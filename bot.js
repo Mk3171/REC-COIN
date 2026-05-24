@@ -51,4 +51,10 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
 
+// منع السيرفر من النوم - كل 14 دقيقة
+setInterval(() => {
+  fetch('https://rec-coin.onrender.com/')
+    .catch(() => {});
+}, 840000);
+
 module.exports = app;
