@@ -37,6 +37,7 @@
     .card-emoji { font-size: 35px; margin-bottom: 8px; }
     .card-name { font-size: 12px; color: #ddd; margin-bottom: 4px; }
     .card-level { font-size: 11px; color: #FF0000; }
+    .card-speed { font-size: 10px; color: #666; margin-top: 2px; }
     .medal-wrap { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 20px 0; }
     .medal-arrow { background: none; border: 1px solid #333; color: white; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 18px; }
     .medal-box { background: #1a1a1a; border-radius: 15px; padding: 20px; text-align: center; min-width: 180px; border: 2px solid #333; }
@@ -46,6 +47,9 @@
     .nav-btn.active { color: #FF0000; }
     .page-title { font-size: 20px; text-align: center; margin: 10px 0 20px; }
     .info-card { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 15px; margin-bottom: 12px; }
+    .task-btn { background: #FF0000; border: none; color: white; padding: 10px; border-radius: 8px; cursor: pointer; width: 100%; font-size: 14px; margin-top: 8px; }
+    .task-btn:disabled { background: #333; color: #666; cursor: not-allowed; }
+    .task-btn.done { background: #1a5c1a; }
   </style>
 </head>
 <body>
@@ -57,7 +61,7 @@
 <div id="home" class="page active">
   <div class="home-inner">
     <div style="text-align:center; margin:10px 0;">
-      <div class="rec-amount" id="recAmount">0.000</div>
+      <div class="rec-amount" id="recAmount">0.000000</div>
       <div class="rec-label">REC</div>
     </div>
     <button class="camera-btn" onclick="tap()">📷</button>
@@ -71,6 +75,7 @@
         <div class="energy-bar-fill" id="energyBar" style="width:100%"></div>
       </div>
     </div>
+    <div style="font-size:11px; color:#666; margin-top:5px;">سرعة التعدين: <span id="miningSpeedShow">0.000001</span> REC/ث</div>
     <button class="upgrade-btn" onclick="openUpgrade()">UPGRADE</button>
   </div>
 </div>
@@ -117,13 +122,13 @@
   <div class="page-title">✅ المهام</div>
   <div class="info-card">
     <div style="font-size:15px; margin-bottom:8px;">📱 انضم لجروب تيليغرام</div>
-    <a href="https://t.me/Momokh1" target="_blank" style="color:#FF0000; font-size:13px; display:block; margin-bottom:10px;">t.me/Momokh1</a>
-    <button id="task1Btn" onclick="claimTask('telegram','task1Btn')" style="background:#FF0000; border:none; color:white; padding:10px; border-radius:8px; cursor:pointer; width:100%; font-size:14px;">احصل على 10,000 RECORD</button>
+    <button id="task1JoinBtn" onclick="joinTask('telegram')" style="background:#1a1a1a; border:1px solid #FF0000; color:#FF0000; padding:8px; border-radius:8px; cursor:pointer; width:100%; font-size:13px; margin-bottom:8px;">انضم للجروب ←</button>
+    <button id="task1Btn" onclick="claimTask('telegram','task1Btn','task1JoinBtn')" class="task-btn">احصل على 10,000 RECORD</button>
   </div>
   <div class="info-card">
     <div style="font-size:15px; margin-bottom:8px;">🐦 تابع على تويتر</div>
-    <a href="https://x.com/mohamma33122570" target="_blank" style="color:#FF0000; font-size:13px; display:block; margin-bottom:10px;">@mohamma33122570</a>
-    <button id="task2Btn" onclick="claimTask('twitter','task2Btn')" style="background:#FF0000; border:none; color:white; padding:10px; border-radius:8px; cursor:pointer; width:100%; font-size:14px;">احصل على 10,000 RECORD</button>
+    <button id="task2JoinBtn" onclick="joinTask('twitter')" style="background:#1a1a1a; border:1px solid #FF0000; color:#FF0000; padding:8px; border-radius:8px; cursor:pointer; width:100%; font-size:13px; margin-bottom:8px;">تابع على تويتر ←</button>
+    <button id="task2Btn" onclick="claimTask('twitter','task2Btn','task2JoinBtn')" class="task-btn">احصل على 10,000 RECORD</button>
   </div>
 </div>
 
@@ -173,7 +178,7 @@
     </div>
   </div>
   <div class="info-card">
-    <a href="https://t.me/Momokhli" style="color:#FF0000; font-size:15px; text-decoration:none;">💬 الدعم @Momokhli</a>
+    <a href="#" onclick="openSupport(); return false;" style="color:#FF0000; font-size:15px; text-decoration:none;">💬 الدعم @Momokhli</a>
   </div>
   <div class="info-card">
     <button onclick="connectWallet()" style="background:none; border:none; color:white; font-size:15px; cursor:pointer; width:100%; text-align:right; padding:0;">💎 ربط محفظة TON ←</button>
@@ -201,16 +206,52 @@
 window.Telegram.WebApp.ready();
 window.Telegram.WebApp.expand();
 
-const tgUser = window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user;
+var tgUser = window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user;
 if (tgUser) {
   document.getElementById('profileName').textContent = tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '');
 }
 
-var record = 0, rec = 0, energy = 1000, maxEnergy = 1000;
-var tapLevelVal = 0, energyLevelVal = 0, tapPowerVal = 1, miningSpeed = 0.001;
-var completedTasks = [];
-var cardLevels = {};
+// مفتاح الحفظ حسب المستخدم
+var saveKey = 'recmining_' + (tgUser ? tgUser.id : 'guest');
 
+// البيانات الافتراضية
+var defaultData = {
+  record: 0, rec: 0, energy: 1000, maxEnergy: 1000,
+  tapLevelVal: 0, energyLevelVal: 0, tapPowerVal: 1,
+  miningSpeed: 0.000001,
+  completedTasks: [],
+  cardLevels: {}
+};
+
+// تحميل البيانات المحفوظة
+var saved = null;
+try { saved = JSON.parse(localStorage.getItem(saveKey)); } catch(e) {}
+var d = saved || defaultData;
+
+var record = d.record || 0;
+var rec = d.rec || 0;
+var energy = d.energy !== undefined ? d.energy : 1000;
+var maxEnergy = d.maxEnergy || 1000;
+var tapLevelVal = d.tapLevelVal || 0;
+var energyLevelVal = d.energyLevelVal || 0;
+var tapPowerVal = d.tapPowerVal || 1;
+var miningSpeed = d.miningSpeed || 0.000001;
+var completedTasks = d.completedTasks || [];
+var cardLevels = d.cardLevels || {};
+
+// حفظ البيانات
+function saveData() {
+  try {
+    localStorage.setItem(saveKey, JSON.stringify({
+      record: record, rec: rec, energy: energy, maxEnergy: maxEnergy,
+      tapLevelVal: tapLevelVal, energyLevelVal: energyLevelVal,
+      tapPowerVal: tapPowerVal, miningSpeed: miningSpeed,
+      completedTasks: completedTasks, cardLevels: cardLevels
+    }));
+  } catch(e) {}
+}
+
+// بيانات البطاقات
 var categories = [
   { name:'أنمي', cards:[
     {n:'ناروتو',e:'🍥'},{n:'غوكو',e:'⚡'},{n:'لوفي',e:'🏴‍☠️'},{n:'ساسكي',e:'🌩️'},
@@ -385,8 +426,15 @@ function buildCards() {
       div.id = 'card-' + key;
       div.setAttribute('data-ci', ci);
       div.setAttribute('data-idx', idx);
-      div.onclick = function() { openCard(parseInt(this.getAttribute('data-ci')), parseInt(this.getAttribute('data-idx'))); };
-      div.innerHTML = '<div class="card-emoji">' + cat.cards[idx].e + '</div><div class="card-name">' + cat.cards[idx].n + '</div><div class="card-level">LVL 0</div>';
+      div.onclick = function() {
+        openCard(parseInt(this.getAttribute('data-ci')), parseInt(this.getAttribute('data-idx')));
+      };
+      var lvl = cardLevels[key] || 0;
+      var spd = (lvl * 0.000001).toFixed(6);
+      div.innerHTML = '<div class="card-emoji">' + cat.cards[idx].e + '</div>' +
+        '<div class="card-name">' + cat.cards[idx].n + '</div>' +
+        '<div class="card-level">LVL ' + lvl + '</div>' +
+        '<div class="card-speed">+' + spd + ' REC/ث</div>';
       grid.appendChild(div);
     }
   }
@@ -397,17 +445,20 @@ function openCard(ci, idx) {
   var card = categories[ci].cards[idx];
   var lvl = cardLevels[key] || 0;
   var cost = lvl === 0 ? 100 : lvl === 1 ? 300 : lvl === 2 ? 500 : Math.floor(500 * Math.pow(1.5, lvl-2));
-  var miningBonus = lvl * 0.0001;
+  var miningBonus = lvl * 0.000001;
   var canUpgrade = record >= cost && lvl < 100;
-  var html = '<div style="text-align:center; margin-bottom:20px;">';
-  html += '<div style="font-size:80px;">' + card.e + '</div>';
-  html += '<div style="font-size:22px; margin:10px 0;">' + card.n + '</div>';
-  html += '<div style="color:#FF0000; font-size:16px;">المستوى ' + lvl + ' / 100</div>';
-  html += '</div>';
-  html += '<div class="info-card"><div style="color:#aaa;font-size:12px;margin-bottom:5px;">مكافأة التعدين</div><div style="color:#FF0000;">+' + miningBonus.toFixed(4) + ' REC/ثانية</div></div>';
-  html += '<div class="info-card"><div style="color:#aaa;font-size:12px;margin-bottom:5px;">تكلفة الترقية</div><div>' + cost.toLocaleString() + ' RECORD</div></div>';
+  var html = '<div style="text-align:center; margin-bottom:20px;">' +
+    '<div style="font-size:80px;">' + card.e + '</div>' +
+    '<div style="font-size:22px; margin:10px 0;">' + card.n + '</div>' +
+    '<div style="color:#FF0000; font-size:16px;">المستوى ' + lvl + ' / 100</div>' +
+    '</div>' +
+    '<div class="info-card"><div style="color:#aaa;font-size:12px;margin-bottom:5px;">مكافأة التعدين</div>' +
+    '<div style="color:#FF0000;">+' + miningBonus.toFixed(6) + ' REC/ثانية</div></div>' +
+    '<div class="info-card"><div style="color:#aaa;font-size:12px;margin-bottom:5px;">تكلفة الترقية للمستوى ' + (lvl+1) + '</div>' +
+    '<div>' + cost.toLocaleString() + ' RECORD</div></div>';
   if (lvl < 100) {
-    html += '<button class="do-btn" ' + (canUpgrade ? '' : 'disabled') + ' onclick="upgradeCard(' + ci + ',' + idx + ')">ترقية ← ' + cost.toLocaleString() + ' RECORD</button>';
+    html += '<button class="do-btn" ' + (canUpgrade ? '' : 'disabled') +
+      ' onclick="upgradeCard(' + ci + ',' + idx + ')">ترقية ← ' + cost.toLocaleString() + ' RECORD</button>';
   } else {
     html += '<div style="text-align:center;color:#FFD700;margin-top:15px;">✅ وصلت للمستوى الأقصى!</div>';
   }
@@ -422,9 +473,13 @@ function upgradeCard(ci, idx) {
   if (record < cost || lvl >= 100) return;
   record -= cost;
   cardLevels[key] = lvl + 1;
-  miningSpeed += 0.0001;
+  miningSpeed += 0.000001;
   var cardEl = document.getElementById('card-' + key);
-  if (cardEl) cardEl.querySelector('.card-level').textContent = 'LVL ' + (lvl+1);
+  if (cardEl) {
+    cardEl.querySelector('.card-level').textContent = 'LVL ' + (lvl+1);
+    cardEl.querySelector('.card-speed').textContent = '+' + ((lvl+1) * 0.000001).toFixed(6) + ' REC/ث';
+  }
+  saveData();
   openCard(ci, idx);
   updateUI();
 }
@@ -442,14 +497,17 @@ function tap() {
   if (energy <= 0) return;
   energy = Math.max(0, energy - tapPowerVal);
   record += tapPowerVal;
+  saveData();
   updateUI();
 }
 
+// تعدين بطيء جداً - مرة كل 10 ثواني
 setInterval(function() {
-  rec += miningSpeed;
+  rec += miningSpeed * 10;
   if (energy < maxEnergy) energy = Math.min(maxEnergy, energy + 1);
+  saveData();
   updateUI();
-}, 1000);
+}, 10000);
 
 function getTapCost(lvl) { return Math.floor(50 * Math.pow(2, Math.floor(lvl/5))); }
 function getEnergyCost(lvl) { return Math.floor(50 * Math.pow(2, Math.floor(lvl/5))); }
@@ -465,7 +523,8 @@ function upgradeTap() {
   record -= cost;
   tapLevelVal++;
   tapPowerVal = 1 + Math.floor(tapLevelVal/5);
-  miningSpeed += 0.0002;
+  miningSpeed += 0.000002;
+  saveData();
   updateUpgradeUI();
   updateUI();
 }
@@ -476,6 +535,7 @@ function upgradeEnergy() {
   record -= cost;
   energyLevelVal++;
   maxEnergy = 1000 + energyLevelVal * 500;
+  saveData();
   updateUpgradeUI();
   updateUI();
 }
@@ -493,24 +553,40 @@ function updateUpgradeUI() {
 
 function updateUI() {
   document.getElementById('recordCount').textContent = Math.floor(record).toLocaleString();
-  document.getElementById('recAmount').textContent = rec.toFixed(3);
+  document.getElementById('recAmount').textContent = rec.toFixed(6);
   document.getElementById('energyText').textContent = Math.floor(energy) + ' / ' + maxEnergy;
   document.getElementById('energyBar').style.width = (energy/maxEnergy*100) + '%';
   document.getElementById('profileRecord').textContent = Math.floor(record).toLocaleString();
+  document.getElementById('miningSpeedShow').textContent = miningSpeed.toFixed(6);
   var m = getMyMedal();
   document.getElementById('myRankName').textContent = m.name;
   document.getElementById('myRankName').style.color = m.color;
   document.getElementById('myRankRecord').textContent = Math.floor(record).toLocaleString();
 }
 
-function claimTask(type, btnId) {
-  if (completedTasks.indexOf(type) !== -1) { alert('أنجزت هذه المهمة مسبقاً!'); return; }
+// المهام
+function joinTask(type) {
+  if (type === 'telegram') {
+    window.Telegram.WebApp.openTelegramLink('https://t.me/Momokh1');
+  } else if (type === 'twitter') {
+    window.Telegram.WebApp.openLink('https://x.com/mohamma33122570');
+  }
+}
+
+function claimTask(type, btnId, joinBtnId) {
+  if (completedTasks.indexOf(type) !== -1) {
+    alert('أنجزت هذه المهمة مسبقاً!');
+    return;
+  }
   completedTasks.push(type);
   record += 10000;
-  document.getElementById(btnId).textContent = '✅ تم الإنجاز';
-  document.getElementById(btnId).disabled = true;
+  var btn = document.getElementById(btnId);
+  btn.textContent = '✅ تم الإنجاز';
+  btn.disabled = true;
+  btn.classList.add('done');
+  document.getElementById(joinBtnId).style.display = 'none';
+  saveData();
   updateUI();
-  alert('🎉 حصلت على 10,000 RECORD!');
 }
 
 function copyInvite() {
@@ -529,8 +605,17 @@ function shareInvite() {
   window.Telegram.WebApp.openTelegramLink('https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent('انضم لـ REC Mining! 🔴'));
 }
 
+// ربط المحفظة بدون فتح محادثة
 function connectWallet() {
-  window.Telegram.WebApp.openTelegramLink('https://t.me/wallet');
+  try {
+    window.Telegram.WebApp.openLink('https://app.tonkeeper.com/ton-connect');
+  } catch(e) {
+    window.Telegram.WebApp.openLink('https://tonkeeper.com');
+  }
+}
+
+function openSupport() {
+  window.Telegram.WebApp.openTelegramLink('https://t.me/Momokhli');
 }
 
 function toggleLang() {
@@ -543,7 +628,26 @@ function setLang(lang) {
   alert('تم اختيار اللغة: ' + lang);
 }
 
+// استعادة حالة المهام المنجزة
+function restoreTasksUI() {
+  if (completedTasks.indexOf('telegram') !== -1) {
+    var btn = document.getElementById('task1Btn');
+    btn.textContent = '✅ تم الإنجاز';
+    btn.disabled = true;
+    btn.classList.add('done');
+    document.getElementById('task1JoinBtn').style.display = 'none';
+  }
+  if (completedTasks.indexOf('twitter') !== -1) {
+    var btn = document.getElementById('task2Btn');
+    btn.textContent = '✅ تم الإنجاز';
+    btn.disabled = true;
+    btn.classList.add('done');
+    document.getElementById('task2JoinBtn').style.display = 'none';
+  }
+}
+
 buildCards();
+restoreTasksUI();
 updateUI();
 </script>
 </body>
