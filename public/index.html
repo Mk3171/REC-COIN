@@ -11,16 +11,13 @@
 <body>
 
 <div class="top-bar">
+  <div class="record-counter" style="border-color:#white; color:white;">⚡ <span id="recAmount">0.000000</span> REC</div>
   <div class="record-counter">🔴 <span id="recordCount">0</span> RECORD</div>
 </div>
 
 <!-- HOME -->
 <div id="home" class="page active">
   <div class="home-inner">
-    <div style="width:100%; text-align:left; margin-bottom:5px;">
-      <div class="rec-amount" id="recAmount">0.000000</div>
-      <div class="rec-label">REC</div>
-    </div>
     <button class="camera-btn" onclick="tap()">
       <img src="logo.jpeg" alt="REC" onerror="this.parentElement.innerHTML='📷'">
     </button>
