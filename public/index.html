@@ -14,6 +14,7 @@
   <div class="record-counter">🔴 <span id="recordCount">0</span> RECORD</div>
 </div>
 
+<!-- HOME -->
 <div id="home" class="page active">
   <div class="home-inner">
     <div style="text-align:center; margin:10px 0;">
@@ -38,6 +39,7 @@
   </div>
 </div>
 
+<!-- UPGRADE -->
 <div class="overlay-page" id="upgradePage">
   <button class="back-btn" onclick="document.getElementById('upgradePage').classList.remove('open')">← رجوع</button>
   <h2 style="margin-bottom:20px; color:#FF0000;">الترقيات</h2>
@@ -57,6 +59,7 @@
   </div>
 </div>
 
+<!-- CARDS -->
 <div id="cards" class="page">
   <div class="page-title">🃏 البطاقات</div>
   <div style="display:flex; gap:8px; margin-bottom:15px; overflow-x:auto; padding-bottom:5px;">
@@ -76,31 +79,34 @@
   <div id="cardDetail"></div>
 </div>
 
+<!-- TASKS -->
 <div id="tasks" class="page">
   <div class="page-title">✅ المهام</div>
   <div class="info-card">
     <div style="font-size:15px; margin-bottom:8px;">📱 انضم لجروب تيليغرام</div>
-    <button id="task1JoinBtn" onclick="joinTask('telegram')" class="task-join-btn">انضم للجروب ←</button>
-    <button id="task1Btn" onclick="claimTask('telegram','task1Btn','task1JoinBtn')" class="do-btn">احصل على 10,000 RECORD</button>
+    <button id="task1JoinBtn" onclick="joinAndWait('telegram','task1JoinBtn','task1Btn')" class="task-join-btn">انضم للجروب ←</button>
+    <button id="task1Btn" onclick="claimTask('telegram','task1Btn','task1JoinBtn')" class="do-btn" disabled>احصل على 10,000 RECORD</button>
   </div>
   <div class="info-card">
     <div style="font-size:15px; margin-bottom:8px;">🐦 تابع على تويتر</div>
-    <button id="task2JoinBtn" onclick="joinTask('twitter')" class="task-join-btn">تابع على تويتر ←</button>
-    <button id="task2Btn" onclick="claimTask('twitter','task2Btn','task2JoinBtn')" class="do-btn">احصل على 10,000 RECORD</button>
+    <button id="task2JoinBtn" onclick="joinAndWait('twitter','task2JoinBtn','task2Btn')" class="task-join-btn">تابع على تويتر ←</button>
+    <button id="task2Btn" onclick="claimTask('twitter','task2Btn','task2JoinBtn')" class="do-btn" disabled>احصل على 10,000 RECORD</button>
   </div>
 </div>
 
+<!-- INVITE -->
 <div id="invite" class="page">
   <div class="page-title">👥 الدعوة</div>
   <div style="text-align:center; padding:10px;">
     <img src="logo.jpeg" style="width:80px;height:80px;border-radius:50%;margin-bottom:15px;border:2px solid #FF0000;" onerror="this.outerHTML='<div style=font-size:50px;margin-bottom:15px>🔴</div>'">
-    <div style="font-size:22px; font-family:'Orbitron',sans-serif; margin-bottom:5px;">REC Mining</div>
+    <div style="font-size:22px; font-family:Orbitron,sans-serif; margin-bottom:5px;">REC Mining</div>
     <p style="color:#aaa; font-size:13px; margin-bottom:25px;">ادعو أصدقاءك واحصل على مكافآت!</p>
     <button onclick="copyInvite()" style="background:#FF0000;border:none;color:white;padding:14px;border-radius:10px;font-size:15px;cursor:pointer;width:100%;margin-bottom:10px;">📋 انسخ رابط الدعوة</button>
     <button onclick="shareInvite()" style="background:#1a1a1a;border:1px solid #FF0000;color:white;padding:14px;border-radius:10px;font-size:15px;cursor:pointer;width:100%;">📤 شارك مع أصدقاء</button>
   </div>
 </div>
 
+<!-- RANK -->
 <div id="rank" class="page">
   <div class="page-title">🏆 الترتيب</div>
   <div class="medal-wrap">
@@ -119,11 +125,13 @@
   </div>
 </div>
 
+<!-- PROFILE -->
 <div id="profile" class="page">
-  <div class="page-title">👤 الملف الشخصي</div>
-  <div style="display:flex; justify-content:flex-start; margin-bottom:15px;">
-    <button onclick="toggleLang()" style="background:#1a1a1a;border:1px solid #333;color:white;padding:8px 15px;border-radius:20px;cursor:pointer;font-size:18px;">🌐</button>
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+    <div style="font-size:13px; color:#FF0000; font-family:Orbitron,sans-serif;">🔴 <span id="profileRecordTop">0</span> RECORD</div>
+    <button onclick="toggleLang()" style="background:#1a1a1a;border:1px solid #333;color:white;padding:6px 12px;border-radius:20px;cursor:pointer;font-size:16px;">🌐</button>
   </div>
+
   <div id="langMenu" style="display:none;background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:10px;margin-bottom:15px;">
     <div class="lang-grid">
       <button onclick="setLang('ar')" class="lang-btn">🇸🇦 العربية</button>
@@ -135,20 +143,57 @@
       <button onclick="setLang('fa')" class="lang-btn">🇦🇫 دری</button>
     </div>
   </div>
-  <div class="info-card" style="display:flex; justify-content:space-between; align-items:center;">
-    <span style="font-size:15px;">Support</span>
-    <button onclick="openSupport()" style="background:#FF0000;border:none;color:white;width:35px;height:35px;border-radius:50%;cursor:pointer;font-size:12px;font-weight:bold;">GO</button>
+
+  <!-- User Card -->
+  <div class="info-card" style="text-align:center; padding:20px; margin-bottom:12px;">
+    <div style="width:65px;height:65px;border-radius:50%;background:#222;border:2px solid #FF0000;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:32px;">👤</div>
+    <div style="font-size:17px;font-weight:bold;" id="profileName">-</div>
+    <div style="font-size:13px;color:#FF0000;margin-top:4px;">RECORD <span id="profileRecord">0</span></div>
   </div>
-  <div class="info-card">
-    <button onclick="connectWallet()" style="background:none;border:none;color:white;font-size:15px;cursor:pointer;width:100%;text-align:right;padding:0;">💎 ربط محفظة TON ←</button>
+
+  <!-- Pool Wallet -->
+  <div class="info-card" style="display:flex;justify-content:space-between;align-items:center;">
+    <div>
+      <div style="color:#00FF88;font-size:14px;font-weight:bold;">REC <span id="recPoolBalance">0.000000</span></div>
+      <div style="color:#aaa;font-size:11px;">Pool Wallet</div>
+      <div style="color:#aaa;font-size:10px;">Withdrawable balance</div>
+    </div>
+    <div style="font-size:28px;">🏛️</div>
   </div>
-  <div class="info-card" style="text-align:center;">
-    <div style="font-size:40px; margin-bottom:8px;">👤</div>
-    <div style="font-size:16px; font-weight:bold;" id="profileName">-</div>
-    <div style="font-size:13px; color:#FF0000; margin-top:5px;" id="profileRecord">0 RECORD</div>
+
+  <div style="color:#aaa;font-size:12px;text-align:right;margin-bottom:8px;">Controls</div>
+
+  <div class="info-card" style="display:flex;justify-content:space-between;align-items:center;">
+    <span style="background:#222;color:#FFD700;padding:4px 10px;border-radius:8px;font-size:12px;">Coming Soon</span>
+    <div style="text-align:right;">
+      <div style="font-size:14px;">Withdraw Pool</div>
+      <div style="color:#aaa;font-size:11px;">Transfer Pool to Wallet</div>
+    </div>
+    <div style="font-size:24px;">🏦</div>
+  </div>
+
+  <div class="info-card" style="display:flex;justify-content:space-between;align-items:center;">
+    <span style="background:#222;color:#aaa;padding:4px 10px;border-radius:8px;font-size:12px;">Locked</span>
+    <div style="text-align:right;">
+      <div style="font-size:14px;">History</div>
+      <div style="color:#aaa;font-size:11px;">Your withdrawals</div>
+    </div>
+    <div style="font-size:24px;">📄</div>
+  </div>
+
+  <!-- Wallet + ID -->
+  <div class="info-card" style="display:flex;justify-content:space-between;align-items:center;">
+    <button onclick="connectWallet()" style="background:#4B9EFF;border:none;color:white;padding:6px 14px;border-radius:20px;cursor:pointer;font-size:13px;" id="walletBtn">ربط المحفظة</button>
+    <div style="color:#aaa;font-size:12px;">ID: <span id="profileId">-</span></div>
+  </div>
+
+  <!-- Support -->
+  <div class="info-card" style="text-align:center;cursor:pointer;" onclick="openSupport()">
+    <span style="font-size:14px;">الدعم الفني @Momokhli 💬</span>
   </div>
 </div>
 
+<!-- NAV -->
 <nav class="nav">
   <button class="nav-btn active" onclick="showPage('home',this)"><span>🏠</span>Home</button>
   <button class="nav-btn" onclick="showPage('cards',this)"><span>🃏</span>Cards</button>
