@@ -109,40 +109,63 @@
 
     <!-- PROFILE -->
     <div id="profile" class="page">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-        <div style="font-size:13px; color:#FF0000; font-family:Orbitron,sans-serif;">🔴 <span id="profileRecordTop">0</span> RECORD</div>
-        <button onclick="toggleLang()" style="background:#1a1a1a;border:1px solid #333;color:white;padding:6px 12px;border-radius:20px;cursor:pointer;font-size:16px;">🌐</button>
-      </div>
-      <div id="langMenu" style="display:none;background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:10px;margin-bottom:15px;">
-        <div class="lang-grid">
-          <button onclick="setLang('ar')" class="lang-btn">🇸🇦 العربية</button>
-          <button onclick="setLang('en')" class="lang-btn">🇬🇧 English</button>
-          <button onclick="setLang('de')" class="lang-btn">🇩🇪 Deutsch</button>
-          <button onclick="setLang('ru')" class="lang-btn">🇷🇺 Русский</button>
-          <button onclick="setLang('uk')" class="lang-btn">🇺🇦 Українська</button>
-          <button onclick="setLang('zh')" class="lang-btn">🇨🇳 中文</button>
-          <button onclick="setLang('fa')" class="lang-btn">🇦🇫 دری</button>
+
+      <!-- Wallet Address + ID -->
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; gap:8px;">
+        <button onclick="connectWallet()" id="walletBtn"
+          style="background:#4B9EFF;border:none;color:white;padding:7px 14px;border-radius:20px;cursor:pointer;font-size:13px;max-width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">
+          ربط المحفظة
+        </button>
+        <div style="background:#1a1a1a;border:1px solid #333;border-radius:20px;padding:6px 12px;font-size:12px;color:#aaa;white-space:nowrap;">
+          ID: <span id="profileId">-</span>
         </div>
       </div>
+
+      <!-- User Card -->
       <div class="info-card" style="text-align:center; padding:20px; margin-bottom:12px;">
         <div style="width:65px;height:65px;border-radius:50%;background:#222;border:2px solid #FF0000;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:32px;">👤</div>
         <div style="font-size:17px;font-weight:bold;" id="profileName">-</div>
         <div style="font-size:13px;color:#FF0000;margin-top:4px;">RECORD <span id="profileRecord">0</span></div>
       </div>
+
+      <!-- Pool Wallet -->
       <div class="info-card" style="display:flex;justify-content:space-between;align-items:center;">
         <div>
           <div style="color:#00FF88;font-size:14px;font-weight:bold;">REC <span id="recPoolBalance">0.000000</span></div>
           <div style="color:#aaa;font-size:11px;">Pool Wallet</div>
+          <div style="color:#aaa;font-size:10px;">Withdrawable balance</div>
         </div>
         <div style="font-size:28px;">🏛️</div>
       </div>
+
+      <!-- Controls label -->
+      <div style="color:#aaa;font-size:12px;text-align:right;margin-bottom:8px;padding-right:4px;">Controls</div>
+
+      <!-- Withdraw Pool -->
       <div class="info-card" style="display:flex;justify-content:space-between;align-items:center;">
-        <button onclick="connectWallet()" style="background:#4B9EFF;border:none;color:white;padding:6px 14px;border-radius:20px;cursor:pointer;font-size:13px;" id="walletBtn">ربط المحفظة</button>
-        <div style="color:#aaa;font-size:12px;">ID: <span id="profileId">-</span></div>
+        <span style="background:#1a1a1a;color:#FFD700;border:1px solid #444;padding:4px 10px;border-radius:8px;font-size:12px;white-space:nowrap;">Coming Soon</span>
+        <div style="text-align:right;flex:1;margin:0 10px;">
+          <div style="font-size:14px;">Withdraw Pool</div>
+          <div style="color:#aaa;font-size:11px;">Transfer Pool to Wallet</div>
+        </div>
+        <div style="font-size:24px;">🏦</div>
       </div>
+
+      <!-- History -->
+      <div class="info-card" style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="background:#1a1a1a;color:#aaa;border:1px solid #444;padding:4px 10px;border-radius:8px;font-size:12px;white-space:nowrap;">Locked</span>
+        <div style="text-align:right;flex:1;margin:0 10px;">
+          <div style="font-size:14px;">History</div>
+          <div style="color:#aaa;font-size:11px;">Your withdrawals</div>
+        </div>
+        <div style="font-size:24px;">📄</div>
+      </div>
+
+      <!-- Support -->
       <div class="info-card" style="text-align:center;cursor:pointer;" onclick="openSupport()">
-        <span style="font-size:14px;">الدعم الفني @Momokhli 💬</span>
+        <span style="font-size:14px;">💬 الدعم الفني @Momokhli</span>
       </div>
+
     </div>
 
   </div><!-- end pages-container -->
