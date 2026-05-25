@@ -1,43 +1,103 @@
 // ==========================================
-// REC Mining - app.js
+// REC Mining - app.js - CLEAN VERSION
 // ==========================================
 
 window.Telegram.WebApp.ready();
 window.Telegram.WebApp.expand();
 
 var tgUser = window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user;
-
 var saveKey = 'recmining_' + (tgUser ? tgUser.id : 'guest');
+var CS = window.Telegram.WebApp.CloudStorage || null;
 
-// ====== DATA ======
-var saved = null;
-try { saved = JSON.parse(localStorage.getItem(saveKey)); } catch(e) {}
+// ====== LOAD DATA ======
+var defaultData = {
+  record: 0, rec: 0, energy: 1000, maxEnergy: 1000,
+  tapLevelVal: 0, energyLevelVal: 0, tapPowerVal: 1, miningSpeed: 0.000001,
+  completedTasks: [], cardLevels: {}, refCount: 0, claimedMilest: []
+};
 
-var record       = saved ? (saved.record || 0) : 0;
-var rec          = saved ? (saved.rec || 0) : 0;
-var energy       = saved ? (saved.energy !== undefined ? saved.energy : 1000) : 1000;
-var maxEnergy    = saved ? (saved.maxEnergy || 1000) : 1000;
-var tapLevelVal  = saved ? (saved.tapLevelVal || 0) : 0;
-var energyLevelVal = saved ? (saved.energyLevelVal || 0) : 0;
-var tapPowerVal  = saved ? (saved.tapPowerVal || 1) : 1;
-var miningSpeed  = saved ? (saved.miningSpeed || 0.000001) : 0.000001;
-var completedTasks = saved ? (saved.completedTasks || []) : [];
-var cardLevels   = saved ? (saved.cardLevels || {}) : {};
+var G = Object.assign({}, defaultData);
+try {
+  var ls = JSON.parse(localStorage.getItem(saveKey));
+  if (ls) G = Object.assign({}, defaultData, ls);
+} catch(e) {}
+
+// Shortcuts
+var record, rec, energy, maxEnergy, tapLevelVal, energyLevelVal,
+    tapPowerVal, miningSpeed, completedTasks, cardLevels, refCount, claimedMilest;
+
+function applyData(d) {
+  record = d.record || 0;
+  rec = d.rec || 0;
+  energy = d.energy !== undefined ? d.energy : 1000;
+  maxEnergy = d.maxEnergy || 1000;
+  tapLevelVal = d.tapLevelVal || 0;
+  energyLevelVal = d.energyLevelVal || 0;
+  tapPowerVal = d.tapPowerVal || 1;
+  miningSpeed = d.miningSpeed || 0.000001;
+  completedTasks = d.completedTasks || [];
+  cardLevels = d.cardLevels || {};
+  refCount = d.refCount || 0;
+  claimedMilest = d.claimedMilest || [];
+}
+applyData(G);
+
+// Load from CloudStorage if available (more persistent on iOS)
+if (CS) {
+  CS.getItem('gameData', function(err, val) {
+    if (!err && val) {
+      try {
+        var cd = JSON.parse(val);
+        // Use cloud data if newer (higher record)
+        if (!cd.record || cd.record >= record) {
+          applyData(cd);
+          updateUI();
+          buildMilestones();
+          restoreTasksUI();
+        }
+      } catch(e) {}
+    }
+  });
+}
 
 function saveData() {
-  try {
-    localStorage.setItem(saveKey, JSON.stringify({
-      record, rec, energy, maxEnergy,
-      tapLevelVal, energyLevelVal, tapPowerVal, miningSpeed,
-      completedTasks, cardLevels, refCount, claimedMilest
-    }));
-  } catch(e) {}
+  var d = JSON.stringify({
+    record, rec, energy, maxEnergy,
+    tapLevelVal, energyLevelVal, tapPowerVal, miningSpeed,
+    completedTasks, cardLevels, refCount, claimedMilest
+  });
+  try { localStorage.setItem(saveKey, d); } catch(e) {}
+  if (CS) { try { CS.setItem('gameData', d); } catch(e) {} }
+}
+
+// ====== TOAST ======
+function showToast(msg) {
+  var t = document.getElementById('toast-msg');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'toast-msg';
+    t.style.cssText = [
+      'position:fixed', 'bottom:75px', 'left:50%',
+      'transform:translateX(-50%)',
+      'background:rgba(30,30,30,0.95)',
+      'color:white', 'padding:10px 22px',
+      'border-radius:20px', 'font-size:14px',
+      'z-index:9999', 'border:1px solid #444',
+      'pointer-events:none', 'opacity:0',
+      'transition:opacity 0.25s', 'white-space:nowrap'
+    ].join(';');
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  t.style.opacity = '1';
+  clearTimeout(t._t);
+  t._t = setTimeout(function() { t.style.opacity = '0'; }, 2200);
 }
 
 // ====== NAVIGATION ======
 function showPage(id, btn) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('active'); });
+  document.querySelectorAll('.nav-btn').forEach(function(b) { b.classList.remove('active'); });
   document.getElementById(id).classList.add('active');
   btn.classList.add('active');
 }
@@ -51,80 +111,66 @@ function tap() {
   updateUI();
 }
 
-// تعدين تلقائي كل 3 ثواني
 setInterval(function() {
   rec += miningSpeed * 3;
-  if (energy < maxEnergy) energy = Math.min(maxEnergy, energy + 5); // شحن أسرع
+  if (energy < maxEnergy) energy = Math.min(maxEnergy, energy + 5);
   saveData();
   updateUI();
 }, 3000);
 
 function updateUI() {
-  document.getElementById('recordCount').textContent = Math.floor(record).toLocaleString();
-  document.getElementById('recAmount').textContent = rec.toFixed(6);
-  document.getElementById('energyText').textContent = Math.floor(energy) + ' / ' + maxEnergy;
-  document.getElementById('energyBar').style.width = (energy / maxEnergy * 100) + '%';
-  document.getElementById('miningSpeedShow').textContent = miningSpeed.toFixed(6);
-  var rm = document.getElementById('recMini');
-  if (rm) rm.textContent = rec.toFixed(6);
-
-  // Profile
-  var pr = document.getElementById('profileRecord');
-  if (pr) pr.textContent = Math.floor(record).toLocaleString();
-  var prt = document.getElementById('profileRecordTop');
-  if (prt) prt.textContent = Math.floor(record).toLocaleString();
-  var pb = document.getElementById('recPoolBalance');
-  if (pb) pb.textContent = rec.toFixed(6);
-
-  // Rank
+  var set = function(id, val) { var e = document.getElementById(id); if (e) e.textContent = val; };
+  set('recordCount', Math.floor(record).toLocaleString());
+  set('recAmount', rec.toFixed(6));
+  set('recMini', rec.toFixed(6));
+  set('energyText', Math.floor(energy) + ' / ' + maxEnergy);
+  set('miningSpeedShow', miningSpeed.toFixed(6));
+  set('profileRecord', Math.floor(record).toLocaleString());
+  set('recPoolBalance', rec.toFixed(6));
+  var eb = document.getElementById('energyBar');
+  if (eb) eb.style.width = (energy / maxEnergy * 100) + '%';
   var m = getMyMedal();
   var mrn = document.getElementById('myRankName');
   if (mrn) { mrn.textContent = m.name; mrn.style.color = m.color; }
-  var mrr = document.getElementById('myRankRecord');
-  if (mrr) mrr.textContent = Math.floor(record).toLocaleString();
+  set('myRankRecord', Math.floor(record).toLocaleString());
+  var rd = document.getElementById('refCountDisplay');
+  if (rd) rd.textContent = refCount;
 }
 
 // ====== UPGRADE ======
-function getTapCost(lvl) { return Math.floor(50 * Math.pow(2, Math.floor(lvl / 5))); }
-function getEnergyCost(lvl) { return Math.floor(50 * Math.pow(2, Math.floor(lvl / 5))); }
+function getTapCost(l) { return Math.floor(50 * Math.pow(2, Math.floor(l / 5))); }
+function getEnergyCost(l) { return Math.floor(50 * Math.pow(2, Math.floor(l / 5))); }
 
-function openUpgrade() {
-  updateUpgradeUI();
-  document.getElementById('upgradePage').classList.add('open');
-}
+function openUpgrade() { updateUpgradeUI(); document.getElementById('upgradePage').classList.add('open'); }
 
 function upgradeTap() {
   var cost = getTapCost(tapLevelVal);
   if (record < cost || tapLevelVal >= 100) return;
-  record -= cost;
-  tapLevelVal++;
+  record -= cost; tapLevelVal++;
   tapPowerVal = 1 + Math.floor(tapLevelVal / 5);
   miningSpeed += 0.000002;
-  saveData();
-  updateUpgradeUI();
-  updateUI();
+  saveData(); updateUpgradeUI(); updateUI();
 }
 
 function upgradeEnergy() {
   var cost = getEnergyCost(energyLevelVal);
   if (record < cost || energyLevelVal >= 100) return;
-  record -= cost;
-  energyLevelVal++;
+  record -= cost; energyLevelVal++;
   maxEnergy = 1000 + energyLevelVal * 500;
-  saveData();
-  updateUpgradeUI();
-  updateUI();
+  saveData(); updateUpgradeUI(); updateUI();
 }
 
 function updateUpgradeUI() {
-  document.getElementById('tapLevel').textContent = tapLevelVal;
-  document.getElementById('energyLevel').textContent = energyLevelVal;
-  document.getElementById('tapCost').textContent = getTapCost(tapLevelVal).toLocaleString();
-  document.getElementById('energyCost').textContent = getEnergyCost(energyLevelVal).toLocaleString();
-  document.getElementById('tapPower').textContent = tapPowerVal;
-  document.getElementById('maxEnergyShow').textContent = maxEnergy.toLocaleString();
-  document.getElementById('tapUpgradeBtn').disabled = record < getTapCost(tapLevelVal) || tapLevelVal >= 100;
-  document.getElementById('energyUpgradeBtn').disabled = record < getEnergyCost(energyLevelVal) || energyLevelVal >= 100;
+  var set = function(id, val) { var e = document.getElementById(id); if (e) e.textContent = val; };
+  set('tapLevel', tapLevelVal); set('energyLevel', energyLevelVal);
+  set('tapCost', getTapCost(tapLevelVal).toLocaleString());
+  set('energyCost', getEnergyCost(energyLevelVal).toLocaleString());
+  set('tapPower', tapPowerVal);
+  set('maxEnergyShow', maxEnergy.toLocaleString());
+  var tb = document.getElementById('tapUpgradeBtn');
+  if (tb) tb.disabled = record < getTapCost(tapLevelVal) || tapLevelVal >= 100;
+  var eb = document.getElementById('energyUpgradeBtn');
+  if (eb) eb.disabled = record < getEnergyCost(energyLevelVal) || energyLevelVal >= 100;
 }
 
 // ====== CARDS ======
@@ -165,92 +211,47 @@ var categories = [
     {n:'Tesla Roadster',e:'🔴'},{n:'Dodge Viper',e:'🔴'},{n:'Ford GT',e:'🔵'},
     {n:'Chevrolet Corvette',e:'🟡'},{n:'Nissan GT-R',e:'⬛'},{n:'Toyota Supra',e:'🟠'},
     {n:'Mazda RX-7',e:'🔴'},{n:'Honda NSX',e:'⬛'},{n:'Mitsubishi Evo',e:'🔵'},
-    {n:'Subaru WRX STI',e:'🔵'},{n:'Ferrari 458',e:'🔴'},{n:'Lamborghini Huracan',e:'🟡'},
-    {n:'McLaren 720S',e:'🟠'},{n:'Porsche Taycan',e:'⚫'},{n:'Mercedes EQS AMG',e:'⬛'},
-    {n:'BMW iM',e:'🔵'},{n:'Audi e-tron GT',e:'⚪'},{n:'Ferrari LaFerrari',e:'🔴'},
-    {n:'Lamborghini Sian',e:'🟡'},{n:'McLaren Speedtail',e:'🟠'},{n:'Bugatti Divo',e:'🔵'},
-    {n:'Koenigsegg Gemera',e:'🟢'},{n:'Pagani Zonda',e:'🥈'},{n:'Hennessey Venom',e:'🔴'},
-    {n:'SSC Tuatara',e:'⬛'},{n:'Zenvo TSR-S',e:'🔴'},{n:'Apollo IE',e:'⚫'},
-    {n:'Ferrari 296 GTB',e:'🔴'},{n:'Lamborghini Revuelto',e:'🟡'},{n:'McLaren Artura',e:'🟠'},
-    {n:'Porsche 918',e:'⚫'},{n:'Mercedes SLR',e:'⬛'},{n:'BMW M3 E46',e:'🔵'},
-    {n:'Audi RS6',e:'⚪'},{n:'Ferrari Enzo',e:'🔴'},{n:'Lamborghini Diablo',e:'🟡'},
-    {n:'McLaren F1',e:'🟠'},{n:'Bugatti EB110',e:'🔵'},{n:'Jaguar F-Type',e:'🟢'},
-    {n:'Alfa Romeo 4C',e:'🔴'},{n:'Lotus Evija',e:'🟡'},{n:'Ariel Atom',e:'🔴'},
-    {n:'Caterham Seven',e:'🟢'},{n:'TVR Griffith',e:'🔵'},{n:'Noble M600',e:'🔴'},
-    {n:'Saleen S7',e:'🟡'},{n:'Ferrari F40',e:'🔴'},{n:'Ferrari F50',e:'🔴'},
-    {n:'Porsche Carrera GT',e:'⚫'},{n:'Mercedes CLK GTR',e:'⬛'},{n:'McLaren Senna',e:'🟠'},
-    {n:'Aston Martin Valkyrie',e:'🟢'},{n:'Gordon Murray T.50',e:'🔵'},{n:'Pagani Imola',e:'🥈'},
-    {n:'Koenigsegg CC850',e:'🟢'},{n:'Czinger 21C',e:'⚫'},{n:'Hennessey F5',e:'🔴'},
-    {n:'Rimac C_Two',e:'⚡'},{n:'Lotus Emira',e:'🟡'},{n:'Alpine A110',e:'🔵'},
-    {n:'Renault Megane RS',e:'🔵'},{n:'Honda Civic Type R',e:'🔴'},{n:'Ferrari Monza SP2',e:'🔴'},
-    {n:'McLaren Elva',e:'🟠'},{n:'Lamborghini Essenza',e:'🟡'},{n:'Bugatti La Voiture',e:'🔵'}
+    {n:'Ferrari 458',e:'🔴'},{n:'Lamborghini Huracan',e:'🟡'},{n:'McLaren 720S',e:'🟠'},
+    {n:'Porsche Taycan',e:'⚫'},{n:'Ferrari LaFerrari',e:'🔴'},{n:'Lamborghini Sian',e:'🟡'},
+    {n:'McLaren Speedtail',e:'🟠'},{n:'Bugatti Divo',e:'🔵'},{n:'Koenigsegg Gemera',e:'🟢'},
+    {n:'Pagani Zonda',e:'🥈'},{n:'Ferrari 296 GTB',e:'🔴'},{n:'Lamborghini Revuelto',e:'🟡'},
+    {n:'McLaren Artura',e:'🟠'},{n:'Porsche 918',e:'⚫'},{n:'Ferrari Enzo',e:'🔴'},
+    {n:'Lamborghini Diablo',e:'🟡'},{n:'McLaren F1',e:'🟠'},{n:'Jaguar F-Type',e:'🟢'},
+    {n:'Ferrari F40',e:'🔴'},{n:'Ferrari F50',e:'🔴'},{n:'Porsche Carrera GT',e:'⚫'},
+    {n:'McLaren Senna',e:'🟠'},{n:'Aston Martin Valkyrie',e:'🟢'},{n:'Gordon Murray T.50',e:'🔵'}
   ]},
   { name:'ملاهي', cards:[
     {n:'Omnia Dubai',e:'🌃'},{n:'Pacha Ibiza',e:'🏝️'},{n:'Berghain Berlin',e:'⬛'},
     {n:'Fabric London',e:'🇬🇧'},{n:'Amnesia Ibiza',e:'🌊'},{n:'DC10 Ibiza',e:'🎵'},
-    {n:'Privilege Ibiza',e:'👑'},{n:'Space Ibiza',e:'🚀'},{n:'Ushuaia Ibiza',e:'☀️'},
-    {n:'Hi Ibiza',e:'🎶'},{n:'Marquee NYC',e:'🗽'},{n:'Lavo NYC',e:'🌆'},
-    {n:'1 OAK NYC',e:'🌿'},{n:'Avenue NYC',e:'🏙️'},{n:'LIV Miami',e:'🌴'},
-    {n:'E11even Miami',e:'🔥'},{n:'Story Miami',e:'📖'},{n:'Club Space Miami',e:'🚀'},
+    {n:'Marquee NYC',e:'🗽'},{n:'LIV Miami',e:'🌴'},{n:'E11even Miami',e:'🔥'},
     {n:'Hakkasan Vegas',e:'🎰'},{n:'Omnia Vegas',e:'💎'},{n:'XS Vegas',e:'✨'},
-    {n:'Marquee Vegas',e:'🎰'},{n:'Zouk Vegas',e:'🎵'},{n:'Womb Tokyo',e:'🎌'},
-    {n:'ageHa Tokyo',e:'🦋'},{n:'SOUND Tokyo',e:'🔊'},{n:'Vision Tokyo',e:'👁️'},
-    {n:'Zuma Dubai',e:'🌟'},{n:'White Dubai',e:'⬜'},{n:'BASE Dubai',e:'🏗️'},
-    {n:'CÉ LA VI Dubai',e:'🌆'},{n:'Cirque Le Soir London',e:'🎪'},{n:'KOKO London',e:'🎸'},
-    {n:'Ministry of Sound',e:'🔊'},{n:'Heaven London',e:'😇'},{n:'XOYO London',e:'💋'},
-    {n:'Rex Club Paris',e:'🇫🇷'},{n:'Social Club Paris',e:'🎵'},{n:'Concrete Paris',e:'🏗️'},
-    {n:'Nuba Barcelona',e:'☀️'},{n:'Opium Barcelona',e:'🌺'},{n:'Razzmatazz Barcelona',e:'🎶'},
-    {n:'Tresor Berlin',e:'💎'},{n:'Watergate Berlin',e:'🌊'},{n:'Sisyphos Berlin',e:'🪨'},
-    {n:'Wilde Renate Berlin',e:'🌹'},{n:'Cocoon Club',e:'🦋'},{n:'Bootshaus Köln',e:'⛵'},
-    {n:'De School Amsterdam',e:'🏫'},{n:'Shelter Amsterdam',e:'🏠'},{n:'Paradiso Amsterdam',e:'🎭'},
-    {n:'Melkweg Amsterdam',e:'🌌'},{n:'Fabric Room 1',e:'🔊'},{n:'Fabric Room 2',e:'🎵'},
-    {n:'Fabric Room 3',e:'🎶'},{n:'Nation London',e:'🇬🇧'},{n:'EGG London',e:'🥚'},
-    {n:'Corsica Studios',e:'🏭'},{n:'Printworks London',e:'🖨️'},{n:'Junction 2',e:'🔀'},
-    {n:'Fold London',e:'📄'},{n:'Village Underground',e:'🏘️'},{n:'Oval Space',e:'⭕'},
-    {n:'Studio 338',e:'🏗️'},{n:'Drumsheds London',e:'🥁'},{n:'Phonox London',e:'📻'},
-    {n:'Dalston Superstore',e:'🛒'},{n:'Dance Tunnel',e:'🕳️'},{n:'Cargo London',e:'📦'},
-    {n:'Electric Brixton',e:'⚡'},{n:'O2 Academy',e:'🎵'},{n:'Roundhouse London',e:'🔵'},
-    {n:'Scala London',e:'🎬'},{n:'Jazz Cafe',e:'🎷'},{n:'Batofar Paris',e:'⛵'},
-    {n:'Glazart Paris',e:'🎨'},{n:'Badaboum Paris',e:'💥'},{n:'La Machine Paris',e:'⚙️'},
-    {n:'Output Brooklyn',e:'🗽'},{n:'Public Works SF',e:'🔧'},{n:'Exchange LA',e:'🎵'},
-    {n:'Nyx Athens',e:'🇬🇷'},{n:'Void Athens',e:'🕳️'},{n:'Club Riviera Athens',e:'🌊'}
+    {n:'Womb Tokyo',e:'🎌'},{n:'Zuma Dubai',e:'🌟'},{n:'White Dubai',e:'⬜'},
+    {n:'Ministry of Sound',e:'🔊'},{n:'Rex Club Paris',e:'🇫🇷'},{n:'Tresor Berlin',e:'💎'},
+    {n:'Watergate Berlin',e:'🌊'},{n:'Berghain Kantine',e:'🪨'},{n:'Shelter Amsterdam',e:'🏠'},
+    {n:'Fabric Room 1',e:'🔊'},{n:'Fabric Room 2',e:'🎵'},{n:'Fabric Room 3',e:'🎶'},
+    {n:'Printworks London',e:'🖨️'},{n:'Oval Space',e:'⭕'},{n:'Output Brooklyn',e:'🗽'},
+    {n:'Exchange LA',e:'🎵'},{n:'Nyx Athens',e:'🇬🇷'},{n:'Void Athens',e:'🕳️'}
   ]},
   { name:'قصور', cards:[
     {n:'قصر بكنغهام',e:'👑'},{n:'قصر فرساي',e:'🌹'},{n:'قصر الحمراء',e:'🌺'},
     {n:'قصر نويشفانشتاين',e:'❄️'},{n:'قصر توبكابي',e:'🌙'},{n:'قصر الكرملين',e:'⭐'},
-    {n:'قصر شينبرون',e:'🟡'},{n:'قصر هوف',e:'🏛️'},{n:'قصر بيلينتيس',e:'🌊'},
-    {n:'قصر موناكو',e:'🎰'},{n:'قصر برلين',e:'⬛'},{n:'قصر ميلان',e:'🏙️'},
-    {n:'قصر روما',e:'🏛️'},{n:'قصر فلورنسا',e:'🌸'},{n:'قصر البندقية',e:'🚤'},
-    {n:'قصر نابولي',e:'🌋'},{n:'قصر مدريد',e:'🔴'},{n:'قصر ليزبون',e:'🌊'},
+    {n:'قصر شينبرون',e:'🟡'},{n:'قصر موناكو',e:'🎰'},{n:'قصر مدريد',e:'🔴'},
     {n:'قصر براغ',e:'🧙'},{n:'قصر بودابست',e:'🌉'},{n:'قصر وارسو',e:'🦅'},
-    {n:'قصر ستوكهولم',e:'⭐'},{n:'قصر كوبنهاغن',e:'🍀'},{n:'قصر أوسلو',e:'❄️'},
-    {n:'قصر هلسنكي',e:'🌲'},{n:'قصر أمستردام',e:'🌷'},{n:'قصر بروكسل',e:'🇧🇪'},
-    {n:'قصر برن',e:'🐻'},{n:'قصر جنيف',e:'🕊️'},{n:'قصر فيينا',e:'🎵'},
-    {n:'قصر ميونخ',e:'🍺'},{n:'قصر هامبورغ',e:'⚓'},{n:'قصر دبي',e:'🏙️'},
-    {n:'قصر أبوظبي',e:'🕌'},{n:'قصر الرياض',e:'🌴'},{n:'قصر الكويت',e:'🛢️'},
-    {n:'قصر الدوحة',e:'🌐'},{n:'قصر المنامة',e:'🌊'},{n:'قصر مسقط',e:'🏔️'},
-    {n:'قصر بيروت',e:'🌲'},{n:'قصر القاهرة',e:'🏺'},{n:'قصر الإسكندرية',e:'⛵'},
-    {n:'قصر مراكش',e:'🌺'},{n:'قصر فاس',e:'🕌'},{n:'قصر تونس',e:'🌊'},
-    {n:'قصر نيروبي',e:'🦁'},{n:'قصر كيب تاون',e:'🌊'},{n:'قصر جوهانسبرغ',e:'💎'},
-    {n:'قصر مومباي',e:'🕌'},{n:'قصر دلهي',e:'🏯'},{n:'قصر جايبور',e:'🌸'},
-    {n:'قصر آغرا',e:'🕌'},{n:'قصر بانكوك',e:'🐘'},{n:'قصر بالي',e:'🌺'},
-    {n:'قصر سنغافورة',e:'🦁'},{n:'قصر كوالالمبور',e:'🏙️'},{n:'قصر هانوي',e:'🍜'},
-    {n:'قصر كاتماندو',e:'🏔️'},{n:'قصر طوكيو',e:'🌸'},{n:'قصر كيوتو',e:'⛩️'},
-    {n:'قصر أوساكا',e:'🏯'},{n:'قصر بكين',e:'🐉'},{n:'قصر شنغهاي',e:'🌆'},
-    {n:'قصر هونغ كونغ',e:'🌃'},{n:'قصر سيول',e:'🎎'},{n:'قصر موسكو',e:'⛪'},
-    {n:'قصر سان بطرسبرغ',e:'❄️'},{n:'قصر لندن',e:'👑'},{n:'قصر باريس',e:'🗼'},
-    {n:'قصر واشنطن',e:'🏛️'},{n:'قصر نيويورك',e:'🗽'},{n:'قصر لوس أنجلوس',e:'🌴'},
-    {n:'قصر ريو',e:'🌊'},{n:'قصر بوينس آيرس',e:'🥩'},{n:'قصر سانتياغو',e:'🏔️'},
-    {n:'قصر بوغوتا',e:'☕'},{n:'قصر ليما',e:'🦙'},{n:'قصر مكسيكو',e:'🌮'},
-    {n:'قصر أثينا',e:'🏛️'},{n:'قصر إسطنبول',e:'🌙'},{n:'قصر تبريز',e:'🌹'},
-    {n:'قصر طهران',e:'🌺'},{n:'قصر بغداد',e:'🌙'},{n:'قصر دمشق',e:'🌸'},
-    {n:'قصر القدس',e:'⭐'},{n:'قصر عمان',e:'🌊'},{n:'قصر صنعاء',e:'🏰'}
+    {n:'قصر ستوكهولم',e:'⭐'},{n:'قصر أمستردام',e:'🌷'},{n:'قصر فيينا',e:'🎵'},
+    {n:'قصر دبي',e:'🏙️'},{n:'قصر أبوظبي',e:'🕌'},{n:'قصر الرياض',e:'🌴'},
+    {n:'قصر الكويت',e:'🛢️'},{n:'قصر الدوحة',e:'🌐'},{n:'قصر مسقط',e:'🏔️'},
+    {n:'قصر القاهرة',e:'🏺'},{n:'قصر مراكش',e:'🌺'},{n:'قصر إسطنبول',e:'🌙'},
+    {n:'قصر مومباي',e:'🕌'},{n:'قصر دلهي',e:'🏯'},{n:'قصر بانكوك',e:'🐘'},
+    {n:'قصر طوكيو',e:'🌸'},{n:'قصر كيوتو',e:'⛩️'},{n:'قصر بكين',e:'🐉'},
+    {n:'قصر شنغهاي',e:'🌆'},{n:'قصر سيول',e:'🎎'},{n:'قصر لندن',e:'👑'},
+    {n:'قصر باريس',e:'🗼'},{n:'قصر واشنطن',e:'🏛️'},{n:'قصر نيويورك',e:'🗽'}
   ]}
 ];
 
 function buildCards() {
   categories.forEach(function(cat, ci) {
     var grid = document.getElementById('cat-' + ci);
+    if (!grid) return;
     cat.cards.forEach(function(card, idx) {
       var key = ci + '_' + idx;
       if (!cardLevels[key]) cardLevels[key] = 0;
@@ -259,9 +260,7 @@ function buildCards() {
       div.id = 'card-' + key;
       div.setAttribute('data-ci', ci);
       div.setAttribute('data-idx', idx);
-      div.onclick = function() {
-        openCard(parseInt(this.getAttribute('data-ci')), parseInt(this.getAttribute('data-idx')));
-      };
+      div.onclick = function() { openCard(parseInt(this.getAttribute('data-ci')), parseInt(this.getAttribute('data-idx'))); };
       var lvl = cardLevels[key];
       div.innerHTML =
         '<div class="card-emoji">' + card.e + '</div>' +
@@ -300,69 +299,152 @@ function upgradeCard(ci, idx) {
   var lvl = cardLevels[key] || 0;
   var cost = lvl === 0 ? 100 : lvl === 1 ? 300 : lvl === 2 ? 500 : Math.floor(500 * Math.pow(1.5, lvl - 2));
   if (record < cost || lvl >= 100) return;
-  record -= cost;
-  cardLevels[key] = lvl + 1;
-  miningSpeed += 0.000001;
+  record -= cost; cardLevels[key] = lvl + 1; miningSpeed += 0.000001;
   var el = document.getElementById('card-' + key);
   if (el) {
     el.querySelector('.card-level').textContent = 'LVL ' + (lvl + 1);
     el.querySelector('.card-speed').textContent = '+' + ((lvl + 1) * 0.000001).toFixed(6) + ' REC/ث';
   }
-  saveData();
-  openCard(ci, idx);
-  updateUI();
+  saveData(); openCard(ci, idx); updateUI();
 }
 
 function showCategory(idx, btn) {
-  document.querySelectorAll('.card-grid').forEach(g => g.style.display = 'none');
-  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.card-grid').forEach(function(g) { g.style.display = 'none'; });
+  document.querySelectorAll('.cat-btn').forEach(function(b) { b.classList.remove('active'); });
   document.getElementById('cat-' + idx).style.display = 'grid';
   btn.classList.add('active');
 }
 
 // ====== TASKS ======
-function joinTask(type) {
+function joinAndWait(type, joinBtnId, claimBtnId) {
   if (type === 'telegram') {
     window.Telegram.WebApp.openTelegramLink('https://t.me/Momokh1');
-  } else if (type === 'twitter') {
+  } else {
     window.Telegram.WebApp.openLink('https://x.com/mohamma33122570');
   }
+  var joinBtn = document.getElementById(joinBtnId);
+  var claimBtn = document.getElementById(claimBtnId);
+  if (!joinBtn || !claimBtn) return;
+  joinBtn.disabled = true;
+  var sec = 30;
+  joinBtn.textContent = '⏳ ' + sec + ' ثانية...';
+  var timer = setInterval(function() {
+    sec--;
+    joinBtn.textContent = '⏳ ' + sec + ' ثانية...';
+    if (sec <= 0) {
+      clearInterval(timer);
+      joinBtn.style.display = 'none';
+      claimBtn.disabled = false;
+    }
+  }, 1000);
 }
 
 function claimTask(type, btnId, joinBtnId) {
   if (completedTasks.indexOf(type) !== -1) {
-    alert('أنجزت هذه المهمة مسبقاً!');
+    showToast('أنجزت هذه المهمة مسبقاً!');
     return;
   }
   completedTasks.push(type);
   record += 10000;
   var btn = document.getElementById(btnId);
-  btn.textContent = '✅ تم الإنجاز';
-  btn.disabled = true;
-  btn.classList.add('done');
-  document.getElementById(joinBtnId).style.display = 'none';
-  saveData();
-  updateUI();
+  if (btn) { btn.textContent = '✅ تم الإنجاز'; btn.disabled = true; btn.classList.add('done'); }
+  var jb = document.getElementById(joinBtnId);
+  if (jb) jb.style.display = 'none';
+  saveData(); updateUI();
+  showToast('🎉 حصلت على 10,000 RECORD!');
 }
 
 function restoreTasksUI() {
   if (completedTasks.indexOf('telegram') !== -1) {
     var b = document.getElementById('task1Btn');
-    b.textContent = '✅ تم الإنجاز';
-    b.disabled = true;
-    b.classList.add('done');
-    document.getElementById('task1JoinBtn').style.display = 'none';
+    if (b) { b.textContent = '✅ تم الإنجاز'; b.disabled = true; b.classList.add('done'); }
+    var j = document.getElementById('task1JoinBtn');
+    if (j) j.style.display = 'none';
   }
   if (completedTasks.indexOf('twitter') !== -1) {
-    var b = document.getElementById('task2Btn');
-    b.textContent = '✅ تم الإنجاز';
-    b.disabled = true;
-    b.classList.add('done');
-    document.getElementById('task2JoinBtn').style.display = 'none';
+    var b2 = document.getElementById('task2Btn');
+    if (b2) { b2.textContent = '✅ تم الإنجاز'; b2.disabled = true; b2.classList.add('done'); }
+    var j2 = document.getElementById('task2JoinBtn');
+    if (j2) j2.style.display = 'none';
   }
 }
 
+// ====== REFERRAL MILESTONES ======
+var refMilestones = [
+  { req: 5,   reward: 5,   label: 'ادعُ 5 أشخاص'   },
+  { req: 10,  reward: 15,  label: 'ادعُ 10 أشخاص'  },
+  { req: 30,  reward: 50,  label: 'ادعُ 30 شخص'    },
+  { req: 50,  reward: 100, label: 'ادعُ 50 شخص'    },
+  { req: 100, reward: 500, label: 'ادعُ 100 شخص'   }
+];
 
+function buildMilestones() {
+  var cont = document.getElementById('milestonesContainer');
+  if (!cont) return;
+  cont.innerHTML = '';
+  refMilestones.forEach(function(m, i) {
+    var claimed = claimedMilest.indexOf(i) !== -1;
+    var canClaim = !claimed && refCount >= m.req;
+    var pct = Math.min(100, Math.round((refCount / m.req) * 100));
+    var borderColor = claimed ? '#1a5c1a' : canClaim ? '#FF0000' : '#2a2a2a';
+    var card = document.createElement('div');
+    card.style.cssText = 'background:#161616;border:1px solid ' + borderColor + ';border-radius:12px;padding:12px 14px;margin-bottom:9px;';
+    var badgeHtml;
+    if (claimed) {
+      badgeHtml = '<div style="background:#1a4a1a;color:#4eff4e;padding:5px 12px;border-radius:8px;font-size:12px;white-space:nowrap;">✅ تم</div>';
+    } else if (canClaim) {
+      badgeHtml = '<button onclick="claimMilestone(' + i + ')" style="background:#FF0000;border:none;color:white;padding:5px 13px;border-radius:8px;font-size:12px;cursor:pointer;font-weight:bold;white-space:nowrap;">احصل! 🎁</button>';
+    } else {
+      badgeHtml = '<div style="color:#555;font-size:11px;white-space:nowrap;">' + refCount + ' / ' + m.req + '</div>';
+    }
+    card.innerHTML =
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:' + (claimed ? '0' : '8px') + ';">' +
+        '<div>' +
+          '<div style="font-size:13px;color:' + (claimed ? '#4eff4e' : 'white') + ';">' + m.label + '</div>' +
+          '<div style="font-size:12px;color:#00FF88;margin-top:3px;">🟢 + ' + m.reward + ' REC</div>' +
+        '</div>' +
+        badgeHtml +
+      '</div>' +
+      (!claimed ? '<div style="background:#2a2a2a;border-radius:6px;height:5px;overflow:hidden;">' +
+        '<div style="width:' + pct + '%;height:100%;background:' + (canClaim ? '#FF0000' : 'linear-gradient(90deg,#FF0000,#ff6600)') + ';border-radius:6px;transition:width 0.4s;"></div>' +
+        '</div>' : '');
+    cont.appendChild(card);
+  });
+  var rd = document.getElementById('refCountDisplay');
+  if (rd) rd.textContent = refCount;
+}
+
+function claimMilestone(i) {
+  if (claimedMilest.indexOf(i) !== -1) return;
+  if (refCount < refMilestones[i].req) { showToast('لم تكمل المتطلب بعد!'); return; }
+  claimedMilest.push(i);
+  rec += refMilestones[i].reward;
+  saveData(); buildMilestones(); updateUI();
+  showToast('🎉 حصلت على ' + refMilestones[i].reward + ' REC!');
+}
+
+// ====== INVITE ======
+function copyInvite() {
+  var userId = tgUser ? tgUser.id : '0';
+  var link = 'https://t.me/RecMiningGame_bot?start=ref' + userId;
+  // Use navigator.clipboard only — no execCommand (prevents keyboard/system dialog on iOS)
+  if (navigator && navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(link)
+      .then(function() { showToast('✅ تم نسخ الرابط!'); })
+      .catch(function() { showToast('🔗 ' + link); });
+  } else {
+    showToast('🔗 ' + link);
+  }
+}
+
+function shareInvite() {
+  var userId = tgUser ? tgUser.id : '0';
+  var link = 'https://t.me/RecMiningGame_bot?start=ref' + userId;
+  window.Telegram.WebApp.openTelegramLink(
+    'https://t.me/share/url?url=' + encodeURIComponent(link) +
+    '&text=' + encodeURIComponent('🔴 انضم لـ REC Mining وابدأ التعدين مجاناً!\n\n👇 اضغط هنا وابدأ')
+  );
+}
 
 // ====== RANK ======
 var medals = [
@@ -384,11 +466,11 @@ var currentMedalIndex = 0;
 function changeMedal(dir) {
   currentMedalIndex = Math.max(0, Math.min(medals.length - 1, currentMedalIndex + dir));
   var m = medals[currentMedalIndex];
-  document.getElementById('medalEmoji').textContent = m.emoji;
-  document.getElementById('medalName').textContent = m.name;
-  document.getElementById('medalName').style.color = m.color;
-  document.getElementById('medalRange').textContent = m.range + ' RECORD';
-  document.getElementById('medalBox').style.borderColor = m.color;
+  var set = function(id, val) { var e = document.getElementById(id); if (e) e.textContent = val; };
+  set('medalEmoji', m.emoji); set('medalName', m.name);
+  set('medalRange', m.range + ' RECORD');
+  var mn = document.getElementById('medalName'); if (mn) mn.style.color = m.color;
+  var mb = document.getElementById('medalBox'); if (mb) mb.style.borderColor = m.color;
 }
 
 function getMyMedal() {
@@ -398,140 +480,28 @@ function getMyMedal() {
   return medals[0];
 }
 
-// ====== TASKS ======
-function joinAndWait(type, joinBtnId, claimBtnId) {
-  if (type === 'telegram') {
-    window.Telegram.WebApp.openTelegramLink('https://t.me/Momokh1');
-  } else {
-    window.Telegram.WebApp.openLink('https://x.com/mohamma33122570');
-  }
-  var joinBtn = document.getElementById(joinBtnId);
-  var claimBtn = document.getElementById(claimBtnId);
-  joinBtn.disabled = true;
-  joinBtn.textContent = '⏳ انتظر 30 ثانية...';
-  var seconds = 30;
-  var timer = setInterval(function() {
-    seconds--;
-    joinBtn.textContent = '⏳ ' + seconds + ' ثانية...';
-    if (seconds <= 0) {
-      clearInterval(timer);
-      joinBtn.style.display = 'none';
-      claimBtn.disabled = false;
-    }
-  }, 1000);
-}
-
-// ====== INVITE ======
-function copyInvite() {
-  var userId = tgUser ? tgUser.id : '0';
-  var link = 'https://t.me/RecMiningGame_bot?start=ref' + userId;
-  var textArea = document.createElement('textarea');
-  textArea.value = link;
-  textArea.style.position = 'fixed';
-  textArea.style.opacity = '0';
-  document.body.appendChild(textArea);
-  textArea.focus();
-  textArea.select();
-  try {
-    document.execCommand('copy');
-    alert('✅ تم نسخ الرابط!');
-  } catch(e) {
-    prompt('انسخ الرابط:', link);
-  }
-  document.body.removeChild(textArea);
-}
-
-function shareInvite() {
-  var userId = tgUser ? tgUser.id : '0';
-  var link = 'https://t.me/RecMiningGame_bot?start=ref' + userId;
-  var text = '🔴 انضم لـ REC Mining وابدأ التعدين!\n\nاضغط هنا وابدأ تجميع عملات REC مجاناً 👇';
-  window.Telegram.WebApp.openTelegramLink(
-    'https://t.me/share/url?url=' + encodeURIComponent(link) +
-    '&text=' + encodeURIComponent(text)
-  );
-}
-
 // ====== PROFILE ======
+function openSupport() { window.Telegram.WebApp.openTelegramLink('https://t.me/Momokhli'); }
 function toggleLang() {
-  var menu = document.getElementById('langMenu');
-  menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+  var m = document.getElementById('langMenu');
+  if (m) m.style.display = m.style.display === 'none' ? 'block' : 'none';
 }
-
-var langTexts = {
-  ar: {
-    home:'Home', cards:'Cards', tasks:'Tasks', invite:'Invite', rank:'Rank', profile:'Profile',
-    tapTitle:'اضغط للتعدين', upgradeBtn:'UPGRADE', energyLabel:'الطاقة',
-    miningSpeed:'سرعة التعدين', upgradeTitle:'الترقيات', tapUpgrade:'ترقية الكبسات',
-    energyUpgrade:'ترقية الطاقة', level:'المستوى', cost:'التكلفة', tapsPerClick:'كبسات لكل ضغطة',
-    totalEnergy:'الطاقة الكلية', upgradeBtn2:'ترقية', cardsTitle:'البطاقات',
-    tasksTitle:'المهام', joinTelegram:'انضم لجروب تيليغرام', joinTwitter:'تابع على تويتر',
-    joinBtn:'انضم للجروب ←', followBtn:'تابع على تويتر ←', claimBtn:'احصل على 10,000 RECORD',
-    inviteTitle:'الدعوة', copyInvite:'📋 انسخ رابط الدعوة', shareInvite:'📤 شارك مع أصدقاء',
-    rankTitle:'الترتيب', myRank:'مستواك الحالي', balance:'رصيدك',
-    profileTitle:'الملف الشخصي', support:'الدعم الفني @Momokhli 💬',
-    connectWallet:'ربط المحفظة', poolWallet:'Pool Wallet', withdrawable:'Withdrawable balance',
-    controls:'Controls', comingSoon:'Coming Soon', withdrawPool:'Withdraw Pool',
-    transferPool:'Transfer Pool to Wallet', locked:'Locked', history:'History',
-    withdrawals:'Your withdrawals'
-  },
-  en: {
-    home:'Home', cards:'Cards', tasks:'Tasks', invite:'Invite', rank:'Rank', profile:'Profile',
-    tapTitle:'Tap to mine', upgradeBtn:'UPGRADE', energyLabel:'Energy',
-    miningSpeed:'Mining speed', upgradeTitle:'Upgrades', tapUpgrade:'Tap Upgrade',
-    energyUpgrade:'Energy Upgrade', level:'Level', cost:'Cost', tapsPerClick:'Taps per click',
-    totalEnergy:'Total energy', upgradeBtn2:'Upgrade', cardsTitle:'Cards',
-    tasksTitle:'Tasks', joinTelegram:'Join Telegram Group', joinTwitter:'Follow on Twitter',
-    joinBtn:'Join Group ←', followBtn:'Follow on Twitter ←', claimBtn:'Get 10,000 RECORD',
-    inviteTitle:'Invite', copyInvite:'📋 Copy Invite Link', shareInvite:'📤 Share with Friends',
-    rankTitle:'Rank', myRank:'Your Current Rank', balance:'Your Balance',
-    profileTitle:'Profile', support:'Support @Momokhli 💬',
-    connectWallet:'Connect Wallet', poolWallet:'Pool Wallet', withdrawable:'Withdrawable balance',
-    controls:'Controls', comingSoon:'Coming Soon', withdrawPool:'Withdraw Pool',
-    transferPool:'Transfer Pool to Wallet', locked:'Locked', history:'History',
-    withdrawals:'Your withdrawals'
-  }
-};
-
 function setLang(lang) {
-  document.getElementById('langMenu').style.display = 'none';
-  var t = langTexts[lang] || langTexts['ar'];
+  var m = document.getElementById('langMenu');
+  if (m) m.style.display = 'none';
   var dir = (lang === 'ar' || lang === 'fa') ? 'rtl' : 'ltr';
   document.documentElement.setAttribute('lang', lang);
   document.body.style.direction = dir;
-
-  // تغيير النصوص
-  var navBtns = document.querySelectorAll('.nav-btn');
-  var keys = ['home','cards','tasks','invite','rank','profile'];
-  navBtns.forEach(function(btn, i) {
-    if (keys[i] && t[keys[i]]) {
-      var spans = btn.querySelectorAll('span');
-      if (spans.length > 0 && btn.lastChild.nodeType === 3) {
-        btn.lastChild.textContent = t[keys[i]];
-      }
-    }
-  });
-
-  // حفظ اللغة
   try { localStorage.setItem('lang_' + saveKey, lang); } catch(e) {}
 }
-
-function openSupport() {
-  window.Telegram.WebApp.openTelegramLink('https://t.me/Momokhli');
-}
-
-// ====== TON CONNECT ======
-function connectWallet() {
-  window.Telegram.WebApp.openTelegramLink('https://t.me/wallet');
-}
+function connectWallet() { window.Telegram.WebApp.openTelegramLink('https://t.me/wallet'); }
 
 // ====== INIT ======
 document.addEventListener('DOMContentLoaded', function() {
   if (tgUser) {
     var name = tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '');
-    var el = document.getElementById('profileName');
-    if (el) el.textContent = name;
-    var idEl = document.getElementById('profileId');
-    if (idEl) idEl.textContent = tgUser.id;
+    var el = document.getElementById('profileName'); if (el) el.textContent = name;
+    var idEl = document.getElementById('profileId'); if (idEl) idEl.textContent = tgUser.id;
   }
   buildCards();
   buildMilestones();
