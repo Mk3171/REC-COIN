@@ -1,0 +1,160 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+body { background: #0a0a0a; color: white; font-family: Arial, sans-serif; }
+
+/* ====== APP WRAPPER - يخلي النافبار دايم ظاهر ====== */
+.app-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: calc(var(--tg-viewport-stable-height, 100vh));
+  overflow: hidden;
+}
+
+/* ====== TOP BAR ====== */
+.top-bar {
+  flex-shrink: 0;
+  padding: 0 12px;
+  height: 44px;
+  background: #0a0a0a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  z-index: 50;
+  border-bottom: 1px solid #1a1a1a;
+}
+.record-counter {
+  background: #1a1a1a;
+  border: 1px solid #FF0000;
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 13px;
+  color: #FF0000;
+  font-family: 'Orbitron', sans-serif;
+}
+.rec-counter {
+  background: #1a1a1a;
+  border: 1px solid #00FF88;
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 12px;
+  color: #00FF88;
+  font-family: 'Orbitron', sans-serif;
+}
+
+/* ====== PAGES CONTAINER ====== */
+.pages-container {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+/* ====== LAYOUT ====== */
+.page {
+  display: none !important;
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  overflow-y: auto;
+  padding: 15px;
+  -webkit-overflow-scrolling: touch;
+}
+.page.active { display: block !important; }
+.page-title { font-size: 20px; text-align: center; margin: 10px 0 20px; }
+.info-card { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 15px; margin-bottom: 12px; }
+
+/* ====== NAV - مثبت في الأسفل دايماً ====== */
+.nav {
+  flex-shrink: 0;
+  background: #111;
+  display: flex;
+  justify-content: space-around;
+  padding: 8px 0;
+  padding-bottom: max(8px, env(safe-area-inset-bottom, 8px));
+  border-top: 1px solid #222;
+  z-index: 100;
+}
+.nav-btn {
+  background: none;
+  border: none;
+  color: #555;
+  font-size: 10px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 4px 8px;
+  -webkit-tap-highlight-color: transparent;
+}
+.nav-btn span { font-size: 22px; }
+.nav-btn.active { color: #FF0000; }
+
+/* ====== OVERLAY ====== */
+.overlay-page {
+  display: none !important;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: #0a0a0a;
+  z-index: 200;
+  padding: 20px;
+  overflow-y: auto;
+}
+.overlay-page.open { display: block !important; }
+.back-btn { background: none; border: 1px solid #333; color: white; padding: 8px 15px; border-radius: 8px; cursor: pointer; margin-bottom: 20px; font-size: 14px; }
+
+/* ====== BUTTONS ====== */
+.do-btn { background: #FF0000; border: none; color: white; padding: 10px 20px; border-radius: 8px; cursor: pointer; width: 100%; font-size: 14px; margin-top: 10px; }
+.do-btn:disabled { background: #333; color: #666; cursor: not-allowed; }
+.do-btn.done { background: #1a5c1a; }
+
+/* ====== HOME ====== */
+.home-inner { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 12px; padding: 10px 0; }
+.rec-amount { font-size: 32px; font-family: 'Orbitron', sans-serif; color: white; }
+.rec-label { font-size: 13px; color: #FF0000; margin-top: 3px; text-align: center; }
+.camera-btn {
+  width: 150px; height: 150px;
+  background: radial-gradient(circle, #2a2a2a, #111);
+  border: 3px solid #FF0000;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
+  box-shadow: 0 0 30px rgba(255,0,0,0.3);
+  transition: transform 0.1s;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  margin: 15px 0;
+}
+.camera-btn:active { transform: scale(0.93); }
+.camera-btn img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.energy-wrap { width: 100%; max-width: 300px; }
+.energy-header { display: flex; justify-content: space-between; font-size: 12px; color: #aaa; margin-bottom: 5px; }
+.energy-bar-bg { background: #1a1a1a; border-radius: 10px; height: 12px; overflow: hidden; border: 1px solid #333; }
+.energy-bar-fill { height: 100%; background: linear-gradient(90deg, #FF0000, #ff6600); border-radius: 10px; transition: width 0.3s; }
+.upgrade-btn { background: #1a1a1a; border: 2px solid #FF0000; border-radius: 10px; padding: 12px 40px; color: white; font-size: 15px; cursor: pointer; width: 100%; max-width: 300px; letter-spacing: 2px; }
+
+/* ====== UPGRADE ====== */
+.upg-card { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 15px; margin-bottom: 15px; }
+
+/* ====== CARDS ====== */
+.cat-btn { background: #1a1a1a; border: 1px solid #333; color: #aaa; padding: 8px 15px; border-radius: 20px; cursor: pointer; white-space: nowrap; font-size: 13px; }
+.cat-btn.active { border-color: #FF0000; color: #FF0000; }
+.card-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.card-item { background: #1a1a1a; border: 1px solid #333; border-radius: 12px; padding: 12px; cursor: pointer; text-align: center; }
+.card-item:active { border-color: #FF0000; }
+.card-emoji { font-size: 35px; margin-bottom: 8px; }
+.card-name { font-size: 12px; color: #ddd; margin-bottom: 4px; }
+.card-level { font-size: 11px; color: #FF0000; }
+.card-speed { font-size: 10px; color: #666; margin-top: 2px; }
+
+/* ====== TASKS ====== */
+.task-join-btn { background: #1a1a1a; border: 1px solid #FF0000; color: #FF0000; padding: 8px; border-radius: 8px; cursor: pointer; width: 100%; font-size: 13px; margin-bottom: 8px; }
+
+/* ====== RANK ====== */
+.medal-wrap { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 20px 0; }
+.medal-arrow { background: none; border: 1px solid #333; color: white; padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 18px; }
+.medal-box { background: #1a1a1a; border-radius: 15px; padding: 20px; text-align: center; min-width: 180px; border: 2px solid #333; }
+
+/* ====== PROFILE ====== */
+.lang-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.lang-btn { background: #0a0a0a; border: 1px solid #333; color: white; padding: 8px; border-radius: 8px; cursor: pointer; }
