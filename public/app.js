@@ -29,7 +29,7 @@ function saveData() {
     localStorage.setItem(saveKey, JSON.stringify({
       record, rec, energy, maxEnergy,
       tapLevelVal, energyLevelVal, tapPowerVal, miningSpeed,
-      completedTasks, cardLevels
+      completedTasks, cardLevels, refCount, claimedMilest
     }));
   } catch(e) {}
 }
@@ -362,46 +362,7 @@ function restoreTasksUI() {
   }
 }
 
-// ====== INVITE ======
-function showToast(msg) {
-  var t = document.getElementById('toast');
-  if (!t) {
-    t = document.createElement('div');
-    t.id = 'toast';
-    t.style.cssText = 'position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#222;color:white;padding:10px 22px;border-radius:20px;font-size:14px;z-index:9999;border:1px solid #444;pointer-events:none;transition:opacity 0.3s;';
-    document.body.appendChild(t);
-  }
-  t.textContent = msg;
-  t.style.opacity = '1';
-  clearTimeout(t._timer);
-  t._timer = setTimeout(function() { t.style.opacity = '0'; }, 2000);
-}
 
-function copyInvite() {
-  var userId = tgUser ? tgUser.id : '0';
-  var link = 'https://t.me/RecMiningGame_bot?start=' + userId;
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(link).then(function() { showToast('✅ تم نسخ الرابط!'); });
-  } else {
-    var ta = document.createElement('textarea');
-    ta.value = link;
-    ta.style.cssText = 'position:fixed;opacity:0;';
-    document.body.appendChild(ta);
-    ta.focus(); ta.select();
-    try { document.execCommand('copy'); showToast('✅ تم نسخ الرابط!'); } catch(e) {}
-    document.body.removeChild(ta);
-  }
-}
-
-function shareInvite() {
-  var userId = tgUser ? tgUser.id : '0';
-  var link = 'https://t.me/RecMiningGame_bot?start=' + userId;
-  var text = 'انضم لـ REC Mining وابدأ التعدين! 🔴\n' + link;
-  window.Telegram.WebApp.openTelegramLink(
-    'https://t.me/share/url?url=' + encodeURIComponent(link) +
-    '&text=' + encodeURIComponent('انضم لـ REC Mining وابدأ التعدين! 🔴')
-  );
-}
 
 // ====== RANK ======
 var medals = [
@@ -573,6 +534,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (idEl) idEl.textContent = tgUser.id;
   }
   buildCards();
+  buildMilestones();
   restoreTasksUI();
   updateUI();
 });
