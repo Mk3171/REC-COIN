@@ -123,6 +123,39 @@ function saveData(){
     completedTasks,cardLevels,cardUpgrades,refCount,claimedMilest});
   try{localStorage.setItem(saveKey,d);}catch(e){}
   if(CS){try{CS.setItem('gameData',d);}catch(e){}}
+  // Save to MongoDB server (debounced - max once per 10s)
+  clearTimeout(window._saveTimer);
+  window._saveTimer = setTimeout(function(){ saveToServer(); }, 10000);
+}
+
+function saveToServer(){
+  if(!tgUser) return;
+  try {
+    fetch('/api/user/save', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({
+        telegramId: tgUser.id,
+        username: tgUser.username || '',
+        firstName: tgUser.first_name || '',
+        record, rec, energy, maxEnergy,
+        tapLevelVal, energyLevelVal, tapPowerVal,
+        completedTasks, cardLevels, cardUpgrades,
+        refCount, claimedMilest
+      })
+    }).catch(function(){});
+  } catch(e){}
+}
+
+function loadFromServer(callback){
+  if(!tgUser){ callback(null); return; }
+  fetch('/api/user/' + tgUser.id)
+    .then(function(r){ return r.json(); })
+    .then(function(res){
+      if(res.exists && res.data){ callback(res.data); }
+      else { callback(null); }
+    })
+    .catch(function(){ callback(null); });
 }
 
 // ====== TOAST ======
@@ -629,6 +662,14 @@ function updateWalletBtn(wallet) {
     // Save to storage
     try { localStorage.setItem('ton_wallet_' + saveKey, addr); } catch(e) {}
     if (CS) { try { CS.setItem('tonWallet', addr); } catch(e) {} }
+    // Save wallet to server
+    if(tgUser) {
+      fetch('/api/user/save', {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ telegramId: tgUser.id, walletAddress: rawToFriendly(addr) })
+      }).catch(function(){});
+    }
   } else {
     btn.textContent = t('connectWallet');
     btn.style.background = '#4B9EFF';
@@ -692,29 +733,33 @@ function initApp() {
   }
 }
 
-// Try to recover data from CloudStorage first (survives URL changes)
+// Load data: Server > CloudStorage > localStorage
 function loadAndInit() {
-  if(CS) {
-    try {
-      CS.getItems(['gameData','userLang'], function(err, vals) {
-        try {
-          if(!err && vals && vals.gameData) {
-            var cd = JSON.parse(vals.gameData);
-            // CloudStorage data is more reliable than localStorage
-            if(cd && (cd.record > 0 || cd.rec > 0 || Object.keys(cd.cardLevels||{}).length > 0)) {
-              applyData(cd);
+  // Try server first (most reliable, survives everything)
+  loadFromServer(function(serverData) {
+    if(serverData && (serverData.record > 0 || serverData.rec > 0 ||
+       Object.keys(serverData.cardLevels||{}).length > 0)) {
+      applyData(serverData);
+      if(serverData.language && T[serverData.language]) currentLang = serverData.language;
+      initApp();
+      return;
+    }
+    // Fallback: CloudStorage
+    if(CS) {
+      try {
+        CS.getItems(['gameData','userLang'], function(err, vals) {
+          try {
+            if(!err && vals && vals.gameData) {
+              var cd = JSON.parse(vals.gameData);
+              if(cd && (cd.record > 0 || cd.rec > 0)) applyData(cd);
             }
-          }
-          if(!err && vals && vals.userLang && T[vals.userLang]) {
-            currentLang = vals.userLang;
-          }
-        } catch(e) {}
-        initApp();
-      });
-    } catch(e) { initApp(); }
-  } else {
-    initApp();
-  }
+            if(!err && vals && vals.userLang && T[vals.userLang]) currentLang = vals.userLang;
+          } catch(e) {}
+          initApp();
+        });
+      } catch(e) { initApp(); }
+    } else { initApp(); }
+  });
 }
 
 document.addEventListener('DOMContentLoaded', loadAndInit);
