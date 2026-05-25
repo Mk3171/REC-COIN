@@ -26,9 +26,9 @@
       <div class="home-inner">
 
         <button class="camera-btn" onclick="tap()">
-          <img src="logo.jpeg" alt="REC" onerror="this.parentElement.innerHTML='🔴'">
+          <img src="logo.jpeg" alt="REC" onerror="this.parentElement.innerHTML='🔴'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
         </button>
-        <div style="font-size:11px;color:#555;">اضغط للتعدين</div>
+        <div style="font-size:11px;color:#555;letter-spacing:1px;">اضغط للتعدين</div>
         <div class="energy-wrap">
           <div class="energy-header">
             <span>⚡ الطاقة</span>
@@ -38,7 +38,7 @@
             <div class="energy-bar-fill" id="energyBar" style="width:100%"></div>
           </div>
         </div>
-        <div style="font-size:11px;color:#555;">سرعة التعدين: <span id="miningSpeedShow">0.000001</span> REC/ث</div>
+        <div style="font-size:11px;color:#555;width:min(320px,82vw);text-align:center;">سرعة التعدين: <span id="miningSpeedShow">0.000001</span> REC/ث</div>
         <button class="upgrade-btn" onclick="openUpgrade()">UPGRADE</button>
 
       </div>
