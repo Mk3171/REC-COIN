@@ -59,8 +59,18 @@
               <div class="energy-bar-fill" id="energyBar" style="width:100%"></div>
             </div>
           </div>
-          <div style="font-size:11px;color:#555;width:82vw;max-width:340px;text-align:center;">
-            <span data-i18n="miningSpeedLabel">سرعة التعدين:</span> <span id="miningSpeedShow">0.000001</span> REC/ث
+          <!-- Dual mining display -->
+          <div style="width:82vw;max-width:340px;display:flex;gap:6px;">
+            <div style="flex:1;background:#1a0000;border:1px solid #FF0000;border-radius:10px;padding:7px;text-align:center;">
+              <div style="font-size:10px;color:#aaa;margin-bottom:2px;" data-i18n="recordSpeedLabel">تعدين RECORD:</div>
+              <div style="font-size:13px;color:#FF0000;font-family:Orbitron,sans-serif;font-weight:bold;"><span id="recordSpeedShow">0</span></div>
+              <div style="font-size:9px;color:#555;">RECORD/s</div>
+            </div>
+            <div style="flex:1;background:#001a0a;border:1px solid #00FF88;border-radius:10px;padding:7px;text-align:center;">
+              <div style="font-size:10px;color:#aaa;margin-bottom:2px;" data-i18n="miningSpeedLabel">تعدين REC:</div>
+              <div style="font-size:13px;color:#00FF88;font-family:Orbitron,sans-serif;font-weight:bold;"><span id="recSpeedShow">0.00000000</span></div>
+              <div style="font-size:9px;color:#555;">REC/s</div>
+            </div>
           </div>
           <button class="upgrade-btn" onclick="openUpgrade()" data-i18n="upgradesTitle">UPGRADE</button>
         </div>
