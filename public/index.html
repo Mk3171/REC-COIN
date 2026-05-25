@@ -25,28 +25,21 @@
     <div id="home" class="page active">
       <div class="home-inner">
 
-        <!-- Circle top section -->
-        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;">
-          <button class="camera-btn" onclick="tap()">
-            <img src="logo.jpeg" alt="REC" onerror="this.parentElement.innerHTML='🔴'">
-          </button>
-          <div style="font-size:11px;color:#555;">اضغط للتعدين</div>
-        </div>
-
-        <!-- Bottom controls -->
-        <div style="width:100%;display:flex;flex-direction:column;align-items:center;gap:10px;">
-          <div class="energy-wrap">
-            <div class="energy-header">
-              <span>⚡ الطاقة</span>
-              <span id="energyText">1000 / 1000</span>
-            </div>
-            <div class="energy-bar-bg">
-              <div class="energy-bar-fill" id="energyBar" style="width:100%"></div>
-            </div>
+        <button class="camera-btn" onclick="tap()">
+          <img src="logo.jpeg" alt="REC" onerror="this.parentElement.innerHTML='🔴'">
+        </button>
+        <div style="font-size:11px;color:#555;">اضغط للتعدين</div>
+        <div class="energy-wrap">
+          <div class="energy-header">
+            <span>⚡ الطاقة</span>
+            <span id="energyText">1000 / 1000</span>
           </div>
-          <div style="font-size:11px;color:#555;">سرعة التعدين: <span id="miningSpeedShow">0.000001</span> REC/ث</div>
-          <button class="upgrade-btn" onclick="openUpgrade()">UPGRADE</button>
+          <div class="energy-bar-bg">
+            <div class="energy-bar-fill" id="energyBar" style="width:100%"></div>
+          </div>
         </div>
+        <div style="font-size:11px;color:#555;">سرعة التعدين: <span id="miningSpeedShow">0.000001</span> REC/ث</div>
+        <button class="upgrade-btn" onclick="openUpgrade()">UPGRADE</button>
 
       </div>
     </div>
