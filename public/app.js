@@ -51,13 +51,13 @@ function tap() {
   updateUI();
 }
 
-// تعدين تلقائي كل 10 ثواني
+// تعدين تلقائي كل 3 ثواني
 setInterval(function() {
-  rec += miningSpeed * 10;
-  if (energy < maxEnergy) energy = Math.min(maxEnergy, energy + 1);
+  rec += miningSpeed * 3;
+  if (energy < maxEnergy) energy = Math.min(maxEnergy, energy + 5); // شحن أسرع
   saveData();
   updateUI();
-}, 10000);
+}, 3000);
 
 function updateUI() {
   document.getElementById('recordCount').textContent = Math.floor(record).toLocaleString();
@@ -363,7 +363,7 @@ function restoreTasksUI() {
 // ====== INVITE ======
 function copyInvite() {
   var userId = tgUser ? tgUser.id : '0';
-  var link = 'https://t.me/RecMining_bot?start=' + userId;
+  var link = 'https://t.me/RecMiningGame_bot?start=' + userId;
   if (navigator.clipboard) {
     navigator.clipboard.writeText(link).then(function() { alert('✅ تم نسخ الرابط!'); });
   } else {
@@ -373,7 +373,7 @@ function copyInvite() {
 
 function shareInvite() {
   var userId = tgUser ? tgUser.id : '0';
-  var link = 'https://t.me/RecMining_bot?start=' + userId;
+  var link = 'https://t.me/RecMiningGame_bot?start=' + userId;
   var text = 'انضم لـ REC Mining وابدأ التعدين! 🔴\n' + link;
   window.Telegram.WebApp.openTelegramLink(
     'https://t.me/share/url?url=' + encodeURIComponent(link) +
@@ -441,7 +441,7 @@ function joinAndWait(type, joinBtnId, claimBtnId) {
 // ====== INVITE ======
 function copyInvite() {
   var userId = tgUser ? tgUser.id : '0';
-  var link = 'https://t.me/RecMining_bot?start=ref' + userId;
+  var link = 'https://t.me/RecMiningGame_bot?start=ref' + userId;
   var textArea = document.createElement('textarea');
   textArea.value = link;
   textArea.style.position = 'fixed';
@@ -460,7 +460,7 @@ function copyInvite() {
 
 function shareInvite() {
   var userId = tgUser ? tgUser.id : '0';
-  var link = 'https://t.me/RecMining_bot?start=ref' + userId;
+  var link = 'https://t.me/RecMiningGame_bot?start=ref' + userId;
   var text = '🔴 انضم لـ REC Mining وابدأ التعدين!\n\nاضغط هنا وابدأ تجميع عملات REC مجاناً 👇';
   window.Telegram.WebApp.openTelegramLink(
     'https://t.me/share/url?url=' + encodeURIComponent(link) +
