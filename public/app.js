@@ -65,6 +65,8 @@ function updateUI() {
   document.getElementById('energyText').textContent = Math.floor(energy) + ' / ' + maxEnergy;
   document.getElementById('energyBar').style.width = (energy / maxEnergy * 100) + '%';
   document.getElementById('miningSpeedShow').textContent = miningSpeed.toFixed(6);
+  var rm = document.getElementById('recMini');
+  if (rm) rm.textContent = rec.toFixed(6);
 
   // Profile
   var pr = document.getElementById('profileRecord');
