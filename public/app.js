@@ -65,11 +65,21 @@ function updateUI() {
   document.getElementById('energyText').textContent = Math.floor(energy) + ' / ' + maxEnergy;
   document.getElementById('energyBar').style.width = (energy / maxEnergy * 100) + '%';
   document.getElementById('miningSpeedShow').textContent = miningSpeed.toFixed(6);
-  document.getElementById('profileRecord').textContent = Math.floor(record).toLocaleString();
+
+  // Profile
+  var pr = document.getElementById('profileRecord');
+  if (pr) pr.textContent = Math.floor(record).toLocaleString();
+  var prt = document.getElementById('profileRecordTop');
+  if (prt) prt.textContent = Math.floor(record).toLocaleString();
+  var pb = document.getElementById('recPoolBalance');
+  if (pb) pb.textContent = rec.toFixed(6);
+
+  // Rank
   var m = getMyMedal();
-  document.getElementById('myRankName').textContent = m.name;
-  document.getElementById('myRankName').style.color = m.color;
-  document.getElementById('myRankRecord').textContent = Math.floor(record).toLocaleString();
+  var mrn = document.getElementById('myRankName');
+  if (mrn) { mrn.textContent = m.name; mrn.style.color = m.color; }
+  var mrr = document.getElementById('myRankRecord');
+  if (mrr) mrr.textContent = Math.floor(record).toLocaleString();
 }
 
 // ====== UPGRADE ======
@@ -431,22 +441,27 @@ function joinAndWait(type, joinBtnId, claimBtnId) {
 // ====== INVITE ======
 function copyInvite() {
   var userId = tgUser ? tgUser.id : '0';
-  var link = 'https://t.me/RecMining_bot?start=' + userId;
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(link).then(function() {
-      alert('✅ تم نسخ الرابط!\n' + link);
-    }).catch(function() {
-      prompt('انسخ الرابط:', link);
-    });
-  } else {
+  var link = 'https://t.me/RecMining_bot?start=ref' + userId;
+  var textArea = document.createElement('textarea');
+  textArea.value = link;
+  textArea.style.position = 'fixed';
+  textArea.style.opacity = '0';
+  document.body.appendChild(textArea);
+  textArea.focus();
+  textArea.select();
+  try {
+    document.execCommand('copy');
+    alert('✅ تم نسخ الرابط!');
+  } catch(e) {
     prompt('انسخ الرابط:', link);
   }
+  document.body.removeChild(textArea);
 }
 
 function shareInvite() {
   var userId = tgUser ? tgUser.id : '0';
-  var link = 'https://t.me/RecMining_bot?start=' + userId;
-  var text = 'انضم لـ REC Mining وابدأ التعدين! 🔴';
+  var link = 'https://t.me/RecMining_bot?start=ref' + userId;
+  var text = '🔴 انضم لـ REC Mining وابدأ التعدين!\n\nاضغط هنا وابدأ تجميع عملات REC مجاناً 👇';
   window.Telegram.WebApp.openTelegramLink(
     'https://t.me/share/url?url=' + encodeURIComponent(link) +
     '&text=' + encodeURIComponent(text)
