@@ -4,12 +4,8 @@
 
 window.Telegram.WebApp.ready();
 window.Telegram.WebApp.expand();
-window.Telegram.WebApp.enableClosingConfirmation();
 
 var tgUser = window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user;
-if (tgUser) {
-  document.getElementById('profileName').textContent = tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '');
-}
 
 var saveKey = 'recmining_' + (tgUser ? tgUser.id : 'guest');
 
@@ -452,6 +448,12 @@ function connectWallet() {
 }
 
 // ====== INIT ======
-buildCards();
-restoreTasksUI();
-updateUI();
+document.addEventListener('DOMContentLoaded', function() {
+  if (tgUser) {
+    var el = document.getElementById('profileName');
+    if (el) el.textContent = tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '');
+  }
+  buildCards();
+  restoreTasksUI();
+  updateUI();
+});
