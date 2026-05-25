@@ -405,29 +405,116 @@ function getMyMedal() {
   return medals[0];
 }
 
+// ====== TASKS ======
+function joinAndWait(type, joinBtnId, claimBtnId) {
+  if (type === 'telegram') {
+    window.Telegram.WebApp.openTelegramLink('https://t.me/Momokh1');
+  } else {
+    window.Telegram.WebApp.openLink('https://x.com/mohamma33122570');
+  }
+  var joinBtn = document.getElementById(joinBtnId);
+  var claimBtn = document.getElementById(claimBtnId);
+  joinBtn.disabled = true;
+  joinBtn.textContent = '⏳ انتظر 30 ثانية...';
+  var seconds = 30;
+  var timer = setInterval(function() {
+    seconds--;
+    joinBtn.textContent = '⏳ ' + seconds + ' ثانية...';
+    if (seconds <= 0) {
+      clearInterval(timer);
+      joinBtn.style.display = 'none';
+      claimBtn.disabled = false;
+    }
+  }, 1000);
+}
+
+// ====== INVITE ======
+function copyInvite() {
+  var userId = tgUser ? tgUser.id : '0';
+  var link = 'https://t.me/RecMining_bot?start=' + userId;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(link).then(function() {
+      alert('✅ تم نسخ الرابط!\n' + link);
+    }).catch(function() {
+      prompt('انسخ الرابط:', link);
+    });
+  } else {
+    prompt('انسخ الرابط:', link);
+  }
+}
+
+function shareInvite() {
+  var userId = tgUser ? tgUser.id : '0';
+  var link = 'https://t.me/RecMining_bot?start=' + userId;
+  var text = 'انضم لـ REC Mining وابدأ التعدين! 🔴';
+  window.Telegram.WebApp.openTelegramLink(
+    'https://t.me/share/url?url=' + encodeURIComponent(link) +
+    '&text=' + encodeURIComponent(text)
+  );
+}
+
 // ====== PROFILE ======
 function toggleLang() {
   var menu = document.getElementById('langMenu');
   menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
 }
 
+var langTexts = {
+  ar: {
+    home:'Home', cards:'Cards', tasks:'Tasks', invite:'Invite', rank:'Rank', profile:'Profile',
+    tapTitle:'اضغط للتعدين', upgradeBtn:'UPGRADE', energyLabel:'الطاقة',
+    miningSpeed:'سرعة التعدين', upgradeTitle:'الترقيات', tapUpgrade:'ترقية الكبسات',
+    energyUpgrade:'ترقية الطاقة', level:'المستوى', cost:'التكلفة', tapsPerClick:'كبسات لكل ضغطة',
+    totalEnergy:'الطاقة الكلية', upgradeBtn2:'ترقية', cardsTitle:'البطاقات',
+    tasksTitle:'المهام', joinTelegram:'انضم لجروب تيليغرام', joinTwitter:'تابع على تويتر',
+    joinBtn:'انضم للجروب ←', followBtn:'تابع على تويتر ←', claimBtn:'احصل على 10,000 RECORD',
+    inviteTitle:'الدعوة', copyInvite:'📋 انسخ رابط الدعوة', shareInvite:'📤 شارك مع أصدقاء',
+    rankTitle:'الترتيب', myRank:'مستواك الحالي', balance:'رصيدك',
+    profileTitle:'الملف الشخصي', support:'الدعم الفني @Momokhli 💬',
+    connectWallet:'ربط المحفظة', poolWallet:'Pool Wallet', withdrawable:'Withdrawable balance',
+    controls:'Controls', comingSoon:'Coming Soon', withdrawPool:'Withdraw Pool',
+    transferPool:'Transfer Pool to Wallet', locked:'Locked', history:'History',
+    withdrawals:'Your withdrawals'
+  },
+  en: {
+    home:'Home', cards:'Cards', tasks:'Tasks', invite:'Invite', rank:'Rank', profile:'Profile',
+    tapTitle:'Tap to mine', upgradeBtn:'UPGRADE', energyLabel:'Energy',
+    miningSpeed:'Mining speed', upgradeTitle:'Upgrades', tapUpgrade:'Tap Upgrade',
+    energyUpgrade:'Energy Upgrade', level:'Level', cost:'Cost', tapsPerClick:'Taps per click',
+    totalEnergy:'Total energy', upgradeBtn2:'Upgrade', cardsTitle:'Cards',
+    tasksTitle:'Tasks', joinTelegram:'Join Telegram Group', joinTwitter:'Follow on Twitter',
+    joinBtn:'Join Group ←', followBtn:'Follow on Twitter ←', claimBtn:'Get 10,000 RECORD',
+    inviteTitle:'Invite', copyInvite:'📋 Copy Invite Link', shareInvite:'📤 Share with Friends',
+    rankTitle:'Rank', myRank:'Your Current Rank', balance:'Your Balance',
+    profileTitle:'Profile', support:'Support @Momokhli 💬',
+    connectWallet:'Connect Wallet', poolWallet:'Pool Wallet', withdrawable:'Withdrawable balance',
+    controls:'Controls', comingSoon:'Coming Soon', withdrawPool:'Withdraw Pool',
+    transferPool:'Transfer Pool to Wallet', locked:'Locked', history:'History',
+    withdrawals:'Your withdrawals'
+  }
+};
+
 function setLang(lang) {
   document.getElementById('langMenu').style.display = 'none';
-  var texts = {
-    ar: { home:'الرئيسية', cards:'البطاقات', tasks:'المهام', invite:'الدعوة', rank:'الترتيب', profile:'الملف' },
-    en: { home:'Home', cards:'Cards', tasks:'Tasks', invite:'Invite', rank:'Rank', profile:'Profile' },
-    de: { home:'Start', cards:'Karten', tasks:'Aufgaben', invite:'Einladen', rank:'Rang', profile:'Profil' },
-    ru: { home:'Главная', cards:'Карты', tasks:'Задачи', invite:'Пригласить', rank:'Рейтинг', profile:'Профиль' },
-    uk: { home:'Головна', cards:'Картки', tasks:'Завдання', invite:'Запросити', rank:'Рейтинг', profile:'Профіль' },
-    zh: { home:'主页', cards:'卡片', tasks:'任务', invite:'邀请', rank:'排名', profile:'个人' },
-    fa: { home:'خانه', cards:'کارت‌ها', tasks:'وظایف', invite:'دعوت', rank:'رتبه', profile:'پروفایل' }
-  };
-  var t = texts[lang] || texts['ar'];
+  var t = langTexts[lang] || langTexts['ar'];
+  var dir = (lang === 'ar' || lang === 'fa') ? 'rtl' : 'ltr';
+  document.documentElement.setAttribute('lang', lang);
+  document.body.style.direction = dir;
+
+  // تغيير النصوص
   var navBtns = document.querySelectorAll('.nav-btn');
   var keys = ['home','cards','tasks','invite','rank','profile'];
   navBtns.forEach(function(btn, i) {
-    if (keys[i]) btn.lastChild.textContent = t[keys[i]];
+    if (keys[i] && t[keys[i]]) {
+      var spans = btn.querySelectorAll('span');
+      if (spans.length > 0 && btn.lastChild.nodeType === 3) {
+        btn.lastChild.textContent = t[keys[i]];
+      }
+    }
   });
+
+  // حفظ اللغة
+  try { localStorage.setItem('lang_' + saveKey, lang); } catch(e) {}
 }
 
 function openSupport() {
@@ -436,22 +523,17 @@ function openSupport() {
 
 // ====== TON CONNECT ======
 function connectWallet() {
-  try {
-    var tc = new TON_CONNECT_UI.TonConnectUI({
-      manifestUrl: 'https://rec-coin.onrender.com/tonconnect-manifest.json',
-      buttonRootId: null
-    });
-    tc.openModal();
-  } catch(e) {
-    window.Telegram.WebApp.openTelegramLink('https://t.me/wallet');
-  }
+  window.Telegram.WebApp.openTelegramLink('https://t.me/wallet');
 }
 
 // ====== INIT ======
 document.addEventListener('DOMContentLoaded', function() {
   if (tgUser) {
+    var name = tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '');
     var el = document.getElementById('profileName');
-    if (el) el.textContent = tgUser.first_name + (tgUser.last_name ? ' ' + tgUser.last_name : '');
+    if (el) el.textContent = name;
+    var idEl = document.getElementById('profileId');
+    if (idEl) idEl.textContent = tgUser.id;
   }
   buildCards();
   restoreTasksUI();
