@@ -4,6 +4,7 @@
 
 window.Telegram.WebApp.ready();
 window.Telegram.WebApp.expand();
+window.Telegram.WebApp.enableClosingConfirmation();
 
 var tgUser = window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.user;
 if (tgUser) {
@@ -137,7 +138,7 @@ var categories = [
     {n:'آسوكا',e:'🔥'},{n:'ميساتو',e:'🍺'},{n:'كاجي',e:'🌱'},{n:'يوي',e:'💙'},
     {n:'كازوما',e:'💰'},{n:'أكوا',e:'💧'},{n:'ميغومين',e:'💥'},{n:'داكنس',e:'⚔️'},
     {n:'ديانا',e:'🌟'},{n:'إيكي',e:'⚡'},{n:'نورا',e:'🌸'},{n:'بيشامون',e:'👗'},
-    {n:'هاياكاوا',e:'�فس'},{n:'ماكي',e:'🏹'},{n:'باندا',e:'🐼'},{n:'يوتا',e:'💜'},
+    {n:'هاياكاوا',e:'🔫'},{n:'ماكي',e:'🏹'},{n:'باندا',e:'🐼'},{n:'يوتا',e:'💜'},
     {n:'نانامي',e:'👔'},{n:'إينومايكي',e:'🎵'},{n:'يوريتشي',e:'☀️'},{n:'كوكوشيبو',e:'🌑'},
     {n:'رينغوكو',e:'🔥'},{n:'دوما',e:'❄️'},{n:'سانيمي',e:'💨'},{n:'غييو',e:'🐍'},
     {n:'مودا',e:'⚡'},{n:'هيموجيما',e:'🌊'},{n:'تشيهيرو',e:'🏮'},{n:'سوفي',e:'🌺'},
@@ -441,7 +442,7 @@ function openSupport() {
 function connectWallet() {
   try {
     var tc = new TON_CONNECT_UI.TonConnectUI({
-      manifestUrl: 'https://rec-mining-bot.vercel.app/tonconnect-manifest.json',
+      manifestUrl: 'https://rec-coin.onrender.com/tonconnect-manifest.json',
       buttonRootId: null
     });
     tc.openModal();
