@@ -542,7 +542,78 @@ function getMyMedal(){
 
 // ====== PROFILE ======
 function openSupport(){window.Telegram.WebApp.openTelegramLink('https://t.me/Momokhli');}
-function connectWallet(){window.Telegram.WebApp.openTelegramLink('https://t.me/wallet');}
+
+// ====== TON CONNECT ======
+var tonConnect = null;
+
+function initTonConnect() {
+  try {
+    if (typeof TON_CONNECT_UI === 'undefined') return;
+    tonConnect = new TON_CONNECT_UI.TonConnectUI({
+      manifestUrl: 'https://rec-coin.onrender.com/tonconnect-manifest.json'
+    });
+    // Subscribe to wallet status changes
+    tonConnect.onStatusChange(function(wallet) {
+      updateWalletBtn(wallet);
+    });
+    // Apply current status on load
+    updateWalletBtn(tonConnect.wallet);
+  } catch(e) { console.log('TonConnect error:', e); }
+}
+
+function updateWalletBtn(wallet) {
+  var btn = document.getElementById('walletBtn');
+  if (!btn) return;
+  if (wallet && wallet.account && wallet.account.address) {
+    var addr = wallet.account.address;
+    // Convert raw address to short friendly format
+    var short = addr.slice(0, 6) + '...' + addr.slice(-4);
+    btn.textContent = '💎 ' + short;
+    btn.style.background = '#1a6b1a';
+    btn.style.border = '1px solid #4eff4e';
+    btn.style.color = '#4eff4e';
+    btn.removeAttribute('data-i18n');
+    // Save to storage
+    try { localStorage.setItem('ton_wallet_' + saveKey, addr); } catch(e) {}
+    if (CS) { try { CS.setItem('tonWallet', addr); } catch(e) {} }
+  } else {
+    btn.textContent = t('connectWallet');
+    btn.style.background = '#4B9EFF';
+    btn.style.border = 'none';
+    btn.style.color = 'white';
+    btn.setAttribute('data-i18n', 'connectWallet');
+  }
+}
+
+function connectWallet() {
+  if (!tonConnect) {
+    // TonConnect not loaded yet, try init
+    initTonConnect();
+    setTimeout(function() {
+      if (tonConnect) {
+        if (tonConnect.connected) tonConnect.disconnect();
+        else tonConnect.openModal();
+      } else {
+        // Fallback: open Telegram wallet directly
+        window.Telegram.WebApp.openTelegramLink('https://t.me/wallet');
+      }
+    }, 500);
+    return;
+  }
+  if (tonConnect.connected) {
+    // Show disconnect confirmation
+    window.Telegram.WebApp.showConfirm(
+      currentLang === 'ar' ? 'هل تريد فصل المحفظة؟' :
+      currentLang === 'uk' ? 'Відключити гаманець?' :
+      currentLang === 'zh' ? '断开钱包连接？' : 'Disconnect wallet?',
+      function(confirmed) {
+        if (confirmed) { tonConnect.disconnect(); showToast('🔴 Wallet disconnected'); }
+      }
+    );
+  } else {
+    tonConnect.openModal();
+  }
+}
 
 // ====== INIT ======
 document.addEventListener('DOMContentLoaded',function(){
@@ -558,4 +629,6 @@ document.addEventListener('DOMContentLoaded',function(){
   buildMilestones();
   restoreTasksUI();
   updateUI();
+  // Init TonConnect after a short delay to ensure script is loaded
+  setTimeout(initTonConnect, 800);
 });
