@@ -543,6 +543,55 @@ function getMyMedal(){
 // ====== PROFILE ======
 function openSupport(){window.Telegram.WebApp.openTelegramLink('https://t.me/Momokhli');}
 
+// ====== TON ADDRESS CONVERTER ======
+// Converts raw "0:hexhash" to friendly "UQDu...6PP2" format
+function crc16ton(data) {
+  var crc = 0;
+  for (var i = 0; i < data.length; i++) {
+    crc ^= (data[i] << 8);
+    for (var j = 0; j < 8; j++) {
+      crc = (crc & 0x8000) ? (((crc << 1) ^ 0x1021) & 0xFFFF) : ((crc << 1) & 0xFFFF);
+    }
+  }
+  return crc;
+}
+
+function rawToFriendly(rawAddr) {
+  try {
+    // If already friendly (starts with UQ, EQ, etc.), return as-is
+    if (!rawAddr.includes(':')) return rawAddr;
+    var parts = rawAddr.split(':');
+    if (parts.length !== 2) return rawAddr;
+    var wc = parseInt(parts[0]);
+    var hex = parts[1];
+    if (hex.length !== 64) return rawAddr;
+
+    // Build 36-byte buffer
+    var buf = new Uint8Array(36);
+    buf[0] = 0x51;  // non-bounceable (UQ...)
+    buf[1] = wc < 0 ? 0xFF : (wc & 0xFF);
+    for (var i = 0; i < 32; i++) {
+      buf[2 + i] = parseInt(hex.substr(i * 2, 2), 16);
+    }
+    // CRC16
+    var crc = crc16ton(buf.slice(0, 34));
+    buf[34] = (crc >> 8) & 0xFF;
+    buf[35] = crc & 0xFF;
+
+    // Base64url
+    var bin = '';
+    for (var i = 0; i < 36; i++) bin += String.fromCharCode(buf[i]);
+    return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  } catch(e) { return rawAddr; }
+}
+
+function shortTonAddr(addr) {
+  if (!addr) return '';
+  var friendly = rawToFriendly(addr);
+  // UQDu...6PP2 format (first 4 + ... + last 4)
+  return friendly.length > 10 ? friendly.slice(0, 4) + '...' + friendly.slice(-4) : friendly;
+}
+
 // ====== TON CONNECT ======
 var tonConnect = null;
 
@@ -566,8 +615,8 @@ function updateWalletBtn(wallet) {
   if (!btn) return;
   if (wallet && wallet.account && wallet.account.address) {
     var addr = wallet.account.address;
-    // Convert raw address to short friendly format
-    var short = addr.slice(0, 6) + '...' + addr.slice(-4);
+    // Convert raw hex address to friendly TON format (UQDu...6PP2)
+    var short = shortTonAddr(addr);
     btn.textContent = '💎 ' + short;
     btn.style.background = '#1a6b1a';
     btn.style.border = '1px solid #4eff4e';
