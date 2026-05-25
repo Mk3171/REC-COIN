@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -10,33 +10,156 @@
 </head>
 <body>
 
-<div class="top-bar">
-  <div class="record-counter" style="color:white; border-color:#555;">⚡ <span id="recAmount">0.000000</span> REC</div>
-  <div class="record-counter">🔴 <span id="recordCount">0</span> RECORD</div>
-</div>
+<div class="app-wrapper">
 
-<!-- HOME -->
-<div id="home" class="page active">
-  <div class="home-inner">
-    <button class="camera-btn" onclick="tap()">
-      <img src="logo.jpeg" alt="REC" onerror="this.parentElement.innerHTML='📷'">
-    </button>
-    <div style="font-size:11px; color:#666; margin-top:4px;">اضغط للتعدين</div>
-    <div class="energy-wrap">
-      <div class="energy-header">
-        <span>⚡ الطاقة</span>
-        <span id="energyText">1000 / 1000</span>
-      </div>
-      <div class="energy-bar-bg">
-        <div class="energy-bar-fill" id="energyBar" style="width:100%"></div>
+  <!-- ====== TOP BAR ====== -->
+  <div class="top-bar">
+    <div class="rec-counter">⚡ <span id="recMini">0.000000</span> REC</div>
+    <div class="record-counter">🔴 <span id="recordCount">0</span> RECORD</div>
+  </div>
+
+  <!-- ====== PAGES CONTAINER ====== -->
+  <div class="pages-container">
+
+    <!-- HOME -->
+    <div id="home" class="page active">
+      <div class="home-inner">
+        <div style="text-align:center; margin:10px 0;">
+          <div class="rec-amount" id="recAmount">0.000000</div>
+          <div class="rec-label">REC</div>
+        </div>
+        <button class="camera-btn" onclick="tap()">
+          <img src="logo.jpeg" alt="REC" onerror="this.parentElement.innerHTML='🔴'">
+        </button>
+        <div style="font-size:11px; color:#666; margin-top:4px;">اضغط للتعدين</div>
+        <div class="energy-wrap">
+          <div class="energy-header">
+            <span>⚡ الطاقة</span>
+            <span id="energyText">1000 / 1000</span>
+          </div>
+          <div class="energy-bar-bg">
+            <div class="energy-bar-fill" id="energyBar" style="width:100%"></div>
+          </div>
+        </div>
+        <div style="font-size:11px; color:#666; margin-top:5px;">سرعة التعدين: <span id="miningSpeedShow">0.000001</span> REC/ث</div>
+        <button class="upgrade-btn" onclick="openUpgrade()">UPGRADE</button>
       </div>
     </div>
-    <div style="font-size:11px; color:#666; margin-top:5px;">سرعة التعدين: <span id="miningSpeedShow">0.000001</span> REC/ث</div>
-    <button class="upgrade-btn" onclick="openUpgrade()">UPGRADE</button>
-  </div>
-</div>
 
-<!-- UPGRADE -->
+    <!-- CARDS -->
+    <div id="cards" class="page">
+      <div class="page-title">🃏 البطاقات</div>
+      <div style="display:flex; gap:8px; margin-bottom:15px; overflow-x:auto; padding-bottom:5px;">
+        <button class="cat-btn active" onclick="showCategory(0,this)">🎌 أنمي</button>
+        <button class="cat-btn" onclick="showCategory(1,this)">🚗 سيارات</button>
+        <button class="cat-btn" onclick="showCategory(2,this)">🌙 ملاهي</button>
+        <button class="cat-btn" onclick="showCategory(3,this)">🏰 قصور</button>
+      </div>
+      <div class="card-grid" id="cat-0"></div>
+      <div class="card-grid" id="cat-1" style="display:none"></div>
+      <div class="card-grid" id="cat-2" style="display:none"></div>
+      <div class="card-grid" id="cat-3" style="display:none"></div>
+    </div>
+
+    <!-- TASKS -->
+    <div id="tasks" class="page">
+      <div class="page-title">✅ المهام</div>
+      <div class="info-card">
+        <div style="font-size:15px; margin-bottom:8px;">📱 انضم لجروب تيليغرام</div>
+        <button id="task1JoinBtn" onclick="joinAndWait('telegram','task1JoinBtn','task1Btn')" class="task-join-btn">انضم للجروب ←</button>
+        <button id="task1Btn" onclick="claimTask('telegram','task1Btn','task1JoinBtn')" class="do-btn" disabled>احصل على 10,000 RECORD</button>
+      </div>
+      <div class="info-card">
+        <div style="font-size:15px; margin-bottom:8px;">🐦 تابع على تويتر</div>
+        <button id="task2JoinBtn" onclick="joinAndWait('twitter','task2JoinBtn','task2Btn')" class="task-join-btn">تابع على تويتر ←</button>
+        <button id="task2Btn" onclick="claimTask('twitter','task2Btn','task2JoinBtn')" class="do-btn" disabled>احصل على 10,000 RECORD</button>
+      </div>
+    </div>
+
+    <!-- INVITE -->
+    <div id="invite" class="page">
+      <div class="page-title">👥 الدعوة</div>
+      <div style="text-align:center; padding:10px;">
+        <img src="logo.jpeg" style="width:80px;height:80px;border-radius:50%;margin-bottom:15px;border:2px solid #FF0000;" onerror="this.outerHTML='<div style=font-size:50px;margin-bottom:15px>🔴</div>'">
+        <div style="font-size:22px; font-family:Orbitron,sans-serif; margin-bottom:5px;">REC Mining</div>
+        <p style="color:#aaa; font-size:13px; margin-bottom:25px;">ادعو أصدقاءك واحصل على مكافآت!</p>
+        <button onclick="copyInvite()" style="background:#FF0000;border:none;color:white;padding:14px;border-radius:10px;font-size:15px;cursor:pointer;width:100%;margin-bottom:10px;">📋 انسخ رابط الدعوة</button>
+        <button onclick="shareInvite()" style="background:#1a1a1a;border:1px solid #FF0000;color:white;padding:14px;border-radius:10px;font-size:15px;cursor:pointer;width:100%;">📤 شارك مع أصدقاء</button>
+      </div>
+    </div>
+
+    <!-- RANK -->
+    <div id="rank" class="page">
+      <div class="page-title">🏆 الترتيب</div>
+      <div class="medal-wrap">
+        <button class="medal-arrow" onclick="changeMedal(-1)">◀</button>
+        <div class="medal-box" id="medalBox">
+          <div style="font-size:50px" id="medalEmoji">🥉</div>
+          <div style="font-size:18px; margin:8px 0;" id="medalName">Bronze I</div>
+          <div style="color:#aaa; font-size:12px;" id="medalRange">0 - 1M RECORD</div>
+        </div>
+        <button class="medal-arrow" onclick="changeMedal(1)">▶</button>
+      </div>
+      <div class="info-card" style="text-align:center;">
+        <div style="color:#aaa; font-size:13px; margin-bottom:5px;">مستواك الحالي</div>
+        <div style="font-size:18px;" id="myRankName">Bronze I</div>
+        <div style="font-size:13px; color:#aaa; margin-top:5px;">رصيدك: <span id="myRankRecord">0</span> RECORD</div>
+      </div>
+    </div>
+
+    <!-- PROFILE -->
+    <div id="profile" class="page">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+        <div style="font-size:13px; color:#FF0000; font-family:Orbitron,sans-serif;">🔴 <span id="profileRecordTop">0</span> RECORD</div>
+        <button onclick="toggleLang()" style="background:#1a1a1a;border:1px solid #333;color:white;padding:6px 12px;border-radius:20px;cursor:pointer;font-size:16px;">🌐</button>
+      </div>
+      <div id="langMenu" style="display:none;background:#1a1a1a;border:1px solid #333;border-radius:12px;padding:10px;margin-bottom:15px;">
+        <div class="lang-grid">
+          <button onclick="setLang('ar')" class="lang-btn">🇸🇦 العربية</button>
+          <button onclick="setLang('en')" class="lang-btn">🇬🇧 English</button>
+          <button onclick="setLang('de')" class="lang-btn">🇩🇪 Deutsch</button>
+          <button onclick="setLang('ru')" class="lang-btn">🇷🇺 Русский</button>
+          <button onclick="setLang('uk')" class="lang-btn">🇺🇦 Українська</button>
+          <button onclick="setLang('zh')" class="lang-btn">🇨🇳 中文</button>
+          <button onclick="setLang('fa')" class="lang-btn">🇦🇫 دری</button>
+        </div>
+      </div>
+      <div class="info-card" style="text-align:center; padding:20px; margin-bottom:12px;">
+        <div style="width:65px;height:65px;border-radius:50%;background:#222;border:2px solid #FF0000;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:32px;">👤</div>
+        <div style="font-size:17px;font-weight:bold;" id="profileName">-</div>
+        <div style="font-size:13px;color:#FF0000;margin-top:4px;">RECORD <span id="profileRecord">0</span></div>
+      </div>
+      <div class="info-card" style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="color:#00FF88;font-size:14px;font-weight:bold;">REC <span id="recPoolBalance">0.000000</span></div>
+          <div style="color:#aaa;font-size:11px;">Pool Wallet</div>
+        </div>
+        <div style="font-size:28px;">🏛️</div>
+      </div>
+      <div class="info-card" style="display:flex;justify-content:space-between;align-items:center;">
+        <button onclick="connectWallet()" style="background:#4B9EFF;border:none;color:white;padding:6px 14px;border-radius:20px;cursor:pointer;font-size:13px;" id="walletBtn">ربط المحفظة</button>
+        <div style="color:#aaa;font-size:12px;">ID: <span id="profileId">-</span></div>
+      </div>
+      <div class="info-card" style="text-align:center;cursor:pointer;" onclick="openSupport()">
+        <span style="font-size:14px;">الدعم الفني @Momokhli 💬</span>
+      </div>
+    </div>
+
+  </div><!-- end pages-container -->
+
+  <!-- ====== NAV ====== -->
+  <nav class="nav">
+    <button class="nav-btn active" onclick="showPage('home',this)"><span>🏠</span>Home</button>
+    <button class="nav-btn" onclick="showPage('cards',this)"><span>🃏</span>Cards</button>
+    <button class="nav-btn" onclick="showPage('tasks',this)"><span>✅</span>Tasks</button>
+    <button class="nav-btn" onclick="showPage('invite',this)"><span>👥</span>Invite</button>
+    <button class="nav-btn" onclick="showPage('rank',this)"><span>🏆</span>Rank</button>
+    <button class="nav-btn" onclick="showPage('profile',this)"><span>👤</span>Profile</button>
+  </nav>
+
+</div><!-- end app-wrapper -->
+
+<!-- UPGRADE OVERLAY -->
 <div class="overlay-page" id="upgradePage">
   <button class="back-btn" onclick="document.getElementById('upgradePage').classList.remove('open')">← رجوع</button>
   <h2 style="margin-bottom:20px; color:#FF0000;">الترقيات</h2>
@@ -56,15 +179,12 @@
   </div>
 </div>
 
-<!-- CARDS -->
-<div id="cards" class="page">
-  <div class="page-title">🃏 البطاقات</div>
-  <div style="display:flex; gap:8px; margin-bottom:15px; overflow-x:auto; padding-bottom:5px;">
-    <button class="cat-btn active" onclick="showCategory(0,this)">🎌 أنمي</button>
-    <button class="cat-btn" onclick="showCategory(1,this)">🚗 سيارات</button>
-    <button class="cat-btn" onclick="showCategory(2,this)">🌙 ملاهي</button>
-    <button class="cat-btn" onclick="showCategory(3,this)">🏰 قصور</button>
-  </div>
-  <div class="card-grid" id="cat-0"></div>
-  <div class="card-grid" id="cat-1" style="display:none"></div>
-  <div class="card-grid" id="cat-2"
+<!-- CARD MODAL OVERLAY -->
+<div class="overlay-page" id="cardModal">
+  <button class="back-btn" onclick="document.getElementById('cardModal').classList.remove('open')">← رجوع</button>
+  <div id="cardDetail"></div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>
