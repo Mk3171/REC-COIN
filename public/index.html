@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>REC Mining</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="tonconnect-ui.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -142,7 +143,9 @@
     <!-- PROFILE -->
     <div id="profile" class="page">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;gap:8px;">
-        <button onclick="connectWallet()" id="walletBtn" style="background:#4B9EFF;border:none;color:white;padding:7px 14px;border-radius:20px;cursor:pointer;font-size:13px;" data-i18n="connectWallet">ربط المحفظة</button>
+        <button onclick="connectWallet()" id="walletBtn"
+          style="background:#4B9EFF;border:none;color:white;padding:7px 14px;border-radius:20px;cursor:pointer;font-size:13px;max-width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:background 0.3s;"
+          data-i18n="connectWallet">ربط المحفظة</button>
         <div style="background:#1a1a1a;border:1px solid #333;border-radius:20px;padding:6px 12px;font-size:12px;color:#aaa;white-space:nowrap;">ID: <span id="profileId">-</span></div>
       </div>
       <div class="info-card" style="text-align:center;padding:20px;margin-bottom:12px;">
