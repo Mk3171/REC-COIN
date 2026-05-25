@@ -78,14 +78,38 @@
 
     <!-- INVITE -->
     <div id="invite" class="page">
-      <div class="page-title">👥 الدعوة</div>
-      <div style="text-align:center; padding:10px;">
-        <img src="logo.jpeg" style="width:80px;height:80px;border-radius:50%;margin-bottom:15px;border:2px solid #FF0000;" onerror="this.outerHTML='<div style=font-size:50px;margin-bottom:15px>🔴</div>'">
-        <div style="font-size:22px; font-family:Orbitron,sans-serif; margin-bottom:5px;">REC Mining</div>
-        <p style="color:#aaa; font-size:13px; margin-bottom:25px;">ادعو أصدقاءك واحصل على مكافآت!</p>
-        <button onclick="copyInvite()" style="background:#FF0000;border:none;color:white;padding:14px;border-radius:10px;font-size:15px;cursor:pointer;width:100%;margin-bottom:10px;">📋 انسخ رابط الدعوة</button>
-        <button onclick="shareInvite()" style="background:#1a1a1a;border:1px solid #FF0000;color:white;padding:14px;border-radius:10px;font-size:15px;cursor:pointer;width:100%;">📤 شارك مع أصدقاء</button>
+
+      <!-- Header -->
+      <div style="text-align:center; padding:12px 0 8px;">
+        <img src="logo.jpeg" style="width:65px;height:65px;border-radius:50%;border:2px solid #FF0000;box-shadow:0 0 20px rgba(255,0,0,0.35);" onerror="this.outerHTML='<div style=font-size:40px>🔴</div>'">
+        <div style="font-size:18px;font-family:Orbitron,sans-serif;margin:7px 0 2px;color:white;">REC Mining</div>
+        <div style="color:#aaa;font-size:12px;">ادعو أصدقاءك واربح عملات REC!</div>
       </div>
+
+      <!-- Invited count -->
+      <div style="background:linear-gradient(135deg,#1a0000,#2a0a0a);border:1px solid #FF0000;border-radius:14px;padding:12px;margin:10px 0;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-size:11px;color:#aaa;margin-bottom:3px;">إجمالي المدعوين</div>
+          <div style="font-size:30px;font-family:Orbitron,sans-serif;color:#FF0000;line-height:1;" id="refCountDisplay">0</div>
+        </div>
+        <div style="text-align:center;">
+          <div style="font-size:24px;">👥</div>
+          <div style="font-size:10px;color:#aaa;margin-top:2px;">شخص</div>
+        </div>
+      </div>
+
+      <!-- Milestones label -->
+      <div style="font-size:12px;color:#aaa;margin:10px 0 6px;padding-right:2px;letter-spacing:1px;">🎯 مراحل المكافآت</div>
+
+      <!-- Milestone cards -->
+      <div id="milestonesContainer"></div>
+
+      <!-- Buttons -->
+      <div style="display:flex;gap:10px;margin-top:14px;padding-bottom:10px;">
+        <button onclick="copyInvite()" style="flex:1;background:#FF0000;border:none;color:white;padding:13px;border-radius:12px;font-size:14px;cursor:pointer;font-weight:bold;">📋 نسخ الرابط</button>
+        <button onclick="shareInvite()" style="flex:1;background:#1a1a1a;border:1px solid #FF0000;color:white;padding:13px;border-radius:12px;font-size:14px;cursor:pointer;">📤 مشاركة</button>
+      </div>
+
     </div>
 
     <!-- RANK -->
