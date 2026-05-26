@@ -25,8 +25,8 @@ function validateTelegramInit(initData) {
     var entries = [];
     data.forEach(function(v, k) { entries.push(k + '=' + v); });
     entries.sort();
-    var dataCheckString = entries.join('
-');
+    var nl = String.fromCharCode(10);
+    var dataCheckString = entries.join(nl);
     var secretKey = crypto.createHmac('sha256', 'WebAppData').update(process.env.BOT_TOKEN).digest();
     var expectedHash = crypto.createHmac('sha256', secretKey).update(dataCheckString).digest('hex');
     return hash === expectedHash;
