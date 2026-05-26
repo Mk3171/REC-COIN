@@ -11,6 +11,52 @@ mongoose.connect(process.env.MONGODB_URI)
   .then(() => console.log('MongoDB connected ✅'))
   .catch(err => console.log('MongoDB error:', err));
 
+// ====== SECURITY SYSTEM ======
+const crypto = require('crypto');
+
+// 1. Validate Telegram WebApp initData (prevents fake requests)
+function validateTelegramInit(initData) {
+  try {
+    if (!initData) return false;
+    var data = new URLSearchParams(initData);
+    var hash = data.get('hash');
+    if (!hash) return false;
+    data.delete('hash');
+    var entries = [];
+    data.forEach(function(v, k) { entries.push(k + '=' + v); });
+    entries.sort();
+    var dataCheckString = entries.join('
+');
+    var secretKey = crypto.createHmac('sha256', 'WebAppData').update(process.env.BOT_TOKEN).digest();
+    var expectedHash = crypto.createHmac('sha256', secretKey).update(dataCheckString).digest('hex');
+    return hash === expectedHash;
+  } catch(e) { return false; }
+}
+
+// 2. Rate limiter (max requests per user per minute)
+var rateLimits = {};
+function checkRateLimit(userId, maxPerMin) {
+  var now = Date.now();
+  var key = String(userId);
+  if (!rateLimits[key]) rateLimits[key] = [];
+  rateLimits[key] = rateLimits[key].filter(function(t) { return now - t < 60000; });
+  if (rateLimits[key].length >= maxPerMin) return false;
+  rateLimits[key].push(now);
+  return true;
+}
+setInterval(function() { rateLimits = {}; }, 300000); // clear every 5min
+
+// 3. Anti-cheat: validate balance increases are realistic
+function isRealisticIncrease(oldRec, newRec, oldRecord, newRecord, timeDiff) {
+  // Max possible: all 130 cards at level 100 * 3 seconds
+  var maxRecPerSec = 130 * 0.05;       // 6.5 REC/s max
+  var maxRecordPerSec = 130 * 10000;   // 1,300,000 RECORD/s max
+  var seconds = Math.max(timeDiff / 1000, 1);
+  if (newRec - oldRec > maxRecPerSec * seconds * 1.5) return false;      // 50% tolerance
+  if (newRecord - oldRecord > maxRecordPerSec * seconds * 1.5) return false;
+  return true;
+}
+
 // ====== USER SCHEMA ======
 const UserSchema = new mongoose.Schema({
   telegramId:    { type: Number, unique: true, required: true },
@@ -36,7 +82,11 @@ const UserSchema = new mongoose.Schema({
   dailyWithdrawn:{ type: Number, default: 0 },
   lastWithdrawDate: { type: String, default: '' },
   lastSeen:      { type: Date, default: Date.now },
-  createdAt:     { type: Date, default: Date.now }
+  createdAt:     { type: Date, default: Date.now },
+  banned:        { type: Boolean, default: false },
+  banReason:     { type: String, default: '' },
+  lastSaveTime:  { type: Number, default: 0 },
+  suspiciousScore: { type: Number, default: 0 }
 });
 
 const User = mongoose.model('User', UserSchema);
@@ -472,13 +522,99 @@ app.get('/api/user/:telegramId', async (req, res) => {
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-// ====== API: SAVE USER ======
+// ====== API: SAVE USER (with security) ======
 app.post('/api/user/save', async (req, res) => {
   try {
-    const { telegramId, ...data } = req.body;
+    const { telegramId, initData, ...data } = req.body;
     if (!telegramId) return res.status(400).json({ error: 'No telegramId' });
-    const updated = await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, { ...data, lastSeen: new Date() }, { new: true, upsert: true });
+
+    // 1. Rate limit: max 20 saves per minute per user
+    if (!checkRateLimit(telegramId, 20)) {
+      return res.status(429).json({ error: 'rate_limit' });
+    }
+
+    // 2. Validate Telegram signature (skip in dev)
+    if (process.env.NODE_ENV !== 'development' && initData) {
+      if (!validateTelegramInit(initData)) {
+        console.log('Invalid initData from:', telegramId);
+        return res.status(403).json({ error: 'invalid_signature' });
+      }
+    }
+
+    // 3. Check if banned
+    const existingUser = await User.findOne({ telegramId: parseInt(telegramId) });
+    if (existingUser && existingUser.banned) {
+      return res.status(403).json({ error: 'banned', reason: existingUser.banReason });
+    }
+
+    // 4. Anti-cheat: validate balance increases
+    if (existingUser && existingUser.lastSaveTime > 0) {
+      var timeDiff = Date.now() - existingUser.lastSaveTime;
+      if (data.rec !== undefined && data.record !== undefined) {
+        if (!isRealisticIncrease(existingUser.rec, data.rec, existingUser.record, data.record, timeDiff)) {
+          // Suspicious - increment score
+          var newScore = (existingUser.suspiciousScore || 0) + 1;
+          await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, {
+            suspiciousScore: newScore,
+            ...(newScore >= 5 ? { banned: true, banReason: 'cheat_detected' } : {})
+          });
+          if (newScore >= 5) {
+            console.log('AUTO-BANNED (cheat):', telegramId);
+            return res.status(403).json({ error: 'banned', reason: 'cheat_detected' });
+          }
+          // Reject the suspicious save
+          return res.status(400).json({ error: 'invalid_balance' });
+        }
+      }
+    }
+
+    const updated = await User.findOneAndUpdate(
+      { telegramId: parseInt(telegramId) },
+      { ...data, lastSeen: new Date(), lastSaveTime: Date.now() },
+      { new: true, upsert: true }
+    );
     res.json({ success: true, data: updated });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// ====== BOT DETECTION (runs every hour) ======
+async function detectAndBanBots() {
+  try {
+    var oneDayAgo = new Date(Date.now() - 86400000);
+    var suspicious = await User.find({
+      banned: false,
+      createdAt: { $lt: oneDayAgo },
+      $or: [
+        { record: 0, rec: 0 },               // joined 24h+ ago, zero activity
+        { suspiciousScore: { $gte: 3 } }      // multiple suspicious saves
+      ]
+    });
+
+    for (var user of suspicious) {
+      // Extra check: if no username and no activity after 48h
+      var twoDaysAgo = new Date(Date.now() - 172800000);
+      if (!user.username && user.createdAt < twoDaysAgo && user.record === 0) {
+        await User.findOneAndUpdate(
+          { telegramId: user.telegramId },
+          { banned: true, banReason: 'bot_detected_no_activity' }
+        );
+        console.log('AUTO-BANNED (bot):', user.telegramId);
+      }
+    }
+  } catch(e) { console.log('Bot detection error:', e); }
+}
+setInterval(detectAndBanBots, 3600000); // every hour
+
+// ====== API: ADMIN - BAN/UNBAN USER ======
+app.post('/api/admin/ban', async (req, res) => {
+  try {
+    const { telegramId, action, reason, adminId } = req.body;
+    if (String(adminId) !== '6995765586') return res.status(403).json({ error: 'Not admin' });
+    var update = action === 'ban'
+      ? { banned: true, banReason: reason || 'manual_ban' }
+      : { banned: false, banReason: '' };
+    await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, update);
+    res.json({ success: true, action, telegramId });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
