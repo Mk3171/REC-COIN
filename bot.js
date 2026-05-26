@@ -280,6 +280,31 @@ bot.on('message', async (msg) => {
   }
 });
 
+// ====== API: CREATE INVOICE LINK (for in-app payment) ======
+app.post('/api/create-invoice', async (req, res) => {
+  const { product } = req.body;
+  const products = {
+    energy:      { title: '⚡ شحن طاقة فوري',    description: 'يرجع طاقتك كاملة فوراً',              payload: 'energy',      amount: 15  },
+    record_500k: { title: '💰 500,000 RECORD',     description: '500,000 RECORD تضاف لرصيدك فوراً',   payload: 'record_500k', amount: 50  },
+    record_3m:   { title: '💰 3,000,000 RECORD',   description: '3,000,000 RECORD تضاف لرصيدك فوراً', payload: 'record_3m',   amount: 200 },
+    skip_timer:  { title: '🚀 تخطي وقت الانتظار', description: 'أكمل ترقية البطاقة فوراً',            payload: 'skip_timer',  amount: 100 }
+  };
+  const p = products[product];
+  if (!p) return res.status(400).json({ error: 'Invalid product' });
+  try {
+    const link = await bot.createInvoiceLink(
+      p.title, p.description, p.payload,
+      '',     // providerToken empty for Stars
+      'XTR',  // Telegram Stars
+      [{ label: p.title, amount: p.amount }]
+    );
+    res.json({ link });
+  } catch(e) {
+    console.log('createInvoiceLink error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // ====== API: LOAD USER DATA ======
 app.get('/api/user/:telegramId', async (req, res) => {
   try {
