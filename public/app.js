@@ -238,6 +238,8 @@ function updateTimerDisplays(){
 function updateUI(){
   var s=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
   s('recordCount',Math.floor(record).toLocaleString());
+  s('recordCountHome',Math.floor(record).toLocaleString());
+  s('recCountHome',rec.toFixed(6));
   s('recMini',rec.toFixed(6));
   s('energyText',Math.floor(energy)+' / '+maxEnergy);
   s('profileRecord',Math.floor(record).toLocaleString());
@@ -638,6 +640,124 @@ function checkServerRewards() {
 
 try { window.Telegram.WebApp.onEvent('activated', checkServerRewards); } catch(e) {}
 
+// ====== WITHDRAWAL ======
+var WITHDRAW_FEE = 70;
+var MIN_WITHDRAW = 500;
+var DAILY_LIMIT  = 10000;
+
+function openWithdraw() {
+  if (!tgUser) { showToast('❌ يجب فتح البوت من تيليغرام'); return; }
+  var walletEl = document.getElementById('walletBtn');
+  var walletAddr = walletEl ? walletEl.getAttribute('data-raw') : '';
+  if (!walletAddr) {
+    showToast('❌ ربط محفظة TON أولاً!');
+    document.getElementById('cardModal').classList.remove('open');
+    return;
+  }
+
+  var todayKey = 'wd_' + new Date().toISOString().split('T')[0];
+  var dailyUsed = 0;
+  try { dailyUsed = parseInt(localStorage.getItem(todayKey) || '0'); } catch(e){}
+  var remaining = DAILY_LIMIT - dailyUsed;
+
+  document.getElementById('cardDetail').innerHTML =
+    '<div style="text-align:center;margin-bottom:20px;">' +
+      '<div style="font-size:40px;">🏛️</div>' +
+      '<div style="font-size:18px;font-weight:bold;margin:8px 0;">سحب REC</div>' +
+      '<div style="color:#aaa;font-size:12px;">سحب عملة REC الحقيقية لمحفظتك</div>' +
+    '</div>' +
+    '<div class="info-card" style="margin-bottom:8px;">' +
+      '<div style="display:flex;justify-content:space-between;margin-bottom:6px;">' +
+        '<span style="color:#aaa;font-size:12px;">رصيدك المتاح</span>' +
+        '<span style="color:#00FF88;font-weight:bold;">' + rec.toFixed(4) + ' REC</span>' +
+      '</div>' +
+      '<div style="display:flex;justify-content:space-between;margin-bottom:6px;">' +
+        '<span style="color:#aaa;font-size:12px;">الحد الأدنى</span>' +
+        '<span>' + MIN_WITHDRAW + ' REC</span>' +
+      '</div>' +
+      '<div style="display:flex;justify-content:space-between;margin-bottom:6px;">' +
+        '<span style="color:#aaa;font-size:12px;">Fee</span>' +
+        '<span style="color:#FFD700;">' + WITHDRAW_FEE + ' REC</span>' +
+      '</div>' +
+      '<div style="display:flex;justify-content:space-between;">' +
+        '<span style="color:#aaa;font-size:12px;">الحد اليومي المتبقي</span>' +
+        '<span>' + remaining + ' / ' + DAILY_LIMIT + ' REC</span>' +
+      '</div>' +
+    '</div>' +
+    '<div class="info-card" style="margin-bottom:10px;">' +
+      '<div style="color:#aaa;font-size:11px;margin-bottom:6px;">الكمية المراد سحبها</div>' +
+      '<input id="withdrawAmount" type="number" min="' + MIN_WITHDRAW + '" max="' + Math.min(rec, remaining) + '" ' +
+        'value="' + Math.min(Math.floor(rec), remaining, DAILY_LIMIT) + '" ' +
+        'style="width:100%;background:#0a0a0a;border:1px solid #333;color:white;padding:10px;border-radius:8px;font-size:16px;" ' +
+        'oninput="updateWithdrawPreview()">' +
+      '<div id="withdrawPreview" style="margin-top:8px;color:#00FF88;font-size:13px;text-align:center;"></div>' +
+    '</div>' +
+    '<div style="color:#aaa;font-size:11px;text-align:center;margin-bottom:10px;">📬 ' + walletAddr.slice(0,6) + '...' + walletAddr.slice(-6) + '</div>' +
+    '<button class="do-btn" onclick="confirmWithdraw()" style="margin-top:0;">🏛️ سحب REC الآن</button>';
+
+  document.getElementById('cardModal').classList.add('open');
+  updateWithdrawPreview();
+}
+
+function updateWithdrawPreview() {
+  var input = document.getElementById('withdrawAmount');
+  var preview = document.getElementById('withdrawPreview');
+  if (!input || !preview) return;
+  var amt = parseFloat(input.value) || 0;
+  if (amt < MIN_WITHDRAW) {
+    preview.style.color = '#FF4444';
+    preview.textContent = 'الحد الأدنى ' + MIN_WITHDRAW + ' REC';
+  } else {
+    var net = amt - WITHDRAW_FEE;
+    preview.style.color = '#00FF88';
+    preview.textContent = 'ستصلك: ' + net.toFixed(4) + ' REC (بعد خصم Fee ' + WITHDRAW_FEE + ' REC)';
+  }
+}
+
+function confirmWithdraw() {
+  var input = document.getElementById('withdrawAmount');
+  var amount = parseFloat(input ? input.value : 0);
+  if (isNaN(amount) || amount < MIN_WITHDRAW) { showToast('❌ الحد الأدنى ' + MIN_WITHDRAW + ' REC'); return; }
+  if (amount > rec) { showToast('❌ رصيدك غير كافٍ'); return; }
+
+  var btn = document.querySelector('#cardDetail .do-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ جاري الإرسال...'; }
+
+  fetch('/api/withdraw', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ telegramId: tgUser.id, amount: amount })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.success) {
+      rec -= amount;
+      // Track daily limit
+      var todayKey = 'wd_' + new Date().toISOString().split('T')[0];
+      try {
+        var used = parseInt(localStorage.getItem(todayKey) || '0');
+        localStorage.setItem(todayKey, used + amount);
+      } catch(e){}
+      saveData(true); updateUI();
+      document.getElementById('cardModal').classList.remove('open');
+      showToast('✅ تم إرسال ' + data.netAmount + ' REC لمحفظتك!');
+    } else {
+      if (btn) { btn.disabled = false; btn.textContent = '🏛️ سحب REC الآن'; }
+      var msgs = {
+        'no_wallet': '❌ ربط محفظة TON أولاً!',
+        'below_minimum': '❌ الحد الأدنى ' + MIN_WITHDRAW + ' REC',
+        'insufficient_balance': '❌ رصيدك غير كافٍ',
+        'daily_limit': '❌ وصلت الحد اليومي. تبقى: ' + (data.remaining||0) + ' REC'
+      };
+      showToast(msgs[data.error] || '❌ فشل السحب: ' + (data.error||''));
+    }
+  })
+  .catch(function() {
+    if (btn) { btn.disabled = false; btn.textContent = '🏛️ سحب REC الآن'; }
+    showToast('❌ خطأ في الاتصال');
+  });
+}
+
 // ====== RANK ======
 var medals=[
   {name:'Bronze I',emoji:'🥉',color:'#CD7F32',range:'0 - 1M',min:0},
@@ -747,6 +867,7 @@ function updateWalletBtn(wallet) {
     btn.style.border = '1px solid #4eff4e';
     btn.style.color = '#4eff4e';
     btn.removeAttribute('data-i18n');
+    btn.setAttribute('data-raw', rawToFriendly(addr)); // save for withdrawal
     // Save to storage
     try { localStorage.setItem('ton_wallet_' + saveKey, addr); } catch(e) {}
     if (CS) { try { CS.setItem('tonWallet', addr); } catch(e) {} }
