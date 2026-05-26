@@ -287,7 +287,7 @@ function upgradeEnergy(){
   var cost=getEnergyCost(energyLevelVal);
   if(record<cost||energyLevelVal>=100)return;
   record-=cost;energyLevelVal++;maxEnergy=1000+energyLevelVal*500;
-  saveData();updateUpgradeUI();updateUI();
+  saveData(true);updateUpgradeUI();updateUI();
 }
 function updateUpgradeUI(){
   var s=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
