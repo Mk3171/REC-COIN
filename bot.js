@@ -77,6 +77,32 @@ bot.onText(/\/start(.*)/, async (msg, match) => {
   const param = match[1] ? match[1].trim() : '';
   const refId = param.startsWith('ref') ? param.replace('ref', '') : '';
 
+  // Handle buy_ from Stars shop
+  if (param.startsWith('buy_')) {
+    const buyKey = param.replace('buy_', '');
+    const products = {
+      energy:       { title: '⚡ شحن طاقة فوري',      description: 'يرجع طاقتك كاملة فوراً',              payload: 'energy',       amount: 15  },
+      record_500k:  { title: '💰 500,000 RECORD',       description: '500,000 RECORD تضاف لرصيدك فوراً',   payload: 'record_500k',  amount: 50  },
+      record_3m:    { title: '💰 3,000,000 RECORD',     description: '3,000,000 RECORD تضاف لرصيدك فوراً', payload: 'record_3m',    amount: 200 },
+      skip_timer:   { title: '🚀 تخطي وقت الانتظار',   description: 'أكمل ترقية البطاقة فوراً',            payload: 'skip_timer',   amount: 100 }
+    };
+    const product = products[buyKey];
+    if (product) {
+      try {
+        await bot.sendInvoice(
+          chatId,
+          product.title,
+          product.description,
+          product.payload,
+          '',
+          'XTR',
+          [{ label: product.title, amount: product.amount }]
+        );
+      } catch(e) { console.log('Invoice error:', e.message); }
+      return;
+    }
+  }
+
   // Save/update user in MongoDB
   try {
     const existing = await User.findOne({ telegramId: from.id });
@@ -176,7 +202,8 @@ bot.on('callback_query', async (query) => {
       product.title,
       product.description,
       product.payload,
-      'XTR', // XTR = Telegram Stars currency
+      '',      // providerToken - empty string for Telegram Stars
+      'XTR',   // currency = Telegram Stars
       [{ label: product.title, amount: product.amount }]
     );
   } catch(e) {
