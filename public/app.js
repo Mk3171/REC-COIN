@@ -587,8 +587,28 @@ function openStarsShop() {
 }
 
 function buyWithStars(product) {
-  window.Telegram.WebApp.openTelegramLink('https://t.me/RecMiningGame_bot?start=buy_' + product);
-  showToast('⭐ سيصلك فاتورة الدفع في المحادثة!');
+  showToast('⏳ جاري تحضير الفاتورة...');
+  fetch('/api/create-invoice', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ product: product })
+  })
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (!data.link) { showToast('❌ خطأ في إنشاء الفاتورة'); return; }
+    // Open payment screen DIRECTLY inside the mini app
+    window.Telegram.WebApp.openInvoice(data.link, function(status) {
+      if (status === 'paid') {
+        showToast('✅ تم الدفع بنجاح! جاري تحديث رصيدك...');
+        setTimeout(function() { checkServerRewards(); }, 2500);
+      } else if (status === 'cancelled') {
+        showToast('تم إلغاء الدفع');
+      } else if (status === 'failed') {
+        showToast('❌ فشل الدفع، حاول مرة أخرى');
+      }
+    });
+  })
+  .catch(function() { showToast('❌ خطأ في الاتصال بالسيرفر'); });
 }
 
 function checkServerRewards() {
