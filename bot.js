@@ -55,6 +55,91 @@ const WithdrawSchema = new mongoose.Schema({
 });
 const Withdrawal = mongoose.model('Withdrawal', WithdrawSchema);
 
+// ====== WEEKLY CHALLENGE SCHEMA ======
+const WeeklySchema = new mongoose.Schema({
+  weekId:     { type: String, unique: true }, // e.g. "2026-W22"
+  startDate:  Date,
+  endDate:    Date,
+  distributed:{ type: Boolean, default: false },
+  top100:     { type: Array, default: [] }
+});
+const WeeklyChallenge = mongoose.model('WeeklyChallenge', WeeklySchema);
+
+// ====== WEEKLY DISTRIBUTION ======
+function getWeekId(date) {
+  var d = date || new Date();
+  var onejan = new Date(d.getFullYear(), 0, 1);
+  var week = Math.ceil((((d - onejan) / 86400000) + onejan.getDay() + 1) / 7);
+  return d.getFullYear() + '-W' + String(week).padStart(2, '0');
+}
+
+function getWeekStart() {
+  var now = new Date();
+  var day = now.getDay();
+  var diff = now.getDate() - day + (day === 0 ? -6 : 1);
+  var monday = new Date(now.setDate(diff));
+  monday.setHours(0,0,0,0);
+  return monday;
+}
+
+async function distributeWeeklyRewards() {
+  try {
+    var weekId = getWeekId();
+    var existing = await WeeklyChallenge.findOne({ weekId });
+    if (existing && existing.distributed) return;
+
+    var top100 = await User.find({ rec: { $gt: 0 } })
+      .sort({ record: -1 }).limit(100)
+      .select('telegramId username firstName walletAddress record rec');
+
+    if (top100.length === 0) return;
+
+    // Distribution amounts
+    var rewards = {};
+    if (top100[0]) rewards[top100[0].telegramId] = 250;
+    if (top100[1]) rewards[top100[1].telegramId] = 150;
+    if (top100[2]) rewards[top100[2].telegramId] = 100;
+
+    // Ranks 4-100: 500 REC distributed by inverse weight
+    var pool500 = top100.slice(3);
+    var totalWeight = pool500.reduce(function(sum, _, i) { return sum + (pool500.length - i); }, 0);
+    pool500.forEach(function(user, i) {
+      var weight = pool500.length - i;
+      rewards[user.telegramId] = parseFloat((weight / totalWeight * 500).toFixed(4));
+    });
+
+    // Send rewards
+    for (var telegramId in rewards) {
+      var amount = rewards[telegramId];
+      var user = top100.find(function(u) { return u.telegramId == telegramId; });
+      if (user && user.walletAddress) {
+        await sendJetton(user.walletAddress, amount, 'REC Weekly Reward');
+      }
+      await User.findOneAndUpdate(
+        { telegramId: parseInt(telegramId) },
+        { $inc: { rec: amount } }
+      );
+    }
+
+    // Save to DB
+    await WeeklyChallenge.findOneAndUpdate(
+      { weekId },
+      { weekId, startDate: getWeekStart(), endDate: new Date(), distributed: true, top100: top100.map(function(u,i){ return { rank: i+1, telegramId: u.telegramId, username: u.username || u.firstName, record: u.record, reward: rewards[u.telegramId] || 0 }; }) },
+      { upsert: true }
+    );
+
+    console.log('Weekly rewards distributed ✅ Week:', weekId);
+  } catch(e) { console.log('Weekly distribution error:', e.message); }
+}
+
+// Check every hour if weekly distribution needed
+setInterval(async function() {
+  var now = new Date();
+  if (now.getDay() === 1 && now.getHours() === 0) { // Monday midnight
+    await distributeWeeklyRewards();
+  }
+}, 3600000);
+
 // ====== TON TRANSFER ======
 const REC_CONTRACT = 'EQCNkOinRhMSplM0DzP18Fz-4WV293YMHF6umS9tGsvOGDV9';
 const FEE_WALLET   = 'UQD-FoGlRG5pBxZpkf3H9ZOsNTL5basBbTEZE8zvMgHLB99o';
@@ -244,6 +329,55 @@ bot.on('message', async (msg) => {
       reply_markup: { inline_keyboard: [[{ text: '🚀 افتح البوت', web_app: { url: MINI_APP_URL } }]] }
     });
   } catch(e) { console.log('Payment error:', e); }
+});
+
+// ====== API: LEADERBOARD ======
+app.get('/api/leaderboard/global', async (req, res) => {
+  try {
+    var top100 = await User.find({})
+      .sort({ record: -1 }).limit(100)
+      .select('telegramId username firstName record rec refCount createdAt');
+    res.json({ top100: top100.map(function(u, i) {
+      return { rank: i+1, telegramId: u.telegramId, name: u.username || u.firstName || 'User', record: u.record, rec: u.rec, refCount: u.refCount };
+    })});
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/leaderboard/myrank/:telegramId', async (req, res) => {
+  try {
+    var userId = parseInt(req.params.telegramId);
+    var allUsers = await User.find({}).sort({ record: -1 }).select('telegramId username firstName record rec');
+    var myIndex = allUsers.findIndex(function(u) { return u.telegramId === userId; });
+    var myRank = myIndex + 1;
+    var start = Math.max(0, myIndex - 2);
+    var end = Math.min(allUsers.length, myIndex + 3);
+    var neighbors = allUsers.slice(start, end).map(function(u, i) {
+      return { rank: start + i + 1, telegramId: u.telegramId, name: u.username || u.firstName || 'User', record: u.record, rec: u.rec, isMe: u.telegramId === userId };
+    });
+    res.json({ myRank, total: allUsers.length, neighbors });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/leaderboard/friends/:telegramId', async (req, res) => {
+  try {
+    var userId = req.params.telegramId;
+    var friends = await User.find({ referredBy: userId })
+      .sort({ record: -1 }).limit(100)
+      .select('telegramId username firstName record rec');
+    res.json({ friends: friends.map(function(u, i) {
+      return { rank: i+1, telegramId: u.telegramId, name: u.username || u.firstName || 'User', record: u.record, rec: u.rec };
+    })});
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+app.get('/api/leaderboard/weekly', async (req, res) => {
+  try {
+    var weekId = getWeekId();
+    var wc = await WeeklyChallenge.findOne({ weekId });
+    var daysLeft = 7 - new Date().getDay();
+    if (new Date().getDay() === 0) daysLeft = 0;
+    res.json({ weekId, daysLeft, distributed: wc ? wc.distributed : false, lastWinner: wc ? wc.top100[0] : null });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 // ====== API: CREATE INVOICE ======
