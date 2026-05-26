@@ -557,96 +557,66 @@ function shareInvite(){
 
 // ====== STARS SHOP ======
 function openStarsShop() {
-  var html = '<div style="padding:5px;">' +
-    '<div style="text-align:center;margin-bottom:20px;">' +
-      '<div style="font-size:40px;">⭐</div>' +
-      '<div style="font-size:18px;font-weight:bold;margin:8px 0;">متجر النجوم</div>' +
-      '<div style="color:#aaa;font-size:12px;">ادعم المشروع واحصل على مكافآت فورية!</div>' +
-    '</div>' +
+  var items = [
+    { emoji:'⚡', title:'شحن طاقة فوري', desc:'يرجع طاقتك كاملة فوراً', price:'15', color:'#FFD700', key:'energy' },
+    { emoji:'💰', title:'500,000 RECORD', desc:'تضاف فوراً لرصيدك', price:'50', color:'#FFD700', key:'record_500k' },
+    { emoji:'💰', title:'3,000,000 RECORD', desc:'الأفضل قيمة ⭐', price:'200', color:'#FF0000', key:'record_3m' },
+    { emoji:'🚀', title:'تخطي وقت الانتظار', desc:'أكمل ترقية البطاقة فوراً', price:'100', color:'#00BFFF', key:'skip_timer' }
+  ];
 
-    // Energy
-    '<div onclick="buyWithStars('energy')" style="background:#1a1a1a;border:1px solid #FFD700;border-radius:12px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;">' +
+  var html = '<div style="text-align:center;margin-bottom:20px;">' +
+    '<div style="font-size:40px;">⭐</div>' +
+    '<div style="font-size:18px;font-weight:bold;margin:8px 0;">متجر النجوم</div>' +
+    '<div style="color:#aaa;font-size:12px;">ادعم المشروع واحصل على مكافآت فورية!</div>' +
+    '</div>';
+
+  items.forEach(function(item) {
+    html += '<div style="background:#1a1a1a;border:1px solid ' + item.color + ';border-radius:12px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="buyWithStars(\'' + item.key + '\')"> ' +
       '<div>' +
-        '<div style="font-size:15px;">⚡ شحن طاقة فوري</div>' +
-        '<div style="color:#aaa;font-size:11px;margin-top:3px;">يرجع طاقتك كاملة فوراً</div>' +
+        '<div style="font-size:15px;">' + item.emoji + ' ' + item.title + '</div>' +
+        '<div style="color:#aaa;font-size:11px;margin-top:3px;">' + item.desc + '</div>' +
       '</div>' +
-      '<div style="background:#FFD700;color:#000;padding:6px 14px;border-radius:20px;font-weight:bold;font-size:13px;">15 ⭐</div>' +
-    '</div>' +
+      '<div style="background:' + item.color + ';color:#000;padding:6px 14px;border-radius:20px;font-weight:bold;font-size:13px;">' + item.price + ' ⭐</div>' +
+    '</div>';
+  });
 
-    // Record Small
-    '<div onclick="buyWithStars('record_500k')" style="background:#1a1a1a;border:1px solid #FFD700;border-radius:12px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;">' +
-      '<div>' +
-        '<div style="font-size:15px;">💰 500,000 RECORD</div>' +
-        '<div style="color:#aaa;font-size:11px;margin-top:3px;">تضاف فوراً لرصيدك</div>' +
-      '</div>' +
-      '<div style="background:#FFD700;color:#000;padding:6px 14px;border-radius:20px;font-weight:bold;font-size:13px;">50 ⭐</div>' +
-    '</div>' +
-
-    // Record Big
-    '<div onclick="buyWithStars('record_3m')" style="background:#1a1a1a;border:1px solid #FF0000;border-radius:12px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;">' +
-      '<div>' +
-        '<div style="font-size:15px;">💰 3,000,000 RECORD</div>' +
-        '<div style="color:#FF6600;font-size:11px;margin-top:3px;">⭐ الأفضل قيمة</div>' +
-      '</div>' +
-      '<div style="background:#FF0000;color:#fff;padding:6px 14px;border-radius:20px;font-weight:bold;font-size:13px;">200 ⭐</div>' +
-    '</div>' +
-
-    // Skip timer
-    '<div onclick="buyWithStars('skip_timer')" style="background:#1a1a1a;border:1px solid #00BFFF;border-radius:12px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;">' +
-      '<div>' +
-        '<div style="font-size:15px;">🚀 تخطي وقت الانتظار</div>' +
-        '<div style="color:#aaa;font-size:11px;margin-top:3px;">أكمل ترقية البطاقة فوراً</div>' +
-      '</div>' +
-      '<div style="background:#00BFFF;color:#000;padding:6px 14px;border-radius:20px;font-weight:bold;font-size:13px;">100 ⭐</div>' +
-    '</div>' +
-
-    '<div style="color:#555;font-size:10px;text-align:center;margin-top:10px;">النجوم تشترى من تيليغرام مباشرة ⭐</div>' +
-  '</div>';
+  html += '<div style="color:#555;font-size:10px;text-align:center;margin-top:10px;">النجوم تشترى من تيليغرام مباشرة ⭐</div>';
 
   document.getElementById('cardDetail').innerHTML = html;
   document.getElementById('cardModal').classList.add('open');
 }
 
 function buyWithStars(product) {
-  // Open bot chat to trigger the invoice
   window.Telegram.WebApp.openTelegramLink('https://t.me/RecMiningGame_bot?start=buy_' + product);
   showToast('⭐ سيصلك فاتورة الدفع في المحادثة!');
 }
 
-// Check if server updated rewards after purchase
 function checkServerRewards() {
   if(!tgUser) return;
   loadFromServer(function(serverData) {
     if(!serverData) return;
-    // Check for energy refill
     if(serverData.energyRefill && serverData.energyRefill > (window._lastEnergyRefill||0)) {
       window._lastEnergyRefill = serverData.energyRefill;
       energy = maxEnergy;
       showToast('⚡ تم شحن طاقتك!');
       saveData(); updateUI();
     }
-    // Check if record increased from server
     if(serverData.record > record) {
       record = serverData.record;
       showToast('💰 تمت إضافة RECORD لرصيدك!');
       saveData(); updateUI();
     }
-    // Check if skip timer applied
     if(serverData.cardUpgrades && Object.keys(serverData.cardUpgrades).length === 0 &&
        Object.keys(cardUpgrades).length > 0) {
       cardUpgrades = {};
-      buildCards();
-      calcTotalSpeeds();
+      buildCards(); calcTotalSpeeds();
       showToast('🚀 تم تخطي أوقات الانتظار!');
       saveData(); updateUI();
     }
   });
 }
 
-// Check for rewards every time app becomes visible
-try {
-  window.Telegram.WebApp.onEvent('activated', checkServerRewards);
-} catch(e) {}
+try { window.Telegram.WebApp.onEvent('activated', checkServerRewards); } catch(e) {}
 
 // ====== RANK ======
 var medals=[
