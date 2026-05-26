@@ -36,21 +36,47 @@
     <div id="home" class="page active">
       <div class="home-inner">
 
-        <!-- Globe button -->
-        <div style="width:82vw;max-width:340px;display:flex;justify-content:flex-end;margin-bottom:-8px;">
-          <button onclick="toggleLangMenu()" style="background:rgba(255,255,255,0.05);border:1px solid #333;border-radius:50%;width:36px;height:36px;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;">🌍</button>
+        <!-- Middle: side buttons + circle -->
+        <div class="home-middle">
+
+          <!-- LEFT buttons -->
+          <div class="side-buttons">
+            <button class="side-btn" onclick="showPage('rank',document.querySelectorAll('.nav-btn')[1])">
+              <span>🏆</span><span class="side-btn-label" data-i18n="navRank">Rank</span>
+            </button>
+            <button class="side-btn" style="border-color:#FFD700;" onclick="openStarsShop()">
+              <span>⭐</span><span class="side-btn-label">Shop</span>
+            </button>
+            <button class="side-btn" onclick="showPage('tasks',document.querySelectorAll('.nav-btn')[3])">
+              <span>✅</span><span class="side-btn-label" data-i18n="navTasks">Tasks</span>
+            </button>
+          </div>
+
+          <!-- CENTER circle -->
+          <div class="home-center-col">
+            <button class="camera-btn" onclick="tap()">
+              <img src="logo.jpeg" alt="REC" onerror="this.parentElement.innerHTML='🔴'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
+            </button>
+            <div data-i18n="tapMine" style="font-size:11px;color:#555;letter-spacing:1px;margin-top:5px;">اضغط للتعدين</div>
+          </div>
+
+          <!-- RIGHT buttons -->
+          <div class="side-buttons">
+            <button class="side-btn" onclick="toggleLangMenu()">
+              <span>🌍</span><span class="side-btn-label">Lang</span>
+            </button>
+            <button class="side-btn" style="border-color:#FF0000;" onclick="openUpgrade()">
+              <span>⚡</span><span class="side-btn-label" data-i18n="upgradeBtn">Boost</span>
+            </button>
+            <button class="side-btn" onclick="showPage('invite',document.querySelectorAll('.nav-btn')[2])">
+              <span>👥</span><span class="side-btn-label" data-i18n="navInvite">Invite</span>
+            </button>
+          </div>
+
         </div>
 
-        <!-- Circle fills available space -->
-        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;">
-          <button class="camera-btn" onclick="tap()">
-            <img src="logo.jpeg" alt="REC" onerror="this.parentElement.innerHTML='🔴'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
-          </button>
-          <div data-i18n="tapMine" style="font-size:11px;color:#555;letter-spacing:1px;">اضغط للتعدين</div>
-        </div>
-
-        <!-- Controls bottom -->
-        <div style="display:flex;flex-direction:column;align-items:center;gap:8px;padding-bottom:5px;">
+        <!-- Bottom controls -->
+        <div class="home-bottom">
           <div class="energy-wrap">
             <div class="energy-header">
               <span data-i18n="energyLabel">⚡ الطاقة</span>
@@ -60,7 +86,6 @@
               <div class="energy-bar-fill" id="energyBar" style="width:100%"></div>
             </div>
           </div>
-          <!-- hidden speed trackers -->
           <span id="recordSpeedShow" style="display:none;">0</span>
           <span id="recSpeedShow" style="display:none;">0.00000000</span>
           <button class="upgrade-btn" onclick="openUpgrade()" data-i18n="upgradesTitle">UPGRADE</button>
