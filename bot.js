@@ -618,6 +618,38 @@ app.post('/api/admin/ban', async (req, res) => {
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
+// ====== API: GET USER PHOTO ======
+var photoCache = {};
+app.get('/api/photo/:telegramId', async (req, res) => {
+  try {
+    var userId = req.params.telegramId;
+
+    // Cache photos for 1 hour
+    if (photoCache[userId] && photoCache[userId].time > Date.now() - 86400000) {
+      if (photoCache[userId].url) {
+        return res.redirect(photoCache[userId].url);
+      } else {
+        return res.status(404).json({ error: 'no_photo' });
+      }
+    }
+
+    var photos = await bot.getUserProfilePhotos(userId, { limit: 1 });
+    if (!photos || !photos.photos || photos.photos.length === 0) {
+      photoCache[userId] = { url: null, time: Date.now() };
+      return res.status(404).json({ error: 'no_photo' });
+    }
+
+    var fileId = photos.photos[0][0].file_id;
+    var file = await bot.getFile(fileId);
+    var photoUrl = 'https://api.telegram.org/file/bot' + process.env.BOT_TOKEN + '/' + file.file_path;
+
+    photoCache[userId] = { url: photoUrl, time: Date.now() };
+    res.redirect(photoUrl);
+  } catch(e) {
+    res.status(404).json({ error: 'no_photo' });
+  }
+});
+
 // ====== API: ALL USERS ======
 app.get('/api/users', async (req, res) => {
   try {
