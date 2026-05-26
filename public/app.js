@@ -195,6 +195,7 @@ function showPage(id,btn){
   document.getElementById(id).classList.add('active');
   btn.classList.add('active'); closeLangMenu();
   if(id==='rank') loadLeaderboard(currentTab||'global');
+  if(id==='profile') loadProfilePhoto();
 }
 
 // ====== HOME - TAP ======
@@ -655,6 +656,38 @@ function checkServerRewards() {
 
 try { window.Telegram.WebApp.onEvent('activated', checkServerRewards); } catch(e) {}
 
+// ====== AVATAR HELPER ======
+var avatarCache = {};
+
+function makeImgTag(url, size) {
+  var s = 'width:' + size + 'px;height:' + size + 'px;border-radius:50%;object-fit:cover;flex-shrink:0;';
+  return '<img src="' + url + '" style="' + s + '">';
+}
+
+function makeFallback(name, size) {
+  var initial = (name||'?')[0].toUpperCase();
+  return '<div style="width:' + size + 'px;height:' + size + 'px;border-radius:50%;background:#1a0000;border:2px solid #FF0000;display:flex;align-items:center;justify-content:center;font-size:' + Math.floor(size*0.4) + 'px;font-weight:bold;color:#FF0000;flex-shrink:0;">' + initial + '</div>';
+}
+
+function getAvatar(telegramId, name, size, callback) {
+  size = size || 40;
+  if (avatarCache[telegramId] === 'none') { callback(makeFallback(name, size)); return; }
+  if (avatarCache[telegramId]) { callback(makeImgTag(avatarCache[telegramId], size)); return; }
+  var url = '/api/photo/' + telegramId;
+  var img = new Image();
+  img.onload = function() { avatarCache[telegramId] = url; callback(makeImgTag(url, size)); };
+  img.onerror = function() { avatarCache[telegramId] = 'none'; callback(makeFallback(name, size)); };
+  img.src = url;
+}
+
+function loadProfilePhoto() {
+  if (!tgUser) return;
+  getAvatar(tgUser.id, tgUser.first_name, 80, function(html) {
+    var el = document.getElementById('profileAvatar');
+    if (el) el.outerHTML = html;
+  });
+}
+
 // ====== WITHDRAWAL ======
 var WITHDRAW_FEE = 70;
 var MIN_WITHDRAW = 500;
@@ -832,7 +865,7 @@ function renderGlobal(top100, myRankData, weekly) {
   // My rank card
   var m = getMyMedal();
   html += '<div style="background:#1a0000;border:1px solid #FF0000;border-radius:12px;padding:12px;margin-bottom:12px;display:flex;align-items:center;gap:10px;">' +
-    '<div style="font-size:32px;">👤</div>' +
+    '<div style="width:48px;height:48px;border-radius:50%;background:#2a0000;border:2px solid #FF0000;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:bold;color:#FF0000;flex-shrink:0;">' + (tgUser?tgUser.first_name[0].toUpperCase():'?') + '</div>' +
     '<div style="flex:1;"><div style="font-size:11px;color:#aaa;">' + t('myRankLabel') + '</div>' +
     '<div style="font-size:22px;font-family:Orbitron,sans-serif;color:#FF0000;">#' + myRank + '</div>' +
     '<div style="font-size:11px;color:#00FF88;">🔴 ' + Math.floor(record).toLocaleString() + ' RECORD</div></div>' +
@@ -852,7 +885,7 @@ function renderGlobal(top100, myRankData, weekly) {
     html += '<div style="flex:1;text-align:center;background:#1a1a1a;border:1px solid ' + colors[i] + ';border-radius:12px 12px 0 0;padding:' + (isFirst?'20px':'12px') + ' 6px 10px;' + (isFirst?'margin-bottom:-8px;':'') + 'position:relative;">' +
       (isFirst ? '<div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:20px;">👑</div>' : '') +
       '<div style="font-size:' + (isFirst?'24':'18') + 'px;font-weight:bold;color:' + colors[i] + ';">' + emojis[i] + '</div>' +
-      '<div style="font-size:22px;margin:4px 0;">👤</div>' +
+      '<div style="width:38px;height:38px;border-radius:50%;background:#333;display:inline-flex;align-items:center;justify-content:center;font-size:16px;font-weight:bold;color:white;margin:4px auto;">' + (p.name||'?')[0].toUpperCase() + '</div>' +
       '<div style="font-size:10px;color:#ddd;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (p.name||'User') + '</div>' +
       '<div style="font-size:9px;color:#FF0000;margin-top:2px;">' + Math.floor(p.record).toLocaleString() + '</div></div>';
   });
@@ -876,13 +909,21 @@ function renderGlobal(top100, myRankData, weekly) {
       var isMe = p.isMe;
       html += '<div style="display:flex;align-items:center;gap:8px;background:' + (isMe?'#1a0000':'#161616') + ';border:1px solid ' + (isMe?'#FF0000':'#222') + ';border-radius:10px;padding:8px 10px;margin-bottom:6px;">' +
         '<div style="font-size:12px;color:#555;min-width:26px;text-align:center;">#' + p.rank + '</div>' +
-        '<div style="font-size:18px;">👤</div>' +
+        '<div style="width:32px;height:32px;border-radius:50%;background:' + (isMe?'#3a0000':'#222') + ';display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:bold;color:' + (isMe?'#FF0000':'#aaa') + ';flex-shrink:0;">' + (p.name||'?')[0].toUpperCase() + '</div>' +
         '<div style="flex:1;"><div style="font-size:12px;color:' + (isMe?'#FF0000':'#ddd') + ';">' + (p.name||'User') + (isMe?' ←':'') + '</div></div>' +
         '<div style="font-size:10px;color:#FF0000;">' + Math.floor(p.record).toLocaleString() + '</div></div>';
     });
   }
 
   cont.innerHTML = html;
+
+  // Load real photos async
+  top100.slice(0,10).forEach(function(p) {
+    getAvatar(p.telegramId, p.name, 32, function(avatarHtml) {
+      var els = document.querySelectorAll('[data-uid="' + p.telegramId + '"]');
+      els.forEach(function(el) { el.outerHTML = avatarHtml; });
+    });
+  });
 }
 
 function renderFriends(friends) {
@@ -897,7 +938,7 @@ function renderFriends(friends) {
   friends.forEach(function(p) {
     html += '<div style="display:flex;align-items:center;gap:8px;background:#161616;border:1px solid #222;border-radius:10px;padding:8px 10px;margin-bottom:6px;">' +
       '<div style="font-size:12px;color:#555;min-width:26px;text-align:center;">#' + p.rank + '</div>' +
-      '<div style="font-size:18px;">👤</div>' +
+      '<div style="width:32px;height:32px;border-radius:50%;background:#222;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:bold;color:#aaa;flex-shrink:0;">' + (p.name||'?')[0].toUpperCase() + '</div>' +
       '<div style="flex:1;"><div style="font-size:12px;color:#ddd;">' + (p.name||'User') + '</div>' +
       '<div style="font-size:10px;color:#FF0000;">' + Math.floor(p.record).toLocaleString() + ' RECORD</div></div>' +
       '<div style="font-size:10px;color:#00FF88;">' + (p.rec||0).toFixed(3) + ' REC</div></div>';
@@ -911,7 +952,7 @@ function renderMyLevel() {
   var name = tgUser ? (tgUser.first_name + (tgUser.last_name?' '+tgUser.last_name:'')) : 'You';
   cont.innerHTML =
     '<div style="background:#1a1a1a;border:1px solid #333;border-radius:14px;padding:20px;text-align:center;margin-bottom:12px;">' +
-      '<div style="font-size:50px;margin-bottom:10px;">👤</div>' +
+      '<div style="width:80px;height:80px;border-radius:50%;background:#1a0000;border:3px solid #FF0000;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:bold;color:#FF0000;margin:0 auto 10px;">' + (tgUser&&tgUser.first_name?tgUser.first_name[0].toUpperCase():'?') + '</div>' +
       '<div style="font-size:18px;font-weight:bold;">' + name + '</div>' +
       '<div style="font-size:12px;color:#aaa;margin-top:4px;">ID: ' + (tgUser?tgUser.id:'-') + '</div>' +
     '</div>' +
