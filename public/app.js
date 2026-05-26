@@ -118,14 +118,19 @@ applyData(G);
 
 // CloudStorage loaded in loadAndInit()
 
-function saveData(){
+function saveData(immediate){
   var d=JSON.stringify({record,rec,energy,maxEnergy,tapLevelVal,energyLevelVal,tapPowerVal,
     completedTasks,cardLevels,cardUpgrades,refCount,claimedMilest});
   try{localStorage.setItem(saveKey,d);}catch(e){}
   if(CS){try{CS.setItem('gameData',d);}catch(e){}}
-  // Save to MongoDB server (debounced - max once per 10s)
-  clearTimeout(window._saveTimer);
-  window._saveTimer = setTimeout(function(){ saveToServer(); }, 10000);
+  if(immediate){
+    // Save to server immediately (for upgrades/purchases)
+    saveToServer();
+  } else {
+    // Debounced save for routine updates (mining)
+    clearTimeout(window._saveTimer);
+    window._saveTimer = setTimeout(function(){ saveToServer(); }, 15000);
+  }
 }
 
 function saveToServer(){
@@ -465,7 +470,7 @@ function upgradeCard(ci,idx){
   record-=cost;
   var wait=cardWait(lvl);
   cardUpgrades[key]={endTime:Date.now()+wait*1000,toLevel:lvl+1};
-  saveData(); updateUI(); updateCardGridItem(key);
+  saveData(true); updateUI(); updateCardGridItem(key); // immediate=true: save cost deduction NOW
   document.getElementById('cardModal').classList.remove('none');
   openCard(ci,idx);
   showToast(t('toastUpgradeStart')+' ⏳ '+formatWait(wait));
@@ -735,7 +740,31 @@ function initApp() {
 
 // Load data: Server > CloudStorage > localStorage
 function loadAndInit() {
-  // Try server first (most reliable, survives everything)
+  // If local data exists, use it first (prevents overwrite after upgrade)
+  var hasLocalData = false;
+  try {
+    var lsRaw = localStorage.getItem(saveKey);
+    if(lsRaw) {
+      var lsParsed = JSON.parse(lsRaw);
+      if(lsParsed && lsParsed.record >= 0) hasLocalData = true;
+    }
+  } catch(e) {}
+
+  if(hasLocalData) {
+    // Local data exists - use it, sync server in background only
+    initApp();
+    // Background sync from server to recover if local is empty
+    loadFromServer(function(serverData) {
+      if(serverData && serverData.record > record * 1.5) {
+        // Server has significantly more - might be from another device
+        applyData(serverData);
+        updateUI();
+      }
+    });
+    return;
+  }
+
+  // No local data - load from server
   loadFromServer(function(serverData) {
     if(serverData && (serverData.record > 0 || serverData.rec > 0 ||
        Object.keys(serverData.cardLevels||{}).length > 0)) {
