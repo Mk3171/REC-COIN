@@ -121,6 +121,138 @@ bot.onText(/\/start(.*)/, async (msg, match) => {
   }
 });
 
+// ====== TELEGRAM STARS - SEND INVOICE ======
+bot.onText(/\/buy/, async (msg) => {
+  await bot.sendMessage(msg.chat.id, '⭐ اختر الحزمة:', {
+    reply_markup: {
+      inline_keyboard: [
+        [{ text: '⚡ شحن طاقة - 15 ⭐', callback_data: 'buy_energy' }],
+        [{ text: '💰 500K RECORD - 50 ⭐', callback_data: 'buy_record_small' }],
+        [{ text: '💰 3M RECORD - 200 ⭐', callback_data: 'buy_record_big' }],
+        [{ text: '🚀 تخطي انتظار البطاقة - 100 ⭐', callback_data: 'buy_skip' }]
+      ]
+    }
+  });
+});
+
+// Handle button clicks - send invoice
+bot.on('callback_query', async (query) => {
+  const chatId = query.message.chat.id;
+  const data = query.data;
+
+  const products = {
+    buy_energy: {
+      title: '⚡ شحن طاقة فوري',
+      description: 'يرجع طاقتك كاملة فوراً',
+      payload: 'energy',
+      amount: 15
+    },
+    buy_record_small: {
+      title: '💰 حزمة RECORD صغيرة',
+      description: '500,000 RECORD تضاف لرصيدك',
+      payload: 'record_500k',
+      amount: 50
+    },
+    buy_record_big: {
+      title: '💰 حزمة RECORD كبيرة',
+      description: '3,000,000 RECORD تضاف لرصيدك',
+      payload: 'record_3m',
+      amount: 200
+    },
+    buy_skip: {
+      title: '🚀 تخطي وقت الانتظار',
+      description: 'أكمل ترقية البطاقة فوراً بدون انتظار',
+      payload: 'skip_timer',
+      amount: 100
+    }
+  };
+
+  const product = products[data];
+  if (!product) return;
+
+  try {
+    await bot.sendInvoice(
+      chatId,
+      product.title,
+      product.description,
+      product.payload,
+      'XTR', // XTR = Telegram Stars currency
+      [{ label: product.title, amount: product.amount }]
+    );
+  } catch(e) {
+    console.log('Invoice error:', e.message);
+  }
+
+  await bot.answerCallbackQuery(query.id);
+});
+
+// Pre-checkout - must approve within 10 seconds
+bot.on('pre_checkout_query', async (query) => {
+  try {
+    await bot.answerPreCheckoutQuery(query.id, true);
+  } catch(e) {
+    console.log('Pre-checkout error:', e);
+  }
+});
+
+// Payment successful - give the user their reward
+bot.on('message', async (msg) => {
+  if (!msg.successful_payment) return;
+
+  const chatId = msg.chat.id;
+  const userId = msg.from.id;
+  const payload = msg.successful_payment.invoice_payload;
+  const stars = msg.successful_payment.total_amount;
+
+  try {
+    let update = {};
+    let rewardText = '';
+
+    if (payload === 'energy') {
+      // Mark energy refill - app will detect on next load
+      update = { energyRefill: Date.now() };
+      rewardText = '⚡ تم شحن طاقتك بالكامل!';
+    } else if (payload === 'record_500k') {
+      const user = await User.findOne({ telegramId: userId });
+      const current = user ? user.record : 0;
+      update = { record: current + 500000 };
+      rewardText = '💰 تمت إضافة 500,000 RECORD لرصيدك!';
+    } else if (payload === 'record_3m') {
+      const user = await User.findOne({ telegramId: userId });
+      const current = user ? user.record : 0;
+      update = { record: current + 3000000 };
+      rewardText = '💰 تمت إضافة 3,000,000 RECORD لرصيدك!';
+    } else if (payload === 'skip_timer') {
+      // Clear all upgrade timers
+      update = { cardUpgrades: {} };
+      rewardText = '🚀 تم إلغاء جميع أوقات انتظار الترقية!';
+    }
+
+    await User.findOneAndUpdate(
+      { telegramId: userId },
+      update,
+      { upsert: true }
+    );
+
+    await bot.sendMessage(chatId,
+      `✅ شكراً لدعمك! ${rewardText}
+
+⭐ دفعت: ${stars} نجمة
+
+🔄 افتح البوت لترى تغييراتك!`,
+      {
+        reply_markup: {
+          inline_keyboard: [[
+            { text: '🚀 افتح البوت', web_app: { url: MINI_APP_URL } }
+          ]]
+        }
+      }
+    );
+  } catch(e) {
+    console.log('Payment processing error:', e);
+  }
+});
+
 // ====== API: LOAD USER DATA ======
 app.get('/api/user/:telegramId', async (req, res) => {
   try {
