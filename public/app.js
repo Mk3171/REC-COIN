@@ -30,7 +30,7 @@ try{var sl=localStorage.getItem('lang_'+saveKey);if(sl&&T[sl])currentLang=sl;}ca
 function t(key,params){
   var tr=T[currentLang]||T.ar;
   var s=tr[key]!==undefined?tr[key]:(T.ar[key]||key);
-  if(params)Object.keys(params).forEach(function(k){s=s.replace('{'+k,params[k]);});
+  if(params)Object.keys(params).forEach(function(k){s=s.replace('{'+k+'}',params[k]);});
   return s;
 }
 function applyLang(lang){
