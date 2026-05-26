@@ -36,31 +36,24 @@
     <div id="home" class="page active">
       <div class="home-inner">
 
-        <!-- Middle: side buttons + circle -->
+        <!-- Shop & Lang buttons: fixed under top bar counters -->
+        <div style="position:relative;width:100%;height:70px;flex-shrink:0;">
+          <button class="side-btn" style="border-color:#FFD700;position:absolute;left:10px;top:4px;" onclick="openStarsShop()">
+            <span>⭐</span><span class="side-btn-label">Shop</span>
+          </button>
+          <button class="side-btn" style="position:absolute;right:10px;top:4px;" onclick="toggleLangMenu()">
+            <span>🌍</span><span class="side-btn-label">Lang</span>
+          </button>
+        </div>
+
+        <!-- Circle centered -->
         <div class="home-middle">
-
-            <!-- LEFT: Stars Shop only -->
-          <div class="side-buttons">
-            <button class="side-btn" style="border-color:#FFD700;" onclick="openStarsShop()">
-              <span>⭐</span><span class="side-btn-label">Shop</span>
-            </button>
-          </div>
-
-          <!-- CENTER circle -->
           <div class="home-center-col">
             <button class="camera-btn" onclick="tap()">
               <img src="logo.jpeg" alt="REC" onerror="this.parentElement.innerHTML='🔴'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">
             </button>
             <div data-i18n="tapMine" style="font-size:11px;color:#555;letter-spacing:1px;margin-top:5px;">اضغط للتعدين</div>
           </div>
-
-          <!-- RIGHT: Language only -->
-          <div class="side-buttons">
-            <button class="side-btn" onclick="toggleLangMenu()">
-              <span>🌍</span><span class="side-btn-label">Lang</span>
-            </button>
-          </div>
-
         </div>
 
         <!-- Bottom controls -->
