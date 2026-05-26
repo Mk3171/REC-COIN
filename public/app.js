@@ -136,11 +136,14 @@ function saveData(immediate){
 function saveToServer(){
   if(!tgUser) return;
   try {
+    var initData = '';
+    try { initData = window.Telegram.WebApp.initData || ''; } catch(e){}
     fetch('/api/user/save', {
       method: 'POST',
       headers: {'Content-Type':'application/json'},
       body: JSON.stringify({
         telegramId: tgUser.id,
+        initData: initData,
         username: tgUser.username || '',
         firstName: tgUser.first_name || '',
         record, rec, energy, maxEnergy,
@@ -148,6 +151,17 @@ function saveToServer(){
         completedTasks, cardLevels, cardUpgrades,
         refCount, claimedMilest
       })
+    }).then(function(r){ return r.json(); })
+    .then(function(data){
+      if(data.error === 'banned') {
+        // Show ban message
+        document.body.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#0a0a0a;color:white;text-align:center;padding:20px;">' +
+          '<div style="font-size:60px;margin-bottom:20px;">🚫</div>' +
+          '<div style="font-size:22px;font-weight:bold;color:#FF0000;margin-bottom:10px;">تم حظر حسابك</div>' +
+          '<div style="color:#aaa;font-size:14px;">Account Banned</div>' +
+          '<div style="color:#555;font-size:12px;margin-top:10px;">' + (data.reason||'violation') + '</div>' +
+        '</div>';
+      }
     }).catch(function(){});
   } catch(e){}
 }
