@@ -8,6 +8,10 @@
   <script src="tonconnect-ui.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+<style>
+.lb-tab{flex:1;padding:8px 4px;border-radius:8px;background:#1a1a1a;border:1px solid #333;color:#555;font-size:11px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.lb-tab.active{background:#2a0000;border-color:#FF0000;color:#FF0000;}
+</style>
 </head>
 <body>
 
@@ -131,23 +135,22 @@
 
     </div>
 
-    <!-- RANK -->
-    <div id="rank" class="page">
-      <div class="page-title" data-i18n="rankTitle">🏆 الترتيب</div>
-      <div class="medal-wrap">
-        <button class="medal-arrow" onclick="changeMedal(-1)">◀</button>
-        <div class="medal-box" id="medalBox">
-          <div style="font-size:50px" id="medalEmoji">🥉</div>
-          <div style="font-size:18px;margin:8px 0;" id="medalName">Bronze I</div>
-          <div style="color:#aaa;font-size:12px;" id="medalRange">0 - 1M RECORD</div>
-        </div>
-        <button class="medal-arrow" onclick="changeMedal(1)">▶</button>
+    <!-- RANK / LEADERBOARD -->
+    <div id="rank" class="page" onappear="loadLeaderboard('global')">
+      <div class="page-title" data-i18n="rankTitle">🏆 المتصدرون</div>
+
+      <!-- Tabs -->
+      <div style="display:flex;gap:6px;margin-bottom:14px;">
+        <button id="tab_global" class="lb-tab active" onclick="switchLeaderTab('global')" data-i18n="tabGlobal">🌍 عالمي</button>
+        <button id="tab_friends" class="lb-tab" onclick="switchLeaderTab('friends')" data-i18n="tabFriends">👥 أصدقاء</button>
+        <button id="tab_mylevel" class="lb-tab" onclick="switchLeaderTab('mylevel')" data-i18n="tabMyLevel">📊 مستواي</button>
       </div>
-      <div class="info-card" style="text-align:center;">
-        <div data-i18n="yourLevel" style="color:#aaa;font-size:13px;margin-bottom:5px;">مستواك الحالي</div>
-        <div style="font-size:18px;" id="myRankName">Bronze I</div>
-        <div style="font-size:13px;color:#aaa;margin-top:5px;"><span data-i18n="yourBalance">رصيدك:</span> <span id="myRankRecord">0</span> RECORD</div>
+
+      <!-- Content -->
+      <div id="lbContent">
+        <div style="text-align:center;padding:30px;color:#555;" data-i18n="loadingLeader">⏳ جاري التحميل...</div>
       </div>
+
     </div>
 
     <!-- PROFILE -->
