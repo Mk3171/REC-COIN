@@ -477,6 +477,8 @@ var TWEET_URLS = [
 function renderTwitterTasks(){
   renderChannelTask('blocksChannelTask','join_blocks','⛏️ REC Blocks Channel','https://t.me/REC_Blocks',5);
   renderChannelTask('chatGroupTask','join_chat','💬 REC Mining Chat','https://t.me/REC_Mining_Chat',5);
+  renderChannelTask('telegramFollowTask','telegram','📱 Join Telegram Group','https://t.me/Momokh1',5);
+  renderChannelTask('twitterFollowTask','twitter','🐦 Follow on Twitter','https://x.com/mohamma33122570',5);
   renderTweetGroup('likeTasks','like','❤️ Like','like',5);
   renderTweetGroup('retweetTasks','rt','🔁 Retweet','retweet',5);
 }
@@ -516,9 +518,14 @@ function channelTaskOpen(taskId, url, openBtnId, claimBtnId){
 function channelTaskClaim(taskId, claimBtnId, recReward){
   if(completedTasks.indexOf(taskId)!==-1){ showToast('✅ Already claimed!'); return; }
   completedTasks.push(taskId);
-  rec += recReward;
+  if(recReward >= 1000) {
+    record += recReward;
+    showToast('✅ +'+formatCost(recReward)+' RECORD earned!');
+  } else {
+    rec += recReward;
+    showToast('✅ +'+recReward+' REC earned!');
+  }
   saveData(true); updateUI();
-  showToast('✅ +'+recReward+' REC earned!');
   renderTwitterTasks();
 }
 
