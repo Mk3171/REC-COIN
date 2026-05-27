@@ -169,6 +169,12 @@ function saveToServer(){
     }).then(function(r){ return r.json(); })
     .then(function(data){
       if(data.error === 'banned') {
+        // Auto-unban if owner/admin
+        if(tgUser && String(tgUser.id) === '6995765586'){
+          fetch('/api/admin/self-unban',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({telegramId:tgUser.id})})
+          .then(function(){ setTimeout(function(){ window.location.reload(); },1500); });
+          return;
+        }
         // Show ban message
         document.body.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#0a0a0a;color:white;text-align:center;padding:20px;">' +
           '<div style="font-size:60px;margin-bottom:20px;">🚫</div>' +
