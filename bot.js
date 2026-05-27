@@ -86,7 +86,13 @@ const UserSchema = new mongoose.Schema({
   banned:        { type: Boolean, default: false },
   banReason:     { type: String, default: '' },
   lastSaveTime:  { type: Number, default: 0 },
-  suspiciousScore: { type: Number, default: 0 }
+  suspiciousScore: { type: Number, default: 0 },
+  // New fields for daily/task persistence
+  dailyLogin:      { type: Object, default: { day: 0, lastDate: '' } },
+  mysteryLastDate: { type: String, default: '' },
+  dailyTasksData:  { type: Object, default: {} },
+  cardTasksClaimed:{ type: [String], default: [] },
+  totalTaps:       { type: Number, default: 0 }
 });
 
 const User = mongoose.model('User', UserSchema);
@@ -384,10 +390,10 @@ bot.on('message', async (msg) => {
 // ====== API: LEADERBOARD ======
 app.get('/api/leaderboard/global', async (req, res) => {
   try {
-    var top100 = await User.find({})
-      .sort({ record: -1 }).limit(100)
+    var allUsers = await User.find({ banned: false, $or: [{ record: { $gt: 0 } }, { rec: { $gt: 0 } }] })
+      .sort({ record: -1 }).limit(500)
       .select('telegramId username firstName record rec refCount createdAt');
-    res.json({ top100: top100.map(function(u, i) {
+    res.json({ top100: allUsers.map(function(u, i) {
       return { rank: i+1, telegramId: u.telegramId, name: u.username || u.firstName || 'User', record: u.record, rec: u.rec, refCount: u.refCount };
     })});
   } catch(e) { res.status(500).json({ error: e.message }); }
