@@ -418,9 +418,24 @@ function showCardInfo(ci, idx) {
   var recSpd = cardRECSpeed(lvl);
   var name = getCardName(card);
 
+  function closePopup(e) {
+    if(e){ e.stopPropagation(); e.preventDefault(); }
+    if(overlay.parentElement) overlay.remove();
+    if(popup.parentElement) popup.remove();
+  }
+
+  // Dark overlay
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9998;';
+  overlay.addEventListener('click', closePopup);
+  overlay.addEventListener('touchend', closePopup);
+
   // Show info popup
   var popup = document.createElement('div');
   popup.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(5,5,20,0.97);border:1px solid rgba(255,255,255,0.15);border-radius:18px;padding:20px;width:75vw;max-width:280px;z-index:9999;text-align:center;backdrop-filter:blur(15px);box-shadow:0 0 40px rgba(0,0,0,0.8);';
+  popup.addEventListener('click', function(e){ e.stopPropagation(); });
+  popup.addEventListener('touchend', function(e){ e.stopPropagation(); });
+
   popup.innerHTML =
     '<div style="font-size:36px;margin-bottom:8px;">'+card.e+'</div>'+
     '<div style="font-size:16px;font-weight:bold;color:white;margin-bottom:12px;">'+name+'</div>'+
@@ -433,14 +448,16 @@ function showCardInfo(ci, idx) {
       '<div style="font-size:18px;color:#00FF88;font-family:Orbitron,sans-serif;">'+recSpd.toFixed(8)+'</div>'+
     '</div>'+
     '<div style="font-size:12px;color:#aaa;margin-bottom:14px;">Level '+lvl+' / 100</div>'+
-    '<button onclick="this.parentElement.remove()" style="background:linear-gradient(135deg,#CC0000,#FF2200);border:none;color:white;padding:8px 24px;border-radius:10px;cursor:pointer;font-size:13px;">OK</button>';
+    '<button id="cardInfoOkBtn" style="background:linear-gradient(135deg,#CC0000,#FF2200);border:none;color:white;padding:8px 24px;border-radius:10px;cursor:pointer;font-size:13px;">OK</button>';
 
-  // Dark overlay
-  var overlay = document.createElement('div');
-  overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9998;';
-  overlay.onclick = function(){ overlay.remove(); popup.remove(); };
   document.body.appendChild(overlay);
   document.body.appendChild(popup);
+
+  var okBtn = document.getElementById('cardInfoOkBtn');
+  if(okBtn){
+    okBtn.addEventListener('click', closePopup);
+    okBtn.addEventListener('touchend', closePopup);
+  }
 }
 
 function directUpgrade(ci, idx, event) {
