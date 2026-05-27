@@ -475,9 +475,54 @@ var TWEET_URLS = [
 ];
 
 function renderTwitterTasks(){
+  renderChannelTask('blocksChannelTask','join_blocks','⛏️ REC Blocks Channel','https://t.me/REC_Blocks',5);
+  renderChannelTask('chatGroupTask','join_chat','💬 REC Mining Chat','https://t.me/REC_Mining_Chat',5);
   renderTweetGroup('likeTasks','like','❤️ Like','like',5);
   renderTweetGroup('retweetTasks','rt','🔁 Retweet','retweet',5);
 }
+
+function renderChannelTask(containerId, taskId, label, url, recReward){
+  var cont = document.getElementById(containerId);
+  if(!cont) return;
+  var done = completedTasks.indexOf(taskId) !== -1;
+  var openId = taskId+'_open';
+  var claimId = taskId+'_claim';
+  cont.innerHTML =
+    '<div style="background:rgba(10,10,20,0.75);border:1px solid '+(done?'rgba(0,200,100,0.3)':'rgba(255,255,255,0.06)')+';border-radius:12px;padding:11px 12px;margin-bottom:7px;display:flex;justify-content:space-between;align-items:center;">'+
+      '<div>'+
+        '<div style="font-size:13px;color:'+(done?'#4eff4e':'#ddd')+'">'+(done?'✅ ':'')+label+'</div>'+
+        '<div style="font-size:11px;color:#00FF88;margin-top:2px;">+'+recReward+' REC</div>'+
+      '</div>'+
+      (done
+        ? '<div style="font-size:11px;color:#4eff4e;padding:6px 10px;">Done ✅</div>'
+        : '<div style="display:flex;gap:5px;">'+
+            '<button id="'+openId+'" onclick="channelTaskOpen(\''+taskId+'\',\''+url+'\',\''+openId+'\',\''+claimId+'\')" style="background:#1a1a1a;border:1px solid #333;color:white;padding:7px 10px;border-radius:8px;cursor:pointer;font-size:11px;">Join →</button>'+
+            '<button id="'+claimId+'" onclick="channelTaskClaim(\''+taskId+'\',\''+claimId+'\','+recReward+')" disabled style="background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);color:#00FF88;padding:7px 10px;border-radius:8px;cursor:pointer;font-size:11px;opacity:0.4;">Claim</button>'+
+          '</div>')+
+    '</div>';
+}
+
+function channelTaskOpen(taskId, url, openBtnId, claimBtnId){
+  if(completedTasks.indexOf(taskId)!==-1) return;
+  window.Telegram.WebApp.openTelegramLink(url);
+  var openBtn = document.getElementById(openBtnId);
+  if(openBtn){ openBtn.disabled=true; openBtn.style.opacity='0.4'; }
+  setTimeout(function(){
+    var claimBtn = document.getElementById(claimBtnId);
+    if(claimBtn){ claimBtn.disabled=false; claimBtn.style.opacity='1'; }
+  }, 10000);
+}
+
+function channelTaskClaim(taskId, claimBtnId, recReward){
+  if(completedTasks.indexOf(taskId)!==-1){ showToast('✅ Already claimed!'); return; }
+  completedTasks.push(taskId);
+  rec += recReward;
+  saveData(true); updateUI();
+  showToast('✅ +'+recReward+' REC earned!');
+  renderTwitterTasks();
+}
+
+
 
 function renderTweetGroup(containerId, prefix, label, action, recReward){
   var cont = document.getElementById(containerId);
