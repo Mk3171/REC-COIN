@@ -390,7 +390,7 @@ bot.on('message', async (msg) => {
 // ====== API: LEADERBOARD ======
 app.get('/api/leaderboard/global', async (req, res) => {
   try {
-    var allUsers = await User.find({ banned: false, $or: [{ record: { $gt: 0 } }, { rec: { $gt: 0 } }] })
+    var allUsers = await User.find({ banned: false })
       .sort({ record: -1 }).limit(500)
       .select('telegramId username firstName record rec refCount createdAt');
     res.json({ top100: allUsers.map(function(u, i) {
