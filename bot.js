@@ -559,34 +559,25 @@ app.post('/api/user/save', async (req, res) => {
       }
     }
 
-    // 3. Check if banned
+    // 3. Check if banned (only manual bans by admin)
     const existingUser = await User.findOne({ telegramId: parseInt(telegramId) });
-    if (existingUser && existingUser.banned) {
+    if (existingUser && existingUser.banned && existingUser.banReason === 'manual_ban') {
       return res.status(403).json({ error: 'banned', reason: existingUser.banReason });
     }
+    // Auto-unban anyone wrongly banned by old auto-cheat
+    if (existingUser && existingUser.banned && existingUser.banReason !== 'manual_ban') {
+      await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, { banned: false, banReason: '', suspiciousScore: 0 });
+    }
 
-    // 4. Anti-cheat: validate balance increases
+    // 4. Anti-cheat: log only — NEVER auto-ban players
     if (existingUser && existingUser.lastSaveTime > 0) {
-      // Auto-unban admin if wrongly banned
-      if (String(telegramId) === String(ADMIN_ID) && existingUser.banned) {
-        await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, { banned: false, banReason: '', suspiciousScore: 0 });
-        existingUser.banned = false;
-      }
       var timeDiff = Date.now() - existingUser.lastSaveTime;
       if (data.rec !== undefined && data.record !== undefined) {
         if (!isRealisticIncrease(existingUser.rec, data.rec, existingUser.record, data.record, timeDiff, telegramId)) {
-          // Suspicious - increment score
           var newScore = (existingUser.suspiciousScore || 0) + 1;
-          await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, {
-            suspiciousScore: newScore,
-            ...(newScore >= 5 ? { banned: true, banReason: 'cheat_detected' } : {})
-          });
-          if (newScore >= 5) {
-            console.log('AUTO-BANNED (cheat):', telegramId);
-            return res.status(403).json({ error: 'banned', reason: 'cheat_detected' });
-          }
-          // Reject the suspicious save
-          return res.status(400).json({ error: 'invalid_balance' });
+          await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, { suspiciousScore: newScore });
+          console.log('[AntiCheat-Log] userId:', telegramId, 'suspiciousScore:', newScore, '(no ban)');
+          // Save the data anyway - never block legitimate players
         }
       }
     }
@@ -627,6 +618,19 @@ async function detectAndBanBots() {
   } catch(e) { console.log('Bot detection error:', e); }
 }
 setInterval(detectAndBanBots, 3600000); // every hour
+
+// ====== API: UNBAN ALL WRONGLY BANNED (admin only) ======
+app.post('/api/admin/unban-all', async (req, res) => {
+  try {
+    const { adminId } = req.body;
+    if (String(adminId) !== String(ADMIN_ID)) return res.status(403).json({ error: 'Not admin' });
+    const result = await User.updateMany(
+      { banned: true, banReason: { $ne: 'manual_ban' } },
+      { banned: false, banReason: '', suspiciousScore: 0 }
+    );
+    res.json({ success: true, unbanned: result.modifiedCount });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
 
 // ====== API: SELF UNBAN (admin only) ======
 app.post('/api/admin/self-unban', async (req, res) => {
