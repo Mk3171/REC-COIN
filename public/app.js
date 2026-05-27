@@ -362,55 +362,152 @@ function buildCards(){
   });
 }
 
+// Card background gradients per category
+var catGradients = [
+  // Anime - purple/blue fantasy
+  ['135deg,#1a0a2e,#0d1a3a','135deg,#2a0a3e,#0a1a4a','135deg,#1a1a3e,#0a0a2e'],
+  // Cars - dark racing  
+  ['135deg,#1a0a00,#2a1500','135deg,#0a1500,#001a05','135deg,#00101a,#001525'],
+  // Clubs - neon night
+  ['135deg,#1a0025,#250015','135deg,#001a25,#001525','135deg,#1a1500,#251000'],
+  // Palaces - royal gold
+  ['135deg,#1a1500,#2a2000','135deg,#1a0a00,#2a1000','135deg,#001a1a,#002020']
+];
+
+function getCardBg(ci, idx) {
+  var grads = catGradients[ci] || catGradients[0];
+  return grads[idx % grads.length];
+}
+
 function getCardRarity(lvl) {
-  if(lvl >= 75) return {name:'Legendary', color:'#FF0000', glow:'rgba(255,0,0,0.5)', border:'linear-gradient(135deg,#FF0000,#FF6600)'};
-  if(lvl >= 50) return {name:'Epic',      color:'#CC00FF', glow:'rgba(180,0,255,0.4)', border:'linear-gradient(135deg,#CC00FF,#6600FF)'};
-  if(lvl >= 25) return {name:'Rare',      color:'#0088FF', glow:'rgba(0,136,255,0.4)', border:'linear-gradient(135deg,#0088FF,#00CCFF)'};
-  if(lvl >= 10) return {name:'Uncommon',  color:'#00CC66', glow:'rgba(0,204,102,0.35)', border:'linear-gradient(135deg,#00CC66,#00FF88)'};
-  return              {name:'Common',     color:'#888888', glow:'rgba(100,100,100,0.2)', border:'linear-gradient(135deg,#444,#666)'};
+  if(lvl >= 75) return {color:'#FF4400', glow:'rgba(255,68,0,0.6)',  border:'#FF4400'};
+  if(lvl >= 50) return {color:'#CC00FF', glow:'rgba(180,0,255,0.5)', border:'#CC00FF'};
+  if(lvl >= 25) return {color:'#0099FF', glow:'rgba(0,150,255,0.5)', border:'#0099FF'};
+  if(lvl >= 10) return {color:'#00CC66', glow:'rgba(0,200,100,0.4)', border:'#00CC66'};
+  if(lvl >= 1)  return {color:'#888',    glow:'rgba(100,100,100,0.3)', border:'#555'};
+  return              {color:'#333',    glow:'transparent',            border:'#222'};
 }
 
 function getCardName(card) {
-  if(currentLang==='en' || currentLang==='uk' || currentLang==='zh') {
-    return card.en || card.n;
-  }
+  if(currentLang==='en'||currentLang==='uk'||currentLang==='zh') return card.en||card.n;
   return card.n;
 }
 
-function renderCardGridItem(div,key,card){
-  var lvl=cardLevels[key]||0;
-  var upg=cardUpgrades[key];
-  var now=Date.now();
-  var isUpgrading=upg&&upg.endTime>now;
-  var rem=isUpgrading?Math.max(0,Math.ceil((upg.endTime-now)/1000)):0;
-  var recRec=cardRecordSpeed(lvl);
-  var rarity=getCardRarity(lvl);
-  var cardName=getCardName(card);
+function formatCost(cost) {
+  if(cost >= 1e9) return (cost/1e9).toFixed(1)+'B';
+  if(cost >= 1e6) return (cost/1e6).toFixed(1)+'M';
+  if(cost >= 1e3) return (cost/1e3).toFixed(1)+'K';
+  return Math.floor(cost).toString();
+}
 
-  div.style.cssText='background:linear-gradient(135deg,rgba(8,8,20,0.9),rgba(15,15,30,0.85));border:1px solid '+
-    (lvl>0?'rgba(255,68,68,0.4)':'rgba(255,255,255,0.06)')+
-    ';border-radius:16px;padding:12px 8px;cursor:pointer;text-align:center;position:relative;overflow:hidden;'+
-    (lvl>0?'box-shadow:0 0 15px '+rarity.glow+',0 4px 20px rgba(0,0,0,0.5);':'box-shadow:0 4px 15px rgba(0,0,0,0.3);');
+// Long press detection
+var lpTimer = null;
 
-  div.innerHTML=
-    // Rarity glow background
-    (lvl>0?'<div style="position:absolute;top:0;left:0;right:0;height:2px;background:'+rarity.border+';border-radius:16px 16px 0 0;"></div>':'') +
-    // Emoji
-    '<div style="font-size:38px;margin:6px 0 5px;filter:drop-shadow(0 2px 8px '+rarity.glow+');">'+card.e+'</div>'+
+function startLongPress(ci, idx) {
+  lpTimer = setTimeout(function(){ showCardInfo(ci, idx); }, 600);
+}
+function cancelLongPress() {
+  if(lpTimer) { clearTimeout(lpTimer); lpTimer = null; }
+}
+
+function showCardInfo(ci, idx) {
+  var key = ci+'_'+idx;
+  var card = categories[ci].cards[idx];
+  var lvl = cardLevels[key]||0;
+  var recRec = cardRecordSpeed(lvl);
+  var recSpd = cardRECSpeed(lvl);
+  var name = getCardName(card);
+
+  // Show info popup
+  var popup = document.createElement('div');
+  popup.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(5,5,20,0.97);border:1px solid rgba(255,255,255,0.15);border-radius:18px;padding:20px;width:75vw;max-width:280px;z-index:9999;text-align:center;backdrop-filter:blur(15px);box-shadow:0 0 40px rgba(0,0,0,0.8);';
+  popup.innerHTML =
+    '<div style="font-size:36px;margin-bottom:8px;">'+card.e+'</div>'+
+    '<div style="font-size:16px;font-weight:bold;color:white;margin-bottom:12px;">'+name+'</div>'+
+    '<div style="background:rgba(255,0,0,0.1);border:1px solid rgba(255,0,0,0.2);border-radius:10px;padding:10px;margin-bottom:8px;">'+
+      '<div style="font-size:11px;color:#aaa;margin-bottom:4px;">⚡ RECORD/s</div>'+
+      '<div style="font-size:18px;color:#FF6644;font-family:Orbitron,sans-serif;">'+Math.floor(recRec)+'</div>'+
+    '</div>'+
+    '<div style="background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.2);border-radius:10px;padding:10px;margin-bottom:8px;">'+
+      '<div style="font-size:11px;color:#aaa;margin-bottom:4px;">🟢 REC/s</div>'+
+      '<div style="font-size:18px;color:#00FF88;font-family:Orbitron,sans-serif;">'+recSpd.toFixed(8)+'</div>'+
+    '</div>'+
+    '<div style="font-size:12px;color:#aaa;margin-bottom:14px;">Level '+lvl+' / 100</div>'+
+    '<button onclick="this.parentElement.remove()" style="background:linear-gradient(135deg,#CC0000,#FF2200);border:none;color:white;padding:8px 24px;border-radius:10px;cursor:pointer;font-size:13px;">OK</button>';
+
+  // Dark overlay
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.6);z-index:9998;';
+  overlay.onclick = function(){ overlay.remove(); popup.remove(); };
+  document.body.appendChild(overlay);
+  document.body.appendChild(popup);
+}
+
+function directUpgrade(ci, idx, event) {
+  if(event) event.stopPropagation();
+  cancelLongPress();
+  var key = ci+'_'+idx;
+  var lvl = cardLevels[key]||0;
+  if(lvl >= 100){ showToast(t('cardMaxLevel')); return; }
+  var upg = cardUpgrades[key];
+  if(upg && upg.endTime > Date.now()){ showToast(t('toastAlreadyUpgrading')); return; }
+  var cost = cardCost(lvl);
+  if(record < cost){ showToast('⛔ ' + t('toastNotEnoughRecord')); return; }
+  record -= cost;
+  var wait = cardWait(lvl);
+  cardUpgrades[key] = { endTime: Date.now() + wait*1000, toLevel: lvl+1 };
+  saveData(true); updateUI();
+  updateCardGridItem(key);
+  showToast('⏳ ' + formatWait(wait));
+}
+
+function renderCardGridItem(div, key, card) {
+  var ci = parseInt(key.split('_')[0]);
+  var idx = parseInt(key.split('_')[1]);
+  var lvl = cardLevels[key]||0;
+  var upg = cardUpgrades[key];
+  var now = Date.now();
+  var isUpgrading = upg && upg.endTime > now;
+  var rem = isUpgrading ? Math.max(0, Math.ceil((upg.endTime-now)/1000)) : 0;
+  var recRec = cardRecordSpeed(lvl);
+  var cost = cardCost(lvl);
+  var rarity = getCardRarity(lvl);
+  var cardName = getCardName(card);
+  var bg = getCardBg(ci, idx);
+  var canUpgrade = record >= cost && lvl < 100 && !isUpgrading;
+
+  div.style.cssText = 'background:linear-gradient('+bg+');border:1px solid '+(lvl>0?rarity.border:'#1a1a2a')+';border-radius:16px;overflow:hidden;cursor:pointer;position:relative;'+
+    (lvl>0?'box-shadow:0 0 20px '+rarity.glow+';':'');
+
+  div.ontouchstart = function(e){ startLongPress(ci, idx); };
+  div.ontouchend = function(e){ cancelLongPress(); };
+  div.ontouchmove = function(e){ cancelLongPress(); };
+  div.onmousedown = function(e){ startLongPress(ci, idx); };
+  div.onmouseup = function(e){ cancelLongPress(); };
+  div.onclick = null;
+
+  div.innerHTML =
+    // Image area with emoji
+    '<div style="height:100px;display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;">'+
+      '<div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 60%, '+rarity.glow+', transparent 70%);"></div>'+
+      '<div style="font-size:52px;position:relative;filter:drop-shadow(0 4px 12px '+rarity.glow+');">'+card.e+'</div>'+
+      (lvl>0?'<div style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.7);border:1px solid '+rarity.border+';border-radius:6px;padding:1px 6px;font-size:9px;color:'+rarity.color+';font-family:Orbitron,sans-serif;">'+lvl+'</div>':'')+
+    '</div>'+
     // Name
-    '<div style="font-size:12px;color:#e0e0e0;margin-bottom:4px;font-weight:500;text-shadow:0 1px 4px rgba(0,0,0,0.8);">'+cardName+'</div>'+
-    // Level badge
-    '<div style="display:inline-block;background:'+
-      (lvl>0?'linear-gradient(135deg,rgba(255,0,0,0.3),rgba(180,0,0,0.2))':'rgba(30,30,30,0.8)')+
-      ';border:1px solid '+(lvl>0?'rgba(255,68,68,0.5)':'rgba(80,80,80,0.4)')+
-      ';border-radius:8px;padding:2px 8px;font-size:10px;color:'+(lvl>0?'#FF6644':'#666')+
-      ';font-family:Orbitron,sans-serif;margin-bottom:5px;">LVL '+lvl+(isUpgrading?' ▲':'')+'</div>'+
-    // Status
-    (isUpgrading
-      ? '<div id="timer_'+key+'" style="font-size:9px;color:#FFD700;background:rgba(255,200,0,0.1);border-radius:6px;padding:2px 6px;">⏳ '+formatWait(rem)+'</div>'
-      : lvl>0
-        ? '<div style="font-size:9px;color:#00FF88;background:rgba(0,255,136,0.08);border-radius:6px;padding:2px 6px;">⚡ '+Math.floor(recRec)+' R/s</div>'
-        : '<div style="font-size:9px;color:#444;padding:2px;">⛔</div>');
+    '<div style="padding:0 6px 4px;text-align:center;">'+
+      '<div style="font-size:11px;color:#ddd;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;">'+cardName+'</div>'+
+      // Mining speed or status
+      (lvl > 0
+        ? '<div style="font-size:9px;color:#00FF88;margin-bottom:5px;">⚡ '+Math.floor(recRec)+' R/s</div>'
+        : '<div style="font-size:9px;color:#444;margin-bottom:5px;">⛔ No mining</div>')+
+      // Upgrade button
+      (lvl >= 100
+        ? '<div style="background:rgba(255,215,0,0.15);border:1px solid #FFD700;border-radius:8px;padding:4px;font-size:9px;color:#FFD700;text-align:center;">MAX ✅</div>'
+        : isUpgrading
+          ? '<div id="timer_'+key+'" style="background:rgba(255,200,0,0.15);border:1px solid #FFD700;border-radius:8px;padding:4px;font-size:9px;color:#FFD700;text-align:center;">⏳ '+formatWait(rem)+'</div>'
+          : '<button onclick="directUpgrade('+ci+','+idx+',event)" style="width:100%;background:'+(canUpgrade?'linear-gradient(135deg,#CC0000,#FF2200)':'rgba(30,30,30,0.8)')+';border:1px solid '+(canUpgrade?'#FF4444':'#333')+';border-radius:8px;padding:4px;font-size:9px;color:'+(canUpgrade?'white':'#555')+';cursor:'+(canUpgrade?'pointer':'not-allowed')+';font-weight:bold;">'+
+            (lvl===0?'🔓 ':'⬆️ ')+formatCost(cost)+' REC</button>')+
+    '</div>';
 }
 
 function updateCardGridItem(key){
