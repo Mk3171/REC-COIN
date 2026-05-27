@@ -479,12 +479,12 @@ function renderCardGridItem(div, key, card) {
   div.style.cssText = 'background:linear-gradient('+bg+');border:1px solid '+(lvl>0?rarity.border:'#1a1a2a')+';border-radius:16px;overflow:hidden;cursor:pointer;position:relative;'+
     (lvl>0?'box-shadow:0 0 20px '+rarity.glow+';':'');
 
-  div.ontouchstart = function(e){ startLongPress(ci, idx); };
-  div.ontouchend = function(e){ cancelLongPress(); };
-  div.ontouchmove = function(e){ cancelLongPress(); };
-  div.onmousedown = function(e){ startLongPress(ci, idx); };
-  div.onmouseup = function(e){ cancelLongPress(); };
-  div.onclick = null;
+  div.ontouchstart = null;
+  div.ontouchend = null;
+  div.ontouchmove = null;
+  div.onmousedown = null;
+  div.onmouseup = null;
+  div.onclick = function(e){ showCardInfo(ci, idx); };
 
   div.innerHTML =
     // Image area with emoji
