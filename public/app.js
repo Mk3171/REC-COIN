@@ -115,7 +115,8 @@ function applyData(d){
   record=d.record||0; rec=d.rec||0;
   energy=d.energy!==undefined?d.energy:1000; maxEnergy=d.maxEnergy||1000;
   tapLevelVal=d.tapLevelVal||0; energyLevelVal=d.energyLevelVal||0;
-  tapPowerVal=Math.max(1,tapLevelVal);
+  tapPowerVal=tapLevelVal>0?(tapLevelVal+1)*2:1;
+  maxEnergy=energyLevelVal>0?Math.floor(1000*Math.pow(10000,energyLevelVal/99)):d.maxEnergy||1000;
   completedTasks=d.completedTasks||[]; cardLevels=d.cardLevels||{};
   cardUpgrades=d.cardUpgrades||{}; refCount=d.refCount||0;
   claimedMilest=d.claimedMilest||[];
@@ -162,7 +163,8 @@ function saveToServer(){
         record, rec, energy, maxEnergy,
         tapLevelVal, energyLevelVal, tapPowerVal,
         completedTasks, cardLevels, cardUpgrades,
-        refCount, claimedMilest
+        refCount, claimedMilest,
+        dailyLogin, mysteryLastDate, dailyTasksData, cardTasksClaimed, totalTaps
       })
     }).then(function(r){ return r.json(); })
     .then(function(data){
@@ -184,8 +186,20 @@ function loadFromServer(callback){
   fetch('/api/user/' + tgUser.id)
     .then(function(r){ return r.json(); })
     .then(function(res){
-      if(res.exists && res.data){ callback(res.data); }
-      else { callback(null); }
+      if(res.exists && res.data){
+        // Merge new fields from localStorage (not yet in server schema)
+        try{
+          var ls=JSON.parse(localStorage.getItem(saveKey));
+          if(ls){
+            if(!res.data.dailyLogin && ls.dailyLogin) res.data.dailyLogin=ls.dailyLogin;
+            if(!res.data.mysteryLastDate && ls.mysteryLastDate) res.data.mysteryLastDate=ls.mysteryLastDate;
+            if(!res.data.dailyTasksData && ls.dailyTasksData) res.data.dailyTasksData=ls.dailyTasksData;
+            if(!res.data.cardTasksClaimed && ls.cardTasksClaimed) res.data.cardTasksClaimed=ls.cardTasksClaimed;
+            if(!res.data.totalTaps && ls.totalTaps) res.data.totalTaps=ls.totalTaps;
+          }
+        }catch(e){}
+        callback(res.data);
+      } else { callback(null); }
     })
     .catch(function(){ callback(null); });
 }
@@ -294,8 +308,10 @@ function updateUI(){
 }
 
 // ====== UPGRADE OVERLAY (tap power + energy) ======
-function getTapCost(l){return Math.floor(50*Math.pow(2,Math.floor(l/5)));}
-function getEnergyCost(l){return Math.floor(50*Math.pow(2,Math.floor(l/5)));}
+// Tap upgrade cost: Level 1=30K, Level 100=1B
+function getTapCost(l){return Math.floor(30000*Math.pow(33333,l/99));}
+// Energy upgrade cost: Level 1=30K, Level 100=1B
+function getEnergyCost(l){return Math.floor(30000*Math.pow(33333,l/99));}
 function openUpgrade(){updateUpgradeUI();document.getElementById('upgradePage').classList.add('open');}
 
 // ====== REC → RECORD EXCHANGE ======
@@ -693,14 +709,16 @@ function initNewFeatures(){
 function upgradeTap(){
   var cost=getTapCost(tapLevelVal);
   if(record<cost||tapLevelVal>=100)return;
-  record-=cost;tapLevelVal++;tapPowerVal=Math.max(1,tapLevelVal);
-  saveData();updateUpgradeUI();updateUI();
+  record-=cost; tapLevelVal++;
+  tapPowerVal=(tapLevelVal+1)*2;
+  saveData(true); updateUpgradeUI(); updateUI();
 }
 function upgradeEnergy(){
   var cost=getEnergyCost(energyLevelVal);
   if(record<cost||energyLevelVal>=100)return;
-  record-=cost;energyLevelVal++;maxEnergy=1000+energyLevelVal*500;
-  saveData(true);updateUpgradeUI();updateUI();
+  record-=cost; energyLevelVal++;
+  maxEnergy=Math.floor(1000*Math.pow(10000,energyLevelVal/99));
+  saveData(true); updateUpgradeUI(); updateUI();
 }
 function updateUpgradeUI(){
   var s=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
@@ -715,7 +733,7 @@ function updateUpgradeUI(){
 // ====== CARDS ======
 var categories=[
   {nameKey:'catAnime',cards:[
-    {n:'ناروتو',e:'🍥'},{n:'غوكو',e:'⚡'},{n:'لوفي',e:'🏴‍☠️'},{n:'ساسكي',e:'🌩️'},
+    {n:'ناروتو',en:'Naruto',e:'🍥'},{n:'غوكو',en:'Goku',e:'⚡'},{n:'لوفي',en:'Luffy',e:'🏴‍☠️'},{n:'ساسكي',en:'Sasuke',e:'🌩️'},
     {n:'إيتاشي',en:'Itachi',e:'🌸'},{n:'زورو',en:'Zoro',e:'⚔️'},{n:'توتورو',en:'Totoro',e:'🌿'},{n:'ميكاسا',en:'Mikasa',e:'🗡️'},
     {n:'ليفاي',en:'Levi',e:'💨'},{n:'إيرين',en:'Eren',e:'🔑'},{n:'آرمين',en:'Armin',e:'📚'},{n:'بيكولو',en:'Piccolo',e:'👁️'},
     {n:'فيجيتا',en:'Vegeta',e:'👑'},{n:'ناتسو',en:'Natsu',e:'🔥'},{n:'غراي',en:'Gray',e:'❄️'},{n:'إيرزا',en:'Erza',e:'🛡️'},
@@ -748,13 +766,26 @@ var categories=[
     {n:'Printworks London',e:'🖨️'},{n:'Output Brooklyn',e:'🗽'}
   ]},
   {nameKey:'catPalaces',cards:[
-    {n:'قصر بكنغهام',e:'👑'},{n:'قصر فرساي',e:'🌹'},{n:'قصر الحمراء',e:'🌺'},
-    {n:'قصر نويشفانشتاين',e:'❄️'},{n:'قصر توبكابي',e:'🌙'},{n:'قصر الكرملين',e:'⭐'},
-    {n:'قصر شينبرون',e:'🟡'},{n:'قصر موناكو',e:'🎰'},{n:'قصر مدريد',e:'🔴'},
-    {n:'قصر براغ',e:'🧙'},{n:'قصر دبي',e:'🏙️'},{n:'قصر أبوظبي',e:'🕌'},
-    {n:'قصر الرياض',e:'🌴'},{n:'قصر القاهرة',e:'🏺'},{n:'قصر إسطنبول',e:'🌙'},
-    {n:'قصر طوكيو',e:'🌸'},{n:'قصر كيوتو',e:'⛩️'},{n:'قصر بكين',e:'🐉'},
-    {n:'قصر لندن',e:'👑'},{n:'قصر باريس',e:'🗼'}
+    {n:'قصر بكنغهام',en:'Buckingham Palace',e:'👑'},
+    {n:'قصر فرساي',en:'Palace of Versailles',e:'🌹'},
+    {n:'قصر الحمراء',en:'Alhambra Palace',e:'🌺'},
+    {n:'قصر نويشفانشتاين',en:'Neuschwanstein Castle',e:'❄️'},
+    {n:'قصر توبكابي',en:'Topkapi Palace',e:'🌙'},
+    {n:'قصر الكرملين',en:'Kremlin Palace',e:'⭐'},
+    {n:'قصر شينبرون',en:'Schönbrunn Palace',e:'🟡'},
+    {n:'قصر موناكو',en:'Monaco Palace',e:'🎰'},
+    {n:'قصر مدريد',en:'Royal Palace Madrid',e:'🔴'},
+    {n:'قصر براغ',en:'Prague Castle',e:'🧙'},
+    {n:'قصر دبي',en:'Dubai Palace',e:'🏙️'},
+    {n:'قصر أبوظبي',en:'Abu Dhabi Palace',e:'🕌'},
+    {n:'قصر الرياض',en:'Riyadh Palace',e:'🌴'},
+    {n:'قصر القاهرة',en:'Cairo Palace',e:'🏺'},
+    {n:'قصر إسطنبول',en:'Istanbul Palace',e:'🌙'},
+    {n:'قصر طوكيو',en:'Tokyo Imperial Palace',e:'🌸'},
+    {n:'قصر كيوتو',en:'Kyoto Palace',e:'⛩️'},
+    {n:'قصر بكين',en:'Beijing Palace',e:'🐉'},
+    {n:'قصر لندن',en:'London Palace',e:'👑'},
+    {n:'قصر باريس',en:'Paris Palace',e:'🗼'}
   ]},
   // Season 1 Limited Cards
   {nameKey:'catLimited',cards:[
