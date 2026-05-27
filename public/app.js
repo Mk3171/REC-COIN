@@ -169,10 +169,16 @@ function saveToServer(){
     }).then(function(r){ return r.json(); })
     .then(function(data){
       if(data.error === 'banned') {
-        // Auto-unban if owner/admin
+        // Auto-unban if admin
         if(tgUser && String(tgUser.id) === '6995765586'){
           fetch('/api/admin/self-unban',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({telegramId:tgUser.id})})
-          .then(function(){ setTimeout(function(){ window.location.reload(); },1500); });
+          .then(function(){
+            // Also unban all wrongly banned users
+            fetch('/api/admin/unban-all',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminId:tgUser.id})})
+            .then(function(r){return r.json();})
+            .then(function(d){ console.log('Mass unban:', d.unbanned, 'users'); });
+            setTimeout(function(){ window.location.reload(); },1500);
+          });
           return;
         }
         // Show ban message
