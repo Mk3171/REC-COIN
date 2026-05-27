@@ -303,15 +303,15 @@ function updateUpgradeUI(){
 var categories=[
   {nameKey:'catAnime',cards:[
     {n:'ناروتو',e:'🍥'},{n:'غوكو',e:'⚡'},{n:'لوفي',e:'🏴‍☠️'},{n:'ساسكي',e:'🌩️'},
-    {n:'إيتاشي',e:'🌸'},{n:'زورو',e:'⚔️'},{n:'توتورو',e:'🌿'},{n:'ميكاسا',e:'🗡️'},
-    {n:'ليفاي',e:'💨'},{n:'إيرين',e:'🔑'},{n:'آرمين',e:'📚'},{n:'بيكولو',e:'👁️'},
-    {n:'فيجيتا',e:'👑'},{n:'ناتسو',e:'🔥'},{n:'غراي',e:'❄️'},{n:'إيرزا',e:'🛡️'},
-    {n:'لوسي',e:'⭐'},{n:'كيريتو',e:'🗡️'},{n:'أسونا',e:'🌹'},{n:'غون',e:'🌟'},
-    {n:'كيليوا',e:'⚡'},{n:'كوروكو',e:'🏀'},{n:'زيرو تو',e:'🦋'},{n:'ريم',e:'💙'},
-    {n:'غوجو',e:'🌀'},{n:'يوجي',e:'👊'},{n:'تانجيرو',e:'💧'},{n:'نيزوكو',e:'🎋'},
-    {n:'زينيتسو',e:'⚡'},{n:'إيزوكو',e:'💚'},{n:'كاتسوكي',e:'💥'},{n:'شوتو',e:'🌓'},
-    {n:'إيتشيغو',e:'🌙'},{n:'كازوما',e:'💰'},{n:'أكوا',e:'💧'},{n:'ميغومين',e:'💥'},
-    {n:'يوريتشي',e:'☀️'},{n:'رينغوكو',e:'🔥'},{n:'أكازا',e:'🌺'},{n:'تشيهيرو',e:'🏮'}
+    {n:'إيتاشي',en:'Itachi',e:'🌸'},{n:'زورو',en:'Zoro',e:'⚔️'},{n:'توتورو',en:'Totoro',e:'🌿'},{n:'ميكاسا',en:'Mikasa',e:'🗡️'},
+    {n:'ليفاي',en:'Levi',e:'💨'},{n:'إيرين',en:'Eren',e:'🔑'},{n:'آرمين',en:'Armin',e:'📚'},{n:'بيكولو',en:'Piccolo',e:'👁️'},
+    {n:'فيجيتا',en:'Vegeta',e:'👑'},{n:'ناتسو',en:'Natsu',e:'🔥'},{n:'غراي',en:'Gray',e:'❄️'},{n:'إيرزا',en:'Erza',e:'🛡️'},
+    {n:'لوسي',en:'Lucy',e:'⭐'},{n:'كيريتو',en:'Kirito',e:'🗡️'},{n:'أسونا',en:'Asuna',e:'🌹'},{n:'غون',en:'Gon',e:'🌟'},
+    {n:'كيليوا',en:'Killua',e:'⚡'},{n:'كوروكو',en:'Kuroko',e:'🏀'},{n:'زيرو تو',en:'Zero Two',e:'🦋'},{n:'ريم',en:'Rem',e:'💙'},
+    {n:'غوجو',en:'Gojo',e:'🌀'},{n:'يوجي',en:'Yuji',e:'👊'},{n:'تانجيرو',en:'Tanjiro',e:'💧'},{n:'نيزوكو',en:'Nezuko',e:'🎋'},
+    {n:'زينيتسو',en:'Zenitsu',e:'⚡'},{n:'إيزوكو',en:'Izuku',e:'💚'},{n:'كاتسوكي',en:'Bakugo',e:'💥'},{n:'شوتو',en:'Shoto',e:'🌓'},
+    {n:'إيتشيغو',en:'Ichigo',e:'🌙'},{n:'كازوما',en:'Kazuma',e:'💰'},{n:'أكوا',en:'Aqua',e:'💧'},{n:'ميغومين',en:'Megumin',e:'💥'},
+    {n:'يوريتشي',en:'Yoriichi',e:'☀️'},{n:'رينغوكو',en:'Rengoku',e:'🔥'},{n:'أكازا',en:'Akaza',e:'🌺'},{n:'تشيهيرو',en:'Chihiro',e:'🏮'}
   ]},
   {nameKey:'catCars',cards:[
     {n:'Ferrari SF90',e:'🔴'},{n:'Lamborghini Aventador',e:'🟡'},{n:'Bugatti Chiron',e:'🔵'},
@@ -362,23 +362,55 @@ function buildCards(){
   });
 }
 
+function getCardRarity(lvl) {
+  if(lvl >= 75) return {name:'Legendary', color:'#FF0000', glow:'rgba(255,0,0,0.5)', border:'linear-gradient(135deg,#FF0000,#FF6600)'};
+  if(lvl >= 50) return {name:'Epic',      color:'#CC00FF', glow:'rgba(180,0,255,0.4)', border:'linear-gradient(135deg,#CC00FF,#6600FF)'};
+  if(lvl >= 25) return {name:'Rare',      color:'#0088FF', glow:'rgba(0,136,255,0.4)', border:'linear-gradient(135deg,#0088FF,#00CCFF)'};
+  if(lvl >= 10) return {name:'Uncommon',  color:'#00CC66', glow:'rgba(0,204,102,0.35)', border:'linear-gradient(135deg,#00CC66,#00FF88)'};
+  return              {name:'Common',     color:'#888888', glow:'rgba(100,100,100,0.2)', border:'linear-gradient(135deg,#444,#666)'};
+}
+
+function getCardName(card) {
+  if(currentLang==='en' || currentLang==='uk' || currentLang==='zh') {
+    return card.en || card.n;
+  }
+  return card.n;
+}
+
 function renderCardGridItem(div,key,card){
   var lvl=cardLevels[key]||0;
   var upg=cardUpgrades[key];
   var now=Date.now();
   var isUpgrading=upg&&upg.endTime>now;
   var rem=isUpgrading?Math.max(0,Math.ceil((upg.endTime-now)/1000)):0;
-  var recSpd=cardRECSpeed(lvl);
   var recRec=cardRecordSpeed(lvl);
+  var rarity=getCardRarity(lvl);
+  var cardName=getCardName(card);
+
+  div.style.cssText='background:linear-gradient(135deg,rgba(8,8,20,0.9),rgba(15,15,30,0.85));border:1px solid '+
+    (lvl>0?'rgba(255,68,68,0.4)':'rgba(255,255,255,0.06)')+
+    ';border-radius:16px;padding:12px 8px;cursor:pointer;text-align:center;position:relative;overflow:hidden;'+
+    (lvl>0?'box-shadow:0 0 15px '+rarity.glow+',0 4px 20px rgba(0,0,0,0.5);':'box-shadow:0 4px 15px rgba(0,0,0,0.3);');
+
   div.innerHTML=
-    '<div class="card-emoji">'+card.e+'</div>'+
-    '<div class="card-name">'+card.n+'</div>'+
-    '<div class="card-level">LVL '+lvl+(isUpgrading?' ▲':'')+'</div>'+
+    // Rarity glow background
+    (lvl>0?'<div style="position:absolute;top:0;left:0;right:0;height:2px;background:'+rarity.border+';border-radius:16px 16px 0 0;"></div>':'') +
+    // Emoji
+    '<div style="font-size:38px;margin:6px 0 5px;filter:drop-shadow(0 2px 8px '+rarity.glow+');">'+card.e+'</div>'+
+    // Name
+    '<div style="font-size:12px;color:#e0e0e0;margin-bottom:4px;font-weight:500;text-shadow:0 1px 4px rgba(0,0,0,0.8);">'+cardName+'</div>'+
+    // Level badge
+    '<div style="display:inline-block;background:'+
+      (lvl>0?'linear-gradient(135deg,rgba(255,0,0,0.3),rgba(180,0,0,0.2))':'rgba(30,30,30,0.8)')+
+      ';border:1px solid '+(lvl>0?'rgba(255,68,68,0.5)':'rgba(80,80,80,0.4)')+
+      ';border-radius:8px;padding:2px 8px;font-size:10px;color:'+(lvl>0?'#FF6644':'#666')+
+      ';font-family:Orbitron,sans-serif;margin-bottom:5px;">LVL '+lvl+(isUpgrading?' ▲':'')+'</div>'+
+    // Status
     (isUpgrading
-      ? '<div id="timer_'+key+'" style="font-size:10px;color:#FFD700;">⏳ '+formatWait(rem)+'</div>'
+      ? '<div id="timer_'+key+'" style="font-size:9px;color:#FFD700;background:rgba(255,200,0,0.1);border-radius:6px;padding:2px 6px;">⏳ '+formatWait(rem)+'</div>'
       : lvl>0
-        ? '<div style="font-size:9px;color:#00FF88;">📈 '+Math.floor(recRec)+' R/s</div>'
-        : '<div style="font-size:9px;color:#555;">⛔ لا تعدين</div>');
+        ? '<div style="font-size:9px;color:#00FF88;background:rgba(0,255,136,0.08);border-radius:6px;padding:2px 6px;">⚡ '+Math.floor(recRec)+' R/s</div>'
+        : '<div style="font-size:9px;color:#444;padding:2px;">⛔</div>');
 }
 
 function updateCardGridItem(key){
