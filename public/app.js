@@ -125,6 +125,13 @@ function applyData(d){
   dailyTasksData=d.dailyTasksData||{date:'',done:[],taps:0,upgrades:0,spent:0};
   cardTasksClaimed=d.cardTasksClaimed||[];
   totalTaps=d.totalTaps||0;
+  // refillData — 3 فرص يومية لتعبئة الطاقة
+  var _today=getTodayStr();
+  if(d.refillData && d.refillData.date===_today){
+    window.refillData=d.refillData;
+  } else {
+    window.refillData={date:_today,count:3};
+  }
   calcTotalSpeeds();
 }
 applyData(G);
@@ -134,7 +141,8 @@ applyData(G);
 function saveData(immediate){
   var d=JSON.stringify({record,rec,energy,maxEnergy,tapLevelVal,energyLevelVal,tapPowerVal,
     completedTasks,cardLevels,cardUpgrades,refCount,claimedMilest,
-    dailyLogin,mysteryLastDate,dailyTasksData,cardTasksClaimed,totalTaps});
+    dailyLogin,mysteryLastDate,dailyTasksData,cardTasksClaimed,totalTaps,
+    refillData:window.refillData});
   try{localStorage.setItem(saveKey,d);}catch(e){}
   if(CS){try{CS.setItem('gameData',d);}catch(e){}}
   if(immediate){
@@ -164,7 +172,8 @@ function saveToServer(){
         tapLevelVal, energyLevelVal, tapPowerVal,
         completedTasks, cardLevels, cardUpgrades,
         refCount, claimedMilest,
-        dailyLogin, mysteryLastDate, dailyTasksData, cardTasksClaimed, totalTaps
+        dailyLogin, mysteryLastDate, dailyTasksData, cardTasksClaimed, totalTaps,
+        refillData: window.refillData
       })
     }).then(function(r){ return r.json(); })
     .then(function(data){
@@ -987,6 +996,31 @@ function upgradeEnergy(){
   maxEnergy=Math.floor(1000*Math.pow(10000,energyLevelVal/99));
   saveData(true); updateUpgradeUI(); updateUI();
 }
+
+// ====== ENERGY REFILL ======
+function useEnergyRefill(){
+  var today=getTodayStr();
+  if(!window.refillData || window.refillData.date!==today){
+    window.refillData={date:today,count:3};
+  }
+  if(window.refillData.count<=0){
+    showToast('❌ انتهت فرصك اليوم! انتظر الغد');
+    return;
+  }
+  energy=maxEnergy;
+  window.refillData.count--;
+  saveData(true); updateUI(); updateUpgradeUI();
+  showToast('⚡ تمت تعبئة الطاقة! '+window.refillData.count+' فرص متبقية');
+}
+
+function loadRefillData(){
+  // البيانات تتحمل من applyData — بس نتأكد من التاريخ
+  var today=getTodayStr();
+  if(!window.refillData || window.refillData.date!==today){
+    window.refillData={date:today,count:3};
+  }
+}
+
 function updateUpgradeUI(){
   var s=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
   s('tapLevel',tapLevelVal);s('energyLevel',energyLevelVal);
@@ -995,6 +1029,10 @@ function updateUpgradeUI(){
   s('tapPower',tapPowerVal);s('maxEnergyShow',maxEnergy.toLocaleString());
   var tb=document.getElementById('tapUpgradeBtn');if(tb)tb.disabled=record<getTapCost(tapLevelVal)||tapLevelVal>=100;
   var eb=document.getElementById('energyUpgradeBtn');if(eb)eb.disabled=record<getEnergyCost(energyLevelVal)||energyLevelVal>=100;
+  // refill button
+  loadRefillData();
+  var rc=document.getElementById('refillCount');if(rc)rc.textContent=window.refillData.count;
+  var rb=document.getElementById('energyRefillBtn');if(rb)rb.disabled=window.refillData.count<=0;
 }
 
 // ====== CARDS ======
