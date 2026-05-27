@@ -62,20 +62,19 @@ function cardRecordSpeed(lvl){
   if(lvl<=0)return 0;
   return 100*Math.pow(10000,(lvl-1)/99);
 }
-// REC/s per card level (level 1=0.0005, level 100=10)
+// REC/s per card level (level 1=0.0000001, level 100=0.0001) — sustainable 40+ years
 function cardRECSpeed(lvl){
   if(lvl<=0)return 0;
-  return 0.0005*Math.pow(20000,(lvl-1)/99);
+  return 0.0000001*Math.pow(1000,(lvl-1)/99);
 }
 // RECORD cost to upgrade from current level
-// Level 1: 10,000 | Level 100: 100,000,000,000
+// Level 0→1: 10K | Level 50: 110M | Level 75: 11.5B | Level 99→100: 1T
 function cardCost(lvl){
-  return Math.floor(10000*Math.pow(10000000,lvl/99));
+  return Math.floor(10000*Math.pow(1e8,lvl/99));
 }
-// Wait seconds to upgrade from current level
+// Wait time to upgrade — Level 0: 1min | Level 50: 3h | Level 75: 2d | Level 99: 30d
 function cardWait(lvl){
-  if(lvl===0)return 5;
-  return Math.floor(10*Math.pow(8640,(lvl-1)/98));
+  return Math.floor(60*Math.pow(43200,lvl/99));
 }
 function formatWait(sec){
   if(sec<60)return sec+'s';
@@ -277,6 +276,76 @@ function updateUI(){
 function getTapCost(l){return Math.floor(50*Math.pow(2,Math.floor(l/5)));}
 function getEnergyCost(l){return Math.floor(50*Math.pow(2,Math.floor(l/5)));}
 function openUpgrade(){updateUpgradeUI();document.getElementById('upgradePage').classList.add('open');}
+
+// ====== REC → RECORD EXCHANGE ======
+var EXCHANGE_RATE = 5000000; // 1 REC = 5,000,000 RECORD
+
+function openExchange(){
+  var popup = document.createElement('div');
+  popup.id = 'exchangePopup';
+  popup.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(180deg,#0d0d14,#111118);border:1px solid rgba(0,255,136,0.3);border-radius:18px;padding:20px;width:82vw;max-width:300px;z-index:10000;backdrop-filter:blur(15px);box-shadow:0 0 50px rgba(0,255,136,0.1);';
+
+  popup.addEventListener('click', function(e){ e.stopPropagation(); });
+  popup.addEventListener('touchend', function(e){ e.stopPropagation(); });
+
+  function renderExchange(){
+    var recBal = rec;
+    var inputVal = parseFloat(document.getElementById('excInput') ? document.getElementById('excInput').value : 0) || 0;
+    var willGet = Math.floor(inputVal * EXCHANGE_RATE);
+    popup.innerHTML =
+      '<div style="text-align:center;margin-bottom:14px;">'+
+        '<div style="font-size:28px;margin-bottom:6px;">🔄</div>'+
+        '<div style="font-size:15px;font-weight:bold;color:white;">'+
+          (currentLang==='ar'?'استبدال REC ← RECORD':'Exchange REC → RECORD')+
+        '</div>'+
+      '</div>'+
+      '<div style="background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.2);border-radius:10px;padding:10px;margin-bottom:10px;display:flex;justify-content:space-between;">'+
+        '<span style="color:#aaa;font-size:12px;">'+( currentLang==='ar'?'رصيد REC:':'REC Balance:')+'</span>'+
+        '<span style="color:#00FF88;font-size:13px;font-weight:bold;">'+recBal.toFixed(6)+'</span>'+
+      '</div>'+
+      '<div style="color:#aaa;font-size:11px;text-align:center;margin-bottom:8px;">'+
+        '1 REC = '+EXCHANGE_RATE.toLocaleString()+' RECORD'+
+      '</div>'+
+      '<input id="excInput" type="number" min="0" step="0.000001" placeholder="'+(currentLang==='ar'?'كمية REC':'Amount REC')+'"'+
+        ' style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(0,255,136,0.3);border-radius:10px;padding:10px;color:white;font-size:14px;text-align:center;box-sizing:border-box;outline:none;margin-bottom:8px;"'+
+        ' oninput="document.getElementById(\'excPreview\').textContent=\'≈ \'+(Math.floor((parseFloat(this.value)||0)*'+EXCHANGE_RATE+')).toLocaleString()+\' RECORD\'">'+
+      '<div id="excPreview" style="text-align:center;color:#FF8800;font-size:13px;margin-bottom:14px;">≈ 0 RECORD</div>'+
+      '<div style="display:flex;gap:8px;">'+
+        '<button onclick="confirmExchange()" style="flex:1;background:linear-gradient(135deg,#005522,#00AA44);border:none;color:white;padding:10px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:bold;">'+
+          (currentLang==='ar'?'✅ استبدل':'✅ Exchange')+
+        '</button>'+
+        '<button onclick="document.getElementById(\'exchangeOverlay\').remove();document.getElementById(\'exchangePopup\').remove();" style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#aaa;padding:10px;border-radius:10px;cursor:pointer;font-size:13px;">'+
+          (currentLang==='ar'?'إلغاء':'Cancel')+
+        '</button>'+
+      '</div>';
+  }
+
+  var overlay = document.createElement('div');
+  overlay.id = 'exchangeOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;';
+  overlay.addEventListener('click', function(e){ e.stopPropagation(); overlay.remove(); popup.remove(); });
+  overlay.addEventListener('touchend', function(e){ e.stopPropagation(); overlay.remove(); popup.remove(); });
+
+  document.body.appendChild(overlay);
+  document.body.appendChild(popup);
+  renderExchange();
+}
+
+function confirmExchange(){
+  var input = document.getElementById('excInput');
+  if(!input) return;
+  var amount = parseFloat(input.value) || 0;
+  if(amount <= 0){ showToast(currentLang==='ar'?'❌ أدخل كمية صحيحة':'❌ Enter valid amount'); return; }
+  if(amount > rec){ showToast(currentLang==='ar'?'❌ رصيد REC غير كافٍ':'❌ Not enough REC'); return; }
+  var gain = Math.floor(amount * EXCHANGE_RATE);
+  rec -= amount;
+  record += gain;
+  saveData(true); updateUI();
+  var ol = document.getElementById('exchangeOverlay');
+  var pp = document.getElementById('exchangePopup');
+  if(ol) ol.remove(); if(pp) pp.remove();
+  showToast('✅ +'+gain.toLocaleString()+' RECORD');
+}
 function upgradeTap(){
   var cost=getTapCost(tapLevelVal);
   if(record<cost||tapLevelVal>=100)return;
