@@ -362,8 +362,9 @@ function showBlockPopup(blockNum, rewardRecord, rewardRec) {
 
 // ====== HOME - TAP ======
 function tap(){
-  // الضغط مو موصول بالطاقة ومو موصول بعملة RECORD
-  // الطاقة تتعبى وتفضى لحالها بشكل مستقل
+  // كل ضغطة تعطي RECORD وتنقص 10 طاقة — مستقلة عن تعدين البطاقات
+  record += tapPowerVal;
+  if(energy >= 10) energy = Math.max(0, energy - 10);
   totalTaps++;
   var today=getTodayStr();
   if(dailyTasksData.date!==today) resetDailyTasks(today);
@@ -393,15 +394,15 @@ function checkUpgradeTimers(){
 // ====== MAIN INTERVAL (3s) ======
 setInterval(function(){
   checkUpgradeTimers();
-  // Passive mining only if cards are upgraded
-  if(recordPerSec>0||recPerSec>0){
-    record+=recordPerSec*3;
+  // تعدين RECORD من البطاقات — مستقل
+  if(recordPerSec>0) record+=recordPerSec*3;
+  // تعدين REC من البطاقات — مستقل
+  if(recPerSec>0){
     rec+=recPerSec*3;
-    // Check for block every mining tick
     checkForBlock();
   }
-  // Energy recharge
-  if(energy<maxEnergy)energy=Math.min(maxEnergy,energy+12);
+  // شحن الطاقة — مستقل
+  if(energy<maxEnergy) energy=Math.min(maxEnergy,energy+12);
   saveData(); updateUI(); updateTimerDisplays();
 },3000);
 
