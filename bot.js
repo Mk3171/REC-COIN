@@ -47,13 +47,25 @@ function checkRateLimit(userId, maxPerMin) {
 setInterval(function() { rateLimits = {}; }, 300000); // clear every 5min
 
 // 3. Anti-cheat: validate balance increases are realistic
-function isRealisticIncrease(oldRec, newRec, oldRecord, newRecord, timeDiff) {
-  // Max possible: all 130 cards at level 100 * 3 seconds
-  var maxRecPerSec = 130 * 0.05;       // 6.5 REC/s max
-  var maxRecordPerSec = 130 * 10000;   // 1,300,000 RECORD/s max
-  var seconds = Math.max(timeDiff / 1000, 1);
-  if (newRec - oldRec > maxRecPerSec * seconds * 1.5) return false;      // 50% tolerance
-  if (newRecord - oldRecord > maxRecordPerSec * seconds * 1.5) return false;
+const ADMIN_ID = 6995765586;
+
+function isRealisticIncrease(oldRec, newRec, oldRecord, newRecord, timeDiff, telegramId) {
+  // Admin always passes
+  if (String(telegramId) === String(ADMIN_ID)) return true;
+  // If RECORD decreased (spending on upgrades), always allow
+  if (newRecord < oldRecord) return true;
+  // Updated max rates based on current game formulas:
+  // Cards: 130 cards × level 100 = 130 × 1,000,000 RECORD/s
+  // Limited cards (12) get 3x = 12 × 3,000,000 RECORD/s extra
+  // Tap: (100+1)*2 = 202 per tap × 15 taps/s = 3,030 RECORD/s (negligible)
+  var maxRecordPerSec = (130 * 1000000) + (12 * 2000000); // ~154M RECORD/s max
+  // REC: 130 cards × 0.0001/s × limited 3x bonus
+  var maxRecPerSec = (130 * 0.0001) + (12 * 0.0002); // ~0.0154 REC/s max
+  var seconds = Math.max(timeDiff / 1000, 3); // min 3 seconds window
+  var recIncrease = newRec - oldRec;
+  var recordIncrease = newRecord - oldRecord;
+  if (recIncrease > maxRecPerSec * seconds * 2) return false;      // 2x tolerance
+  if (recordIncrease > maxRecordPerSec * seconds * 2) return false; // 2x tolerance
   return true;
 }
 
@@ -555,9 +567,14 @@ app.post('/api/user/save', async (req, res) => {
 
     // 4. Anti-cheat: validate balance increases
     if (existingUser && existingUser.lastSaveTime > 0) {
+      // Auto-unban admin if wrongly banned
+      if (String(telegramId) === String(ADMIN_ID) && existingUser.banned) {
+        await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, { banned: false, banReason: '', suspiciousScore: 0 });
+        existingUser.banned = false;
+      }
       var timeDiff = Date.now() - existingUser.lastSaveTime;
       if (data.rec !== undefined && data.record !== undefined) {
-        if (!isRealisticIncrease(existingUser.rec, data.rec, existingUser.record, data.record, timeDiff)) {
+        if (!isRealisticIncrease(existingUser.rec, data.rec, existingUser.record, data.record, timeDiff, telegramId)) {
           // Suspicious - increment score
           var newScore = (existingUser.suspiciousScore || 0) + 1;
           await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, {
@@ -610,6 +627,19 @@ async function detectAndBanBots() {
   } catch(e) { console.log('Bot detection error:', e); }
 }
 setInterval(detectAndBanBots, 3600000); // every hour
+
+// ====== API: SELF UNBAN (admin only) ======
+app.post('/api/admin/self-unban', async (req, res) => {
+  try {
+    const { telegramId } = req.body;
+    if (String(telegramId) !== String(ADMIN_ID)) return res.status(403).json({ error: 'Not admin' });
+    await User.findOneAndUpdate(
+      { telegramId: parseInt(telegramId) },
+      { banned: false, banReason: '', suspiciousScore: 0 }
+    );
+    res.json({ success: true, message: 'Account unbanned' });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
 
 // ====== API: ADMIN - BAN/UNBAN USER ======
 app.post('/api/admin/ban', async (req, res) => {
