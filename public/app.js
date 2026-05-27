@@ -18,7 +18,7 @@ var CS = window.Telegram.WebApp.CloudStorage || null;
 
 // ====== TRANSLATIONS ======
 var T = {
-  ar:{dir:'rtl',tapMine:'اضغط للتعدين',energyLabel:'⚡ الطاقة',miningSpeedLabel:'تعدين REC:',recordSpeedLabel:'تعدين RECORD:',upgradesTitle:'الترقيات',tapUpgradeTitle:'⚡ ترقية الكبسات',energyUpgradeTitle:'🔋 ترقية الطاقة',levelLabel:'المستوى:',costLabel:'التكلفة:',tapsPerClick:'كبسات لكل ضغطة:',totalEnergy:'الطاقة الكلية:',upgradeBtn:'ترقية',backBtn:'← رجوع',cardsTitle:'🃏 البطاقات',catAnime:'🎌 أنمي',catCars:'🚗 سيارات',catClubs:'🌙 ملاهي',catPalaces:'🏰 قصور',cardLevel:'المستوى',cardUpgradeBtn:'ترقية',cardMaxLevel:'✅ وصلت للمستوى الأقصى!',cardMiningBonus:'تعدين هذه البطاقة',cardUpgradeCost:'تكلفة الترقية',cardWaitTime:'وقت الانتظار',upgrading:'⏳ جاري الترقية...',upgradeReady:'✅ جاهز',noMining:'⛔ لا يوجد تعدين - رقّ بطاقة أولاً',tasksTitle:'✅ المهام',telegramTask:'📱 انضم لجروب تيليغرام',joinGroupBtn:'انضم للجروب ←',twitterTask:'🐦 تابع على تويتر',followTwitterBtn:'تابع على تويتر ←',getRecord:'احصل على 10,000 RECORD',taskDone:'✅ تم الإنجاز',inviteTitle:'👥 الدعوة',inviteSubtitle:'ادعو أصدقاءك واربح عملات REC!',totalInvited:'إجمالي المدعوين',personJoined:'شخص انضم عبر رابطك',milestonesTitle:'🎯 مراحل المكافآت',copyLink:'📋 نسخ الرابط',shareBtn:'📤 مشاركة',claimBtn:'احصل! 🎁',inviteN:'ادعُ {n} شخص',rankTitle:'🏆 الترتيب',yourLevel:'مستواك الحالي',yourBalance:'رصيدك:',connectWallet:'ربط المحفظة',support:'💬 الدعم الفني @Momokhli',poolWallet:'Pool Wallet',withdrawable:'Withdrawable balance',controls:'Controls',withdrawPool:'Withdraw Pool',transferPool:'Transfer Pool to Wallet',history:'History',yourWithdrawals:'Your withdrawals',comingSoon:'Coming Soon',locked:'Locked',navHome:'Home',navCards:'Cards',navTasks:'Tasks',navInvite:'Invite',navRank:'Rank',navProfile:'Profile',toastCopied:'✅ تم نسخ الرابط!',toastTask:'🎉 حصلت على 10,000 RECORD!',toastClaimed:'🎉 حصلت على {n} REC!',toastNotMet:'لم تكمل المتطلب بعد!',toastAlready:'أنجزت هذه المهمة مسبقاً!',toastUpgradeStart:'⏳ بدأت ترقية البطاقة!',toastUpgradeDone:'🎉 تمت الترقية!',toastNotEnoughRecord:'رصيد RECORD غير كافٍ!',toastAlreadyUpgrading:'البطاقة قيد الترقية!',withdrawalBtn:'سحب',withdrawTitle:'سحب REC',withdrawSubtitle:'سحب عملة REC الحقيقية لمحفظتك',withdrawBalance:'رصيدك المتاح',withdrawMin:'الحد الأدنى',withdrawFee:'رسوم السحب',withdrawDaily:'الحد اليومي المتبقي',withdrawAmount:'الكمية المراد سحبها',withdrawBtn:'🏛️ سحب REC الآن',withdrawReceive:'ستصلك:',withdrawAfterFee:'بعد خصم الرسوم',withdrawMinErr:'الحد الأدنى {n} REC',withdrawSuccess:'✅ تم إرسال {n} REC لمحفظتك!',withdrawNoWallet:'❌ ربط محفظة TON أولاً!',withdrawLowBal:'❌ رصيدك غير كافٍ',withdrawDailyErr:'❌ وصلت الحد اليومي. تبقى: {n} REC',withdrawFailed:'❌ فشل السحب',withdrawLoading:'⏳ جاري الإرسال...',rankTitle:'🏆 المتصدرون',tabGlobal:'🌍 عالمي',tabFriends:'👥 أصدقاء',tabMyLevel:'📊 مستواي',myRankLabel:'ترتيبك العالمي',weeklyChallenge:'🏆 التحدي الأسبوعي',weeklyPrize:'جائزة 1,000 REC',daysLeft:'يوم متبقي',loadingLeader:'⏳ جاري التحميل...',noFriends:'لم تدعُ أحداً بعد',totalMined:'إجمالي REC المعدن',sinceJoined:'منذ انضمامك',top100only:'أول 100 مشترك فقط',rewardDist:'توزيع المكافآت',rankReward:'مكافأتك المتوقعة',shopTitle:'متجر النجوم',shopSubtitle:'ادعم المشروع واحصل على مكافآت فورية!',shopNote:'⭐ النجوم تشترى من تيليغرام مباشرة',shopEnergy:'⚡ شحن طاقة فوري',shopEnergyDesc:'يرجع طاقتك كاملة فوراً',shopRecord500:'💰 500,000 RECORD',shopRecord500Desc:'تضاف فوراً لرصيدك',shopRecord3m:'💰 3,000,000 RECORD',shopRecord3mDesc:'الأفضل قيمة ⭐',shopSkip:'🚀 تخطي وقت الانتظار',shopSkipDesc:'أكمل ترقية البطاقة فوراً',toastInvoiceLoading:'⏳ جاري تحضير الفاتورة...',toastPaid:'✅ تم الدفع بنجاح! جاري تحديث رصيدك...',toastCancelled:'تم إلغاء الدفع',toastFailed:'❌ فشل الدفع، حاول مرة أخرى',toastConnError:'❌ خطأ في الاتصال بالسيرفر'},
+  ar:{dir:'rtl',tapMine:'اضغط للتعدين',energyLabel:'⚡ الطاقة',miningSpeedLabel:'تعدين REC:',recordSpeedLabel:'تعدين RECORD:',upgradesTitle:'الترقيات',tapUpgradeTitle:'⚡ ترقية الكبسات',energyUpgradeTitle:'🔋 ترقية الطاقة',levelLabel:'المستوى:',costLabel:'التكلفة:',tapsPerClick:'كبسات لكل ضغطة:',totalEnergy:'الطاقة الكلية:',upgradeBtn:'ترقية',backBtn:'← رجوع',cardsTitle:'🃏 البطاقات',catAnime:'🎌 أنمي',catCars:'🚗 سيارات',catClubs:'🌙 ملاهي',catPalaces:'🏰 قصور',catLimited:'🔥 محدود',cardLevel:'المستوى',cardUpgradeBtn:'ترقية',cardMaxLevel:'✅ وصلت للمستوى الأقصى!',cardMiningBonus:'تعدين هذه البطاقة',cardUpgradeCost:'تكلفة الترقية',cardWaitTime:'وقت الانتظار',upgrading:'⏳ جاري الترقية...',upgradeReady:'✅ جاهز',noMining:'⛔ لا يوجد تعدين - رقّ بطاقة أولاً',tasksTitle:'✅ المهام',telegramTask:'📱 انضم لجروب تيليغرام',joinGroupBtn:'انضم للجروب ←',twitterTask:'🐦 تابع على تويتر',followTwitterBtn:'تابع على تويتر ←',getRecord:'احصل على 10,000 RECORD',taskDone:'✅ تم الإنجاز',inviteTitle:'👥 الدعوة',inviteSubtitle:'ادعو أصدقاءك واربح عملات REC!',totalInvited:'إجمالي المدعوين',personJoined:'شخص انضم عبر رابطك',milestonesTitle:'🎯 مراحل المكافآت',copyLink:'📋 نسخ الرابط',shareBtn:'📤 مشاركة',claimBtn:'احصل! 🎁',inviteN:'ادعُ {n} شخص',rankTitle:'🏆 الترتيب',yourLevel:'مستواك الحالي',yourBalance:'رصيدك:',connectWallet:'ربط المحفظة',support:'💬 الدعم الفني @Momokhli',poolWallet:'Pool Wallet',withdrawable:'Withdrawable balance',controls:'Controls',withdrawPool:'Withdraw Pool',transferPool:'Transfer Pool to Wallet',history:'History',yourWithdrawals:'Your withdrawals',comingSoon:'Coming Soon',locked:'Locked',navHome:'Home',navCards:'Cards',navTasks:'Tasks',navInvite:'Invite',navRank:'Rank',navProfile:'Profile',toastCopied:'✅ تم نسخ الرابط!',toastTask:'🎉 حصلت على 10,000 RECORD!',toastClaimed:'🎉 حصلت على {n} REC!',toastNotMet:'لم تكمل المتطلب بعد!',toastAlready:'أنجزت هذه المهمة مسبقاً!',toastUpgradeStart:'⏳ بدأت ترقية البطاقة!',toastUpgradeDone:'🎉 تمت الترقية!',toastNotEnoughRecord:'رصيد RECORD غير كافٍ!',toastAlreadyUpgrading:'البطاقة قيد الترقية!',withdrawalBtn:'سحب',withdrawTitle:'سحب REC',withdrawSubtitle:'سحب عملة REC الحقيقية لمحفظتك',withdrawBalance:'رصيدك المتاح',withdrawMin:'الحد الأدنى',withdrawFee:'رسوم السحب',withdrawDaily:'الحد اليومي المتبقي',withdrawAmount:'الكمية المراد سحبها',withdrawBtn:'🏛️ سحب REC الآن',withdrawReceive:'ستصلك:',withdrawAfterFee:'بعد خصم الرسوم',withdrawMinErr:'الحد الأدنى {n} REC',withdrawSuccess:'✅ تم إرسال {n} REC لمحفظتك!',withdrawNoWallet:'❌ ربط محفظة TON أولاً!',withdrawLowBal:'❌ رصيدك غير كافٍ',withdrawDailyErr:'❌ وصلت الحد اليومي. تبقى: {n} REC',withdrawFailed:'❌ فشل السحب',withdrawLoading:'⏳ جاري الإرسال...',rankTitle:'🏆 المتصدرون',tabGlobal:'🌍 عالمي',tabFriends:'👥 أصدقاء',tabMyLevel:'📊 مستواي',myRankLabel:'ترتيبك العالمي',weeklyChallenge:'🏆 التحدي الأسبوعي',weeklyPrize:'جائزة 1,000 REC',daysLeft:'يوم متبقي',loadingLeader:'⏳ جاري التحميل...',noFriends:'لم تدعُ أحداً بعد',totalMined:'إجمالي REC المعدن',sinceJoined:'منذ انضمامك',top100only:'أول 100 مشترك فقط',rewardDist:'توزيع المكافآت',rankReward:'مكافأتك المتوقعة',shopTitle:'متجر النجوم',shopSubtitle:'ادعم المشروع واحصل على مكافآت فورية!',shopNote:'⭐ النجوم تشترى من تيليغرام مباشرة',shopEnergy:'⚡ شحن طاقة فوري',shopEnergyDesc:'يرجع طاقتك كاملة فوراً',shopRecord500:'💰 500,000 RECORD',shopRecord500Desc:'تضاف فوراً لرصيدك',shopRecord3m:'💰 3,000,000 RECORD',shopRecord3mDesc:'الأفضل قيمة ⭐',shopSkip:'🚀 تخطي وقت الانتظار',shopSkipDesc:'أكمل ترقية البطاقة فوراً',toastInvoiceLoading:'⏳ جاري تحضير الفاتورة...',toastPaid:'✅ تم الدفع بنجاح! جاري تحديث رصيدك...',toastCancelled:'تم إلغاء الدفع',toastFailed:'❌ فشل الدفع، حاول مرة أخرى',toastConnError:'❌ خطأ في الاتصال بالسيرفر'},
   en:{dir:'ltr',tapMine:'Tap to Mine',energyLabel:'⚡ Energy',miningSpeedLabel:'REC Mining:',recordSpeedLabel:'RECORD Mining:',upgradesTitle:'Upgrades',tapUpgradeTitle:'⚡ Tap Upgrade',energyUpgradeTitle:'🔋 Energy Upgrade',levelLabel:'Level:',costLabel:'Cost:',tapsPerClick:'Taps per click:',totalEnergy:'Total Energy:',upgradeBtn:'Upgrade',backBtn:'← Back',cardsTitle:'🃏 Cards',catAnime:'🎌 Anime',catCars:'🚗 Cars',catClubs:'🌙 Clubs',catPalaces:'🏰 Palaces',cardLevel:'Level',cardUpgradeBtn:'Upgrade',cardMaxLevel:'✅ Max level reached!',cardMiningBonus:'Card Mining',cardUpgradeCost:'Upgrade Cost',cardWaitTime:'Wait Time',upgrading:'⏳ Upgrading...',upgradeReady:'✅ Ready',noMining:'⛔ No mining — upgrade a card first',tasksTitle:'✅ Tasks',telegramTask:'📱 Join Telegram Group',joinGroupBtn:'Join Group →',twitterTask:'🐦 Follow on Twitter',followTwitterBtn:'Follow Twitter →',getRecord:'Get 10,000 RECORD',taskDone:'✅ Completed',inviteTitle:'👥 Invite',inviteSubtitle:'Invite friends and earn REC!',totalInvited:'Total Invited',personJoined:'people joined via your link',milestonesTitle:'🎯 Reward Milestones',copyLink:'📋 Copy Link',shareBtn:'📤 Share',claimBtn:'Claim! 🎁',inviteN:'Invite {n} people',rankTitle:'🏆 Ranking',yourLevel:'Your Current Level',yourBalance:'Your Balance:',connectWallet:'Connect Wallet',support:'💬 Support @Momokhli',poolWallet:'Pool Wallet',withdrawable:'Withdrawable balance',controls:'Controls',withdrawPool:'Withdraw Pool',transferPool:'Transfer Pool to Wallet',history:'History',yourWithdrawals:'Your withdrawals',comingSoon:'Coming Soon',locked:'Locked',navHome:'Home',navCards:'Cards',navTasks:'Tasks',navInvite:'Invite',navRank:'Rank',navProfile:'Profile',toastCopied:'✅ Link Copied!',toastTask:'🎉 Got 10,000 RECORD!',toastClaimed:'🎉 Got {n} REC!',toastNotMet:'Requirement not met!',toastAlready:'Task already completed!',toastUpgradeStart:'⏳ Card upgrade started!',toastUpgradeDone:'🎉 Upgrade complete!',toastNotEnoughRecord:'Not enough RECORD!',toastAlreadyUpgrading:'Card already upgrading!',withdrawalBtn:'Withdrawal',withdrawTitle:'Withdraw REC',withdrawSubtitle:'Withdraw real REC to your wallet',withdrawBalance:'Available Balance',withdrawMin:'Minimum',withdrawFee:'Fee',withdrawDaily:'Daily Remaining',withdrawAmount:'Amount to withdraw',withdrawBtn:'🏛️ Withdraw REC Now',withdrawReceive:'You will receive:',withdrawAfterFee:'after fee',withdrawMinErr:'Minimum {n} REC',withdrawSuccess:'✅ Sent {n} REC to your wallet!',withdrawNoWallet:'❌ Connect TON wallet first!',withdrawLowBal:'❌ Insufficient balance',withdrawDailyErr:'❌ Daily limit reached. Remaining: {n} REC',withdrawFailed:'❌ Withdrawal failed',withdrawLoading:'⏳ Sending...',rankTitle:'🏆 LEADERBOARD',tabGlobal:'🌍 Global',tabFriends:'👥 Friends',tabMyLevel:'📊 My Level',myRankLabel:'Your Global Rank',weeklyChallenge:'🏆 Weekly Challenge',weeklyPrize:'Prize: 1,000 REC',daysLeft:'days left',loadingLeader:'⏳ Loading...',noFriends:'You have not invited anyone yet',totalMined:'Total REC Mined',sinceJoined:'since you joined',top100only:'Top 100 players only',rewardDist:'Reward Distribution',rankReward:'Your expected reward',shopTitle:'Stars Shop',shopSubtitle:'Support the project and get instant rewards!',shopNote:'⭐ Stars are purchased directly from Telegram',shopEnergy:'⚡ Instant Energy Refill',shopEnergyDesc:'Refills your energy completely',shopRecord500:'💰 500,000 RECORD',shopRecord500Desc:'Added to your balance instantly',shopRecord3m:'💰 3,000,000 RECORD',shopRecord3mDesc:'Best value ⭐',shopSkip:'🚀 Skip Wait Timer',shopSkipDesc:'Complete card upgrade instantly',toastInvoiceLoading:'⏳ Preparing invoice...',toastPaid:'✅ Payment successful! Updating balance...',toastCancelled:'Payment cancelled',toastFailed:'❌ Payment failed, try again',toastConnError:'❌ Connection error'},
   uk:{dir:'ltr',tapMine:'Натисніть для майнінгу',energyLabel:'⚡ Енергія',miningSpeedLabel:'Майнінг REC:',recordSpeedLabel:'Майнінг RECORD:',upgradesTitle:'Покращення',tapUpgradeTitle:'⚡ Покращення натискань',energyUpgradeTitle:'🔋 Покращення енергії',levelLabel:'Рівень:',costLabel:'Вартість:',tapsPerClick:'Натискань за клік:',totalEnergy:'Загальна енергія:',upgradeBtn:'Покращити',backBtn:'← Назад',cardsTitle:'🃏 Картки',catAnime:'🎌 Аніме',catCars:'🚗 Машини',catClubs:'🌙 Клуби',catPalaces:'🏰 Палаци',cardLevel:'Рівень',cardUpgradeBtn:'Покращити',cardMaxLevel:'✅ Максимальний рівень!',cardMiningBonus:'Майнінг картки',cardUpgradeCost:'Вартість покращення',cardWaitTime:'Час очікування',upgrading:'⏳ Покращення...',upgradeReady:'✅ Готово',noMining:'⛔ Немає майнінгу — покращіть картку!',tasksTitle:'✅ Завдання',telegramTask:'📱 Приєднатися до Telegram',joinGroupBtn:'Приєднатися →',twitterTask:'🐦 Підписатися в Twitter',followTwitterBtn:'Підписатися →',getRecord:'Отримати 10,000 RECORD',taskDone:'✅ Виконано',inviteTitle:'👥 Запросити',inviteSubtitle:'Запрошуйте друзів і заробляйте REC!',totalInvited:'Всього запрошено',personJoined:'людей приєдналися',milestonesTitle:'🎯 Етапи винагород',copyLink:'📋 Копіювати посилання',shareBtn:'📤 Поділитися',claimBtn:'Отримати! 🎁',inviteN:'Запросіть {n} людей',rankTitle:'🏆 Рейтинг',yourLevel:'Ваш поточний рівень',yourBalance:'Ваш баланс:',connectWallet:'Підключити гаманець',support:'💬 Підтримка @Momokhli',poolWallet:'Pool Wallet',withdrawable:'Доступний баланс',controls:'Управління',withdrawPool:'Вивести Pool',transferPool:'Перевести в гаманець',history:'Історія',yourWithdrawals:'Ваші виведення',comingSoon:'Незабаром',locked:'Заблоковано',navHome:'Home',navCards:'Cards',navTasks:'Tasks',navInvite:'Invite',navRank:'Rank',navProfile:'Profile',toastCopied:'✅ Посилання скопійовано!',toastTask:'🎉 Отримано 10,000 RECORD!',toastClaimed:'🎉 Отримано {n} REC!',toastNotMet:'Вимога не виконана!',toastAlready:'Завдання вже виконано!',toastUpgradeStart:'⏳ Покращення розпочато!',toastUpgradeDone:'🎉 Покращення завершено!',toastNotEnoughRecord:'Недостатньо RECORD!',toastAlreadyUpgrading:'Картка вже покращується!',withdrawalBtn:'Виведення',withdrawTitle:'Вивести REC',withdrawSubtitle:'Виведення реального REC на гаманець',withdrawBalance:'Доступний баланс',withdrawMin:'Мінімум',withdrawFee:'Комісія',withdrawDaily:'Залишок ліміту',withdrawAmount:'Сума виведення',withdrawBtn:'🏛️ Вивести REC',withdrawReceive:'Ви отримаєте:',withdrawAfterFee:'після комісії',withdrawMinErr:'Мінімум {n} REC',withdrawSuccess:'✅ Відправлено {n} REC!',withdrawNoWallet:'❌ Підключіть гаманець!',withdrawLowBal:'❌ Недостатньо коштів',withdrawDailyErr:'❌ Ліміт. Залишок: {n} REC',withdrawFailed:'❌ Помилка виведення',withdrawLoading:'⏳ Відправка...',rankTitle:'🏆 ЛІДЕРБОРД',tabGlobal:'🌍 Глобально',tabFriends:'👥 Друзі',tabMyLevel:'📊 Мій рівень',myRankLabel:'Ваш глобальний ранг',weeklyChallenge:'🏆 Тижневий виклик',weeklyPrize:'Приз: 1,000 REC',daysLeft:'днів залишилось',loadingLeader:'⏳ Завантаження...',noFriends:'Ви ще нікого не запросили',totalMined:'Всього REC здобуто',sinceJoined:'з моменту приєднання',top100only:'Тільки топ 100',rewardDist:'Розподіл нагород',rankReward:'Очікувана нагорода',shopTitle:'Магазин зірок',shopSubtitle:'Підтримайте проект і отримайте нагороди!',shopNote:'⭐ Зірки купуються в Telegram',shopEnergy:'⚡ Миттєва зарядка енергії',shopEnergyDesc:'Повністю відновлює енергію',shopRecord500:'💰 500,000 RECORD',shopRecord500Desc:'Додається на баланс миттєво',shopRecord3m:'💰 3,000,000 RECORD',shopRecord3mDesc:'Найкраща цінність ⭐',shopSkip:'🚀 Пропустити очікування',shopSkipDesc:'Завершити покращення карти миттєво',toastInvoiceLoading:'⏳ Підготовка рахунку...',toastPaid:'✅ Оплата успішна! Оновлення балансу...',toastCancelled:'Оплату скасовано',toastFailed:'❌ Помилка оплати',toastConnError:'❌ Помилка з\'єднання'},
   zh:{dir:'ltr',tapMine:'点击挖矿',energyLabel:'⚡ 能量',miningSpeedLabel:'REC挖矿:',recordSpeedLabel:'RECORD挖矿:',upgradesTitle:'升级',tapUpgradeTitle:'⚡ 点击升级',energyUpgradeTitle:'🔋 能量升级',levelLabel:'等级:',costLabel:'费用:',tapsPerClick:'每次点击次数:',totalEnergy:'总能量:',upgradeBtn:'升级',backBtn:'← 返回',cardsTitle:'🃏 卡片',catAnime:'🎌 动漫',catCars:'🚗 汽车',catClubs:'🌙 夜总会',catPalaces:'🏰 宫殿',cardLevel:'等级',cardUpgradeBtn:'升级',cardMaxLevel:'✅ 已达最高等级!',cardMiningBonus:'卡片挖矿',cardUpgradeCost:'升级费用',cardWaitTime:'等待时间',upgrading:'⏳ 升级中...',upgradeReady:'✅ 就绪',noMining:'⛔ 无挖矿 — 请先升级卡片!',tasksTitle:'✅ 任务',telegramTask:'📱 加入Telegram群组',joinGroupBtn:'加入群组 →',twitterTask:'🐦 在推特关注',followTwitterBtn:'在推特关注 →',getRecord:'获得 10,000 RECORD',taskDone:'✅ 已完成',inviteTitle:'👥 邀请',inviteSubtitle:'邀请朋友赚取REC!',totalInvited:'总邀请人数',personJoined:'人加入',milestonesTitle:'🎯 奖励里程碑',copyLink:'📋 复制链接',shareBtn:'📤 分享',claimBtn:'领取! 🎁',inviteN:'邀请{n}人',rankTitle:'🏆 排名',yourLevel:'您的当前级别',yourBalance:'您的余额:',connectWallet:'连接钱包',support:'💬 技术支持 @Momokhli',poolWallet:'Pool Wallet',withdrawable:'可提现余额',controls:'操作',withdrawPool:'提取Pool',transferPool:'将Pool转入钱包',history:'历史',yourWithdrawals:'提现记录',comingSoon:'即将推出',locked:'已锁定',navHome:'Home',navCards:'Cards',navTasks:'Tasks',navInvite:'Invite',navRank:'Rank',navProfile:'Profile',toastCopied:'✅ 链接已复制!',toastTask:'🎉 获得10,000 RECORD!',toastClaimed:'🎉 获得{n} REC!',toastNotMet:'尚未满足要求!',toastAlready:'任务已完成!',toastUpgradeStart:'⏳ 卡片升级开始!',toastUpgradeDone:'🎉 升级完成!',toastNotEnoughRecord:'RECORD不足!',toastAlreadyUpgrading:'卡片升级中!'}
@@ -96,12 +96,16 @@ function calcTotalSpeeds(){
 // ====== DATA ======
 var defaultData={record:0,rec:0,energy:1000,maxEnergy:1000,
   tapLevelVal:0,energyLevelVal:0,tapPowerVal:1,
-  completedTasks:[],cardLevels:{},cardUpgrades:{},refCount:0,claimedMilest:[]};
+  completedTasks:[],cardLevels:{},cardUpgrades:{},refCount:0,claimedMilest:[],
+  dailyLogin:{day:0,lastDate:''},mysteryLastDate:'',
+  dailyTasksData:{date:'',done:[],taps:0,upgrades:0,spent:0},
+  cardTasksClaimed:[],totalTaps:0};
 var G=Object.assign({},defaultData);
 try{var ls=JSON.parse(localStorage.getItem(saveKey));if(ls)G=Object.assign({},defaultData,ls);}catch(e){}
 
 var record,rec,energy,maxEnergy,tapLevelVal,energyLevelVal,tapPowerVal,
-    completedTasks,cardLevels,cardUpgrades,refCount,claimedMilest;
+    completedTasks,cardLevels,cardUpgrades,refCount,claimedMilest,
+    dailyLogin,mysteryLastDate,dailyTasksData,cardTasksClaimed,totalTaps;
 
 function applyData(d){
   record=d.record||0; rec=d.rec||0;
@@ -111,6 +115,11 @@ function applyData(d){
   completedTasks=d.completedTasks||[]; cardLevels=d.cardLevels||{};
   cardUpgrades=d.cardUpgrades||{}; refCount=d.refCount||0;
   claimedMilest=d.claimedMilest||[];
+  dailyLogin=d.dailyLogin||{day:0,lastDate:''};
+  mysteryLastDate=d.mysteryLastDate||'';
+  dailyTasksData=d.dailyTasksData||{date:'',done:[],taps:0,upgrades:0,spent:0};
+  cardTasksClaimed=d.cardTasksClaimed||[];
+  totalTaps=d.totalTaps||0;
   calcTotalSpeeds();
 }
 applyData(G);
@@ -119,7 +128,8 @@ applyData(G);
 
 function saveData(immediate){
   var d=JSON.stringify({record,rec,energy,maxEnergy,tapLevelVal,energyLevelVal,tapPowerVal,
-    completedTasks,cardLevels,cardUpgrades,refCount,claimedMilest});
+    completedTasks,cardLevels,cardUpgrades,refCount,claimedMilest,
+    dailyLogin,mysteryLastDate,dailyTasksData,cardTasksClaimed,totalTaps});
   try{localStorage.setItem(saveKey,d);}catch(e){}
   if(CS){try{CS.setItem('gameData',d);}catch(e){}}
   if(immediate){
@@ -202,6 +212,11 @@ function tap(){
   if(energy<tapPowerVal)return;
   energy=Math.max(0,energy-tapPowerVal);
   record+=tapPowerVal;
+  totalTaps++;
+  var today=getTodayStr();
+  if(dailyTasksData.date!==today) resetDailyTasks(today);
+  dailyTasksData.taps++;
+  checkDailyTaskProgress();
   saveData(); updateUI();
 }
 
@@ -340,11 +355,334 @@ function confirmExchange(){
   var gain = Math.floor(amount * EXCHANGE_RATE);
   rec -= amount;
   record += gain;
+  var today=getTodayStr();
+  if(dailyTasksData.date!==today) resetDailyTasks(today);
+  dailyTasksData.spent += gain;
+  checkDailyTaskProgress();
   saveData(true); updateUI();
   var ol = document.getElementById('exchangeOverlay');
   var pp = document.getElementById('exchangePopup');
   if(ol) ol.remove(); if(pp) pp.remove();
   showToast('✅ +'+gain.toLocaleString()+' RECORD');
+}
+
+// ====== HELPER ======
+function getTodayStr(){ return new Date().toISOString().split('T')[0]; }
+
+// ====== DAILY LOGIN ======
+var DAILY_REWARDS=[
+  {record:1000,rec:0},{record:2000,rec:0},{record:3000,rec:0},
+  {record:5000,rec:0},{record:8000,rec:0},{record:12000,rec:0},
+  {record:20000,rec:0.001},
+  {record:30000,rec:0},{record:40000,rec:0},{record:50000,rec:0},
+  {record:70000,rec:0},{record:90000,rec:0},{record:120000,rec:0},
+  {record:150000,rec:0.01},
+  {record:200000,rec:0},{record:250000,rec:0},{record:300000,rec:0},
+  {record:400000,rec:0},{record:500000,rec:0},{record:600000,rec:0},
+  {record:800000,rec:0.1},
+  {record:1000000,rec:0},{record:1200000,rec:0},{record:1500000,rec:0},
+  {record:2000000,rec:0.5},
+  {record:2500000,rec:0},
+  {record:3000000,rec:1},
+  {record:4000000,rec:2},
+  {record:5000000,rec:3},
+  {record:10000000,rec:5}
+];
+
+function openDailyLogin(){
+  var today=getTodayStr();
+  var login=dailyLogin;
+  var alreadyClaimed=login.lastDate===today;
+  if(login.lastDate&&!alreadyClaimed){
+    var diff=Math.round((new Date(today)-new Date(login.lastDate))/86400000);
+    if(diff>1){login.day=0;}
+  }
+  var currentDay=login.day%30;
+  var reward=DAILY_REWARDS[currentDay];
+
+  var ol=document.createElement('div');
+  ol.id='dailyOverlay';
+  ol.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;overflow-y:auto;display:flex;align-items:flex-start;justify-content:center;padding:20px 0;';
+
+  var grid='';
+  for(var i=0;i<30;i++){
+    var r=DAILY_REWARDS[i];
+    var isClaimed=i<currentDay||(i===currentDay&&alreadyClaimed);
+    var isCurr=i===currentDay&&!alreadyClaimed;
+    var bg=isClaimed?'rgba(0,120,0,0.3)':isCurr?'rgba(255,215,0,0.18)':'rgba(255,255,255,0.03)';
+    var brd=isClaimed?'#1a7a1a':isCurr?'#FFD700':'#1a1a2a';
+    var tc=isClaimed?'#4eff4e':isCurr?'#FFD700':'#555';
+    grid+='<div style="background:'+bg+';border:1px solid '+brd+';border-radius:8px;padding:5px 3px;text-align:center;">';
+    if(isClaimed) grid+='<div style="font-size:13px;">✅</div>';
+    else grid+='<div style="font-size:10px;color:'+tc+';">'+formatCost(r.record)+'</div>';
+    if(r.rec>0&&!isClaimed) grid+='<div style="font-size:8px;color:#00FF88;">🟢'+r.rec+'</div>';
+    grid+='<div style="font-size:8px;color:'+tc+';">'+(i+1)+'</div></div>';
+  }
+
+  var pp=document.createElement('div');
+  pp.style.cssText='background:linear-gradient(180deg,#0a0a18,#111118);border:1px solid rgba(255,215,0,0.35);border-radius:20px;padding:20px;width:88vw;max-width:360px;';
+  pp.addEventListener('click',function(e){e.stopPropagation();});
+  pp.innerHTML=
+    '<div style="text-align:center;margin-bottom:14px;">'+
+      '<div style="font-size:30px;margin-bottom:4px;">📅</div>'+
+      '<div style="font-family:Orbitron,sans-serif;font-size:15px;color:#FFD700;">Daily Reward</div>'+
+      '<div style="font-size:11px;color:#666;margin-top:3px;">Day '+(currentDay+1)+' / 30</div>'+
+    '</div>'+
+    '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:14px;">'+grid+'</div>'+
+    (!alreadyClaimed?
+      '<div style="background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.3);border-radius:12px;padding:12px;margin-bottom:12px;text-align:center;">'+
+        '<div style="font-size:11px;color:#aaa;margin-bottom:5px;">Today\'s Reward</div>'+
+        '<div style="font-size:18px;color:#FFD700;font-family:Orbitron,sans-serif;font-weight:bold;">'+formatCost(reward.record)+' RECORD</div>'+
+        (reward.rec>0?'<div style="font-size:15px;color:#00FF88;margin-top:3px;">+ '+reward.rec+' REC 🟢</div>':'')+
+      '</div>':
+      '<div style="background:rgba(0,100,0,0.12);border:1px solid #1a5c1a;border-radius:12px;padding:12px;margin-bottom:12px;text-align:center;">'+
+        '<div style="color:#4eff4e;font-size:13px;">✅ Already claimed today!</div>'+
+        '<div style="color:#555;font-size:10px;margin-top:3px;">Come back tomorrow</div>'+
+      '</div>')+
+    '<div style="display:flex;gap:8px;">'+
+      (!alreadyClaimed?
+        '<button onclick="claimDailyReward()" style="flex:1;background:linear-gradient(135deg,#886600,#FFD700);border:none;color:#000;padding:11px;border-radius:10px;font-size:14px;font-weight:bold;cursor:pointer;">🎁 Claim!</button>':
+        '<button disabled style="flex:1;background:#222;border:1px solid #333;color:#555;padding:11px;border-radius:10px;font-size:13px;cursor:not-allowed;">Claimed ✅</button>')+
+      '<button onclick="document.getElementById(\'dailyOverlay\').remove();" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.1);color:#aaa;padding:11px 15px;border-radius:10px;font-size:14px;cursor:pointer;">✕</button>'+
+    '</div>';
+
+  ol.addEventListener('click',function(e){if(e.target===ol)ol.remove();});
+  ol.appendChild(pp); document.body.appendChild(ol);
+}
+
+function claimDailyReward(){
+  var today=getTodayStr();
+  if(dailyLogin.lastDate===today){showToast('Already claimed today!');return;}
+  var currentDay=dailyLogin.day%30;
+  var reward=DAILY_REWARDS[currentDay];
+  record+=reward.record;
+  if(reward.rec>0) rec+=reward.rec;
+  dailyLogin.day=currentDay+1; dailyLogin.lastDate=today;
+  saveData(true); updateUI();
+  var ol=document.getElementById('dailyOverlay');
+  if(ol)ol.remove();
+  showToast('🎁 +'+formatCost(reward.record)+' RECORD'+(reward.rec>0?' +'+reward.rec+' REC':'')+'!');
+  openDailyLogin();
+}
+
+// ====== MYSTERY BOX ======
+function openMysteryBox(){
+  var today=getTodayStr();
+  var alreadyOpen=mysteryLastDate===today;
+
+  var ol=document.createElement('div');
+  ol.id='mysteryOverlay';
+  ol.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9999;display:flex;align-items:center;justify-content:center;';
+  ol.addEventListener('click',function(e){if(e.target===ol)ol.remove();});
+
+  var pp=document.createElement('div');
+  pp.style.cssText='background:linear-gradient(180deg,#0d0010,#150020);border:1px solid rgba(180,0,255,0.4);border-radius:20px;padding:22px 20px;width:82vw;max-width:300px;text-align:center;';
+  pp.addEventListener('click',function(e){e.stopPropagation();});
+
+  if(alreadyOpen){
+    pp.innerHTML=
+      '<div style="font-size:50px;margin-bottom:10px;filter:grayscale(1);">📦</div>'+
+      '<div style="font-size:16px;color:#aaa;margin-bottom:6px;">Mystery Box</div>'+
+      '<div style="color:#555;font-size:12px;margin-bottom:16px;">Already opened today.<br>Come back tomorrow!</div>'+
+      '<button onclick="document.getElementById(\'mysteryOverlay\').remove();" style="background:#1a1a1a;border:1px solid #333;color:#aaa;padding:10px 24px;border-radius:10px;cursor:pointer;">Close</button>';
+  } else {
+    pp.innerHTML=
+      '<div id="mysteryBox" style="font-size:60px;margin-bottom:10px;cursor:pointer;animation:boxFloat 2s ease-in-out infinite;transition:transform 0.2s;" onclick="revealMystery()">📦</div>'+
+      '<div style="font-family:Orbitron,sans-serif;font-size:15px;color:#CC88FF;margin-bottom:6px;">Mystery Box</div>'+
+      '<div style="color:#888;font-size:11px;margin-bottom:16px;">Tap the box to reveal your daily prize!</div>'+
+      '<div style="color:#555;font-size:10px;">1 free box per day</div>'+
+      '<style>@keyframes boxFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}</style>';
+  }
+
+  ol.appendChild(pp); document.body.appendChild(ol);
+}
+
+function revealMystery(){
+  var today=getTodayStr();
+  if(mysteryLastDate===today){showToast('Already opened today!');return;}
+
+  var roll=Math.random()*100;
+  var reward;
+  if(roll<40)      reward={type:'record',amount:Math.floor(5000+Math.random()*45000),label:'RECORD'};
+  else if(roll<65) reward={type:'record',amount:Math.floor(50000+Math.random()*450000),label:'RECORD'};
+  else if(roll<80) reward={type:'record',amount:Math.floor(500000+Math.random()*1500000),label:'RECORD'};
+  else if(roll<90) reward={type:'record',amount:Math.floor(2000000+Math.random()*8000000),label:'RECORD'};
+  else if(roll<96) reward={type:'rec',amount:parseFloat((0.001+Math.random()*0.009).toFixed(4)),label:'REC'};
+  else if(roll<99) reward={type:'rec',amount:parseFloat((0.01+Math.random()*0.09).toFixed(4)),label:'REC'};
+  else             reward={type:'rec',amount:parseFloat((0.1+Math.random()*0.4).toFixed(4)),label:'REC'};
+
+  if(reward.type==='record') record+=reward.amount;
+  else rec+=reward.amount;
+  mysteryLastDate=today;
+  saveData(true); updateUI();
+
+  var pp=document.querySelector('#mysteryOverlay > div');
+  if(!pp)return;
+  var isRec=reward.type==='rec';
+  var emoji=isRec?'🟢':'💥';
+  var color=isRec?'#00FF88':'#FFD700';
+  var amtStr=isRec?reward.amount+' REC':formatCost(reward.amount)+' RECORD';
+  var rarity=roll<40?'Common':roll<65?'Uncommon':roll<80?'Rare':roll<90?'Epic':roll<96?'Legendary':'MYTHIC';
+  var rarityColor=roll<40?'#888':roll<65?'#4488FF':roll<80?'#AA44FF':roll<90?'#FF8800':roll<96?'#FFD700':'#FF0055';
+
+  pp.innerHTML=
+    '<div style="font-size:60px;margin-bottom:8px;animation:popIn 0.4s ease;">'+emoji+'</div>'+
+    '<div style="font-family:Orbitron,sans-serif;font-size:13px;color:'+rarityColor+';margin-bottom:4px;">'+rarity+'!</div>'+
+    '<div style="font-size:24px;color:'+color+';font-family:Orbitron,sans-serif;font-weight:bold;margin:10px 0;">+'+amtStr+'</div>'+
+    '<div style="color:#666;font-size:10px;margin-bottom:16px;">Added to your balance</div>'+
+    '<button onclick="document.getElementById(\'mysteryOverlay\').remove();" style="background:linear-gradient(135deg,#4a0080,#8800FF);border:none;color:white;padding:10px 28px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:bold;">Awesome! 🎉</button>'+
+    '<style>@keyframes popIn{from{transform:scale(0)}to{transform:scale(1)}}</style>';
+}
+
+// ====== DAILY TASKS ======
+var DAILY_TASK_POOL=[
+  {id:'tap50',label:'Tap 50 times today',labelAr:'اكبس 50 مرة اليوم',type:'taps',target:50,reward:{record:5000}},
+  {id:'tap100',label:'Tap 100 times today',labelAr:'اكبس 100 مرة اليوم',type:'taps',target:100,reward:{record:12000}},
+  {id:'tap200',label:'Tap 200 times today',labelAr:'اكبس 200 مرة اليوم',type:'taps',target:200,reward:{record:25000}},
+  {id:'tap500',label:'Tap 500 times today',labelAr:'اكبس 500 مرة اليوم',type:'taps',target:500,reward:{record:70000}},
+  {id:'upg1',label:'Upgrade 1 card today',labelAr:'رقّ بطاقة واحدة اليوم',type:'upgrades',target:1,reward:{record:15000}},
+  {id:'upg3',label:'Upgrade 3 cards today',labelAr:'رقّ 3 بطاقات اليوم',type:'upgrades',target:3,reward:{record:50000}},
+  {id:'upg5',label:'Upgrade 5 cards today',labelAr:'رقّ 5 بطاقات اليوم',type:'upgrades',target:5,reward:{record:120000}},
+  {id:'spend50k',label:'Spend 50K RECORD on upgrades',labelAr:'اصرف 50K RECORD على الترقيات',type:'spent',target:50000,reward:{record:30000}},
+  {id:'spend500k',label:'Spend 500K RECORD on upgrades',labelAr:'اصرف 500K RECORD على الترقيات',type:'spent',target:500000,reward:{record:200000}},
+];
+
+function getTodayTaskIndices(){
+  var d=getTodayStr();
+  var seed=0;
+  for(var i=0;i<d.length;i++) seed=((seed*31)+d.charCodeAt(i))&0xFFFFFF;
+  var pool=DAILY_TASK_POOL.slice();
+  var picked=[];
+  for(var j=0;j<3;j++){
+    var idx=seed%pool.length;
+    picked.push(pool.splice(idx,1)[0]);
+    seed=Math.floor(seed/7)+j*13+1;
+  }
+  return picked;
+}
+
+function resetDailyTasks(today){
+  dailyTasksData={date:today,done:[],taps:0,upgrades:0,spent:0};
+}
+
+function checkDailyTaskProgress(){
+  var today=getTodayStr();
+  if(dailyTasksData.date!==today) resetDailyTasks(today);
+  var tasks=getTodayTaskIndices();
+  tasks.forEach(function(task){
+    if(dailyTasksData.done.indexOf(task.id)!==-1) return;
+    var prog=dailyTasksData[task.type]||0;
+    if(prog>=task.target){
+      dailyTasksData.done.push(task.id);
+      if(task.reward.record) record+=task.reward.record;
+      if(task.reward.rec) rec+=task.reward.rec;
+      saveData(true); updateUI();
+      showToast('✅ Task done! +'+formatCost(task.reward.record||0)+' RECORD');
+    }
+  });
+  renderDailyTasksUI();
+}
+
+function renderDailyTasksUI(){
+  var cont=document.getElementById('dailyTasksCont');
+  if(!cont)return;
+  var today=getTodayStr();
+  if(dailyTasksData.date!==today) resetDailyTasks(today);
+  var tasks=getTodayTaskIndices();
+  var html='';
+  tasks.forEach(function(task){
+    var done=dailyTasksData.done.indexOf(task.id)!==-1;
+    var prog=Math.min(dailyTasksData[task.type]||0,task.target);
+    var pct=Math.round(prog/task.target*100);
+    var label=currentLang==='ar'?task.labelAr:task.label;
+    var rewardStr=task.reward.record?formatCost(task.reward.record)+' RECORD':(task.reward.rec+' REC');
+    html+=
+      '<div style="background:'+(done?'rgba(0,80,0,0.3)':'rgba(10,10,20,0.7)')+';border:1px solid '+(done?'#1a7a1a':'rgba(255,255,255,0.07)')+';border-radius:12px;padding:12px;margin-bottom:8px;">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">'+
+          '<div style="font-size:12px;color:'+(done?'#4eff4e':'#ddd')+';flex:1;">'+label+'</div>'+
+          '<div style="font-size:11px;color:'+(done?'#4eff4e':'#FFD700')+';margin-left:8px;white-space:nowrap;">'+(done?'✅ Done':'🏆 '+rewardStr)+'</div>'+
+        '</div>'+
+        (!done?
+          '<div style="background:rgba(255,255,255,0.05);border-radius:6px;height:5px;overflow:hidden;">'+
+            '<div style="width:'+pct+'%;height:100%;background:linear-gradient(90deg,#FF4400,#FFD700);border-radius:6px;transition:width 0.3s;"></div>'+
+          '</div>'+
+          '<div style="font-size:9px;color:#555;text-align:right;margin-top:3px;">'+prog+' / '+task.target+'</div>':'')+
+      '</div>';
+  });
+  cont.innerHTML=html;
+}
+
+// ====== CARD MISSIONS (in Tasks page) ======
+var CARD_MISSIONS=[
+  {id:'cm_naruto5',label:'Upgrade Naruto to Lv 5',labelAr:'رقّ ناروتو للمستوى 5',cardKey:'0_0',reqLvl:5,reward:{rec:0.005}},
+  {id:'cm_goku10',label:'Upgrade Goku to Lv 10',labelAr:'رقّ غوكو للمستوى 10',cardKey:'0_1',reqLvl:10,reward:{rec:0.01}},
+  {id:'cm_luffy8',label:'Upgrade Luffy to Lv 8',labelAr:'رقّ لوفي للمستوى 8',cardKey:'0_2',reqLvl:8,reward:{rec:0.008}},
+  {id:'cm_gojo20',label:'Upgrade Gojo to Lv 20',labelAr:'رقّ غوجو للمستوى 20',cardKey:'0_24',reqLvl:20,reward:{rec:0.1}},
+  {id:'cm_ferrari5',label:'Upgrade Ferrari SF90 to Lv 5',labelAr:'رقّ Ferrari SF90 للمستوى 5',cardKey:'1_0',reqLvl:5,reward:{rec:0.005}},
+  {id:'cm_lambo10',label:'Upgrade Lamborghini to Lv 10',labelAr:'رقّ لامبورغيني للمستوى 10',cardKey:'1_1',reqLvl:10,reward:{rec:0.015}},
+  {id:'cm_any25',label:'Get any card to Lv 25',labelAr:'وصّل أي بطاقة للمستوى 25',cardKey:'any',reqLvl:25,reward:{rec:0.1}},
+  {id:'cm_any50',label:'Get any card to Lv 50',labelAr:'وصّل أي بطاقة للمستوى 50',cardKey:'any',reqLvl:50,reward:{rec:1}},
+  {id:'cm_any75',label:'Get any card to Lv 75',labelAr:'وصّل أي بطاقة للمستوى 75',cardKey:'any',reqLvl:75,reward:{rec:5}},
+  {id:'cm_any100',label:'Get any card to Lv 100',labelAr:'وصّل أي بطاقة للمستوى 100',cardKey:'any',reqLvl:100,reward:{rec:15}},
+];
+
+function checkCardMissions(){
+  var changed=false;
+  CARD_MISSIONS.forEach(function(m){
+    if(cardTasksClaimed.indexOf(m.id)!==-1) return;
+    var met=false;
+    if(m.cardKey==='any'){
+      met=Object.keys(cardLevels).some(function(k){return (cardLevels[k]||0)>=m.reqLvl;});
+    } else {
+      met=(cardLevels[m.cardKey]||0)>=m.reqLvl;
+    }
+    if(met){
+      cardTasksClaimed.push(m.id);
+      if(m.reward.rec) rec+=m.reward.rec;
+      if(m.reward.record) record+=m.reward.record;
+      changed=true;
+      showToast('🎯 Mission done! +'+m.reward.rec+' REC');
+    }
+  });
+  if(changed){saveData(true);updateUI();renderCardMissionsUI();}
+}
+
+function renderCardMissionsUI(){
+  var cont=document.getElementById('cardMissionsCont');
+  if(!cont)return;
+  var html='';
+  CARD_MISSIONS.forEach(function(m){
+    var done=cardTasksClaimed.indexOf(m.id)!==-1;
+    var label=currentLang==='ar'?m.labelAr:m.label;
+    var prog=0,target=m.reqLvl;
+    if(m.cardKey==='any'){
+      Object.keys(cardLevels).forEach(function(k){prog=Math.max(prog,cardLevels[k]||0);});
+    } else {
+      prog=cardLevels[m.cardKey]||0;
+    }
+    prog=Math.min(prog,target);
+    var pct=Math.round(prog/target*100);
+    html+=
+      '<div style="background:'+(done?'rgba(0,80,0,0.3)':'rgba(10,10,20,0.7)')+';border:1px solid '+(done?'#1a7a1a':'rgba(0,255,136,0.12)')+';border-radius:12px;padding:12px;margin-bottom:8px;">'+
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">'+
+          '<div style="font-size:12px;color:'+(done?'#4eff4e':'#ddd')+';flex:1;">'+label+'</div>'+
+          '<div style="font-size:11px;color:'+(done?'#4eff4e':'#00FF88')+';margin-left:8px;white-space:nowrap;">'+(done?'✅':'🟢 +'+m.reward.rec+' REC')+'</div>'+
+        '</div>'+
+        (!done?
+          '<div style="background:rgba(255,255,255,0.05);border-radius:6px;height:5px;overflow:hidden;">'+
+            '<div style="width:'+pct+'%;height:100%;background:linear-gradient(90deg,#00AA44,#00FF88);border-radius:6px;"></div>'+
+          '</div>'+
+          '<div style="font-size:9px;color:#555;text-align:right;margin-top:3px;">Lv '+prog+' / '+target+'</div>':'')+
+      '</div>';
+  });
+  cont.innerHTML=html;
+}
+
+function initNewFeatures(){
+  var today=getTodayStr();
+  if(dailyTasksData.date!==today) resetDailyTasks(today);
+  renderDailyTasksUI();
+  renderCardMissionsUI();
 }
 function upgradeTap(){
   var cost=getTapCost(tapLevelVal);
@@ -411,6 +749,21 @@ var categories=[
     {n:'قصر الرياض',e:'🌴'},{n:'قصر القاهرة',e:'🏺'},{n:'قصر إسطنبول',e:'🌙'},
     {n:'قصر طوكيو',e:'🌸'},{n:'قصر كيوتو',e:'⛩️'},{n:'قصر بكين',e:'🐉'},
     {n:'قصر لندن',e:'👑'},{n:'قصر باريس',e:'🗼'}
+  ]},
+  // Season 1 Limited Cards
+  {nameKey:'catLimited',cards:[
+    {n:'Dragon Emperor',en:'Dragon Emperor',e:'🐉'},
+    {n:'Crystal Phoenix',en:'Crystal Phoenix',e:'🦅'},
+    {n:'Shadow Reaper',en:'Shadow Reaper',e:'💀'},
+    {n:'Solar God',en:'Solar God',e:'☀️'},
+    {n:'Thunder Zeus',en:'Thunder Zeus',e:'⚡'},
+    {n:'Neon Samurai',en:'Neon Samurai',e:'⚔️'},
+    {n:'Cosmic Witch',en:'Cosmic Witch',e:'🔮'},
+    {n:'Ice Queen',en:'Ice Queen',e:'❄️'},
+    {n:'Desert Sultan',en:'Desert Sultan',e:'🏜️'},
+    {n:'Ocean Master',en:'Ocean Master',e:'🌊'},
+    {n:'Sky Pegasus',en:'Sky Pegasus',e:'🐎'},
+    {n:'Void Walker',en:'Void Walker',e:'🌌'}
   ]}
 ];
 
@@ -542,6 +895,10 @@ function directUpgrade(ci, idx, event) {
   record -= cost;
   var wait = cardWait(lvl);
   cardUpgrades[key] = { endTime: Date.now() + wait*1000, toLevel: lvl+1 };
+  var today=getTodayStr();
+  if(dailyTasksData.date!==today) resetDailyTasks(today);
+  dailyTasksData.upgrades++; dailyTasksData.spent+=cost;
+  checkDailyTaskProgress(); checkCardMissions();
   saveData(true); updateUI();
   updateCardGridItem(key);
   showToast('⏳ ' + formatWait(wait));
@@ -703,7 +1060,11 @@ function upgradeCard(ci,idx){
   record-=cost;
   var wait=cardWait(lvl);
   cardUpgrades[key]={endTime:Date.now()+wait*1000,toLevel:lvl+1};
-  saveData(true); updateUI(); updateCardGridItem(key); // immediate=true: save cost deduction NOW
+  var today=getTodayStr();
+  if(dailyTasksData.date!==today) resetDailyTasks(today);
+  dailyTasksData.upgrades++; dailyTasksData.spent+=cost;
+  checkDailyTaskProgress(); checkCardMissions();
+  saveData(true); updateUI(); updateCardGridItem(key);
   document.getElementById('cardModal').classList.remove('none');
   openCard(ci,idx);
   showToast(t('toastUpgradeStart')+' ⏳ '+formatWait(wait));
@@ -1337,6 +1698,7 @@ function initApp() {
     restoreTasksUI();
     updateUI();
     setTimeout(initTonConnect, 800);
+    setTimeout(function(){ initNewFeatures(); checkCardMissions(); }, 300);
   } catch(e) {
     console.log('Init error:', e);
     // Try minimal init so UI at least works
