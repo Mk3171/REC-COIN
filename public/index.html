@@ -107,35 +107,58 @@
     <div id="tasks" class="page">
       <div class="page-title" data-i18n="tasksTitle">✅ المهام</div>
 
-      <!-- Mystery Box -->
-      <div style="background:linear-gradient(135deg,#0d0010,#150020);border:1px solid rgba(180,0,255,0.35);border-radius:14px;padding:14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="openMysteryBox()">
-        <div>
-          <div style="font-size:15px;color:#CC88FF;font-weight:bold;">📦 Mystery Box</div>
-          <div style="color:#aaa;font-size:11px;margin-top:3px;">Free daily — random RECORD or REC!</div>
+      <!-- Task Tabs -->
+      <div style="display:flex;gap:6px;margin-bottom:14px;">
+        <button class="lb-tab active" id="ttab_social" onclick="showTaskTab('social',this)">📢 Social</button>
+        <button class="lb-tab" id="ttab_daily" onclick="showTaskTab('daily',this)">⚡ Daily</button>
+        <button class="lb-tab" id="ttab_missions" onclick="showTaskTab('missions',this)">🎯 Missions</button>
+      </div>
+
+      <!-- ===== SOCIAL TASKS ===== -->
+      <div id="taskTab-social">
+
+        <!-- Telegram & Twitter follow -->
+        <div style="font-size:11px;color:#555;letter-spacing:1px;margin-bottom:8px;">FOLLOW US</div>
+        <div class="info-card">
+          <div style="font-size:14px;margin-bottom:8px;" data-i18n="telegramTask">📱 انضم لجروب تيليغرام</div>
+          <button id="task1JoinBtn" onclick="joinAndWait('telegram','task1JoinBtn','task1Btn')" class="task-join-btn" data-i18n="joinGroupBtn">انضم للجروب ←</button>
+          <button id="task1Btn" onclick="claimTask('telegram','task1Btn','task1JoinBtn')" class="do-btn" disabled data-i18n="getRecord">احصل على 10,000 RECORD</button>
         </div>
-        <button style="background:linear-gradient(135deg,#4a0080,#8800FF);border:none;color:white;padding:9px 14px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:bold;" onclick="event.stopPropagation();openMysteryBox()">Open 🎲</button>
+        <div class="info-card">
+          <div style="font-size:14px;margin-bottom:8px;" data-i18n="twitterTask">🐦 تابع على تويتر</div>
+          <button id="task2JoinBtn" onclick="joinAndWait('twitter','task2JoinBtn','task2Btn')" class="task-join-btn" data-i18n="followTwitterBtn">تابع على تويتر ←</button>
+          <button id="task2Btn" onclick="claimTask('twitter','task2Btn','task2JoinBtn')" class="do-btn" disabled data-i18n="getRecord">احصل على 10,000 RECORD</button>
+        </div>
+
+        <!-- Like Tasks -->
+        <div style="font-size:11px;color:#555;letter-spacing:1px;margin:14px 0 8px;">❤️ LIKE TWEETS — +5 REC EACH</div>
+        <div id="likeTasks"></div>
+
+        <!-- Retweet Tasks -->
+        <div style="font-size:11px;color:#555;letter-spacing:1px;margin:14px 0 8px;">🔁 RETWEET — +5 REC EACH</div>
+        <div id="retweetTasks"></div>
+
       </div>
 
-      <!-- Daily Tasks -->
-      <div style="font-size:13px;color:#aaa;margin-bottom:8px;padding-right:2px;">⚡ Daily Tasks <span style="font-size:10px;color:#555;">— resets midnight</span></div>
-      <div id="dailyTasksCont"></div>
-
-      <!-- Social Tasks -->
-      <div style="font-size:13px;color:#aaa;margin:14px 0 8px;padding-right:2px;">📢 Social Tasks</div>
-      <div class="info-card">
-        <div style="font-size:15px;margin-bottom:8px;" data-i18n="telegramTask">📱 انضم لجروب تيليغرام</div>
-        <button id="task1JoinBtn" onclick="joinAndWait('telegram','task1JoinBtn','task1Btn')" class="task-join-btn" data-i18n="joinGroupBtn">انضم للجروب ←</button>
-        <button id="task1Btn" onclick="claimTask('telegram','task1Btn','task1JoinBtn')" class="do-btn" disabled data-i18n="getRecord">احصل على 10,000 RECORD</button>
-      </div>
-      <div class="info-card">
-        <div style="font-size:15px;margin-bottom:8px;" data-i18n="twitterTask">🐦 تابع على تويتر</div>
-        <button id="task2JoinBtn" onclick="joinAndWait('twitter','task2JoinBtn','task2Btn')" class="task-join-btn" data-i18n="followTwitterBtn">تابع على تويتر ←</button>
-        <button id="task2Btn" onclick="claimTask('twitter','task2Btn','task2JoinBtn')" class="do-btn" disabled data-i18n="getRecord">احصل على 10,000 RECORD</button>
+      <!-- ===== DAILY TASKS ===== -->
+      <div id="taskTab-daily" style="display:none;">
+        <!-- Mystery Box -->
+        <div style="background:linear-gradient(135deg,#0d0010,#150020);border:1px solid rgba(180,0,255,0.35);border-radius:14px;padding:14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="openMysteryBox()">
+          <div>
+            <div style="font-size:15px;color:#CC88FF;font-weight:bold;">📦 Mystery Box</div>
+            <div style="color:#aaa;font-size:11px;margin-top:3px;">Free daily — random RECORD or REC!</div>
+          </div>
+          <button style="background:linear-gradient(135deg,#4a0080,#8800FF);border:none;color:white;padding:9px 14px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:bold;" onclick="event.stopPropagation();openMysteryBox()">Open 🎲</button>
+        </div>
+        <div style="font-size:11px;color:#555;letter-spacing:1px;margin-bottom:8px;">TODAY'S TASKS — resets midnight</div>
+        <div id="dailyTasksCont"></div>
       </div>
 
-      <!-- Card Missions -->
-      <div style="font-size:13px;color:#aaa;margin:14px 0 8px;padding-right:2px;">🎯 Card Missions <span style="font-size:10px;color:#555;">— one-time rewards</span></div>
-      <div id="cardMissionsCont"></div>
+      <!-- ===== CARD MISSIONS ===== -->
+      <div id="taskTab-missions" style="display:none;">
+        <div style="font-size:11px;color:#555;letter-spacing:1px;margin-bottom:8px;">CARD MISSIONS — one-time rewards</div>
+        <div id="cardMissionsCont"></div>
+      </div>
 
     </div>
 
