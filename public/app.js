@@ -57,15 +57,15 @@ function closeLangMenu(){
 }
 
 // ====== CARD MINING FORMULAS ======
-// RECORD/s per card level (level 1=1, level 100=10,000)
+// RECORD/s per card level (level 1=100, level 100=1,000,000)
 function cardRecordSpeed(lvl){
   if(lvl<=0)return 0;
-  return 1*Math.pow(10000,(lvl-1)/99);
+  return 100*Math.pow(10000,(lvl-1)/99);
 }
-// REC/s per card level (level 1=0.000001, level 100=0.05)
+// REC/s per card level (level 1=0.0005, level 100=10)
 function cardRECSpeed(lvl){
   if(lvl<=0)return 0;
-  return 0.000001*Math.pow(50000,(lvl-1)/99);
+  return 0.0005*Math.pow(20000,(lvl-1)/99);
 }
 // RECORD cost to upgrade from current level
 // Level 1: 10,000 | Level 100: 100,000,000,000
