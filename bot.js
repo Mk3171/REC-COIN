@@ -114,7 +114,8 @@ const UserSchema = new mongoose.Schema({
   cardTasksClaimed:{ type: [String], default: [] },
   totalTaps:       { type: Number, default: 0 },
   lastBlockDate:   { type: String, default: '' },
-  totalBlocksFound:{ type: Number, default: 0 }
+  totalBlocksFound:{ type: Number, default: 0 },
+  refillData:      { type: Object, default: {date:'',count:3} }
 });
 
 const User = mongoose.model('User', UserSchema);
