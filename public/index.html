@@ -41,13 +41,16 @@
     <div id="home" class="page active">
       <div class="home-inner">
 
-        <!-- Shop, Exchange & Lang buttons -->
+        <!-- Shop, Exchange, Daily & Lang buttons -->
         <div style="position:relative;width:100%;height:70px;flex-shrink:0;">
           <button class="side-btn" style="border-color:#FFD700;position:absolute;left:10px;top:4px;" onclick="openStarsShop()">
             <span>⭐</span><span class="side-btn-label">Shop</span>
           </button>
           <button class="side-btn" style="border-color:rgba(0,255,136,0.6);position:absolute;left:80px;top:4px;" onclick="openExchange()">
             <span>🔄</span><span class="side-btn-label" style="color:#00FF88;">Exchange</span>
+          </button>
+          <button class="side-btn" style="border-color:rgba(255,215,0,0.6);position:absolute;left:150px;top:4px;" onclick="openDailyLogin()">
+            <span>📅</span><span class="side-btn-label" style="color:#FFD700;">Daily</span>
           </button>
           <button class="side-btn" style="position:absolute;right:10px;top:4px;" onclick="toggleLangMenu()">
             <span>🌍</span><span class="side-btn-label">Lang</span>
@@ -91,16 +94,34 @@
         <button class="cat-btn" onclick="showCategory(1,this)" data-i18n="catCars">🚗 سيارات</button>
         <button class="cat-btn" onclick="showCategory(2,this)" data-i18n="catClubs">🌙 ملاهي</button>
         <button class="cat-btn" onclick="showCategory(3,this)" data-i18n="catPalaces">🏰 قصور</button>
+        <button class="cat-btn" onclick="showCategory(4,this)" style="border-color:rgba(255,215,0,0.5);color:#FFD700;background:linear-gradient(135deg,#1a1200,#2a1e00);">🔥 Limited</button>
       </div>
       <div class="card-grid" id="cat-0"></div>
       <div class="card-grid" id="cat-1" style="display:none"></div>
       <div class="card-grid" id="cat-2" style="display:none"></div>
       <div class="card-grid" id="cat-3" style="display:none"></div>
+      <div class="card-grid" id="cat-4" style="display:none"></div>
     </div>
 
     <!-- TASKS -->
     <div id="tasks" class="page">
       <div class="page-title" data-i18n="tasksTitle">✅ المهام</div>
+
+      <!-- Mystery Box -->
+      <div style="background:linear-gradient(135deg,#0d0010,#150020);border:1px solid rgba(180,0,255,0.35);border-radius:14px;padding:14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="openMysteryBox()">
+        <div>
+          <div style="font-size:15px;color:#CC88FF;font-weight:bold;">📦 Mystery Box</div>
+          <div style="color:#aaa;font-size:11px;margin-top:3px;">Free daily — random RECORD or REC!</div>
+        </div>
+        <button style="background:linear-gradient(135deg,#4a0080,#8800FF);border:none;color:white;padding:9px 14px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:bold;" onclick="event.stopPropagation();openMysteryBox()">Open 🎲</button>
+      </div>
+
+      <!-- Daily Tasks -->
+      <div style="font-size:13px;color:#aaa;margin-bottom:8px;padding-right:2px;">⚡ Daily Tasks <span style="font-size:10px;color:#555;">— resets midnight</span></div>
+      <div id="dailyTasksCont"></div>
+
+      <!-- Social Tasks -->
+      <div style="font-size:13px;color:#aaa;margin:14px 0 8px;padding-right:2px;">📢 Social Tasks</div>
       <div class="info-card">
         <div style="font-size:15px;margin-bottom:8px;" data-i18n="telegramTask">📱 انضم لجروب تيليغرام</div>
         <button id="task1JoinBtn" onclick="joinAndWait('telegram','task1JoinBtn','task1Btn')" class="task-join-btn" data-i18n="joinGroupBtn">انضم للجروب ←</button>
@@ -111,6 +132,11 @@
         <button id="task2JoinBtn" onclick="joinAndWait('twitter','task2JoinBtn','task2Btn')" class="task-join-btn" data-i18n="followTwitterBtn">تابع على تويتر ←</button>
         <button id="task2Btn" onclick="claimTask('twitter','task2Btn','task2JoinBtn')" class="do-btn" disabled data-i18n="getRecord">احصل على 10,000 RECORD</button>
       </div>
+
+      <!-- Card Missions -->
+      <div style="font-size:13px;color:#aaa;margin:14px 0 8px;padding-right:2px;">🎯 Card Missions <span style="font-size:10px;color:#555;">— one-time rewards</span></div>
+      <div id="cardMissionsCont"></div>
+
     </div>
 
     <!-- INVITE -->
