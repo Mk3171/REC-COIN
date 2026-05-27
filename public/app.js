@@ -108,7 +108,7 @@ function applyData(d){
   record=d.record||0; rec=d.rec||0;
   energy=d.energy!==undefined?d.energy:1000; maxEnergy=d.maxEnergy||1000;
   tapLevelVal=d.tapLevelVal||0; energyLevelVal=d.energyLevelVal||0;
-  tapPowerVal=d.tapPowerVal||1;
+  tapPowerVal=Math.max(1,tapLevelVal);
   completedTasks=d.completedTasks||[]; cardLevels=d.cardLevels||{};
   cardUpgrades=d.cardUpgrades||{}; refCount=d.refCount||0;
   claimedMilest=d.claimedMilest||[];
@@ -200,8 +200,8 @@ function showPage(id,btn){
 
 // ====== HOME - TAP ======
 function tap(){
-  if(energy<=0)return;
-  energy=Math.max(0,energy-1);
+  if(energy<tapPowerVal)return;
+  energy=Math.max(0,energy-tapPowerVal);
   record+=tapPowerVal;
   saveData(); updateUI();
 }
@@ -231,7 +231,7 @@ setInterval(function(){
     rec+=recPerSec*3;
   }
   // Energy recharge
-  if(energy<maxEnergy)energy=Math.min(maxEnergy,energy+5);
+  if(energy<maxEnergy)energy=Math.min(maxEnergy,energy+12);
   saveData(); updateUI(); updateTimerDisplays();
 },3000);
 
@@ -280,7 +280,7 @@ function openUpgrade(){updateUpgradeUI();document.getElementById('upgradePage').
 function upgradeTap(){
   var cost=getTapCost(tapLevelVal);
   if(record<cost||tapLevelVal>=100)return;
-  record-=cost;tapLevelVal++;tapPowerVal=1+Math.floor(tapLevelVal/5);
+  record-=cost;tapLevelVal++;tapPowerVal=Math.max(1,tapLevelVal);
   saveData();updateUpgradeUI();updateUI();
 }
 function upgradeEnergy(){
