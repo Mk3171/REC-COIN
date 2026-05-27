@@ -199,7 +199,12 @@ function loadFromServer(callback){
     .then(function(r){ return r.json(); })
     .then(function(res){
       if(res.exists && res.data){
-        // Merge new fields from localStorage (not yet in server schema)
+        // Check if server has more REC than local (block reward received while offline)
+        var localRec = rec || 0;
+        var serverRec = res.data.rec || 0;
+        var recDiff = serverRec - localRec;
+
+        // Merge new fields from localStorage
         try{
           var ls=JSON.parse(localStorage.getItem(saveKey));
           if(ls){
@@ -210,6 +215,14 @@ function loadFromServer(callback){
             if(!res.data.totalTaps && ls.totalTaps) res.data.totalTaps=ls.totalTaps;
           }
         }catch(e){}
+
+        // If server REC is significantly more → block reward was given while offline
+        if(recDiff >= 99) {
+          setTimeout(function(){
+            showBlockNotification(recDiff, res.data.totalBlocksFound || 1);
+          }, 2000);
+        }
+
         callback(res.data);
       } else { callback(null); }
     })
@@ -235,6 +248,37 @@ function showPage(id,btn){
   btn.classList.add('active'); closeLangMenu();
   if(id==='rank') loadLeaderboard(currentTab||'global');
   if(id==='profile') loadProfilePhoto();
+}
+
+// إشعار البلوك عند فتح البوت (لما البلوك جاء من السيرفر وهو أوفلاين)
+function showBlockNotification(recAmount, blockNum) {
+  var old = document.getElementById('blockPopupOverlay');
+  if(old) return; // ما نظهر مرتين
+
+  var ol = document.createElement('div');
+  ol.id = 'blockPopupOverlay';
+  ol.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:99999;display:flex;align-items:center;justify-content:center;';
+
+  var pp = document.createElement('div');
+  pp.style.cssText = 'background:linear-gradient(180deg,#0a0005,#150008);border:2px solid #FF0000;border-radius:20px;padding:24px;width:85vw;max-width:320px;text-align:center;box-shadow:0 0 80px rgba(255,0,0,0.6);animation:blockAppear 0.5s ease;';
+  pp.addEventListener('click', function(e){ e.stopPropagation(); });
+
+  pp.innerHTML =
+    '<style>@keyframes blockAppear{from{transform:scale(0.3);opacity:0}to{transform:scale(1);opacity:1}}</style>'+
+    '<div style="font-size:52px;margin-bottom:6px;">⛏️</div>'+
+    '<div style="font-family:Orbitron,sans-serif;font-size:16px;color:#FF0000;font-weight:bold;letter-spacing:1px;margin-bottom:4px;">BLOCK FOUND!</div>'+
+    '<div style="font-size:11px;color:#555;margin-bottom:16px;">Block #'+blockNum+' • بينما كنت غائباً</div>'+
+    '<div style="background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.3);border-radius:12px;padding:16px;margin-bottom:14px;">'+
+      '<div style="font-size:11px;color:#aaa;margin-bottom:6px;">🟢 REC Reward</div>'+
+      '<div style="font-size:32px;color:#00FF88;font-family:Orbitron,sans-serif;font-weight:bold;">+'+Math.floor(recAmount)+' REC</div>'+
+      '<div style="font-size:10px;color:#555;margin-top:4px;">تمت الإضافة لرصيدك تلقائياً ✅</div>'+
+    '</div>'+
+    '<div style="font-size:10px;color:#444;margin-bottom:14px;">📢 تم الإعلان في قناة REC Blocks</div>'+
+    '<button onclick="document.getElementById(\'blockPopupOverlay\').remove()" style="background:linear-gradient(135deg,#CC0000,#FF2200);border:none;color:white;padding:13px;border-radius:12px;cursor:pointer;font-size:15px;font-weight:bold;width:100%;">🔴 COLLECT</button>';
+
+  ol.addEventListener('click', function(e){ if(e.target===ol) ol.remove(); });
+  ol.appendChild(pp);
+  document.body.appendChild(ol);
 }
 
 // ====== BLOCK MINING (Passive - based on REC mining speed) ======
