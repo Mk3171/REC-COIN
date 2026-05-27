@@ -48,6 +48,14 @@ setInterval(function() { rateLimits = {}; }, 300000); // clear every 5min
 
 // 3. Anti-cheat: validate balance increases are realistic
 const ADMIN_ID = 6995765586;
+const GROUP_CHAT_ID = -1003957241357;
+const BLOCKS_CHANNEL_ID = -1004293036864;
+
+// ====== BLOCK MINING SYSTEM ======
+// Every tap has 1/500 chance to find a block
+// Block rewards based on user's mining level
+const BLOCK_CHANCE = 1 / 500;
+var totalBlocksMined = 0; // track globally
 
 function isRealisticIncrease(oldRec, newRec, oldRecord, newRecord, timeDiff, telegramId) {
   // Admin always passes
@@ -704,6 +712,54 @@ app.get('/api/withdrawals', async (req, res) => {
     const list = await Withdrawal.find().sort({ createdAt: -1 }).limit(50);
     res.json({ count: list.length, withdrawals: list });
   } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// ====== API: BLOCK FOUND ======
+app.post('/api/block-found', async (req, res) => {
+  try {
+    const { telegramId, blockReward, blockNumber } = req.body;
+    if (!telegramId) return res.status(400).json({ error: 'Missing data' });
+
+    const user = await User.findOne({ telegramId: parseInt(telegramId) });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    // Add reward to user
+    const rewardRecord = blockReward.record || 0;
+    const rewardRec = blockReward.rec || 0;
+    await User.findOneAndUpdate(
+      { telegramId: parseInt(telegramId) },
+      { $inc: { record: rewardRecord, rec: rewardRec } }
+    );
+
+    totalBlocksMined++;
+    const userName = user.username ? '@' + user.username : user.firstName || 'مستخدم';
+    const blockNum = blockNumber || totalBlocksMined;
+
+    // Announce to Blocks Channel
+    const channelMsg =
+      `⛏️ *NEW BLOCK MINED* ⛏️\n\n` +
+      `🔴 Block #${blockNum}\n` +
+      `👤 Miner: ${userName}\n` +
+      `💰 Reward: ${rewardRecord > 0 ? '+' + rewardRecord.toLocaleString() + ' RECORD' : ''}${rewardRec > 0 ? ' +' + rewardRec.toFixed(4) + ' REC' : ''}\n` +
+      `⏰ ${new Date().toUTCString()}\n\n` +
+      `🚀 Start mining: @RecMiningGame_bot`;
+
+    await bot.sendMessage(BLOCKS_CHANNEL_ID, channelMsg, { parse_mode: 'Markdown' });
+
+    // Announce to Group
+    const groupMsg =
+      `🎉 *بلوك جديد اكتُشف!*\n\n` +
+      `⛏️ المعدّن: ${userName}\n` +
+      `🏆 المكافأة: ${rewardRecord > 0 ? rewardRecord.toLocaleString() + ' RECORD' : ''}${rewardRec > 0 ? ' + ' + rewardRec.toFixed(4) + ' REC' : ''}\n\n` +
+      `💡 ابدأ التعدين: @RecMiningGame_bot`;
+
+    await bot.sendMessage(GROUP_CHAT_ID, groupMsg, { parse_mode: 'Markdown' });
+
+    res.json({ success: true, blockNum });
+  } catch (e) {
+    console.log('Block announcement error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
 });
 
 app.post('/webhook', (req, res) => { bot.processUpdate(req.body); res.sendStatus(200); });
