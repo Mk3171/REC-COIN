@@ -362,9 +362,8 @@ function showBlockPopup(blockNum, rewardRecord, rewardRec) {
 
 // ====== HOME - TAP ======
 function tap(){
-  if(energy<tapPowerVal)return;
-  energy=Math.max(0,energy-tapPowerVal);
-  record+=tapPowerVal;
+  // الضغط مو موصول بالطاقة ومو موصول بعملة RECORD
+  // الطاقة تتعبى وتفضى لحالها بشكل مستقل
   totalTaps++;
   var today=getTodayStr();
   if(dailyTasksData.date!==today) resetDailyTasks(today);
