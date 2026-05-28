@@ -2032,19 +2032,28 @@ function renderGlobal(top100, myRankData, weekly) {
   var cont = document.getElementById('lbContent');
   var myRank = myRankData ? myRankData.myRank : '-';
 
-  // Use precise server timestamp if available
-  if(weekly && weekly.endTimestamp) {
-    weeklyEndMs = weekly.endTimestamp;
-  } else {
-    weeklyEndMs = Date.now() + (weekly ? weekly.daysLeft : 7) * 24 * 60 * 60 * 1000;
-  }
+  // Calculate end of week client-side (next Sunday midnight)
+  var _d = new Date();
+  var _day = _d.getDay();
+  var _daysLeft = _day === 0 ? 7 : 7 - _day;
+  var _endOfWeek = new Date(_d.getTime() + _daysLeft * 86400000);
+  _endOfWeek.setHours(0,0,0,0);
+  weeklyEndMs = _endOfWeek.getTime();
+
+  // Pre-calculate countdown string
+  var _diff = Math.max(0, weeklyEndMs - Date.now());
+  var _dd = Math.floor(_diff/86400000);
+  var _hh = Math.floor((_diff%86400000)/3600000);
+  var _mm = Math.floor((_diff%3600000)/60000);
+  var _ss = Math.floor((_diff%60000)/1000);
+  var _cdStr = pad2(_dd)+'d '+pad2(_hh)+'h '+pad2(_mm)+'m '+pad2(_ss)+'s';
 
   var html = '';
 
   // Weekly countdown
   html += '<div style="text-align:center;margin-bottom:16px;">' +
     '<div style="font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:2px;margin-bottom:4px;">REWARDS CREDIT IN</div>' +
-    '<div id="weeklyCountdown" style="font-family:Orbitron,sans-serif;font-size:16px;color:#FFD700;font-weight:700;letter-spacing:2px;">calculating...</div>' +
+    '<div id="weeklyCountdown" style="font-family:Orbitron,sans-serif;font-size:16px;color:#FFD700;font-weight:700;letter-spacing:2px;">'+_cdStr+'</div>' +
     '</div>';
 
   if(top100.length === 0) {
@@ -2095,9 +2104,6 @@ function renderGlobal(top100, myRankData, weekly) {
   }
 
   cont.innerHTML = html;
-
-  // Force update countdown immediately
-  updateTimerDisplays();
 
   // Load avatars async
   top100.slice(0,15).forEach(function(p) {
