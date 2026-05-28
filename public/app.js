@@ -472,6 +472,7 @@ function updateUI(){
   s('myRankRecord',Math.floor(record).toLocaleString());
   s('refCountDisplay',refCount);
   updateInviteLinkDisplay();
+  updateWalletPage();
   var commEl = document.getElementById('totalCommissionDisplay');
   if(commEl) commEl.textContent = rec.toFixed(2);
 }
@@ -1057,6 +1058,66 @@ function updateUpgradeUI(){
   var rc=document.getElementById('refillCount');if(rc)rc.textContent=window.refillData.count;
   var rb=document.getElementById('energyRefillBtn');if(rb)rb.disabled=window.refillData.count<=0;
 }
+
+// ====== WALLET PAGE ======
+function updateWalletPage() {
+  var name = tgUser ? (tgUser.first_name || 'Miner') : 'Miner';
+  var id   = tgUser ? tgUser.id : '—';
+  var el;
+
+  el = document.getElementById('walletName'); if(el) el.textContent = name;
+  el = document.getElementById('walletId');   if(el) el.textContent = id;
+  el = document.getElementById('walletAvatar'); if(el) el.textContent = name[0].toUpperCase();
+  el = document.getElementById('walletAssets'); if(el) el.textContent = rec.toFixed(6) + ' REC';
+  el = document.getElementById('walletPool');   if(el) el.textContent = rec.toFixed(6) + ' REC';
+  el = document.getElementById('profileId');    if(el) el.textContent = id;
+  el = document.getElementById('recPoolBalance'); if(el) el.textContent = rec.toFixed(6);
+}
+
+function openWithdrawHistory() {
+  if(!tgUser) return;
+  var overlay = document.getElementById('historyOverlay');
+  if(overlay) { overlay.classList.add('open'); loadWithdrawHistory(); return; }
+
+  // Create overlay
+  var ol = document.createElement('div');
+  ol.id = 'historyOverlay';
+  ol.className = 'overlay-page open';
+  ol.innerHTML =
+    '<button class="back-btn" onclick="document.getElementById(\'historyOverlay\').classList.remove(\'open\')">← Back</button>' +
+    '<h2 style="margin-bottom:16px;color:#FF6644;font-family:Orbitron,sans-serif;font-size:18px;">📄 History</h2>' +
+    '<div id="historyContent" style="color:rgba(255,255,255,0.4);text-align:center;padding:30px;">⏳ Loading...</div>';
+  document.body.appendChild(ol);
+  loadWithdrawHistory();
+}
+
+function loadWithdrawHistory() {
+  if(!tgUser) return;
+  var el = document.getElementById('historyContent');
+  if(!el) return;
+  fetch('/api/withdrawals/'+tgUser.id)
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(!d.withdrawals || d.withdrawals.length === 0) {
+        el.innerHTML = '<div style="text-align:center;padding:40px 20px;"><div style="font-size:40px;margin-bottom:12px;">📭</div><div style="color:rgba(255,255,255,0.3);font-size:14px;">No withdrawals yet</div></div>';
+        return;
+      }
+      el.innerHTML = d.withdrawals.map(function(w){
+        var date = new Date(w.createdAt).toLocaleDateString();
+        var statusColor = w.status==='sent' ? '#00FF88' : w.status==='pending' ? '#FFD700' : '#FF4444';
+        return '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:14px;margin-bottom:8px;">'+
+          '<div style="display:flex;justify-content:space-between;align-items:center;">'+
+          '<div><div style="font-size:15px;font-weight:700;color:#00FF88;">'+w.netAmount+' REC</div>'+
+          '<div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:2px;">'+date+'</div></div>'+
+          '<div style="font-size:11px;font-weight:700;color:'+statusColor+';text-transform:uppercase;">'+w.status+'</div>'+
+          '</div></div>';
+      }).join('');
+    })
+    .catch(function(){
+      el.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,0.3);padding:20px;">Could not load history</div>';
+    });
+}
+// ====== END WALLET PAGE ======
 
 // ====== PROFILE POPUP ======
 function openProfilePopup() {
