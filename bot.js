@@ -442,11 +442,10 @@ function calcMiningSpeed(cardLevels) {
 app.get('/api/leaderboard/global', async (req, res) => {
   try {
     var allUsers = await User.find({ banned: false })
-      .sort({ rec: -1 }).limit(500)
-      .select('telegramId username firstName record rec refCount miningSpeed cardLevels');
+      .sort({ rec: -1 }).limit(100)
+      .select('telegramId username firstName rec miningSpeed');
     res.json({ top100: allUsers.map(function(u, i) {
-      var speed = u.miningSpeed > 0 ? u.miningSpeed : calcMiningSpeed(u.cardLevels);
-      return { rank: i+1, telegramId: u.telegramId, name: u.username || u.firstName || 'User', record: u.record, rec: u.rec, miningSpeed: speed, refCount: u.refCount };
+      return { rank: i+1, telegramId: u.telegramId, name: u.username||u.firstName||'User', rec: u.rec, miningSpeed: u.miningSpeed||0 };
     })});
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
@@ -454,14 +453,14 @@ app.get('/api/leaderboard/global', async (req, res) => {
 app.get('/api/leaderboard/myrank/:telegramId', async (req, res) => {
   try {
     var userId = parseInt(req.params.telegramId);
-    var allUsers = await User.find({}).sort({ rec: -1 }).select('telegramId username firstName record rec miningSpeed cardLevels');
+    var allUsers = await User.find({ banned: false }).sort({ rec: -1 }).limit(500)
+      .select('telegramId username firstName rec miningSpeed');
     var myIndex = allUsers.findIndex(function(u) { return u.telegramId === userId; });
-    var myRank = myIndex + 1;
+    var myRank = myIndex < 0 ? 999 : myIndex + 1;
     var start = Math.max(0, myIndex - 2);
     var end = Math.min(allUsers.length, myIndex + 3);
-    var neighbors = allUsers.slice(start, end).map(function(u, i) {
-      var speed = u.miningSpeed > 0 ? u.miningSpeed : calcMiningSpeed(u.cardLevels);
-      return { rank: start + i + 1, telegramId: u.telegramId, name: u.username || u.firstName || 'User', record: u.record, rec: u.rec, miningSpeed: speed, isMe: u.telegramId === userId };
+    var neighbors = myIndex < 0 ? [] : allUsers.slice(start, end).map(function(u, i) {
+      return { rank: start+i+1, telegramId: u.telegramId, name: u.username||u.firstName||'User', rec: u.rec, miningSpeed: u.miningSpeed||0, isMe: u.telegramId===userId };
     });
     res.json({ myRank, total: allUsers.length, neighbors });
   } catch(e) { res.status(500).json({ error: e.message }); }
