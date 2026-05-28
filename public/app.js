@@ -174,6 +174,7 @@ function saveToServer(){
         completedTasks, cardLevels, cardUpgrades,
         refCount, claimedMilest,
         dailyLogin, mysteryLastDate, dailyTasksData, cardTasksClaimed, totalTaps,
+        miningSpeed: recPerSec,
         refillData: window.refillData
       })
     }).then(function(r){ return r.json(); })
