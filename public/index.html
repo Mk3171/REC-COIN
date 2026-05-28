@@ -13,7 +13,24 @@
   from { transform: translateY(100%); opacity:0; }
   to { transform: translateY(0); opacity:1; }
 }
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
 </style>
+<script>
+function openSideMenu(){
+  var m=document.getElementById('sideMenu');
+  var o=document.getElementById('sideMenuOverlay');
+  m.style.display='block';
+  o.style.display='block';
+  m.style.animation='slideInRight 0.25s ease';
+}
+function closeSideMenu(){
+  document.getElementById('sideMenu').style.display='none';
+  document.getElementById('sideMenuOverlay').style.display='none';
+}
+</script>
 </head>
 <body>
 
@@ -45,7 +62,7 @@
     </div>
     <div class="top-bar-actions">
       <div class="top-bar-btn" onclick="toggleLangMenu()">🌍</div>
-      <div class="top-bar-btn" onclick="showPage('profile', document.querySelector('.nav-btn'))">☰</div>
+      <div class="top-bar-btn" onclick="openSideMenu()">☰</div>
     </div>
   </div>
 
@@ -328,6 +345,76 @@
 <div class="overlay-page" id="cardModal">
   <button class="back-btn" data-i18n="backBtn" onclick="document.getElementById('cardModal').classList.remove('open')">← Back</button>
   <div id="cardDetail"></div>
+</div>
+
+<!-- SIDE MENU -->
+<div id="sideMenuOverlay" style="display:none;position:fixed;inset:0;z-index:9980;background:rgba(0,0,0,0.6);" onclick="closeSideMenu()"></div>
+<div id="sideMenu" style="display:none;position:fixed;top:0;right:0;bottom:0;z-index:9981;width:75%;max-width:280px;background:linear-gradient(180deg,#0e0a22,#080518);border-left:1px solid rgba(255,255,255,0.08);padding:50px 16px 30px;overflow-y:auto;">
+
+  <!-- Close -->
+  <div onclick="closeSideMenu()" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:rgba(255,255,255,0.5);">✕</div>
+
+  <!-- Title -->
+  <div style="font-family:Orbitron,sans-serif;font-size:16px;font-weight:900;background:linear-gradient(180deg,#FF7744,#FF2200);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:24px;letter-spacing:2px;">REC MINING</div>
+
+  <!-- Menu Items -->
+  <div style="display:flex;flex-direction:column;gap:10px;">
+
+    <!-- Support -->
+    <a href="https://t.me/Momokhli" target="_blank" onclick="closeSideMenu()"
+      style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px 16px;text-decoration:none;transition:all 0.2s;-webkit-tap-highlight-color:transparent;">
+      <span style="font-size:22px;">🎧</span>
+      <div>
+        <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;">Support</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:1px;">@Momokhli</div>
+      </div>
+      <span style="margin-left:auto;color:rgba(255,255,255,0.2);font-size:16px;">›</span>
+    </a>
+
+    <!-- News -->
+    <a href="https://t.me/Momokh1" target="_blank" onclick="closeSideMenu()"
+      style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px 16px;text-decoration:none;transition:all 0.2s;-webkit-tap-highlight-color:transparent;">
+      <span style="font-size:22px;">📢</span>
+      <div>
+        <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;">News</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:1px;">Updates & Announcements</div>
+      </div>
+      <span style="margin-left:auto;color:rgba(255,255,255,0.2);font-size:16px;">›</span>
+    </a>
+
+    <!-- Chat -->
+    <a href="https://t.me/REC_Mining_Chat" target="_blank" onclick="closeSideMenu()"
+      style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px 16px;text-decoration:none;transition:all 0.2s;-webkit-tap-highlight-color:transparent;">
+      <span style="font-size:22px;">💬</span>
+      <div>
+        <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;">Chat</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:1px;">Community Chat</div>
+      </div>
+      <span style="margin-left:auto;color:rgba(255,255,255,0.2);font-size:16px;">›</span>
+    </a>
+
+    <!-- Payouts — Locked -->
+    <div style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);border-radius:14px;padding:14px 16px;opacity:0.4;cursor:not-allowed;">
+      <span style="font-size:22px;">💸</span>
+      <div>
+        <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;">Payouts</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:1px;">Coming Soon</div>
+      </div>
+      <span style="margin-left:auto;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.3);font-size:9px;padding:3px 8px;border-radius:6px;font-family:Rajdhani,sans-serif;font-weight:700;letter-spacing:1px;">SOON</span>
+    </div>
+
+    <!-- FAQ / Terms -->
+    <a href="https://rec-mining.onrender.com/" target="_blank" onclick="closeSideMenu()"
+      style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px 16px;text-decoration:none;transition:all 0.2s;-webkit-tap-highlight-color:transparent;">
+      <span style="font-size:22px;">📋</span>
+      <div>
+        <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;">FAQ & Terms</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:1px;">Rules & Conditions</div>
+      </div>
+      <span style="margin-left:auto;color:rgba(255,255,255,0.2);font-size:16px;">›</span>
+    </a>
+
+  </div>
 </div>
 
 <!-- PROFILE STATS POPUP -->
