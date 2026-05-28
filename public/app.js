@@ -1073,6 +1073,163 @@ function updateUpgradeUI(){
   var rb=document.getElementById('energyRefillBtn');if(rb)rb.disabled=window.refillData.count<=0;
 }
 
+// ====== DAILY COMBO ======
+var comboData = null;
+var ADMIN_TG_ID = 6995765586;
+var adminComboSelection = [null, null, null];
+
+function openCombo() {
+  document.getElementById('comboOverlay').style.display = 'block';
+  document.getElementById('comboPopup').style.display = 'block';
+  loadComboData();
+  if(tgUser && tgUser.id === ADMIN_TG_ID) {
+    document.getElementById('comboAdminPanel').style.display = 'block';
+    buildAdminComboSlots();
+  }
+}
+
+function closeCombo() {
+  document.getElementById('comboOverlay').style.display = 'none';
+  document.getElementById('comboPopup').style.display = 'none';
+}
+
+function loadComboData() {
+  if(!tgUser) return;
+  var slots = document.getElementById('comboCardSlots');
+  if(slots) slots.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,0.3);padding:20px;">⏳ Loading...</div>';
+
+  fetch('/api/combo/today/' + tgUser.id)
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      comboData = d;
+      renderComboSlots(d);
+    })
+    .catch(function(){
+      var slots = document.getElementById('comboCardSlots');
+      if(slots) slots.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,0.3);padding:20px;">ما في كومبو اليوم بعد</div>';
+    });
+}
+
+function renderComboSlots(d) {
+  var slots = document.getElementById('comboCardSlots');
+  if(!slots) return;
+
+  if(!d || !d.exists) {
+    slots.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;"><div style="font-size:32px;margin-bottom:8px;">🔒</div><div style="color:rgba(255,255,255,0.3);font-size:13px;">لم يُحدد كومبو اليوم بعد</div></div>';
+    return;
+  }
+
+  slots.innerHTML = d.cards.map(function(c, i) {
+    var cardInfo = getCardInfo(c.categoryIndex, c.cardIndex);
+    var done = c.done;
+    return '<div style="background:' + (done ? 'rgba(0,255,136,0.1)' : 'rgba(255,255,255,0.04)') + ';border:1px solid ' + (done ? 'rgba(0,255,136,0.4)' : 'rgba(255,255,255,0.08)') + ';border-radius:14px;padding:14px 8px;text-align:center;">' +
+      '<div style="font-size:28px;margin-bottom:6px;">' + (done ? (cardInfo ? cardInfo.e : '✅') : '?') + '</div>' +
+      '<div style="font-size:10px;color:' + (done ? '#00FF88' : 'rgba(255,255,255,0.3)') + ';font-weight:700;">' + (done ? (cardInfo ? cardInfo.name : 'Done') : '???') + '</div>' +
+      '<div style="font-size:18px;margin-top:6px;">' + (done ? '✅' : '🔒') + '</div>' +
+      '</div>';
+  }).join('');
+
+  var claimArea = document.getElementById('comboClaimArea');
+  var claimed = document.getElementById('comboClaimed');
+  var allDone = d.allDone;
+  var alreadyClaimed = d.cards.every(function(c){ return c.done; }) && allDone;
+
+  if(claimArea) claimArea.style.display = allDone && !d.rewardClaimed ? 'block' : 'none';
+  if(claimed) claimed.style.display = d.rewardClaimed ? 'block' : 'none';
+
+  // Update badge on home
+  var badge = document.getElementById('comboDotBadge');
+  if(badge) badge.style.display = (d.exists && !allDone) ? 'block' : 'none';
+}
+
+function getCardInfo(catIdx, cardIdx) {
+  try {
+    var cats = typeof categories !== 'undefined' ? categories : [];
+    if(cats[catIdx] && cats[catIdx].cards[cardIdx]) {
+      var card = cats[catIdx].cards[cardIdx];
+      return { e: card.e || '🃏', name: card.en || card.n || 'Card' };
+    }
+  } catch(e) {}
+  return null;
+}
+
+function claimCombo() {
+  if(!tgUser || !comboData) return;
+  // Reward is given server-side automatically when all cards done
+  document.getElementById('comboClaimArea').style.display = 'none';
+  document.getElementById('comboClaimed').style.display = 'block';
+  showToast('🎉 حصلت على +5 REC!');
+  rec += 5;
+  saveData(true); updateUI();
+}
+
+// Called when a card is upgraded — checks against combo
+function checkComboOnUpgrade(cardKey) {
+  if(!tgUser || !comboData || !comboData.exists) return;
+  fetch('/api/combo/check', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ telegramId: tgUser.id, cardKey: cardKey })
+  }).then(function(r){ return r.json(); })
+  .then(function(d){
+    if(d.matched) {
+      showToast('🎯 بطاقة كومبو! ' + d.done + '/3');
+      if(d.allDone && d.reward > 0) {
+        rec += d.reward;
+        saveData(true); updateUI();
+        showToast('🎉 أكملت الكومبو! +' + d.reward + ' REC');
+      }
+      loadComboData(); // refresh combo display
+    }
+  }).catch(function(){});
+}
+
+// ====== ADMIN COMBO SETTER ======
+function buildAdminComboSlots() {
+  var panel = document.getElementById('comboAdminSlots');
+  if(!panel) return;
+  var cats = typeof categories !== 'undefined' ? categories : [];
+  var allCards = [];
+  cats.forEach(function(cat, ci) {
+    cat.cards.forEach(function(card, idx) {
+      allCards.push({ key: ci+'_'+idx, label: (card.e||'🃏') + ' ' + (card.en||card.n||'Card'), ci: ci, idx: idx });
+    });
+  });
+
+  panel.innerHTML = [0,1,2].map(function(slot) {
+    return '<select id="adminComboSlot_'+slot+'" style="width:100%;background:rgba(0,0,0,0.5);border:1px solid rgba(255,100,50,0.3);color:white;padding:8px;border-radius:8px;font-size:11px;">' +
+      '<option value="">-- بطاقة '+(slot+1)+' --</option>' +
+      allCards.map(function(c) {
+        return '<option value="'+c.key+'|'+c.ci+'|'+c.idx+'">'+c.label+'</option>';
+      }).join('') +
+      '</select>';
+  }).join('');
+}
+
+function saveAdminCombo() {
+  if(!tgUser || tgUser.id !== ADMIN_TG_ID) return;
+  var cards = [];
+  for(var i=0;i<3;i++) {
+    var sel = document.getElementById('adminComboSlot_'+i);
+    if(!sel || !sel.value) { showToast('❌ اختر 3 بطاقات'); return; }
+    var parts = sel.value.split('|');
+    cards.push({ key: parts[0], categoryIndex: parseInt(parts[1]), cardIndex: parseInt(parts[2]) });
+  }
+  if(cards[0].key===cards[1].key || cards[1].key===cards[2].key || cards[0].key===cards[2].key) {
+    showToast('❌ لا تكرر نفس البطاقة'); return;
+  }
+  fetch('/api/combo/set', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ adminId: tgUser.id, cards })
+  }).then(function(r){ return r.json(); })
+  .then(function(d){
+    if(d.success) { showToast('✅ تم حفظ الكومبو!'); loadComboData(); }
+    else showToast('❌ خطأ: ' + d.error);
+  }).catch(function(){ showToast('❌ خطأ في الاتصال'); });
+}
+// ====== END DAILY COMBO ======
+
 // ====== WALLET PAGE ======
 function updateWalletPage() {
   var name = tgUser ? (tgUser.first_name || 'Miner') : 'Miner';
@@ -1682,6 +1839,7 @@ function upgradeCard(ci,idx){
   if(dailyTasksData.date!==today) resetDailyTasks(today);
   dailyTasksData.upgrades++; dailyTasksData.spent+=cost;
   checkDailyTaskProgress(); checkCardMissions();
+  checkComboOnUpgrade(key);  // Check if this card is part of daily combo
   saveData(true); updateUI(); updateCardGridItem(key);
   document.getElementById('cardModal').classList.remove('none');
   openCard(ci,idx);
