@@ -2031,14 +2031,20 @@ function loadLeaderboard(tab) {
 function renderGlobal(top100, myRankData, weekly) {
   var cont = document.getElementById('lbContent');
   var myRank = myRankData ? myRankData.myRank : '-';
-  weeklyEndMs = Date.now() + (weekly ? weekly.daysLeft : 7) * 24 * 60 * 60 * 1000;
+
+  // Use precise server timestamp if available
+  if(weekly && weekly.endTimestamp) {
+    weeklyEndMs = weekly.endTimestamp;
+  } else {
+    weeklyEndMs = Date.now() + (weekly ? weekly.daysLeft : 7) * 24 * 60 * 60 * 1000;
+  }
 
   var html = '';
 
   // Weekly countdown
   html += '<div style="text-align:center;margin-bottom:16px;">' +
     '<div style="font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:2px;margin-bottom:4px;">REWARDS CREDIT IN</div>' +
-    '<div id="weeklyCountdown" style="font-family:Orbitron,sans-serif;font-size:16px;color:#FFD700;font-weight:700;letter-spacing:2px;">--d --h --m --s</div>' +
+    '<div id="weeklyCountdown" style="font-family:Orbitron,sans-serif;font-size:16px;color:#FFD700;font-weight:700;letter-spacing:2px;">calculating...</div>' +
     '</div>';
 
   if(top100.length === 0) {
@@ -2052,6 +2058,8 @@ function renderGlobal(top100, myRankData, weekly) {
 
   top100.forEach(function(p) {
     var isMe   = tgUser && p.telegramId == tgUser.id;
+    var speed  = isMe ? recPerSec : (p.miningSpeed || 0);
+    var speedStr = speed > 0 ? speed.toFixed(6) : '—';
     var rCol   = rankColors[p.rank] || (isMe ? '#FF6644' : 'rgba(255,255,255,0.4)');
     var bg     = isMe ? 'rgba(255,100,50,0.12)' : 'rgba(255,255,255,0.03)';
     var border = isMe ? 'rgba(255,100,50,0.5)' : (rankColors[p.rank] ? rCol+'40' : 'rgba(255,255,255,0.07)');
@@ -2062,7 +2070,7 @@ function renderGlobal(top100, myRankData, weekly) {
       '<div data-uid="' + p.telegramId + '" style="width:42px;height:42px;border-radius:50%;background:' + avBg + ';display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:bold;color:white;flex-shrink:0;">' + (p.name||'?')[0].toUpperCase() + '</div>' +
       '<div style="flex:1;min-width:0;">' +
         '<div style="font-size:14px;font-weight:700;color:' + (isMe?'#FF6644':'white') + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (p.name||'User') + (isMe?' 👈':'') + '</div>' +
-        '<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px;">⚡ ' + (p.miningSpeed||0).toFixed(6) + ' REC/s</div>' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px;">⚡ ' + speedStr + (speed > 0 ? ' REC/s' : '') + '</div>' +
       '</div>' +
       '<div style="text-align:right;flex-shrink:0;">' +
         '<div style="font-size:14px;color:#00FF88;font-weight:700;">' + (p.rec||0).toFixed(3) + '</div>' +
@@ -2087,6 +2095,9 @@ function renderGlobal(top100, myRankData, weekly) {
   }
 
   cont.innerHTML = html;
+
+  // Force update countdown immediately
+  updateTimerDisplays();
 
   // Load avatars async
   top100.slice(0,15).forEach(function(p) {
