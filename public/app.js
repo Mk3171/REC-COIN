@@ -452,13 +452,13 @@ function updateTimerDisplays(){
   });
   // Weekly countdown
   var wEl = document.getElementById('weeklyCountdown');
-  if(wEl && weeklyEndMs){
+  if(wEl && weeklyEndMs > 0){
     var diff = Math.max(0, weeklyEndMs - now);
     var dd = Math.floor(diff / 86400000);
     var hh = Math.floor((diff % 86400000) / 3600000);
     var mm = Math.floor((diff % 3600000) / 60000);
     var ss = Math.floor((diff % 60000) / 1000);
-    wEl.textContent = pad2(dd) + 'd ' + pad2(hh) + 'h ' + pad2(mm) + 'm ' + pad2(ss) + 's';
+    wEl.textContent = pad2(dd)+'d '+pad2(hh)+'h '+pad2(mm)+'m '+pad2(ss)+'s';
   }
 }
 
@@ -1807,7 +1807,7 @@ function renderGlobal(top100, myRankData, weekly) {
   var cont = document.getElementById('lbContent');
   var myRank = myRankData ? myRankData.myRank : '-';
   var daysLeft = weekly ? weekly.daysLeft : 7;
-  var weeklyEndMs = Date.now() + daysLeft * 24 * 60 * 60 * 1000;
+  weeklyEndMs = Date.now() + daysLeft * 24 * 60 * 60 * 1000;
 
   var html = '';
 
@@ -1815,8 +1815,8 @@ function renderGlobal(top100, myRankData, weekly) {
   html += '<div style="background:linear-gradient(135deg,#1a0a00,#2a1500);border:1px solid #FFD700;border-radius:12px;padding:12px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">' +
     '<div><div style="color:#FFD700;font-size:13px;font-weight:bold;">' + t('weeklyChallenge') + '</div>' +
     '<div style="color:#aaa;font-size:11px;margin-top:2px;">' + t('weeklyPrize') + '</div></div>' +
-    '<div style="text-align:center;" id="weeklyCountdownWrap">' +
-    '<div id="weeklyCountdown" style="font-size:13px;font-family:Orbitron,sans-serif;color:#FFD700;letter-spacing:1px;">--:--:--</div>' +
+    '<div style="text-align:center;">' +
+    '<div id="weeklyCountdown" style="font-size:13px;font-family:Orbitron,sans-serif;color:#FFD700;letter-spacing:1px;">--d --h --m --s</div>' +
     '<div style="font-size:9px;color:#aaa;">DD : HH : MM : SS</div></div></div>';
 
   // My rank card
