@@ -8,6 +8,12 @@
   <script src="tonconnect-ui.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+<style>
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity:0; }
+  to { transform: translateY(0); opacity:1; }
+}
+</style>
 </head>
 <body>
 
@@ -26,7 +32,7 @@
 
   <!-- ===== TOP BAR ===== -->
   <div class="top-bar">
-    <div class="top-bar-profile">
+    <div class="top-bar-profile" onclick="openProfilePopup()" style="cursor:pointer;-webkit-tap-highlight-color:transparent;">
       <div class="top-bar-avatar" id="topBarAvatar">M</div>
       <div>
         <div class="top-bar-name" id="topBarName">REC Mining</div>
@@ -322,6 +328,23 @@
 <div class="overlay-page" id="cardModal">
   <button class="back-btn" data-i18n="backBtn" onclick="document.getElementById('cardModal').classList.remove('open')">← Back</button>
   <div id="cardDetail"></div>
+</div>
+
+<!-- PROFILE STATS POPUP -->
+<div id="profilePopupOverlay" style="display:none;position:fixed;inset:0;z-index:9990;background:rgba(0,0,0,0.75);" onclick="closeProfilePopup()"></div>
+<div id="profilePopup" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9991;background:linear-gradient(180deg,#0e0a22,#080518);border-radius:24px 24px 0 0;border-top:1px solid rgba(255,100,50,0.3);padding:20px 16px 36px;max-height:85vh;overflow-y:auto;">
+  <div style="width:40px;height:4px;background:rgba(255,255,255,0.15);border-radius:2px;margin:0 auto 16px;"></div>
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+    <div id="ppAvatar" style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#FF4444,#CC0000);border:3px solid rgba(255,68,68,0.5);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:bold;color:white;flex-shrink:0;overflow:hidden;"></div>
+    <div style="flex:1;">
+      <div id="ppName" style="font-size:18px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;"></div>
+      <div id="ppUsername" style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:2px;"></div>
+    </div>
+    <div onclick="closeProfilePopup()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:rgba(255,255,255,0.5);flex-shrink:0;">✕</div>
+  </div>
+  <div id="ppStatsGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;"></div>
+  <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.35);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">🃏 TOP CARDS</div>
+  <div id="ppCardsGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;"></div>
 </div>
 
 <script src="app.js"></script>
