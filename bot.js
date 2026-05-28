@@ -961,12 +961,50 @@ app.post('/api/block-found', async (req, res) => {
   try {
     const { telegramId, blockReward, blockNumber } = req.body;
     if (!telegramId) return res.status(400).json({ error: 'Missing data' });
-    // Give commission to referrers when block found
-    if (blockReward && blockReward > 0) {
-      var user = await User.findOne({ telegramId: parseInt(telegramId) }).select('referredBy referredByL2 referredByL3');
-      if (user) distributeRefCommission(user, parseFloat(blockReward)).catch(function(){});
+
+    const user = await User.findOne({ telegramId: parseInt(telegramId) })
+      .select('username firstName referredBy referredByL2 referredByL3 totalBlocksFound');
+    if (!user) return res.json({ success: true });
+
+    const rewardRec    = blockReward ? (blockReward.rec    || 0) : 0;
+    const rewardRecord = blockReward ? (blockReward.record || 0) : 0;
+    const userName     = user.username ? '@' + user.username : (user.firstName || 'Miner');
+    const today        = new Date().toISOString().split('T')[0];
+
+    totalBlocksMined++;
+
+    // Update user stats
+    await User.findOneAndUpdate(
+      { telegramId: parseInt(telegramId) },
+      { $inc: { totalBlocksFound: 1 }, lastBlockDate: today }
+    );
+
+    // Referral commission on block
+    if (rewardRec > 0) {
+      distributeRefCommission(user, rewardRec).catch(() => {});
     }
-    res.json({ success: true });
+
+    // 📢 Send to Blocks Channel
+    const channelMsg =
+      `⛏️ *NEW BLOCK MINED* ⛏️\n\n` +
+      `🔴 Block #${totalBlocksMined}\n` +
+      `👤 Miner: ${userName}\n` +
+      `💰 Reward: +${rewardRec.toFixed(4)} REC\n` +
+      `🎯 Block #${totalBlocksMined} found by the community!`;
+
+    await bot.sendMessage(BLOCKS_CHANNEL_ID, channelMsg, { parse_mode: 'Markdown' }).catch(() => {});
+
+    // 📩 Personal message to miner
+    const personalMsg =
+      `⛏️ *YOU FOUND A BLOCK!*\n\n` +
+      `🔴 Block #${totalBlocksMined}\n` +
+      `💰 +${rewardRec.toFixed(6)} REC added!\n` +
+      `📦 +${rewardRecord.toLocaleString()} RECORD added!\n\n` +
+      `Keep mining to find more blocks! 🚀`;
+
+    await bot.sendMessage(parseInt(telegramId), personalMsg, { parse_mode: 'Markdown' }).catch(() => {});
+
+    res.json({ success: true, blockNum: totalBlocksMined });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
