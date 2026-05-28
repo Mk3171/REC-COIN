@@ -1058,6 +1058,92 @@ function updateUpgradeUI(){
   var rb=document.getElementById('energyRefillBtn');if(rb)rb.disabled=window.refillData.count<=0;
 }
 
+// ====== PROFILE POPUP ======
+function openProfilePopup() {
+  var popup = document.getElementById('profilePopup');
+  var overlay = document.getElementById('profilePopupOverlay');
+  if(!popup) return;
+
+  var name = tgUser ? (tgUser.first_name || 'Miner') : 'Miner';
+  var username = tgUser ? (tgUser.username ? '@'+tgUser.username : 'ID: '+tgUser.id) : '';
+  document.getElementById('ppName').textContent = name;
+  document.getElementById('ppUsername').textContent = username;
+
+  var avatarEl = document.getElementById('ppAvatar');
+  avatarEl.textContent = name[0].toUpperCase();
+
+  // Count cards
+  var totalCards = 0, upgradedCards = 0, totalCardLevels = 0;
+  var categories_list = typeof categories !== 'undefined' ? categories : [];
+  categories_list.forEach(function(cat){ totalCards += cat.cards.length; });
+  Object.keys(cardLevels).forEach(function(k){
+    var lvl = cardLevels[k] || 0;
+    if(lvl > 0) upgradedCards++;
+    totalCardLevels += lvl;
+  });
+
+  var tasksDone = completedTasks.length;
+  var speed = recPerSec > 0 ? recPerSec.toFixed(8) : '0.00000000';
+
+  var stats = [
+    { icon:'⛏️', label:'CARDS UPGRADED', val: upgradedCards+' / '+totalCards, color:'#AA66FF' },
+    { icon:'⚡', label:'REC SPEED', val: speed+'/s', color:'#00FF88' },
+    { icon:'🔴', label:'RECORD', val: Math.floor(record).toLocaleString(), color:'#FF6644' },
+    { icon:'💚', label:'REC BALANCE', val: rec.toFixed(4), color:'#00FF88' },
+    { icon:'👆', label:'TOTAL TAPS', val: (totalTaps||0).toLocaleString(), color:'#FFD700' },
+    { icon:'✅', label:'TASKS DONE', val: tasksDone, color:'#44FFAA' },
+    { icon:'👥', label:'FRIENDS', val: refCount, color:'#44CCFF' },
+    { icon:'📈', label:'CARD LEVELS', val: totalCardLevels, color:'#FF8844' },
+  ];
+
+  var grid = document.getElementById('ppStatsGrid');
+  if(grid) grid.innerHTML = stats.map(function(s){
+    return '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:12px 10px;text-align:center;">'+
+      '<div style="font-size:22px;margin-bottom:4px;">'+s.icon+'</div>'+
+      '<div style="font-size:12px;font-weight:700;color:'+s.color+';font-family:Orbitron,sans-serif;line-height:1.2;word-break:break-all;">'+s.val+'</div>'+
+      '<div style="font-size:9px;color:rgba(255,255,255,0.3);margin-top:4px;letter-spacing:1px;">'+s.label+'</div>'+
+      '</div>';
+  }).join('');
+
+  // Top cards
+  var cardsList = [];
+  categories_list.forEach(function(cat){
+    cat.cards.forEach(function(card, idx){
+      var key = (cat.nameKey||'cat')+'_'+idx;
+      var lvl = cardLevels[key] || 0;
+      if(lvl > 0) cardsList.push({ e:card.e||'🃏', n:card.en||card.n||'Card', lvl:lvl });
+    });
+  });
+  cardsList.sort(function(a,b){ return b.lvl-a.lvl; });
+
+  var cardsGrid = document.getElementById('ppCardsGrid');
+  if(cardsGrid) {
+    if(cardsList.length === 0) {
+      cardsGrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,0.25);font-size:12px;padding:10px 0;">No cards upgraded yet</div>';
+    } else {
+      cardsGrid.innerHTML = cardsList.slice(0,12).map(function(c){
+        return '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:8px 4px;text-align:center;">'+
+          '<div style="font-size:22px;">'+c.e+'</div>'+
+          '<div style="font-size:9px;color:rgba(255,255,255,0.5);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+c.n+'</div>'+
+          '<div style="font-size:10px;color:#FF6644;font-weight:700;margin-top:1px;">LVL '+c.lvl+'</div>'+
+          '</div>';
+      }).join('');
+    }
+  }
+
+  overlay.style.display = 'block';
+  popup.style.display = 'block';
+  popup.style.animation = 'slideUp 0.3s ease';
+}
+
+function closeProfilePopup() {
+  var p = document.getElementById('profilePopup');
+  var o = document.getElementById('profilePopupOverlay');
+  if(p) p.style.display = 'none';
+  if(o) o.style.display = 'none';
+}
+// ====== END PROFILE POPUP ======
+
 // ====== INVITE PAGE FUNCTIONS ======
 var refData = { l1:[], l2:[], l3:[] };
 var currentRefLevel = 1;
