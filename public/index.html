@@ -276,28 +276,84 @@ function closeSideMenu(){
 
     <!-- INVITE PAGE -->
     <div id="invite" class="page">
-      <div class="page-title" data-i18n="inviteTitle">👥 Invite</div>
-      <div class="info-card" style="text-align:center;padding:16px;margin-bottom:12px;">
-        <div style="font-size:36px;margin-bottom:8px;">🎁</div>
-        <div data-i18n="inviteSubtitle" style="color:#aaa;font-size:13px;">Invite friends and earn REC!</div>
+      <div class="page-title" data-i18n="inviteTitle">👥 Friends</div>
+
+      <!-- Tabs -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <button id="inviteTab_invite" onclick="switchInviteTab('invite',this)"
+          style="flex:1;padding:10px;border-radius:12px;background:rgba(255,100,50,0.15);border:1px solid rgba(255,100,50,0.5);color:#FF6644;font-size:14px;font-weight:700;cursor:pointer;font-family:Rajdhani,sans-serif;">Invite</button>
+        <button id="inviteTab_referrals" onclick="switchInviteTab('referrals',this)"
+          style="flex:1;padding:10px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.4);font-size:14px;font-weight:700;cursor:pointer;font-family:Rajdhani,sans-serif;">Referrals</button>
       </div>
-      <div style="display:flex;gap:10px;margin-bottom:12px;">
-        <button onclick="copyInvite()" style="flex:1;background:linear-gradient(135deg,#CC0000,#FF2200);border:none;color:white;padding:13px;border-radius:12px;font-size:14px;cursor:pointer;font-weight:bold;font-family:Rajdhani,sans-serif;" data-i18n="copyLink">📋 Copy Link</button>
-        <button onclick="shareInvite()" style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,0,0,0.35);color:white;padding:13px;border-radius:12px;font-size:14px;cursor:pointer;font-family:Rajdhani,sans-serif;" data-i18n="shareBtn">📤 Share</button>
-      </div>
-      <div class="info-card" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
-        <div>
-          <div data-i18n="totalInvited" style="font-size:11px;color:#aaa;margin-bottom:4px;">Total Invited</div>
-          <div style="font-size:30px;font-family:Orbitron,sans-serif;color:#FF6644;line-height:1;" id="refCountDisplay">0</div>
+
+      <!-- INVITE TAB -->
+      <div id="inviteTabContent_invite">
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px;margin-bottom:12px;">
+          <div style="font-size:13px;font-weight:700;color:white;letter-spacing:1px;margin-bottom:4px;">PARTNER PROGRAM</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:14px;">Invite friends & earn REC from their mining and blocks.</div>
+          <div style="display:flex;gap:8px;margin-bottom:10px;">
+            <div id="inviteLinkDisplay" style="flex:1;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 12px;font-size:10px;color:rgba(255,255,255,0.4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Loading...</div>
+            <button onclick="copyInvite()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);color:white;padding:10px 14px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:700;font-family:Rajdhani,sans-serif;white-space:nowrap;">Copy</button>
+          </div>
+          <button onclick="shareInvite()" style="width:100%;background:linear-gradient(135deg,#CC0000,#FF4400);border:none;color:white;padding:12px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:Rajdhani,sans-serif;letter-spacing:1px;">📤 Share</button>
         </div>
-        <div style="text-align:center;">
-          <div style="font-size:32px;">👥</div>
-          <div data-i18n="personJoined" style="font-size:9px;color:#aaa;margin-top:2px;max-width:80px;">people joined</div>
+
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px;margin-bottom:12px;">
+          <div style="font-size:13px;font-weight:700;color:white;letter-spacing:1px;margin-bottom:12px;">COMMISSION RATES</div>
+          <div style="display:grid;grid-template-columns:1fr 72px 72px 72px;gap:4px;margin-bottom:8px;">
+            <div style="font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:1px;">TYPE</div>
+            <div style="font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:1px;text-align:center;">LVL 1</div>
+            <div style="font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:1px;text-align:center;">LVL 2</div>
+            <div style="font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:1px;text-align:center;">LVL 3</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 72px 72px 72px;gap:4px;background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.15);border-radius:10px;padding:10px;margin-bottom:6px;">
+            <div style="font-size:12px;color:white;">⛏️ Mining</div>
+            <div style="font-size:13px;color:#00FF88;font-weight:700;text-align:center;">8%</div>
+            <div style="font-size:13px;color:#00FF88;font-weight:700;text-align:center;">2%</div>
+            <div style="font-size:13px;color:#00FF88;font-weight:700;text-align:center;">1%</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 72px 72px 72px;gap:4px;background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.15);border-radius:10px;padding:10px;">
+            <div style="font-size:12px;color:white;">🏆 Block</div>
+            <div style="font-size:13px;color:#FFD700;font-weight:700;text-align:center;">8%</div>
+            <div style="font-size:13px;color:#FFD700;font-weight:700;text-align:center;">2%</div>
+            <div style="font-size:13px;color:#FFD700;font-weight:700;text-align:center;">1%</div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:14px;text-align:center;">
+            <div style="font-size:26px;color:#FF6644;font-family:Orbitron,sans-serif;font-weight:700;" id="refCountDisplay">0</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:4px;letter-spacing:1px;">FRIENDS</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:14px;text-align:center;">
+            <div style="font-size:18px;color:#00FF88;font-family:Orbitron,sans-serif;font-weight:700;" id="totalCommissionDisplay">0.00</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:4px;letter-spacing:1px;">REC EARNED</div>
+          </div>
+        </div>
+
+        <div style="font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin-bottom:8px;">🎯 REWARD MILESTONES</div>
+        <div id="milestonesContainer"></div>
+      </div>
+
+      <!-- REFERRALS TAB -->
+      <div id="inviteTabContent_referrals" style="display:none;">
+        <div style="display:flex;gap:6px;margin-bottom:14px;">
+          <button id="refLvlBtn_1" onclick="switchRefLevel(1)" style="flex:1;padding:9px;border-radius:10px;background:rgba(255,100,50,0.15);border:1px solid rgba(255,100,50,0.5);color:#FF6644;font-size:12px;font-weight:700;cursor:pointer;font-family:Rajdhani,sans-serif;">Lvl 1</button>
+          <button id="refLvlBtn_2" onclick="switchRefLevel(2)" style="flex:1;padding:9px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.3);font-size:12px;font-weight:700;cursor:pointer;font-family:Rajdhani,sans-serif;">Lvl 2</button>
+          <button id="refLvlBtn_3" onclick="switchRefLevel(3)" style="flex:1;padding:9px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.3);font-size:12px;font-weight:700;cursor:pointer;font-family:Rajdhani,sans-serif;">Lvl 3</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 80px 80px;gap:4px;padding:0 4px;margin-bottom:8px;">
+          <div style="font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:1px;">USER</div>
+          <div style="font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:1px;text-align:center;">REC/s</div>
+          <div style="font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:1px;text-align:right;">REC</div>
+        </div>
+        <div id="refListContent">
+          <div style="text-align:center;padding:30px;color:rgba(255,255,255,0.2);font-size:13px;">⏳ Loading...</div>
         </div>
       </div>
-      <div data-i18n="milestonesTitle" style="font-size:13px;color:#aaa;margin:10px 0 8px;font-weight:600;">🎯 Reward Milestones</div>
-      <div id="milestonesContainer"></div>
     </div>
+
+
 
     <!-- RANK PAGE -->
     <div id="rank" class="page" onappear="loadLeaderboard('global')">
