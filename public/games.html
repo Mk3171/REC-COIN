@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>REC Catch</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600&display=swap');
+
+  *{ margin:0; padding:0; box-sizing:border-box; }
+
+  body{
+    background:#000;
+    overflow:hidden;
+    font-family:'Rajdhani',sans-serif;
+    height:100vh;
+    width:100vw;
+    touch-action:none;
+  }
+
+  #gameCanvas{
+    display:block;
+    width:100vw;
+    height:100vh;
+  }
+
+  /* HUD */
+  #hud{
+    position:fixed;
+    top:0; left:0; right:0;
+    padding:10px 14px 6px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    background:linear-gradient(180deg,rgba(0,0,0,0.9),transparent);
+    z-index:10;
+    pointer-events:none;
+  }
+
+  .hud-box{
+    background:rgba(0,0,0,0.6);
+    border:1px solid rgba(255,0,0,0.3);
+    border-radius:10px;
+    padding:5px 10px;
+    text-align:center;
+  }
+
+  .hud-label{
+    font-size:9px;
+    color:#555;
+    letter-spacing:1px;
+    text-transform:uppercase;
+  }
+
+  .hud-value{
+    font-family:'Orbitron',sans-serif;
+    font-size:14px;
+    color:#00FF88;
+    font-weight:700;
+  }
+
+  .hud-value.red{ color:#FF4444; }
+  .hud-value.yellow{ color:#FFD700; }
+
+  /* Powerup icons */
+  #powerups{
+    position:fixed;
+    bottom:120px;
+    left:50%;
+    transform:translateX(-50%);
+    display:flex;
+    gap:10px;
+    z-index:10;
+    pointer-events:none;
+  }
+
+  .pu-badge{
+    background:rgba(0,0,0,0.8);
+    border:1px solid rgba(255,255,255,0.2);
+    border-radius:20px;
+    padding:4px 12px;
+    font-size:12px;
+    color:#fff;
+    display:flex;
+    align-items:center;
+    gap:5px;
+    animation:pulseBadge 0.5s ease infinite alternate;
+  }
+
+  @keyframes pulseBadge{
+    from{transform:scale(1);}
+    to{transform:scale(1.05);}
+  }
+
+  /* Start/End screens */
+  .screen{
+    position:fixed;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    background:rgba(0,0,0,0.92);
+    z-index:20;
+    padding:24px;
+  }
+
+  .screen.hidden{ display:none; }
+
+  .screen-title{
+    font-family:'Orbitron',sans-serif;
+    font-size:28px;
+    color:#FF0000;
+    font-weight:900;
+    letter-spacing:3px;
+    margin-bottom:6px;
+    text-shadow:0 0 30px rgba(255,0,0,0.6);
+  }
+
+  .screen-sub{
+    font-size:13px;
+    color:#555;
+    margin-bottom:28px;
+    letter-spacing:1px;
+  }
+
+  .stat-row{
+    display:flex;
+    justify-content:space-between;
+    width:100%;
+    max-width:280px;
+    background:rgba(255,255,255,0.03);
+    border:1px solid rgba(255,255,255,0.07);
+    border-radius:10px;
+    padding:10px 16px;
+    margin-bottom:8px;
+  }
+
+  .stat-label{ color:#555; font-size:13px; }
+  .stat-val{ color:#00FF88; font-family:'Orbitron',sans-serif; font-size:13px; }
+  .stat-val.red{ color:#FF4444; }
+
+  .play-btn{
+    margin-top:20px;
+    background:linear-gradient(135deg,#CC0000,#FF2200);
+    border:none;
+    color:white;
+    padding:14px 40px;
+    border-radius:12px;
+    font-family:'Orbitron',sans-serif;
+    font-size:15px;
+    font-weight:700;
+    cursor:pointer;
+    letter-spacing:2px;
+    box-shadow:0 0 30px rgba(255,0,0,0.4);
+  }
+
+  .play-btn:disabled{
+    background:#222;
+    color:#444;
+    box-shadow:none;
+  }
+
+  .daily-bar-wrap{
+    width:100%;
+    max-width:280px;
+    margin-bottom:16px;
+  }
+
+  .daily-bar-label{
+    display:flex;
+    justify-content:space-between;
+    font-size:11px;
+    color:#555;
+    margin-bottom:4px;
+  }
+
+  .daily-bar{
+    height:6px;
+    background:rgba(255,255,255,0.08);
+    border-radius:3px;
+    overflow:hidden;
+  }
+
+  .daily-bar-fill{
+    height:100%;
+    background:linear-gradient(90deg,#00FF88,#00CC66);
+    border-radius:3px;
+    transition:width 0.3s;
+  }
+
+  /* Combo flash */
+  #comboFlash{
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    font-family:'Orbitron',sans-serif;
+    font-size:32px;
+    font-weight:900;
+    color:#FFD700;
+    text-shadow:0 0 20px rgba(255,215,0,0.8);
+    pointer-events:none;
+    z-index:15;
+    opacity:0;
+    transition:opacity 0.3s;
+  }
+
+  #limitFlash{
+    position:fixed;
+    top:40%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    font-family:'Orbitron',sans-serif;
+    font-size:18px;
+    font-weight:700;
+    color:#FF4444;
+    text-shadow:0 0 20px rgba(255,68,68,0.8);
+    pointer-events:none;
+    z-index:15;
+    opacity:0;
+    text-align:center;
+  }
+</style>
+</head>
+<body>
+
+<!-- HUD -->
+<div id="hud">
+  <div class="hud-box">
+    <div class="hud-label">Session</div>
+    <div class="hud-value" id="hudSession">0.0000</div>
+  </div>
+  <div class="hud-box">
+    <div class="hud-label">Today</div>
+    <div class="hud-value yellow" id="hudToday">0.0000</div>
+  </div>
+  <div class="hud-box">
+    <div class="hud-label">Score</div>
+    <div class="hud-value red" id="hudScore">0</div>
+  </div>
+</div>
+
+<!-- Powerup badges -->
+<div id="powerups"></div>
+
+<!-- Combo flash -->
+<div id="comboFlash"></div>
+<div id="limitFlash"></div>
+
+<!-- Canvas -->
+<canvas id="gameCanvas"></canvas>
+
+<!-- Start Screen -->
+<div class="screen" id="startScreen">
+  <div style="font-size:48px;margin-bottom:10px;">⛏️</div>
+  <div class="screen-title">REC CATCH</div>
+  <div class="screen-sub">Catch REC coins — earn real rewards!</div>
+
+  <div class="daily-bar-wrap">
+    <div class="daily-bar-label">
+      <span>Daily Progress</span>
+      <span id="startTodayLabel">0 / 10 REC</span>
+    </div>
+    <div class="daily-bar">
+      <div class="daily-bar-fill" id="startDailyBar" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="stat-row">
+    <span class="stat-label">⚡ x2 Boost</span>
+    <span class="stat-val">Random drops</span>
+  </div>
+  <div class="stat-row">
+    <span class="stat-label">🧲 Magnet</span>
+    <span class="stat-val">Auto-collect</span>
+  </div>
+  <div class="stat-row">
+    <span class="stat-label">🌟 Combo</span>
+    <span class="stat-val">Chain = bonus</span>
+  </div>
+  <div class="stat-row">
+    <span class="stat-label">📅 Daily Max</span>
+    <span class="stat-val">10 REC</span>
+  </div>
+
+  <button class="play-btn" id="startBtn" onclick="startGame()">▶ PLAY</button>
+  <div id="limitMsg" style="margin-top:12px;font-size:11px;color:#FF4444;display:none;">Daily limit reached! Come back tomorrow 🌙</div>
+</div>
+
+<!-- End Screen -->
+<div class="screen hidden" id="endScreen">
+  <div style="font-size:44px;margin-bottom:8px;">🎮</div>
+  <div class="screen-title">GAME OVER</div>
+  <div class="screen-sub">Session Results</div>
+
+  <div class="stat-row">
+    <span class="stat-label">Session Earned</span>
+    <span class="stat-val" id="endSession">0.0000 REC</span>
+  </div>
+  <div class="stat-row">
+    <span class="stat-label">Total Today</span>
+    <span class="stat-val yellow" id="endToday">0.0000 REC</span>
+  </div>
+  <div class="stat-row">
+    <span class="stat-label">Coins Caught</span>
+    <span class="stat-val" id="endCoins">0</span>
+  </div>
+  <div class="stat-row">
+    <span class="stat-label">Best Combo</span>
+    <span class="stat-val" id="endCombo">x1</span>
+  </div>
+
+  <div class="daily-bar-wrap" style="margin-top:16px;">
+    <div class="daily-bar-label">
+      <span>Daily Progress</span>
+      <span id="endTodayLabel">0 / 10 REC</span>
+    </div>
+    <div class="daily-bar">
+      <div class="daily-bar-fill" id="endDailyBar" style="width:0%"></div>
+    </div>
+  </div>
+
+  <button class="play-btn" id="playAgainBtn" onclick="showStart()">🔄 PLAY AGAIN</button>
+</div>
+
+<script src="games.js"></script>
+</body>
+</html>
