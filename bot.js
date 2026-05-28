@@ -717,7 +717,84 @@ app.get('/api/withdrawals', async (req, res) => {
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-// ====== BLOCK DISTRIBUTION SYSTEM ======
+// ====== ADMIN DASHBOARD API ======
+app.get('/admin', async (req, res) => {
+  const adminId = req.query.id;
+  if(String(adminId) !== String(ADMIN_ID)){
+    return res.status(403).send('<h2 style="color:red;font-family:monospace;">❌ Access Denied</h2>');
+  }
+
+  try {
+    const users = await User.find({}).sort({ rec: -1 }).lean();
+    const totalUsers = users.length;
+    const activeWeek = users.filter(u => u.lastSeen && (Date.now() - new Date(u.lastSeen)) < 7*86400000).length;
+    const activeDay = users.filter(u => u.lastSeen && (Date.now() - new Date(u.lastSeen)) < 86400000).length;
+    const totalRec = users.reduce((s,u) => s + (u.rec||0), 0);
+    const totalRecord = users.reduce((s,u) => s + (u.record||0), 0);
+
+    let rows = users.map((u, i) => {
+      const lastSeen = u.lastSeen ? new Date(u.lastSeen).toLocaleString() : 'Never';
+      const hoursAgo = u.lastSeen ? Math.floor((Date.now()-new Date(u.lastSeen))/3600000) : 999;
+      const activity = hoursAgo < 24 ? '🟢' : hoursAgo < 168 ? '🟡' : '🔴';
+      const name = (u.username ? '@'+u.username : u.firstName || 'Unknown').substring(0,20);
+      return `<tr style="border-bottom:1px solid #222;">
+        <td style="padding:8px;color:#888">#${i+1}</td>
+        <td style="padding:8px;">${activity} ${name}</td>
+        <td style="padding:8px;color:#00FF88;">${(u.rec||0).toFixed(4)}</td>
+        <td style="padding:8px;color:#FF4444;">${Math.floor(u.record||0).toLocaleString()}</td>
+        <td style="padding:8px;color:#FFD700;">${u.refCount||0}</td>
+        <td style="padding:8px;color:#aaa;font-size:11px;">${lastSeen}</td>
+        <td style="padding:8px;color:#555;font-size:11px;">${u.telegramId}</td>
+      </tr>`;
+    }).join('');
+
+    res.send(`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>REC Admin</title>
+<style>
+  body{background:#000;color:#fff;font-family:monospace;padding:16px;margin:0;}
+  h1{color:#FF0000;font-size:20px;margin-bottom:16px;}
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px;}
+  .stat{background:#0a0a0a;border:1px solid #222;border-radius:10px;padding:12px;text-align:center;}
+  .stat-val{font-size:22px;font-weight:bold;color:#00FF88;}
+  .stat-val.red{color:#FF4444;}
+  .stat-val.yellow{color:#FFD700;}
+  .stat-label{font-size:10px;color:#555;margin-top:4px;}
+  table{width:100%;border-collapse:collapse;font-size:12px;}
+  th{background:#111;padding:8px;text-align:left;color:#555;border-bottom:1px solid #333;}
+  tr:hover{background:#0a0a0a;}
+  .legend{font-size:11px;color:#555;margin-bottom:10px;}
+</style>
+</head>
+<body>
+<h1>⛏️ REC Mining — Admin Dashboard</h1>
+<div class="stats">
+  <div class="stat"><div class="stat-val">${totalUsers}</div><div class="stat-label">Total Users</div></div>
+  <div class="stat"><div class="stat-val yellow">${activeDay}</div><div class="stat-label">Active Today</div></div>
+  <div class="stat"><div class="stat-val">${activeWeek}</div><div class="stat-label">Active Week</div></div>
+  <div class="stat"><div class="stat-val">${totalRec.toFixed(2)}</div><div class="stat-label">Total REC</div></div>
+  <div class="stat"><div class="stat-val red">${Math.floor(totalRecord).toLocaleString()}</div><div class="stat-label">Total RECORD</div></div>
+  <div class="stat"><div class="stat-val yellow">${users.filter(u=>u.refCount>0).length}</div><div class="stat-label">Have Referrals</div></div>
+</div>
+<div class="legend">🟢 Active today &nbsp; 🟡 Active this week &nbsp; 🔴 Inactive</div>
+<table>
+  <tr>
+    <th>#</th><th>User</th><th>REC</th><th>RECORD</th><th>Refs</th><th>Last Seen</th><th>ID</th>
+  </tr>
+  ${rows}
+</table>
+<p style="color:#333;font-size:10px;margin-top:20px;">Updated: ${new Date().toLocaleString()}</p>
+</body>
+</html>`);
+  } catch(e) {
+    res.status(500).send('Error: ' + e.message);
+  }
+});
+
+
 // كل 10 مستخدمين نشيطين في آخر أسبوعين → واحد يحصل على بلوك
 const BLOCK_REC_REWARD = 100;
 const BLOCK_USERS_RATIO = 10; // بلوك واحد لكل 10 مستخدمين
