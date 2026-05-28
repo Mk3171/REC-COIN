@@ -251,7 +251,23 @@ function showToast(msg){
 
 // ====== NAV ======
 function openGames(){
-  window.Telegram.WebApp.openLink('https://rec-coin.onrender.com/games.html');
+  // افتح اللعبة كـ overlay داخل نفس الـ WebApp
+  var overlay = document.createElement('div');
+  overlay.id = 'gamesOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000;';
+  
+  var closeBtn = document.createElement('button');
+  closeBtn.textContent = '✕ Back';
+  closeBtn.style.cssText = 'position:absolute;top:10px;right:10px;z-index:100000;background:rgba(0,0,0,0.8);color:white;border:1px solid #333;padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer;';
+  closeBtn.onclick = function(){ document.body.removeChild(overlay); };
+  
+  var iframe = document.createElement('iframe');
+  iframe.src = '/games.html';
+  iframe.style.cssText = 'width:100%;height:100%;border:none;';
+  
+  overlay.appendChild(closeBtn);
+  overlay.appendChild(iframe);
+  document.body.appendChild(overlay);
 }
 
 function showPage(id,btn){
