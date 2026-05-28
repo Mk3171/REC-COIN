@@ -808,6 +808,36 @@ setInterval(runBlockDistribution, 6 * 3600000);
 setTimeout(runBlockDistribution, 60000);
 
 // ====== API: BLOCK-FOUND (للإشعار اليدوي من الواجهة) ======
+// ====== API: GAME EARN (REC Catch game) ======
+app.post('/api/game-earn', async (req, res) => {
+  try {
+    const { telegramId, rec, gameType } = req.body;
+    if(!telegramId || !rec) return res.status(400).json({ error: 'Missing data' });
+
+    const user = await User.findOne({ telegramId: parseInt(telegramId) });
+    if(!user) return res.status(404).json({ error: 'User not found' });
+
+    // تحقق من الحد اليومي على السيرفر
+    const today = new Date().toISOString().split('T')[0];
+    const gameEarnKey = 'gameEarn_' + today;
+    const todayEarned = user.get(gameEarnKey) || 0;
+    const remaining = Math.max(0, 10 - todayEarned);
+
+    if(remaining <= 0) return res.json({ success: false, reason: 'daily_limit' });
+
+    const toAdd = Math.min(parseFloat(rec), remaining);
+
+    await User.findOneAndUpdate(
+      { telegramId: parseInt(telegramId) },
+      { $inc: { rec: toAdd }, $set: { [gameEarnKey]: todayEarned + toAdd } }
+    );
+
+    res.json({ success: true, added: toAdd, remaining: remaining - toAdd });
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
 app.post('/api/block-found', async (req, res) => {
   try {
     const { telegramId, blockReward, blockNumber } = req.body;
