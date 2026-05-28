@@ -2017,7 +2017,13 @@ function loadLeaderboard(tab) {
       fetch('/api/leaderboard/weekly').then(function(r){return r.json();})
     ]).then(function(results) {
       renderGlobal(results[0].top100 || [], results[1], results[2]);
-    }).catch(function(){ cont.innerHTML = '<div style="text-align:center;color:#555;padding:20px;">❌</div>'; });
+    }).catch(function(){
+      cont.innerHTML = '<div style="text-align:center;padding:30px;">' +
+        '<div style="font-size:36px;margin-bottom:10px;">📡</div>' +
+        '<div style="color:rgba(255,255,255,0.4);font-size:13px;margin-bottom:16px;">Connection failed</div>' +
+        '<button onclick="loadLeaderboard(\'global\')" style="background:linear-gradient(135deg,#CC0000,#FF2200);border:none;color:white;padding:10px 24px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:Rajdhani,sans-serif;">🔄 Try Again</button>' +
+        '</div>';
+    });
   } else if(tab === 'friends') {
     fetch('/api/leaderboard/friends/' + (tgUser?tgUser.id:0))
       .then(function(r){return r.json();})
