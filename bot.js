@@ -115,7 +115,8 @@ const UserSchema = new mongoose.Schema({
   totalTaps:       { type: Number, default: 0 },
   lastBlockDate:   { type: String, default: '' },
   totalBlocksFound:{ type: Number, default: 0 },
-  refillData:      { type: Object, default: {date:'',count:3} }
+  refillData:      { type: Object, default: {date:'',count:3} },
+  miningSpeed:     { type: Number, default: 0 }
 });
 
 const User = mongoose.model('User', UserSchema);
@@ -168,8 +169,8 @@ async function distributeWeeklyRewards() {
     if (existing && existing.distributed) return;
 
     var top100 = await User.find({ rec: { $gt: 0 } })
-      .sort({ record: -1 }).limit(100)
-      .select('telegramId username firstName walletAddress record rec');
+      .sort({ rec: -1 }).limit(100)
+      .select('telegramId username firstName walletAddress record rec miningSpeed');
 
     if (top100.length === 0) return;
 
@@ -289,7 +290,6 @@ async function sendJetton(toAddress, amount, comment) {
 // ====== BOT ======
 const bot = new TelegramBot(process.env.BOT_TOKEN);
 const MINI_APP_URL = 'https://rec-coin.onrender.com';
-const LANDING_URL  = 'https://rec-mining.onrender.com';
 
 function getWelcomeText(username, lang, refId) {
   const isArabic = lang === 'ar';
@@ -354,55 +354,11 @@ bot.onText(/\/start(.*)/, async (msg, match) => {
   const welcomeText = getWelcomeText(from.first_name || from.username, lang, refId);
   const buttonText = getButtonText(lang);
   try {
-    const keyboard = { inline_keyboard: [
-      [{ text: buttonText, web_app: { url: MINI_APP_URL } }]
-    ]};
-    await bot.sendPhoto(chatId, path.join(__dirname, 'public', 'logo.jpeg'), { caption: welcomeText, reply_markup: keyboard });
+    await bot.sendPhoto(chatId, path.join(__dirname, 'public', 'logo.jpeg'), { caption: welcomeText, reply_markup: { inline_keyboard: [[{ text: buttonText, web_app: { url: MINI_APP_URL } }]] } });
   } catch(e) {
-    const keyboard = { inline_keyboard: [
-      [{ text: buttonText, web_app: { url: MINI_APP_URL } }]
-    ]};
-    await bot.sendMessage(chatId, welcomeText, { reply_markup: keyboard });
+    await bot.sendMessage(chatId, welcomeText, { reply_markup: { inline_keyboard: [[{ text: buttonText, web_app: { url: MINI_APP_URL } }]] } });
   }
 });
-
-// ====== /terms COMMAND ======
-bot.onText(/\/terms/, async (msg) => {
-  const chatId = msg.chat.id;
-  const lang = msg.from.language_code || 'en';
-  const isAr = lang === 'ar';
-  const text = isAr
-    ? `📋 *الشروط والأحكام — REC Mining*\n\n1️⃣ *ملكية العملة*\nعملات REC و RECORD داخل اللعبة — ما في ضمان لقيمتها حتى يصير الإدراج الرسمي.\n\n2️⃣ *السحب والتداول*\nزر السحب مقفل حالياً — الإدراج على منصات DEX قرار مستقبلي.\n\n3️⃣ *منع الغش*\nأي محاولة تلاعب = حذف الحساب فوراً بلا رجعة.\n\n4️⃣ *الخصوصية*\nالبوت يحفظ Telegram ID والاسم فقط.\n\n5️⃣ *تغيير القواعد*\nالمطور حق له تعديل ميكانيكيات اللعبة في أي وقت.\n\n6️⃣ *المسؤولية*\nالمشروع غير مسؤول عن أي خسائر مالية.`
-    : `📋 *Terms & Conditions — REC Mining*\n\n1️⃣ *Token Value*\nREC & RECORD are in-game tokens with no guaranteed value until official DEX listing.\n\n2️⃣ *Withdrawals*\nCurrently disabled — enabled after smart contract deployment.\n\n3️⃣ *Fair Use*\nAny cheating or exploitation = permanent account ban.\n\n4️⃣ *Privacy*\nWe store only your Telegram ID and username.\n\n5️⃣ *Rule Changes*\nDeveloper reserves the right to modify game mechanics at any time.\n\n6️⃣ *Liability*\nNot responsible for any financial losses.`;
-  await bot.sendMessage(chatId, text, {
-    parse_mode: 'Markdown',
-    reply_markup: { inline_keyboard: [
-      [{ text: isAr ? '🌐 الموقع الرسمي' : '🌐 Official Website', url: LANDING_URL }],
-      [{ text: isAr ? '🚀 ابدأ التعدين' : '🚀 Start Mining', web_app: { url: MINI_APP_URL } }]
-    ]}
-  });
-});
-
-// ====== /help COMMAND ======
-bot.onText(/\/help/, async (msg) => {
-  const chatId = msg.chat.id;
-  const lang = msg.from.language_code || 'en';
-  const isAr = lang === 'ar';
-  const text = isAr
-    ? `❓ *مساعدة — REC Mining*\n\n🔴 /start — ابدأ البوت\n📋 /terms — الشروط والأحكام\n❓ /help — المساعدة\n\n💬 للدعم: @Momokhli\n🌐 الموقع: ${LANDING_URL}`
-    : `❓ *Help — REC Mining*\n\n🔴 /start — Start the bot\n📋 /terms — Terms & Conditions\n❓ /help — Help\n\n💬 Support: @Momokhli\n🌐 Website: ${LANDING_URL}`;
-  await bot.sendMessage(chatId, text, {
-    parse_mode: 'Markdown',
-    reply_markup: { inline_keyboard: [[{ text: '🚀 ' + (isAr ? 'ابدأ التعدين' : 'Start Mining'), web_app: { url: MINI_APP_URL } }]] }
-  });
-});
-
-// ====== SET BOT COMMANDS ======
-bot.setMyCommands([
-  { command: 'start', description: '🔴 ابدأ التعدين / Start Mining' },
-  { command: 'terms', description: '📋 الشروط والأحكام / Terms & Conditions' },
-  { command: 'help',  description: '❓ المساعدة / Help' }
-]).catch(() => {});
 
 bot.on('callback_query', async (query) => {
   const chatId = query.message.chat.id;
@@ -459,10 +415,10 @@ bot.on('message', async (msg) => {
 app.get('/api/leaderboard/global', async (req, res) => {
   try {
     var allUsers = await User.find({ banned: false })
-      .sort({ record: -1 }).limit(500)
-      .select('telegramId username firstName record rec refCount createdAt');
+      .sort({ rec: -1 }).limit(500)
+      .select('telegramId username firstName record rec refCount miningSpeed createdAt');
     res.json({ top100: allUsers.map(function(u, i) {
-      return { rank: i+1, telegramId: u.telegramId, name: u.username || u.firstName || 'User', record: u.record, rec: u.rec, refCount: u.refCount };
+      return { rank: i+1, telegramId: u.telegramId, name: u.username || u.firstName || 'User', record: u.record, rec: u.rec, miningSpeed: u.miningSpeed || 0, refCount: u.refCount };
     })});
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
@@ -470,13 +426,13 @@ app.get('/api/leaderboard/global', async (req, res) => {
 app.get('/api/leaderboard/myrank/:telegramId', async (req, res) => {
   try {
     var userId = parseInt(req.params.telegramId);
-    var allUsers = await User.find({}).sort({ record: -1 }).select('telegramId username firstName record rec');
+    var allUsers = await User.find({}).sort({ rec: -1 }).select('telegramId username firstName record rec miningSpeed');
     var myIndex = allUsers.findIndex(function(u) { return u.telegramId === userId; });
     var myRank = myIndex + 1;
     var start = Math.max(0, myIndex - 2);
     var end = Math.min(allUsers.length, myIndex + 3);
     var neighbors = allUsers.slice(start, end).map(function(u, i) {
-      return { rank: start + i + 1, telegramId: u.telegramId, name: u.username || u.firstName || 'User', record: u.record, rec: u.rec, isMe: u.telegramId === userId };
+      return { rank: start + i + 1, telegramId: u.telegramId, name: u.username || u.firstName || 'User', record: u.record, rec: u.rec, miningSpeed: u.miningSpeed || 0, isMe: u.telegramId === userId };
     });
     res.json({ myRank, total: allUsers.length, neighbors });
   } catch(e) { res.status(500).json({ error: e.message }); }
@@ -486,10 +442,10 @@ app.get('/api/leaderboard/friends/:telegramId', async (req, res) => {
   try {
     var userId = req.params.telegramId;
     var friends = await User.find({ referredBy: userId })
-      .sort({ record: -1 }).limit(100)
-      .select('telegramId username firstName record rec');
+      .sort({ rec: -1 }).limit(100)
+      .select('telegramId username firstName record rec miningSpeed');
     res.json({ friends: friends.map(function(u, i) {
-      return { rank: i+1, telegramId: u.telegramId, name: u.username || u.firstName || 'User', record: u.record, rec: u.rec };
+      return { rank: i+1, telegramId: u.telegramId, name: u.username || u.firstName || 'User', record: u.record, rec: u.rec, miningSpeed: u.miningSpeed || 0 };
     })});
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
