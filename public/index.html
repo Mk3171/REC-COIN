@@ -56,22 +56,27 @@
       <div class="home-inner">
 
         <!-- Shop, Exchange, Daily & Lang buttons -->
-        <div style="position:relative;width:100%;height:70px;flex-shrink:0;">
-          <button class="side-btn" style="border-color:#FFD700;position:absolute;left:10px;top:4px;" onclick="openStarsShop()">
-            <span>⭐</span><span class="side-btn-label">Shop</span>
-          </button>
-          <button class="side-btn" style="border-color:rgba(0,255,136,0.6);position:absolute;left:80px;top:4px;" onclick="openExchange()">
-            <span>🔄</span><span class="side-btn-label" style="color:#00FF88;">Exchange</span>
-          </button>
-          <button class="side-btn" style="border-color:rgba(255,215,0,0.6);position:absolute;left:150px;top:4px;" onclick="openDailyLogin()">
-            <span>📅</span><span class="side-btn-label" style="color:#FFD700;">Daily</span>
-          </button>
-          <button class="side-btn" style="border-color:rgba(255,100,0,0.6);position:absolute;left:220px;top:4px;" onclick="openGames()">
-            <span>🎮</span><span class="side-btn-label" style="color:#FF8844;">Games</span>
-          </button>
-          <button class="side-btn" style="border-color:rgba(100,150,255,0.6);position:absolute;left:290px;top:4px;" onclick="toggleLangMenu()">
-            <span>🌍</span><span class="side-btn-label" style="color:#88AAFF;">Lang</span>
-          </button>
+        <div style="width:100%;height:70px;flex-shrink:0;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;">
+          <div style="display:flex;flex-direction:row;gap:8px;padding:4px 10px;width:max-content;height:100%;align-items:center;">
+            <button class="side-btn" style="border-color:#FFD700;" onclick="openStarsShop()">
+              <span>⭐</span><span class="side-btn-label">Shop</span>
+            </button>
+            <button class="side-btn" style="border-color:rgba(0,255,136,0.6);" onclick="openExchange()">
+              <span>🔄</span><span class="side-btn-label" style="color:#00FF88;">Exchange</span>
+            </button>
+            <button class="side-btn" style="border-color:rgba(255,215,0,0.6);" onclick="openDailyLogin()">
+              <span>📅</span><span class="side-btn-label" style="color:#FFD700;">Daily</span>
+            </button>
+            <button class="side-btn" style="border-color:rgba(255,100,0,0.6);" onclick="openGames()">
+              <span>🎮</span><span class="side-btn-label" style="color:#FF8844;">Games</span>
+            </button>
+            <button class="side-btn" style="border-color:rgba(100,150,255,0.6);" onclick="toggleLangMenu()">
+              <span>🌍</span><span class="side-btn-label" style="color:#88AAFF;">Lang</span>
+            </button>
+            <button class="side-btn" style="border-color:rgba(255,180,0,0.6);" onclick="window.open('https://mk3171.github.io/rec-mining#terms','_blank')">
+              <span>📋</span><span class="side-btn-label" style="color:#FFB400;" data-i18n="termsBtn">Terms</span>
+            </button>
+          </div>
         </div>
 
         <!-- Circle centered -->
