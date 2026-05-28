@@ -35,15 +35,40 @@ function closeSideMenu(){
 <body>
 
 <!-- Lang Dropdown -->
-<div id="langDropdown" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#0f0a20;border:1px solid rgba(255,100,50,0.5);border-radius:16px;padding:20px;z-index:9999;min-width:230px;box-shadow:0 0 40px rgba(255,50,0,0.2);">
-  <div style="text-align:center;font-size:32px;margin-bottom:12px;">🌍</div>
-  <div style="font-size:14px;color:#aaa;text-align:center;margin-bottom:15px;">اختر اللغة / Choose Language</div>
-  <button onclick="applyLang('ar')" style="display:flex;align-items:center;gap:10px;width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:white;padding:10px 14px;border-radius:10px;cursor:pointer;margin-bottom:8px;font-size:14px;font-family:Rajdhani,sans-serif;">🇸🇦 <span>العربية</span></button>
-  <button onclick="applyLang('en')" style="display:flex;align-items:center;gap:10px;width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:white;padding:10px 14px;border-radius:10px;cursor:pointer;margin-bottom:8px;font-size:14px;font-family:Rajdhani,sans-serif;">🇬🇧 <span>English</span></button>
-  <button onclick="applyLang('uk')" style="display:flex;align-items:center;gap:10px;width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:white;padding:10px 14px;border-radius:10px;cursor:pointer;margin-bottom:8px;font-size:14px;font-family:Rajdhani,sans-serif;">🇺🇦 <span>Українська</span></button>
-  <button onclick="applyLang('zh')" style="display:flex;align-items:center;gap:10px;width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:white;padding:10px 14px;border-radius:10px;cursor:pointer;font-size:14px;font-family:Rajdhani,sans-serif;">🇨🇳 <span>中文</span></button>
+<div id="langOverlay" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.75);" onclick="closeLangMenu()"></div>
+<div id="langDropdown" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;width:88%;max-width:340px;background:linear-gradient(180deg,#0e0a22,#080518);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:20px 16px 24px;box-shadow:0 20px 60px rgba(0,0,0,0.7);">
+
+  <!-- Header -->
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+    <div style="font-size:17px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;">Choose language</div>
+    <div onclick="closeLangMenu()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:rgba(255,255,255,0.5);">✕</div>
+  </div>
+
+  <!-- Language buttons -->
+  <div style="display:flex;flex-direction:column;gap:8px;">
+
+    <button onclick="applyLang('en')" style="display:flex;align-items:center;gap:14px;width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:13px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all 0.2s;font-family:Rajdhani,sans-serif;">
+      <span style="font-size:28px;line-height:1;flex-shrink:0;">🇬🇧</span>
+      <span style="font-size:16px;font-weight:700;color:white;">English</span>
+    </button>
+
+    <button onclick="applyLang('ar')" style="display:flex;align-items:center;gap:14px;width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:13px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all 0.2s;font-family:Rajdhani,sans-serif;">
+      <span style="font-size:28px;line-height:1;flex-shrink:0;">🇸🇦</span>
+      <span style="font-size:16px;font-weight:700;color:white;">العربية</span>
+    </button>
+
+    <button onclick="applyLang('uk')" style="display:flex;align-items:center;gap:14px;width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:13px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all 0.2s;font-family:Rajdhani,sans-serif;">
+      <span style="font-size:28px;line-height:1;flex-shrink:0;">🇺🇦</span>
+      <span style="font-size:16px;font-weight:700;color:white;">Українська</span>
+    </button>
+
+    <button onclick="applyLang('zh')" style="display:flex;align-items:center;gap:14px;width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:13px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent;transition:all 0.2s;font-family:Rajdhani,sans-serif;">
+      <span style="font-size:28px;line-height:1;flex-shrink:0;">🇨🇳</span>
+      <span style="font-size:16px;font-weight:700;color:white;">中文</span>
+    </button>
+
+  </div>
 </div>
-<div id="langOverlay" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.7);" onclick="closeLangMenu()"></div>
 
 <div class="app-wrapper" id="appWrapper">
 
