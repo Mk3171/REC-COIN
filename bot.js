@@ -289,7 +289,7 @@ async function sendJetton(toAddress, amount, comment) {
 // ====== BOT ======
 const bot = new TelegramBot(process.env.BOT_TOKEN);
 const MINI_APP_URL = 'https://rec-coin.onrender.com';
-const LANDING_URL  = 'https://mk3171.github.io/rec-mining';
+const LANDING_URL  = 'https://rec-mining.onrender.com';
 
 function getWelcomeText(username, lang, refId) {
   const isArabic = lang === 'ar';
@@ -371,35 +371,9 @@ bot.onText(/\/terms/, async (msg) => {
   const chatId = msg.chat.id;
   const lang = msg.from.language_code || 'en';
   const isAr = lang === 'ar';
-
   const text = isAr
-    ? `📋 *الشروط والأحكام — REC Mining*\n\n` +
-      `1️⃣ *ملكية العملة*\n` +
-      `عملات REC و RECORD داخل اللعبة — ما في ضمان لقيمتها حتى يصير الإدراج الرسمي.\n\n` +
-      `2️⃣ *السحب والتداول*\n` +
-      `زر السحب مقفل حالياً — الإدراج على منصات DEX قرار مستقبلي.\n\n` +
-      `3️⃣ *منع الغش*\n` +
-      `أي محاولة تلاعب بالأرقام أو استغلال ثغرات = حذف الحساب فوراً بلا رجعة.\n\n` +
-      `4️⃣ *الخصوصية*\n` +
-      `البوت يحفظ Telegram ID والاسم فقط — ما يشارك بيانات مع طرف ثالث.\n\n` +
-      `5️⃣ *تغيير القواعد*\n` +
-      `المطور حق له تعديل ميكانيكيات اللعبة أو التوكينوميكس في أي وقت.\n\n` +
-      `6️⃣ *المسؤولية*\n` +
-      `المشروع غير مسؤول عن أي خسائر مالية ناتجة عن استخدام البوت.`
-    : `📋 *Terms & Conditions — REC Mining*\n\n` +
-      `1️⃣ *Coin Ownership*\n` +
-      `REC & RECORD coins are in-game assets — no guaranteed value until official listing.\n\n` +
-      `2️⃣ *Withdrawal & Trading*\n` +
-      `Withdrawal is currently locked — DEX listing is a future decision.\n\n` +
-      `3️⃣ *Anti-Cheat*\n` +
-      `Any attempt to manipulate numbers or exploit bugs = immediate account deletion.\n\n` +
-      `4️⃣ *Privacy*\n` +
-      `We store only your Telegram ID and name — no data is shared with third parties.\n\n` +
-      `5️⃣ *Rule Changes*\n` +
-      `The developer reserves the right to modify game mechanics or tokenomics at any time.\n\n` +
-      `6️⃣ *Liability*\n` +
-      `The project is not responsible for any financial losses from using this bot.`;
-
+    ? `📋 *الشروط والأحكام — REC Mining*\n\n1️⃣ *ملكية العملة*\nعملات REC و RECORD داخل اللعبة — ما في ضمان لقيمتها حتى يصير الإدراج الرسمي.\n\n2️⃣ *السحب والتداول*\nزر السحب مقفل حالياً — الإدراج على منصات DEX قرار مستقبلي.\n\n3️⃣ *منع الغش*\nأي محاولة تلاعب = حذف الحساب فوراً بلا رجعة.\n\n4️⃣ *الخصوصية*\nالبوت يحفظ Telegram ID والاسم فقط.\n\n5️⃣ *تغيير القواعد*\nالمطور حق له تعديل ميكانيكيات اللعبة في أي وقت.\n\n6️⃣ *المسؤولية*\nالمشروع غير مسؤول عن أي خسائر مالية.`
+    : `📋 *Terms & Conditions — REC Mining*\n\n1️⃣ *Token Value*\nREC & RECORD are in-game tokens with no guaranteed value until official DEX listing.\n\n2️⃣ *Withdrawals*\nCurrently disabled — enabled after smart contract deployment.\n\n3️⃣ *Fair Use*\nAny cheating or exploitation = permanent account ban.\n\n4️⃣ *Privacy*\nWe store only your Telegram ID and username.\n\n5️⃣ *Rule Changes*\nDeveloper reserves the right to modify game mechanics at any time.\n\n6️⃣ *Liability*\nNot responsible for any financial losses.`;
   await bot.sendMessage(chatId, text, {
     parse_mode: 'Markdown',
     reply_markup: { inline_keyboard: [
@@ -415,19 +389,8 @@ bot.onText(/\/help/, async (msg) => {
   const lang = msg.from.language_code || 'en';
   const isAr = lang === 'ar';
   const text = isAr
-    ? `❓ *مساعدة — REC Mining*\n\n` +
-      `🔴 /start — ابدأ البوت\n` +
-      `📋 /terms — الشروط والأحكام\n` +
-      `❓ /help — المساعدة\n\n` +
-      `💬 للدعم الفني: @Momokhli\n` +
-      `🌐 الموقع: [rec-mining](${LANDING_URL})`
-    : `❓ *Help — REC Mining*\n\n` +
-      `🔴 /start — Start the bot\n` +
-      `📋 /terms — Terms & Conditions\n` +
-      `❓ /help — Help\n\n` +
-      `💬 Support: @Momokhli\n` +
-      `🌐 Website: [rec-mining](${LANDING_URL})`;
-
+    ? `❓ *مساعدة — REC Mining*\n\n🔴 /start — ابدأ البوت\n📋 /terms — الشروط والأحكام\n❓ /help — المساعدة\n\n💬 للدعم: @Momokhli\n🌐 الموقع: ${LANDING_URL}`
+    : `❓ *Help — REC Mining*\n\n🔴 /start — Start the bot\n📋 /terms — Terms & Conditions\n❓ /help — Help\n\n💬 Support: @Momokhli\n🌐 Website: ${LANDING_URL}`;
   await bot.sendMessage(chatId, text, {
     parse_mode: 'Markdown',
     reply_markup: { inline_keyboard: [[{ text: '🚀 ' + (isAr ? 'ابدأ التعدين' : 'Start Mining'), web_app: { url: MINI_APP_URL } }]] }
