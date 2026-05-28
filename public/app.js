@@ -86,6 +86,7 @@ function formatWait(sec){
 }
 
 var recordPerSec=0, recPerSec=0;
+var weeklyEndMs = 0;
 function getLimitedMulti(key){ return parseInt(key.split('_')[0])===4 ? 3 : 1; }
 function calcTotalSpeeds(){
   recordPerSec=0; recPerSec=0;
@@ -438,6 +439,8 @@ setInterval(function(){
 // 1s interval for timer countdown display
 setInterval(function(){updateTimerDisplays();},1000);
 
+function pad2(n){return n<10?'0'+n:''+n;}
+
 function updateTimerDisplays(){
   var now=Date.now();
   Object.keys(cardUpgrades).forEach(function(key){
@@ -449,6 +452,16 @@ function updateTimerDisplays(){
       else{el.textContent='⏳ '+formatWait(rem);}
     }
   });
+  // Weekly countdown
+  var wEl=document.getElementById('weeklyCountdown');
+  if(wEl&&typeof weeklyEndMs!=='undefined'&&weeklyEndMs>0){
+    var diff=Math.max(0,weeklyEndMs-now);
+    var dd=Math.floor(diff/86400000);
+    var hh=Math.floor((diff%86400000)/3600000);
+    var mm=Math.floor((diff%3600000)/60000);
+    var ss=Math.floor((diff%60000)/1000);
+    wEl.textContent=pad2(dd)+'d '+pad2(hh)+'h '+pad2(mm)+'m '+pad2(ss)+'s';
+  }
 }
 
 function updateUI(){
