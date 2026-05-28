@@ -2008,30 +2008,25 @@ function switchLeaderTab(tab) {
 function loadLeaderboard(tab) {
   var cont = document.getElementById('lbContent');
   if(!cont) return;
-  cont.innerHTML = '<div style="text-align:center;padding:30px;color:#555;">' + t('loadingLeader') + '</div>';
+  cont.innerHTML = '<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.3);">⏳ Loading...</div>';
 
-  if(tab === 'global') {
-    Promise.all([
-      fetch('/api/leaderboard/global').then(function(r){return r.json();}),
-      fetch('/api/leaderboard/myrank/' + (tgUser?tgUser.id:0)).then(function(r){return r.json();}),
-      fetch('/api/leaderboard/weekly').then(function(r){return r.json();})
-    ]).then(function(results) {
-      renderGlobal(results[0].top100 || [], results[1], results[2]);
-    }).catch(function(){
-      cont.innerHTML = '<div style="text-align:center;padding:30px;">' +
-        '<div style="font-size:36px;margin-bottom:10px;">📡</div>' +
-        '<div style="color:rgba(255,255,255,0.4);font-size:13px;margin-bottom:16px;">Connection failed</div>' +
-        '<button onclick="loadLeaderboard(\'global\')" style="background:linear-gradient(135deg,#CC0000,#FF2200);border:none;color:white;padding:10px 24px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:Rajdhani,sans-serif;">🔄 Try Again</button>' +
-        '</div>';
-    });
-  } else if(tab === 'friends') {
-    fetch('/api/leaderboard/friends/' + (tgUser?tgUser.id:0))
-      .then(function(r){return r.json();})
-      .then(function(data){ renderFriends(data.friends || []); })
-      .catch(function(){});
-  } else if(tab === 'mylevel') {
-    renderMyLevel();
-  }
+  var uid = tgUser ? tgUser.id : 0;
+
+  // Fetch each independently so one failure doesn't break all
+  var p1 = fetch('/api/leaderboard/global').then(function(r){return r.json();}).catch(function(){return {top100:[]};});
+  var p2 = fetch('/api/leaderboard/myrank/'+uid).then(function(r){return r.json();}).catch(function(){return {myRank:'-',neighbors:[]};});
+  var p3 = fetch('/api/leaderboard/weekly').then(function(r){return r.json();}).catch(function(){return {daysLeft:7};});
+
+  Promise.all([p1, p2, p3]).then(function(results) {
+    var top100 = (results[0] && results[0].top100) ? results[0].top100 : [];
+    renderGlobal(top100, results[1], results[2]);
+  }).catch(function() {
+    cont.innerHTML = '<div style="text-align:center;padding:30px;">' +
+      '<div style="font-size:36px;margin-bottom:10px;">📡</div>' +
+      '<div style="color:rgba(255,255,255,0.4);font-size:13px;margin-bottom:16px;">Connection failed</div>' +
+      '<button onclick="loadLeaderboard(\'global\')" style="background:linear-gradient(135deg,#CC0000,#FF2200);border:none;color:white;padding:10px 24px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:Rajdhani,sans-serif;">🔄 Try Again</button>' +
+      '</div>';
+  });
 }
 
 function renderGlobal(top100, myRankData, weekly) {
