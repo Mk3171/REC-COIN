@@ -354,17 +354,13 @@ bot.onText(/\/start(.*)/, async (msg, match) => {
   const welcomeText = getWelcomeText(from.first_name || from.username, lang, refId);
   const buttonText = getButtonText(lang);
   try {
-    const termsText = lang === 'ar' ? '📋 الشروط والأحكام' : lang === 'uk' ? '📋 Умови використання' : lang === 'zh' ? '📋 使用条款' : '📋 Terms & Conditions';
     const keyboard = { inline_keyboard: [
-      [{ text: buttonText, web_app: { url: MINI_APP_URL } }],
-      [{ text: termsText, url: LANDING_URL + '#terms' }]
+      [{ text: buttonText, web_app: { url: MINI_APP_URL } }]
     ]};
     await bot.sendPhoto(chatId, path.join(__dirname, 'public', 'logo.jpeg'), { caption: welcomeText, reply_markup: keyboard });
   } catch(e) {
-    const termsText = lang === 'ar' ? '📋 الشروط والأحكام' : '📋 Terms & Conditions';
     const keyboard = { inline_keyboard: [
-      [{ text: buttonText, web_app: { url: MINI_APP_URL } }],
-      [{ text: termsText, url: LANDING_URL + '#terms' }]
+      [{ text: buttonText, web_app: { url: MINI_APP_URL } }]
     ]};
     await bot.sendMessage(chatId, welcomeText, { reply_markup: keyboard });
   }
