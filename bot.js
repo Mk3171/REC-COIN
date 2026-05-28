@@ -426,13 +426,27 @@ bot.on('message', async (msg) => {
 });
 
 // ====== API: LEADERBOARD ======
+// ====== MINING SPEED CALCULATOR (server-side) ======
+function calcMiningSpeed(cardLevels) {
+  if(!cardLevels) return 0;
+  var speed = 0;
+  Object.keys(cardLevels).forEach(function(key) {
+    var lvl = cardLevels[key] || 0;
+    if(lvl > 0) {
+      speed += parseFloat((0.000001 * Math.pow(1.15, lvl)).toFixed(8));
+    }
+  });
+  return parseFloat(speed.toFixed(8));
+}
+
 app.get('/api/leaderboard/global', async (req, res) => {
   try {
     var allUsers = await User.find({ banned: false })
-      .sort({ record: -1 }).limit(500)
-      .select('telegramId username firstName record rec refCount createdAt');
+      .sort({ rec: -1 }).limit(500)
+      .select('telegramId username firstName record rec refCount miningSpeed cardLevels');
     res.json({ top100: allUsers.map(function(u, i) {
-      return { rank: i+1, telegramId: u.telegramId, name: u.username || u.firstName || 'User', record: u.record, rec: u.rec, refCount: u.refCount };
+      var speed = u.miningSpeed > 0 ? u.miningSpeed : calcMiningSpeed(u.cardLevels);
+      return { rank: i+1, telegramId: u.telegramId, name: u.username || u.firstName || 'User', record: u.record, rec: u.rec, miningSpeed: speed, refCount: u.refCount };
     })});
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
@@ -440,13 +454,14 @@ app.get('/api/leaderboard/global', async (req, res) => {
 app.get('/api/leaderboard/myrank/:telegramId', async (req, res) => {
   try {
     var userId = parseInt(req.params.telegramId);
-    var allUsers = await User.find({}).sort({ record: -1 }).select('telegramId username firstName record rec');
+    var allUsers = await User.find({}).sort({ rec: -1 }).select('telegramId username firstName record rec miningSpeed cardLevels');
     var myIndex = allUsers.findIndex(function(u) { return u.telegramId === userId; });
     var myRank = myIndex + 1;
     var start = Math.max(0, myIndex - 2);
     var end = Math.min(allUsers.length, myIndex + 3);
     var neighbors = allUsers.slice(start, end).map(function(u, i) {
-      return { rank: start + i + 1, telegramId: u.telegramId, name: u.username || u.firstName || 'User', record: u.record, rec: u.rec, isMe: u.telegramId === userId };
+      var speed = u.miningSpeed > 0 ? u.miningSpeed : calcMiningSpeed(u.cardLevels);
+      return { rank: start + i + 1, telegramId: u.telegramId, name: u.username || u.firstName || 'User', record: u.record, rec: u.rec, miningSpeed: speed, isMe: u.telegramId === userId };
     });
     res.json({ myRank, total: allUsers.length, neighbors });
   } catch(e) { res.status(500).json({ error: e.message }); }
@@ -468,9 +483,16 @@ app.get('/api/leaderboard/weekly', async (req, res) => {
   try {
     var weekId = getWeekId();
     var wc = await WeeklyChallenge.findOne({ weekId });
-    var daysLeft = 7 - new Date().getDay();
-    if (new Date().getDay() === 0) daysLeft = 0;
-    res.json({ weekId, daysLeft, distributed: wc ? wc.distributed : false, lastWinner: wc ? wc.top100[0] : null });
+    // Calculate exact end of week (next Sunday midnight)
+    var now = new Date();
+    var day = now.getDay(); // 0=Sun
+    var daysUntilSunday = day === 0 ? 7 : 7 - day;
+    var endOfWeek = new Date(now);
+    endOfWeek.setDate(now.getDate() + daysUntilSunday);
+    endOfWeek.setHours(0, 0, 0, 0);
+    var daysLeft = Math.max(0, Math.ceil((endOfWeek - now) / 86400000));
+    var endTimestamp = endOfWeek.getTime();
+    res.json({ weekId, daysLeft, endTimestamp, distributed: wc ? wc.distributed : false, lastWinner: wc ? wc.top100[0] : null });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
