@@ -250,6 +250,10 @@ function showToast(msg){
 }
 
 // ====== NAV ======
+function openGames(){
+  window.Telegram.WebApp.openLink('https://rec-coin.onrender.com/games.html');
+}
+
 function showPage(id,btn){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});
