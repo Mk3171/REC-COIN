@@ -121,13 +121,13 @@ function closeSideMenu(){
 
           <!-- LEFT SIDE BUTTONS -->
           <div class="side-col">
-            <div class="side-action-btn" onclick="openGames()" style="border-color:rgba(255,100,180,0.25);">
-              <span class="sa-icon">🎮</span>
-              <span class="sa-label" style="color:#FF66AA;">Games</span>
-            </div>
             <div class="side-action-btn" onclick="openDailyLogin()" style="border-color:rgba(0,200,100,0.25);">
               <span class="sa-icon">📅</span>
               <span class="sa-label" style="color:#00CC66;">Daily</span>
+            </div>
+            <div class="side-action-btn" onclick="showPage('rank', document.getElementById('navRankBtn'))" style="border-color:rgba(255,215,0,0.25);">
+              <span class="sa-icon">🏆</span>
+              <span class="sa-label" style="color:#FFD700;" data-i18n="navRank">Rank</span>
             </div>
           </div>
 
@@ -360,7 +360,8 @@ function closeSideMenu(){
   <!-- ===== NAV BAR ===== -->
   <nav class="nav">
     <button class="nav-btn" id="navProfileBtn" onclick="showPage('profile',this)"><span>👤</span><span data-i18n="navProfile">Profile</span></button>
-    <button class="nav-btn" id="navRankBtn" onclick="openGames()"><span>🎮</span><span>Games</span></button>
+    <button class="nav-btn" id="navRankBtn" style="display:none;"></button>
+    <button class="nav-btn" id="navGamesBtn" onclick="openGames()"><span>🎮</span><span>Games</span></button>
     <button class="nav-btn active" id="navHomeBtn" onclick="showPage('home',this)"><span>🏠</span><span data-i18n="navHome">Home</span></button>
     <button class="nav-btn" id="navInviteBtn" onclick="showPage('invite',this)"><span>👥</span><span data-i18n="navInvite">Invite</span></button>
     <button class="nav-btn" id="navTasksBtn" onclick="showPage('tasks',this)"><span>✅</span><span data-i18n="navTasks">Tasks</span></button>
