@@ -194,10 +194,10 @@ function closeSideMenu(){
               <span class="qb-label" style="color:rgba(255,255,255,0.7);">Exchange</span>
               <span class="qb-sub" style="color:#00FF88;">SWAP</span>
             </div>
-            <div class="quick-btn" onclick="window.open('https://rec-mining.onrender.com','_blank')">
-              <span class="qb-icon">📋</span>
-              <span class="qb-label" style="color:rgba(255,255,255,0.7);">Terms</span>
-              <span class="qb-sub" style="color:#FFB400;">Legal</span>
+            <div class="quick-btn" onclick="showPage('wallet', document.getElementById('navWalletBtn'))">
+              <span class="qb-icon">💳</span>
+              <span class="qb-label" style="color:rgba(255,255,255,0.7);">Wallet</span>
+              <span class="qb-sub" style="color:#4B9EFF;">REC</span>
             </div>
           </div>
 
@@ -364,6 +364,75 @@ function closeSideMenu(){
       </div>
     </div>
 
+    <!-- WALLET PAGE -->
+    <div id="wallet" class="page">
+
+      <!-- Top row: ID left, Connect Wallet right -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:10px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#FF4444,#CC0000);border:2px solid rgba(255,68,68,0.4);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:bold;color:white;flex-shrink:0;" id="walletAvatar">M</div>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:white;" id="walletName">REC Miner</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:1px;">ID: <span id="walletId">—</span></div>
+          </div>
+        </div>
+        <button onclick="connectWallet()" id="walletBtn"
+          style="background:linear-gradient(135deg,#1144AA,#4B9EFF);border:none;color:white;padding:8px 14px;border-radius:20px;cursor:pointer;font-size:12px;font-weight:700;font-family:Rajdhani,sans-serif;white-space:nowrap;flex-shrink:0;"
+          data-i18n="connectWallet">Connect Wallet</button>
+      </div>
+
+      <!-- Assets -->
+      <div style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px;margin-bottom:10px;">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.2);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">💰</div>
+        <div style="flex:1;">
+          <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;">Assets</div>
+          <div style="font-size:18px;color:#00FF88;font-weight:700;margin-top:2px;font-family:Orbitron,sans-serif;" id="walletAssets">0.000000 REC</div>
+        </div>
+      </div>
+
+      <!-- Pool Wallet -->
+      <div style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px;margin-bottom:18px;">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgba(75,158,255,0.1);border:1px solid rgba(75,158,255,0.2);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🏛️</div>
+        <div style="flex:1;">
+          <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;" data-i18n="poolWallet">Pool Wallet</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:1px;" data-i18n="withdrawable">Withdrawable balance</div>
+          <div style="font-size:18px;color:#4B9EFF;font-weight:700;margin-top:4px;font-family:Orbitron,sans-serif;" id="walletPool">0.000000 REC</div>
+        </div>
+      </div>
+
+      <!-- Controls header -->
+      <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.5);letter-spacing:2px;text-align:center;margin-bottom:10px;">CONTROLS</div>
+
+      <!-- Withdraw Pool — Locked -->
+      <div style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:16px;padding:16px;margin-bottom:10px;opacity:0.5;">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🏦</div>
+        <div style="flex:1;">
+          <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;" data-i18n="withdrawPool">Withdraw Pool</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:1px;" data-i18n="transferPool">Transfer Pool to Wallet</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:7px 14px;font-size:11px;color:rgba(255,255,255,0.3);font-weight:700;font-family:Rajdhani,sans-serif;letter-spacing:1px;flex-shrink:0;">🔒 SOON</div>
+      </div>
+
+      <!-- History — Open -->
+      <div style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px;margin-bottom:10px;cursor:pointer;" onclick="openWithdrawHistory()">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.15);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">📄</div>
+        <div style="flex:1;">
+          <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;" data-i18n="history">History</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:1px;" data-i18n="yourWithdrawals">Your withdrawals</div>
+        </div>
+        <div style="background:linear-gradient(135deg,#006633,#00AA55);border:none;border-radius:10px;padding:7px 16px;font-size:12px;color:white;font-weight:700;font-family:Rajdhani,sans-serif;letter-spacing:1px;flex-shrink:0;">Open →</div>
+      </div>
+
+      <!-- Support -->
+      <div style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:14px;cursor:pointer;" onclick="openSupport()">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,100,50,0.08);border:1px solid rgba(255,100,50,0.15);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">💬</div>
+        <div>
+          <div style="font-size:14px;color:white;font-family:Rajdhani,sans-serif;" data-i18n="support">Support @Momokhli</div>
+        </div>
+      </div>
+
+    </div>
+
     <!-- PROFILE PAGE -->
     <div id="profile" class="page">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;gap:8px;">
@@ -413,11 +482,12 @@ function closeSideMenu(){
   <nav class="nav">
     <button class="nav-btn" id="navCardsBtn" onclick="showPage('cards',this)"><span>🃏</span><span data-i18n="navCards">Cards</span></button>
     <button class="nav-btn" style="display:none;" id="navProfileBtn" onclick="showPage('profile',this)"></button>
-    <button class="nav-btn" id="navRankBtn" style="display:none;"></button>
+    <button class="nav-btn" style="display:none;" id="navRankBtn"></button>
+    <button class="nav-btn" style="display:none;" id="navTasksBtn" onclick="showPage('tasks',this)"></button>
     <button class="nav-btn" id="navGamesBtn" onclick="openGames()"><span>🎮</span><span>Games</span></button>
     <button class="nav-btn active" id="navHomeBtn" onclick="showPage('home',this)"><span>🏠</span><span data-i18n="navHome">Home</span></button>
     <button class="nav-btn" id="navInviteBtn" onclick="showPage('invite',this)"><span>👥</span><span data-i18n="navInvite">Invite</span></button>
-    <button class="nav-btn" id="navTasksBtn" onclick="showPage('tasks',this)"><span>✅</span><span data-i18n="navTasks">Tasks</span></button>
+    <button class="nav-btn" id="navWalletBtn" onclick="showPage('wallet',this)"><span>💳</span><span>Wallet</span></button>
   </nav>
 
 </div><!-- end app-wrapper -->
