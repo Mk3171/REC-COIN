@@ -119,7 +119,8 @@ const UserSchema = new mongoose.Schema({
   miningSpeed:     { type: Number, default: 0 },
   referredByL2:    { type: String, default: '' },
   referredByL3:    { type: String, default: '' },
-  totalRefCommission: { type: Number, default: 0 }
+  totalRefCommission: { type: Number, default: 0 },
+  comboProgress:   { type: Object, default: { date: '', done: [], claimed: false } }
 });
 
 const User = mongoose.model('User', UserSchema);
@@ -147,6 +148,14 @@ const WeeklySchema = new mongoose.Schema({
   top100:     { type: Array, default: [] }
 });
 const WeeklyChallenge = mongoose.model('WeeklyChallenge', WeeklySchema);
+
+// ====== DAILY COMBO SCHEMA ======
+const DailyComboSchema = new mongoose.Schema({
+  date:   { type: String, required: true, unique: true },
+  cards:  [{ key: String, categoryIndex: Number, cardIndex: Number }],
+  reward: { type: Number, default: 5 }
+});
+const DailyCombo = mongoose.model('DailyCombo', DailyComboSchema);
 
 // ====== WEEKLY DISTRIBUTION ======
 function getWeekId(date) {
@@ -1055,6 +1064,81 @@ app.get('/api/referrals/:telegramId', async (req, res) => {
       .select('telegramId username firstName rec miningSpeed createdAt')
       .sort({ rec: -1 }).limit(50);
     res.json({ l1, l2, l3 });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// ====== DAILY COMBO API ======
+
+// GET today's combo (admin sees card keys, others see only progress)
+app.get('/api/combo/today/:telegramId', async (req, res) => {
+  try {
+    var today = new Date().toISOString().split('T')[0];
+    var combo = await DailyCombo.findOne({ date: today });
+    var isAdmin = parseInt(req.params.telegramId) === ADMIN_ID;
+    if(!combo) return res.json({ exists: false, cards: [], reward: 5 });
+
+    // Check user's completion
+    var user = await User.findOne({ telegramId: parseInt(req.params.telegramId) })
+      .select('cardLevels comboProgress');
+    var progress = (user && user.comboProgress && user.comboProgress.date === today)
+      ? user.comboProgress.done : [];
+
+    var cards = combo.cards.map(function(c) {
+      return {
+        key: isAdmin ? c.key : '?',
+        categoryIndex: c.categoryIndex,
+        cardIndex: c.cardIndex,
+        done: progress.indexOf(c.key) !== -1
+      };
+    });
+    res.json({ exists: true, cards, reward: combo.reward, allDone: progress.length >= 3 });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// POST set combo (admin only)
+app.post('/api/combo/set', async (req, res) => {
+  try {
+    var { adminId, cards } = req.body;
+    if(parseInt(adminId) !== ADMIN_ID) return res.status(403).json({ error: 'Not admin' });
+    if(!cards || cards.length !== 3) return res.status(400).json({ error: 'Need 3 cards' });
+    var today = new Date().toISOString().split('T')[0];
+    await DailyCombo.findOneAndUpdate(
+      { date: today },
+      { date: today, cards, reward: 5 },
+      { upsert: true, new: true }
+    );
+    res.json({ success: true, date: today });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// POST check card upgrade against combo
+app.post('/api/combo/check', async (req, res) => {
+  try {
+    var { telegramId, cardKey } = req.body;
+    if(!telegramId || !cardKey) return res.status(400).json({ error: 'Missing data' });
+    var today = new Date().toISOString().split('T')[0];
+    var combo = await DailyCombo.findOne({ date: today });
+    if(!combo) return res.json({ matched: false });
+
+    var isComboCard = combo.cards.some(function(c){ return c.key === cardKey; });
+    if(!isComboCard) return res.json({ matched: false });
+
+    // Update user's combo progress
+    var user = await User.findOne({ telegramId: parseInt(telegramId) }).select('comboProgress rec');
+    var progress = (user && user.comboProgress && user.comboProgress.date === today)
+      ? user.comboProgress.done.slice() : [];
+
+    if(progress.indexOf(cardKey) === -1) progress.push(cardKey);
+    var allDone = progress.length >= 3 && combo.cards.every(function(c){ return progress.indexOf(c.key) !== -1; });
+    var claimed = user && user.comboProgress && user.comboProgress.claimed;
+
+    var update = { 'comboProgress.date': today, 'comboProgress.done': progress };
+    if(allDone && !claimed) {
+      update['comboProgress.claimed'] = true;
+      update.$inc = { rec: combo.reward };
+    }
+    await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, { $set: update });
+    res.json({ matched: true, done: progress.length, allDone, reward: allDone && !claimed ? combo.reward : 0 });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
