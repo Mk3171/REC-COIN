@@ -116,7 +116,10 @@ const UserSchema = new mongoose.Schema({
   lastBlockDate:   { type: String, default: '' },
   totalBlocksFound:{ type: Number, default: 0 },
   refillData:      { type: Object, default: {date:'',count:3} },
-  miningSpeed:     { type: Number, default: 0 }
+  miningSpeed:     { type: Number, default: 0 },
+  referredByL2:    { type: String, default: '' },
+  referredByL3:    { type: String, default: '' },
+  totalRefCommission: { type: Number, default: 0 }
 });
 
 const User = mongoose.model('User', UserSchema);
@@ -169,8 +172,8 @@ async function distributeWeeklyRewards() {
     if (existing && existing.distributed) return;
 
     var top100 = await User.find({ rec: { $gt: 0 } })
-      .sort({ rec: -1 }).limit(100)
-      .select('telegramId username firstName walletAddress record rec miningSpeed');
+      .sort({ record: -1 }).limit(100)
+      .select('telegramId username firstName walletAddress record rec');
 
     if (top100.length === 0) return;
 
@@ -344,7 +347,18 @@ bot.onText(/\/start(.*)/, async (msg, match) => {
   try {
     const existing = await User.findOne({ telegramId: from.id });
     if (!existing) {
-      await new User({ telegramId: from.id, username: from.username || '', firstName: from.first_name || '', lastName: from.last_name || '', language: lang, referredBy: refId || '' }).save();
+      var l2Id = '', l3Id = '';
+      if (refId) {
+        var l1User = await User.findOne({ telegramId: parseInt(refId) });
+        if (l1User) {
+          l2Id = l1User.referredBy || '';
+          if (l2Id) {
+            var l2User = await User.findOne({ telegramId: parseInt(l2Id) });
+            if (l2User) l3Id = l2User.referredBy || '';
+          }
+        }
+      }
+      await new User({ telegramId: from.id, username: from.username || '', firstName: from.first_name || '', lastName: from.last_name || '', language: lang, referredBy: refId || '', referredByL2: l2Id, referredByL3: l3Id }).save();
       if (refId) await User.findOneAndUpdate({ telegramId: parseInt(refId) }, { $inc: { refCount: 1 } });
     } else {
       await User.findOneAndUpdate({ telegramId: from.id }, { lastSeen: new Date(), username: from.username || existing.username });
@@ -415,10 +429,10 @@ bot.on('message', async (msg) => {
 app.get('/api/leaderboard/global', async (req, res) => {
   try {
     var allUsers = await User.find({ banned: false })
-      .sort({ rec: -1 }).limit(500)
-      .select('telegramId username firstName record rec refCount miningSpeed createdAt');
+      .sort({ record: -1 }).limit(500)
+      .select('telegramId username firstName record rec refCount createdAt');
     res.json({ top100: allUsers.map(function(u, i) {
-      return { rank: i+1, telegramId: u.telegramId, name: u.username || u.firstName || 'User', record: u.record, rec: u.rec, miningSpeed: u.miningSpeed || 0, refCount: u.refCount };
+      return { rank: i+1, telegramId: u.telegramId, name: u.username || u.firstName || 'User', record: u.record, rec: u.rec, refCount: u.refCount };
     })});
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
@@ -426,13 +440,13 @@ app.get('/api/leaderboard/global', async (req, res) => {
 app.get('/api/leaderboard/myrank/:telegramId', async (req, res) => {
   try {
     var userId = parseInt(req.params.telegramId);
-    var allUsers = await User.find({}).sort({ rec: -1 }).select('telegramId username firstName record rec miningSpeed');
+    var allUsers = await User.find({}).sort({ record: -1 }).select('telegramId username firstName record rec');
     var myIndex = allUsers.findIndex(function(u) { return u.telegramId === userId; });
     var myRank = myIndex + 1;
     var start = Math.max(0, myIndex - 2);
     var end = Math.min(allUsers.length, myIndex + 3);
     var neighbors = allUsers.slice(start, end).map(function(u, i) {
-      return { rank: start + i + 1, telegramId: u.telegramId, name: u.username || u.firstName || 'User', record: u.record, rec: u.rec, miningSpeed: u.miningSpeed || 0, isMe: u.telegramId === userId };
+      return { rank: start + i + 1, telegramId: u.telegramId, name: u.username || u.firstName || 'User', record: u.record, rec: u.rec, isMe: u.telegramId === userId };
     });
     res.json({ myRank, total: allUsers.length, neighbors });
   } catch(e) { res.status(500).json({ error: e.message }); }
@@ -442,10 +456,10 @@ app.get('/api/leaderboard/friends/:telegramId', async (req, res) => {
   try {
     var userId = req.params.telegramId;
     var friends = await User.find({ referredBy: userId })
-      .sort({ rec: -1 }).limit(100)
-      .select('telegramId username firstName record rec miningSpeed');
+      .sort({ record: -1 }).limit(100)
+      .select('telegramId username firstName record rec');
     res.json({ friends: friends.map(function(u, i) {
-      return { rank: i+1, telegramId: u.telegramId, name: u.username || u.firstName || 'User', record: u.record, rec: u.rec, miningSpeed: u.miningSpeed || 0 };
+      return { rank: i+1, telegramId: u.telegramId, name: u.username || u.firstName || 'User', record: u.record, rec: u.rec };
     })});
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
@@ -553,6 +567,25 @@ app.get('/api/user/:telegramId', async (req, res) => {
 });
 
 // ====== API: SAVE USER (with security) ======
+// ====== REFERRAL COMMISSION ======
+async function distributeRefCommission(user, recEarned) {
+  if (!user || recEarned <= 0) return;
+  try {
+    if (user.referredBy) {
+      var c1 = parseFloat((recEarned * 0.08).toFixed(6));
+      await User.findOneAndUpdate({ telegramId: parseInt(user.referredBy) }, { $inc: { rec: c1, totalRefCommission: c1 } });
+    }
+    if (user.referredByL2) {
+      var c2 = parseFloat((recEarned * 0.02).toFixed(6));
+      await User.findOneAndUpdate({ telegramId: parseInt(user.referredByL2) }, { $inc: { rec: c2, totalRefCommission: c2 } });
+    }
+    if (user.referredByL3) {
+      var c3 = parseFloat((recEarned * 0.01).toFixed(6));
+      await User.findOneAndUpdate({ telegramId: parseInt(user.referredByL3) }, { $inc: { rec: c3, totalRefCommission: c3 } });
+    }
+  } catch(e) { console.log('Commission error:', e.message); }
+}
+
 app.post('/api/user/save', async (req, res) => {
   try {
     const { telegramId, initData, ...data } = req.body;
@@ -591,6 +624,14 @@ app.post('/api/user/save', async (req, res) => {
           console.log('[AntiCheat-Log] userId:', telegramId, 'suspiciousScore:', newScore, '(no ban)');
           // Save the data anyway - never block legitimate players
         }
+      }
+    }
+
+    // 5. Referral commission — async, non-blocking
+    if (existingUser && data.rec !== undefined && existingUser.rec !== undefined) {
+      var recEarned = parseFloat((data.rec - existingUser.rec).toFixed(6));
+      if (recEarned > 0 && recEarned < 10 && (existingUser.referredBy || existingUser.referredByL2 || existingUser.referredByL3)) {
+        distributeRefCommission(existingUser, recEarned).catch(function(){});
       }
     }
 
@@ -920,10 +961,34 @@ app.post('/api/block-found', async (req, res) => {
   try {
     const { telegramId, blockReward, blockNumber } = req.body;
     if (!telegramId) return res.status(400).json({ error: 'Missing data' });
+    // Give commission to referrers when block found
+    if (blockReward && blockReward > 0) {
+      var user = await User.findOne({ telegramId: parseInt(telegramId) }).select('referredBy referredByL2 referredByL3');
+      if (user) distributeRefCommission(user, parseFloat(blockReward)).catch(function(){});
+    }
     res.json({ success: true });
   } catch (e) {
     res.status(500).json({ error: e.message });
   }
+});
+
+// ====== REFERRAL LIST ======
+app.get('/api/referrals/:telegramId', async (req, res) => {
+  try {
+    var userId = req.params.telegramId;
+    var l1 = await User.find({ referredBy: userId })
+      .select('telegramId username firstName rec miningSpeed createdAt')
+      .sort({ rec: -1 }).limit(50);
+    var l1Ids = l1.map(function(u){ return u.telegramId.toString(); });
+    var l2 = await User.find({ referredBy: { $in: l1Ids } })
+      .select('telegramId username firstName rec miningSpeed createdAt')
+      .sort({ rec: -1 }).limit(50);
+    var l2Ids = l2.map(function(u){ return u.telegramId.toString(); });
+    var l3 = await User.find({ referredBy: { $in: l2Ids } })
+      .select('telegramId username firstName rec miningSpeed createdAt')
+      .sort({ rec: -1 }).limit(50);
+    res.json({ l1, l2, l3 });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 app.post('/webhook', (req, res) => { bot.processUpdate(req.body); res.sendStatus(200); });
