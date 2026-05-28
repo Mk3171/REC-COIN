@@ -6,117 +6,179 @@
   <title>REC Mining</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script src="tonconnect-ui.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
-<style>
-.lb-tab{flex:1;padding:8px 4px;border-radius:8px;background:#1a1a1a;border:1px solid #333;color:#555;font-size:11px;cursor:pointer;-webkit-tap-highlight-color:transparent;}
-.lb-tab.active{background:#2a0000;border-color:#FF0000;color:#FF0000;}
-
-/* Camera button override */
-.camera-btn {
-  background: radial-gradient(circle at 35% 35%, #1a1a2e, #0a0a12) !important;
-  border: 3px solid #FF0000 !important;
-  border-radius: 50% !important;
-  box-shadow: 0 0 40px rgba(255,0,0,0.5), 0 0 80px rgba(255,0,0,0.2) !important;
-  animation: pulseGlow 3s ease-in-out infinite !important;
-  overflow: hidden !important;
-}
-.camera-btn:active {
-  transform: scale(0.95) !important;
-  box-shadow: 0 0 60px rgba(255,0,0,0.8) !important;
-}
-</style>
 </head>
-
 <body>
 
-<!-- Lang Dropdown (global overlay) -->
-<div id="langDropdown" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#1a1a1a;border:1px solid #FF0000;border-radius:16px;padding:20px;z-index:9999;min-width:220px;box-shadow:0 0 40px rgba(255,0,0,0.3);">
+<!-- Lang Dropdown -->
+<div id="langDropdown" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#0f0a20;border:1px solid rgba(255,100,50,0.5);border-radius:16px;padding:20px;z-index:9999;min-width:230px;box-shadow:0 0 40px rgba(255,50,0,0.2);">
   <div style="text-align:center;font-size:32px;margin-bottom:12px;">🌍</div>
   <div style="font-size:14px;color:#aaa;text-align:center;margin-bottom:15px;">اختر اللغة / Choose Language</div>
-  <button onclick="applyLang('ar')" style="display:flex;align-items:center;gap:10px;width:100%;background:#0a0a0a;border:1px solid #333;color:white;padding:10px 14px;border-radius:10px;cursor:pointer;margin-bottom:8px;font-size:14px;">🇸🇦 <span>العربية</span></button>
-  <button onclick="applyLang('en')" style="display:flex;align-items:center;gap:10px;width:100%;background:#0a0a0a;border:1px solid #333;color:white;padding:10px 14px;border-radius:10px;cursor:pointer;margin-bottom:8px;font-size:14px;">🇬🇧 <span>English</span></button>
-  <button onclick="applyLang('uk')" style="display:flex;align-items:center;gap:10px;width:100%;background:#0a0a0a;border:1px solid #333;color:white;padding:10px 14px;border-radius:10px;cursor:pointer;margin-bottom:8px;font-size:14px;">🇺🇦 <span>Українська</span></button>
-  <button onclick="applyLang('zh')" style="display:flex;align-items:center;gap:10px;width:100%;background:#0a0a0a;border:1px solid #333;color:white;padding:10px 14px;border-radius:10px;cursor:pointer;font-size:14px;">🇨🇳 <span>中文</span></button>
+  <button onclick="applyLang('ar')" style="display:flex;align-items:center;gap:10px;width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:white;padding:10px 14px;border-radius:10px;cursor:pointer;margin-bottom:8px;font-size:14px;font-family:Rajdhani,sans-serif;">🇸🇦 <span>العربية</span></button>
+  <button onclick="applyLang('en')" style="display:flex;align-items:center;gap:10px;width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:white;padding:10px 14px;border-radius:10px;cursor:pointer;margin-bottom:8px;font-size:14px;font-family:Rajdhani,sans-serif;">🇬🇧 <span>English</span></button>
+  <button onclick="applyLang('uk')" style="display:flex;align-items:center;gap:10px;width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:white;padding:10px 14px;border-radius:10px;cursor:pointer;margin-bottom:8px;font-size:14px;font-family:Rajdhani,sans-serif;">🇺🇦 <span>Українська</span></button>
+  <button onclick="applyLang('zh')" style="display:flex;align-items:center;gap:10px;width:100%;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:white;padding:10px 14px;border-radius:10px;cursor:pointer;font-size:14px;font-family:Rajdhani,sans-serif;">🇨🇳 <span>中文</span></button>
 </div>
 <div id="langOverlay" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.7);" onclick="closeLangMenu()"></div>
 
 <div class="app-wrapper" id="appWrapper">
 
-  <!-- TOP BAR -->
+  <!-- ===== TOP BAR ===== -->
   <div class="top-bar">
-    <div class="rec-counter">⚡ <span id="recMini">0.000000</span> REC</div>
-    <div class="record-counter">🔴 <span id="recordCount">0</span> RECORD</div>
+    <div class="top-bar-profile">
+      <div class="top-bar-avatar" id="topBarAvatar">M</div>
+      <div>
+        <div class="top-bar-name" id="topBarName">REC Mining</div>
+        <div class="top-bar-level">LVL 5 ●●●○○</div>
+      </div>
+    </div>
+    <div class="top-bar-title">
+      <div class="top-bar-title-rec">REC</div>
+      <div class="top-bar-title-mining">MINING</div>
+    </div>
+    <div class="top-bar-actions">
+      <div class="top-bar-btn" onclick="toggleLangMenu()">🌍</div>
+      <div class="top-bar-btn" onclick="showPage('profile', document.querySelector('.nav-btn'))">☰</div>
+    </div>
   </div>
 
+  <!-- ===== BALANCE ROW ===== -->
+  <div class="balance-row">
+    <div class="balance-card">
+      <div class="balance-card-icon">⚡</div>
+      <div>
+        <div class="balance-card-label">REC</div>
+        <div class="balance-card-value green"><span id="recMini">0.000000</span></div>
+      </div>
+      <div class="balance-card-plus" onclick="showPage('profile', document.querySelector('.nav-btn'))">?</div>
+    </div>
+    <div class="balance-card">
+      <div class="balance-card-icon">🔴</div>
+      <div>
+        <div class="balance-card-label">RECORD</div>
+        <div class="balance-card-value red"><span id="recordCount">0</span></div>
+      </div>
+      <div class="balance-card-plus" onclick="openExchange()">🔄</div>
+    </div>
+  </div>
+
+  <!-- ===== PAGES ===== -->
   <div class="pages-container">
 
     <!-- HOME -->
     <div id="home" class="page active">
       <div class="home-inner">
 
-        <!-- Shop, Exchange, Daily & Lang buttons -->
-        <div style="width:100%;height:70px;flex-shrink:0;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none;">
-          <div style="display:flex;flex-direction:row;gap:8px;padding:4px 10px;width:max-content;height:100%;align-items:center;">
-            <button class="side-btn" style="border-color:#FFD700;" onclick="openStarsShop()">
-              <span>⭐</span><span class="side-btn-label">Shop</span>
-            </button>
-            <button class="side-btn" style="border-color:rgba(0,255,136,0.6);" onclick="openExchange()">
-              <span>🔄</span><span class="side-btn-label" style="color:#00FF88;">Exchange</span>
-            </button>
-            <button class="side-btn" style="border-color:rgba(255,215,0,0.6);" onclick="openDailyLogin()">
-              <span>📅</span><span class="side-btn-label" style="color:#FFD700;">Daily</span>
-            </button>
-            <button class="side-btn" style="border-color:rgba(255,100,0,0.6);" onclick="openGames()">
-              <span>🎮</span><span class="side-btn-label" style="color:#FF8844;">Games</span>
-            </button>
-            <button class="side-btn" style="border-color:rgba(100,150,255,0.6);" onclick="toggleLangMenu()">
-              <span>🌍</span><span class="side-btn-label" style="color:#88AAFF;">Lang</span>
-            </button>
-            <button class="side-btn" style="border-color:rgba(255,180,0,0.6);" onclick="window.open('https://rec-mining.onrender.com','_blank')">
-              <span>📋</span><span class="side-btn-label" style="color:#FFB400;">Terms</span>
-            </button>
-          </div>
-        </div>
+        <!-- MAIN AREA: side btns + circle -->
+        <div class="home-main-area">
 
-        <!-- Circle centered -->
-        <div class="home-middle">
+          <!-- LEFT SIDE BUTTONS -->
+          <div class="side-col">
+            <div class="side-action-btn" onclick="showPage('rank', document.getElementById('navRankBtn'))" style="border-color:rgba(255,215,0,0.25);">
+              <span class="sa-icon">🏆</span>
+              <span class="sa-label" style="color:#FFD700;" data-i18n="navRank">Rank</span>
+            </div>
+            <div class="side-action-btn" onclick="openDailyLogin()" style="border-color:rgba(0,200,100,0.25);">
+              <span class="sa-icon">📅</span>
+              <span class="sa-label" style="color:#00CC66;">Daily</span>
+            </div>
+            <div class="side-action-btn" onclick="openGames()" style="border-color:rgba(255,100,180,0.25);">
+              <span class="sa-icon">🎮</span>
+              <span class="sa-label" style="color:#FF66AA;" data-i18n="navCards">Games</span>
+            </div>
+          </div>
+
+          <!-- CENTER -->
           <div class="home-center-col">
             <button class="camera-btn" onclick="tap()">
               <img src="logo.jpeg" alt="REC" style="width:100%;height:100%;object-fit:cover;border-radius:50%;pointer-events:none;">
             </button>
-            <div data-i18n="tapMine" style="font-size:11px;color:#555;letter-spacing:1px;margin-top:5px;">اضغط للتعدين</div>
+            <div class="tap-label" data-i18n="tapMine">TAP TO MINE</div>
           </div>
-        </div>
 
-        <!-- Bottom controls -->
+          <!-- RIGHT SIDE BUTTONS -->
+          <div class="side-col">
+            <div class="side-action-btn" onclick="showPage('cards', document.getElementById('navCardsBtn'))" style="border-color:rgba(170,100,255,0.25);">
+              <span class="sa-icon">🃏</span>
+              <span class="sa-label" style="color:#AA66FF;" data-i18n="navCards">Cards</span>
+            </div>
+            <div class="side-action-btn" onclick="openUpgrade()" style="border-color:rgba(255,100,50,0.25);">
+              <span class="sa-icon">⬆️</span>
+              <span class="sa-label" style="color:#FF8844;">Upgrade</span>
+            </div>
+            <div class="side-action-btn" onclick="openStarsShop()" style="border-color:rgba(255,220,0,0.25);">
+              <span class="sa-icon">⭐</span>
+              <span class="sa-label" style="color:#FFD700;">Shop</span>
+            </div>
+          </div>
+
+        </div><!-- end home-main-area -->
+
+        <!-- BOTTOM SECTION -->
         <div class="home-bottom">
+
+          <!-- Gold RECORD bar -->
+          <div class="gold-bar">
+            <div class="gold-bar-icon">⛏️</div>
+            <div>
+              <div class="gold-bar-amount" id="recordCountHome">0</div>
+              <div class="gold-bar-speed">RECORD • <span id="recSpeedShow" style="font-size:9px;color:rgba(255,200,0,0.5);">0.00000000</span> REC/s</div>
+            </div>
+            <div class="gold-bar-right">💰</div>
+          </div>
+
+          <!-- Energy bar -->
           <div class="energy-wrap">
             <div class="energy-header">
-              <span data-i18n="energyLabel">⚡ الطاقة</span>
-              <span id="energyText">1000 / 1000</span>
+              <span data-i18n="energyLabel" style="color:rgba(255,255,255,0.5);">⚡ Energy</span>
+              <span id="energyText" style="color:rgba(255,255,255,0.4);">1000 / 1000</span>
             </div>
             <div class="energy-bar-bg">
               <div class="energy-bar-fill" id="energyBar" style="width:100%"></div>
             </div>
           </div>
+
+          <!-- Quick actions -->
+          <div class="quick-grid">
+            <div class="quick-btn" onclick="showPage('tasks', document.getElementById('navTasksBtn'))">
+              <span class="qb-icon">✅</span>
+              <span class="qb-label" style="color:rgba(255,255,255,0.7);" data-i18n="navTasks">Tasks</span>
+              <span class="qb-sub" style="color:#FF8800;" id="tasksBadge">Go</span>
+            </div>
+            <div class="quick-btn" onclick="showPage('invite', document.getElementById('navInviteBtn'))">
+              <span class="qb-icon">👥</span>
+              <span class="qb-label" style="color:rgba(255,255,255,0.7);" data-i18n="navInvite">Invite</span>
+              <span class="qb-sub" style="color:#44CCFF;">+REC</span>
+            </div>
+            <div class="quick-btn" onclick="openExchange()">
+              <span class="qb-icon">🔄</span>
+              <span class="qb-label" style="color:rgba(255,255,255,0.7);">Exchange</span>
+              <span class="qb-sub" style="color:#00FF88;">SWAP</span>
+            </div>
+            <div class="quick-btn" onclick="window.open('https://rec-mining.onrender.com','_blank')">
+              <span class="qb-icon">📋</span>
+              <span class="qb-label" style="color:rgba(255,255,255,0.7);">Terms</span>
+              <span class="qb-sub" style="color:#FFB400;">Legal</span>
+            </div>
+          </div>
+
+          <!-- Hidden speed spans for app.js compatibility -->
           <span id="recordSpeedShow" style="display:none;">0</span>
-          <span id="recSpeedShow" style="display:none;">0.00000000</span>
-          <button class="upgrade-btn" onclick="openUpgrade()" data-i18n="upgradesTitle">UPGRADE</button>
-        </div>
 
-      </div>
-    </div>
+        </div><!-- end home-bottom -->
+      </div><!-- end home-inner -->
+    </div><!-- end #home -->
 
-    <!-- CARDS -->
+    <!-- CARDS PAGE -->
     <div id="cards" class="page">
-      <div class="page-title" data-i18n="cardsTitle">🃏 البطاقات</div>
+      <div class="page-title" data-i18n="cardsTitle">🃏 Cards</div>
       <div style="display:flex;gap:8px;margin-bottom:15px;overflow-x:auto;padding-bottom:5px;">
-        <button class="cat-btn active" onclick="showCategory(0,this)" data-i18n="catAnime">🎌 أنمي</button>
-        <button class="cat-btn" onclick="showCategory(1,this)" data-i18n="catCars">🚗 سيارات</button>
-        <button class="cat-btn" onclick="showCategory(2,this)" data-i18n="catClubs">🌙 ملاهي</button>
-        <button class="cat-btn" onclick="showCategory(3,this)" data-i18n="catPalaces">🏰 قصور</button>
-        <button class="cat-btn" onclick="showCategory(4,this)" data-i18n="catLimited" style="border-color:rgba(255,215,0,0.5);color:#FFD700;background:linear-gradient(135deg,#1a1200,#2a1e00);">🔥 Limited</button>
+        <button class="cat-btn active" onclick="showCategory(0,this)" data-i18n="catAnime">🎌 Anime</button>
+        <button class="cat-btn" onclick="showCategory(1,this)" data-i18n="catCars">🚗 Cars</button>
+        <button class="cat-btn" onclick="showCategory(2,this)" data-i18n="catClubs">🌙 Clubs</button>
+        <button class="cat-btn" onclick="showCategory(3,this)" data-i18n="catPalaces">🏰 Palaces</button>
+        <button class="cat-btn" onclick="showCategory(4,this)" data-i18n="catLimited" style="border-color:rgba(255,215,0,0.4);color:#FFD700;background:rgba(255,180,0,0.08);">🔥 Limited</button>
       </div>
       <div class="card-grid" id="cat-0"></div>
       <div class="card-grid" id="cat-1" style="display:none"></div>
@@ -125,118 +187,67 @@
       <div class="card-grid" id="cat-4" style="display:none"></div>
     </div>
 
-    <!-- TASKS -->
+    <!-- TASKS PAGE -->
     <div id="tasks" class="page">
-      <div class="page-title" data-i18n="tasksTitle">✅ المهام</div>
-
-      <!-- Task Tabs -->
+      <div class="page-title" data-i18n="tasksTitle">✅ Tasks</div>
       <div style="display:flex;gap:6px;margin-bottom:14px;">
-        <button class="lb-tab active" id="ttab_social" onclick="showTaskTab('social',this)">📢 Social</button>
-        <button class="lb-tab" id="ttab_daily" onclick="showTaskTab('daily',this)">⚡ Daily</button>
-        <button class="lb-tab" id="ttab_missions" onclick="showTaskTab('missions',this)">🎯 Missions</button>
+        <button id="taskTab_social" style="flex:1;padding:8px;border-radius:8px;background:rgba(255,50,0,0.12);border:1px solid rgba(255,0,0,0.4);color:#FF6644;font-size:11px;cursor:pointer;font-family:Rajdhani,sans-serif;" onclick="switchTaskTab('social',this)">📱 Social</button>
+        <button id="taskTab_daily" style="flex:1;padding:8px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.3);font-size:11px;cursor:pointer;font-family:Rajdhani,sans-serif;" onclick="switchTaskTab('daily',this)">📅 Daily</button>
+        <button id="taskTab_cards" style="flex:1;padding:8px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.3);font-size:11px;cursor:pointer;font-family:Rajdhani,sans-serif;" onclick="switchTaskTab('cards',this)">🃏 Cards</button>
       </div>
-
-      <!-- ===== SOCIAL TASKS ===== -->
-      <div id="taskTab-social">
-
-        <!-- Telegram Channels -->
-        <div style="font-size:11px;color:#555;letter-spacing:1px;margin-bottom:8px;">📢 JOIN OUR CHANNELS — +5 REC EACH</div>
-        <div id="blocksChannelTask"></div>
-        <div id="chatGroupTask"></div>
-
-        <!-- Telegram & Twitter follow -->
-        <div style="font-size:11px;color:#555;letter-spacing:1px;margin:14px 0 8px;">FOLLOW US</div>
-        <div id="telegramFollowTask"></div>
-        <div id="twitterFollowTask"></div>
-
-        <!-- Like Tasks -->
-        <div style="font-size:11px;color:#555;letter-spacing:1px;margin:14px 0 8px;">❤️ LIKE TWEETS — +5 REC EACH</div>
-        <div id="likeTasks"></div>
-
-        <!-- Retweet Tasks -->
-        <div style="font-size:11px;color:#555;letter-spacing:1px;margin:14px 0 8px;">🔁 RETWEET — +5 REC EACH</div>
-        <div id="retweetTasks"></div>
-
-      </div>
-
-      <!-- ===== DAILY TASKS ===== -->
-      <div id="taskTab-daily" style="display:none;">
-        <!-- Mystery Box -->
-        <div style="background:linear-gradient(135deg,#0d0010,#150020);border:1px solid rgba(180,0,255,0.35);border-radius:14px;padding:14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="openMysteryBox()">
-          <div>
-            <div style="font-size:15px;color:#CC88FF;font-weight:bold;">📦 Mystery Box</div>
-            <div style="color:#aaa;font-size:11px;margin-top:3px;">Free daily — random RECORD or REC!</div>
-          </div>
-          <button style="background:linear-gradient(135deg,#4a0080,#8800FF);border:none;color:white;padding:9px 14px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:bold;" onclick="event.stopPropagation();openMysteryBox()">Open 🎲</button>
-        </div>
-        <div style="font-size:11px;color:#555;letter-spacing:1px;margin-bottom:8px;">TODAY'S TASKS — resets midnight</div>
-        <div id="dailyTasksCont"></div>
-      </div>
-
-      <!-- ===== CARD MISSIONS ===== -->
-      <div id="taskTab-missions" style="display:none;">
-        <div style="font-size:11px;color:#555;letter-spacing:1px;margin-bottom:8px;">CARD MISSIONS — one-time rewards</div>
-        <div id="cardMissionsCont"></div>
-      </div>
-
+      <div id="tasksContent"></div>
     </div>
 
-    <!-- INVITE -->
+    <!-- INVITE PAGE -->
     <div id="invite" class="page">
-      <div style="text-align:center;padding:12px 0 8px;">
-        <img src="logo.jpeg" style="width:65px;height:65px;border-radius:50%;border:2px solid #FF0000;box-shadow:0 0 20px rgba(255,0,0,0.35);" onerror="this.outerHTML='<div style=font-size:40px>🔴</div>'">
-        <div style="font-size:18px;font-family:Orbitron,sans-serif;margin:7px 0 2px;color:white;">REC Mining</div>
-        <div data-i18n="inviteSubtitle" style="color:#aaa;font-size:12px;">ادعو أصدقاءك واربح عملات REC!</div>
+      <div class="page-title" data-i18n="inviteTitle">👥 Invite</div>
+      <div class="info-card" style="text-align:center;padding:16px;margin-bottom:12px;">
+        <div style="font-size:36px;margin-bottom:8px;">🎁</div>
+        <div data-i18n="inviteSubtitle" style="color:#aaa;font-size:13px;">Invite friends and earn REC!</div>
       </div>
-
-      <!-- Buttons ABOVE total invited -->
-      <div style="display:flex;gap:10px;margin-bottom:10px;">
-        <button onclick="copyInvite()" style="flex:1;background:#FF0000;border:none;color:white;padding:13px;border-radius:12px;font-size:14px;cursor:pointer;font-weight:bold;" data-i18n="copyLink">📋 نسخ الرابط</button>
-        <button onclick="shareInvite()" style="flex:1;background:#1a1a1a;border:1px solid #FF0000;color:white;padding:13px;border-radius:12px;font-size:14px;cursor:pointer;" data-i18n="shareBtn">📤 مشاركة</button>
+      <div style="display:flex;gap:10px;margin-bottom:12px;">
+        <button onclick="copyInvite()" style="flex:1;background:linear-gradient(135deg,#CC0000,#FF2200);border:none;color:white;padding:13px;border-radius:12px;font-size:14px;cursor:pointer;font-weight:bold;font-family:Rajdhani,sans-serif;" data-i18n="copyLink">📋 Copy Link</button>
+        <button onclick="shareInvite()" style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,0,0,0.35);color:white;padding:13px;border-radius:12px;font-size:14px;cursor:pointer;font-family:Rajdhani,sans-serif;" data-i18n="shareBtn">📤 Share</button>
       </div>
-
-      <div style="background:linear-gradient(135deg,#1a0000,#2a0a0a);border:1px solid #FF0000;border-radius:14px;padding:12px;margin:10px 0;display:flex;justify-content:space-between;align-items:center;">
+      <div class="info-card" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
         <div>
-          <div data-i18n="totalInvited" style="font-size:11px;color:#aaa;margin-bottom:3px;">إجمالي المدعوين</div>
-          <div style="font-size:30px;font-family:Orbitron,sans-serif;color:#FF0000;line-height:1;" id="refCountDisplay">0</div>
+          <div data-i18n="totalInvited" style="font-size:11px;color:#aaa;margin-bottom:4px;">Total Invited</div>
+          <div style="font-size:30px;font-family:Orbitron,sans-serif;color:#FF6644;line-height:1;" id="refCountDisplay">0</div>
         </div>
-        <div style="text-align:center;"><div style="font-size:24px;">👥</div><div data-i18n="personJoined" style="font-size:9px;color:#aaa;margin-top:2px;max-width:80px;">شخص انضم عبر رابطك</div></div>
+        <div style="text-align:center;">
+          <div style="font-size:32px;">👥</div>
+          <div data-i18n="personJoined" style="font-size:9px;color:#aaa;margin-top:2px;max-width:80px;">people joined</div>
+        </div>
       </div>
-      <div data-i18n="milestonesTitle" style="font-size:12px;color:#aaa;margin:10px 0 6px;padding-right:2px;">🎯 مراحل المكافآت</div>
+      <div data-i18n="milestonesTitle" style="font-size:13px;color:#aaa;margin:10px 0 8px;font-weight:600;">🎯 Reward Milestones</div>
       <div id="milestonesContainer"></div>
-
     </div>
 
-    <!-- RANK / LEADERBOARD -->
+    <!-- RANK PAGE -->
     <div id="rank" class="page" onappear="loadLeaderboard('global')">
-      <div class="page-title" data-i18n="rankTitle">🏆 المتصدرون</div>
-
-      <!-- Tabs -->
+      <div class="page-title" data-i18n="rankTitle">🏆 Leaderboard</div>
       <div style="display:flex;gap:6px;margin-bottom:14px;">
-        <button id="tab_global" class="lb-tab active" onclick="switchLeaderTab('global')" data-i18n="tabGlobal">🌍 عالمي</button>
-        <button id="tab_friends" class="lb-tab" onclick="switchLeaderTab('friends')" data-i18n="tabFriends">👥 أصدقاء</button>
-        <button id="tab_mylevel" class="lb-tab" onclick="switchLeaderTab('mylevel')" data-i18n="tabMyLevel">📊 مستواي</button>
+        <button id="tab_global" class="lb-tab active" onclick="switchLeaderTab('global')" data-i18n="tabGlobal">🌍 Global</button>
+        <button id="tab_friends" class="lb-tab" onclick="switchLeaderTab('friends')" data-i18n="tabFriends">👥 Friends</button>
+        <button id="tab_mylevel" class="lb-tab" onclick="switchLeaderTab('mylevel')" data-i18n="tabMyLevel">📊 My Level</button>
       </div>
-
-      <!-- Content -->
       <div id="lbContent">
-        <div style="text-align:center;padding:30px;color:#555;" data-i18n="loadingLeader">⏳ جاري التحميل...</div>
+        <div style="text-align:center;padding:30px;color:#555;" data-i18n="loadingLeader">⏳ Loading...</div>
       </div>
-
     </div>
 
-    <!-- PROFILE -->
+    <!-- PROFILE PAGE -->
     <div id="profile" class="page">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;gap:8px;">
         <button onclick="connectWallet()" id="walletBtn"
-          style="background:#4B9EFF;border:none;color:white;padding:7px 14px;border-radius:20px;cursor:pointer;font-size:13px;max-width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:background 0.3s;"
-          data-i18n="connectWallet">ربط المحفظة</button>
-        <div style="background:#1a1a1a;border:1px solid #333;border-radius:20px;padding:6px 12px;font-size:12px;color:#aaa;white-space:nowrap;">ID: <span id="profileId">-</span></div>
+          style="background:linear-gradient(135deg,#1144AA,#4B9EFF);border:none;color:white;padding:8px 14px;border-radius:20px;cursor:pointer;font-size:13px;max-width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:Rajdhani,sans-serif;font-weight:700;"
+          data-i18n="connectWallet">Connect Wallet</button>
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:6px 12px;font-size:12px;color:#aaa;white-space:nowrap;">ID: <span id="profileId">-</span></div>
       </div>
       <div class="info-card" style="text-align:center;padding:20px;margin-bottom:12px;">
-        <div style="width:65px;height:65px;border-radius:50%;background:#222;border:2px solid #FF0000;margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:32px;">👤</div>
+        <div style="width:65px;height:65px;border-radius:50%;background:rgba(255,0,0,0.1);border:2px solid rgba(255,0,0,0.4);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:32px;">👤</div>
         <div style="font-size:17px;font-weight:bold;" id="profileName">-</div>
-        <div style="font-size:13px;color:#FF0000;margin-top:4px;">RECORD <span id="profileRecord">0</span></div>
+        <div style="font-size:13px;color:#FF6644;margin-top:4px;">RECORD <span id="profileRecord">0</span></div>
       </div>
       <div class="info-card" style="display:flex;justify-content:space-between;align-items:center;">
         <div>
@@ -248,7 +259,7 @@
       </div>
       <div data-i18n="controls" style="color:#aaa;font-size:12px;text-align:right;margin-bottom:8px;padding-right:4px;">Controls</div>
       <div class="info-card" style="display:flex;justify-content:space-between;align-items:center;opacity:0.6;">
-        <div style="background:#1a1a1a;color:#aaa;border:1px solid #444;padding:4px 10px;border-radius:8px;font-size:12px;white-space:nowrap;" data-i18n="comingSoon">Coming Soon</div>
+        <div style="background:rgba(255,255,255,0.06);color:#aaa;border:1px solid rgba(255,255,255,0.1);padding:4px 10px;border-radius:8px;font-size:12px;white-space:nowrap;" data-i18n="comingSoon">Coming Soon</div>
         <div style="text-align:right;flex:1;margin:0 10px;">
           <div data-i18n="withdrawPool" style="font-size:14px;">Withdraw Pool</div>
           <div style="color:#aaa;font-size:11px;" data-i18n="transferPool">Transfer Pool to Wallet</div>
@@ -256,7 +267,7 @@
         <div style="font-size:24px;">🏦</div>
       </div>
       <div class="info-card" style="display:flex;justify-content:space-between;align-items:center;">
-        <span style="background:#1a1a1a;color:#aaa;border:1px solid #444;padding:4px 10px;border-radius:8px;font-size:12px;white-space:nowrap;" data-i18n="locked">Locked</span>
+        <span style="background:rgba(255,255,255,0.06);color:#aaa;border:1px solid rgba(255,255,255,0.1);padding:4px 10px;border-radius:8px;font-size:12px;white-space:nowrap;" data-i18n="locked">Locked</span>
         <div style="text-align:right;flex:1;margin:0 10px;">
           <div data-i18n="history" style="font-size:14px;">History</div>
           <div data-i18n="yourWithdrawals" style="color:#aaa;font-size:11px;">Your withdrawals</div>
@@ -264,51 +275,52 @@
         <div style="font-size:24px;">📄</div>
       </div>
       <div class="info-card" style="text-align:center;cursor:pointer;" onclick="openSupport()">
-        <span data-i18n="support" style="font-size:14px;">💬 الدعم الفني @Momokhli</span>
+        <span data-i18n="support" style="font-size:14px;">💬 Support @Momokhli</span>
       </div>
     </div>
 
   </div><!-- end pages-container -->
 
-  <!-- NAV -->
+  <!-- ===== NAV BAR ===== -->
   <nav class="nav">
-    <button class="nav-btn" onclick="showPage('profile',this)"><span>👤</span><span data-i18n="navProfile">Profile</span></button>
-    <button class="nav-btn" onclick="showPage('rank',this)"><span>🏆</span><span data-i18n="navRank">Rank</span></button>
-    <button class="nav-btn" onclick="showPage('invite',this)"><span>👥</span><span data-i18n="navInvite">Invite</span></button>
-    <button class="nav-btn" onclick="showPage('tasks',this)"><span>✅</span><span data-i18n="navTasks">Tasks</span></button>
-    <button class="nav-btn" onclick="showPage('cards',this)"><span>🃏</span><span data-i18n="navCards">Cards</span></button>
-    <button class="nav-btn active" onclick="showPage('home',this)"><span>🏠</span><span data-i18n="navHome">Home</span></button>
+    <button class="nav-btn" id="navProfileBtn" onclick="showPage('profile',this)"><span>👤</span><span data-i18n="navProfile">Profile</span></button>
+    <button class="nav-btn" id="navRankBtn" onclick="showPage('rank',this)"><span>🏆</span><span data-i18n="navRank">Rank</span></button>
+    <button class="nav-btn active" id="navHomeBtn" onclick="showPage('home',this)"><span>🏠</span><span data-i18n="navHome">Home</span></button>
+    <button class="nav-btn" id="navInviteBtn" onclick="showPage('invite',this)"><span>👥</span><span data-i18n="navInvite">Invite</span></button>
+    <button class="nav-btn" id="navTasksBtn" onclick="showPage('tasks',this)"><span>✅</span><span data-i18n="navTasks">Tasks</span></button>
   </nav>
 
 </div><!-- end app-wrapper -->
 
 <!-- UPGRADE OVERLAY -->
 <div class="overlay-page" id="upgradePage">
-  <button class="back-btn" data-i18n="backBtn" onclick="document.getElementById('upgradePage').classList.remove('open')">← رجوع</button>
-  <h2 style="margin-bottom:20px;color:#FF0000;" data-i18n="upgradesTitle">الترقيات</h2>
+  <button class="back-btn" data-i18n="backBtn" onclick="document.getElementById('upgradePage').classList.remove('open')">← Back</button>
+  <h2 style="margin-bottom:20px;color:#FF6644;font-family:Orbitron,sans-serif;" data-i18n="upgradesTitle">Upgrades</h2>
   <div class="upg-card">
-    <div style="font-size:16px;" data-i18n="tapUpgradeTitle">⚡ ترقية الكبسات</div>
-    <div style="color:#FF0000;font-size:13px;margin:5px 0;"><span data-i18n="levelLabel">المستوى:</span> <span id="tapLevel">0</span> / 100</div>
-    <div style="color:#aaa;font-size:12px;"><span data-i18n="costLabel">التكلفة:</span> <span id="tapCost">50</span> RECORD</div>
-    <div style="color:#aaa;font-size:12px;margin-top:4px;"><span data-i18n="tapsPerClick">كبسات لكل ضغطة:</span> <span id="tapPower">1</span></div>
-    <button class="do-btn" id="tapUpgradeBtn" onclick="upgradeTap()" data-i18n="upgradeBtn">ترقية</button>
+    <div style="font-size:16px;" data-i18n="tapUpgradeTitle">⚡ Tap Upgrade</div>
+    <div style="color:#FF6644;font-size:13px;margin:5px 0;"><span data-i18n="levelLabel">Level:</span> <span id="tapLevel">0</span> / 100</div>
+    <div style="color:#aaa;font-size:12px;"><span data-i18n="costLabel">Cost:</span> <span id="tapCost">50</span> RECORD</div>
+    <div style="color:#aaa;font-size:12px;margin-top:4px;"><span data-i18n="tapsPerClick">Taps per click:</span> <span id="tapPower">1</span></div>
+    <button class="do-btn" id="tapUpgradeBtn" onclick="upgradeTap()" data-i18n="upgradeBtn">Upgrade</button>
   </div>
   <div class="upg-card">
-    <div style="font-size:16px;" data-i18n="energyUpgradeTitle">🔋 ترقية الطاقة</div>
-    <div style="color:#FF0000;font-size:13px;margin:5px 0;"><span data-i18n="levelLabel">المستوى:</span> <span id="energyLevel">0</span> / 100</div>
-    <div style="color:#aaa;font-size:12px;"><span data-i18n="costLabel">التكلفة:</span> <span id="energyCost">50</span> RECORD</div>
-    <div style="color:#aaa;font-size:12px;margin-top:4px;"><span data-i18n="totalEnergy">الطاقة الكلية:</span> <span id="maxEnergyShow">1000</span></div>
-    <button class="do-btn" id="energyUpgradeBtn" onclick="upgradeEnergy()" data-i18n="upgradeBtn">ترقية</button>
+    <div style="font-size:16px;" data-i18n="energyUpgradeTitle">🔋 Energy Upgrade</div>
+    <div style="color:#FF6644;font-size:13px;margin:5px 0;"><span data-i18n="levelLabel">Level:</span> <span id="energyLevel">0</span> / 100</div>
+    <div style="color:#aaa;font-size:12px;"><span data-i18n="costLabel">Cost:</span> <span id="energyCost">50</span> RECORD</div>
+    <div style="color:#aaa;font-size:12px;margin-top:4px;"><span data-i18n="totalEnergy">Total Energy:</span> <span id="maxEnergyShow">1000</span></div>
+    <button class="do-btn" id="energyUpgradeBtn" onclick="upgradeEnergy()" data-i18n="upgradeBtn">Upgrade</button>
   </div>
   <div class="upg-card">
     <div style="font-size:16px;">⚡ Energy Refill</div>
-    <div style="color:#aaa;font-size:12px;margin:5px 0;">تعبئة الطاقة كاملة فوراً</div>
-    <div style="color:#FF0000;font-size:13px;margin:5px 0;">الفرص المتبقية اليوم: <span id="refillCount">3</span> / 3</div>
-    <button class="do-btn" id="energyRefillBtn" onclick="useEnergyRefill()">⚡ تعبئة الطاقة</button>
+    <div style="color:#aaa;font-size:12px;margin:5px 0;">Instantly refill your energy</div>
+    <div style="color:#FF6644;font-size:13px;margin:5px 0;">Remaining today: <span id="refillCount">3</span> / 3</div>
+    <button class="do-btn" id="energyRefillBtn" onclick="useEnergyRefill()">⚡ Refill Energy</button>
   </div>
 </div>
+
+<!-- CARD MODAL -->
 <div class="overlay-page" id="cardModal">
-  <button class="back-btn" data-i18n="backBtn" onclick="document.getElementById('cardModal').classList.remove('open')">← رجوع</button>
+  <button class="back-btn" data-i18n="backBtn" onclick="document.getElementById('cardModal').classList.remove('open')">← Back</button>
   <div id="cardDetail"></div>
 </div>
 
