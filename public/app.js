@@ -2031,77 +2031,84 @@ function loadLeaderboard(tab) {
 function renderGlobal(top100, myRankData, weekly) {
   var cont = document.getElementById('lbContent');
   var myRank = myRankData ? myRankData.myRank : '-';
-  var daysLeft = weekly ? weekly.daysLeft : 7;
+  weeklyEndMs = Date.now() + (weekly ? weekly.daysLeft : 7) * 24 * 60 * 60 * 1000;
 
   var html = '';
 
-  // Weekly challenge banner
-  html += '<div style="background:linear-gradient(135deg,#1a0a00,#2a1500);border:1px solid #FFD700;border-radius:12px;padding:12px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">' +
-    '<div><div style="color:#FFD700;font-size:13px;font-weight:bold;">' + t('weeklyChallenge') + '</div>' +
-    '<div style="color:#aaa;font-size:11px;margin-top:2px;">' + t('weeklyPrize') + '</div></div>' +
-    '<div style="text-align:center;"><div style="font-size:22px;font-family:Orbitron,sans-serif;color:#FFD700;">' + daysLeft + '</div>' +
-    '<div style="font-size:9px;color:#aaa;">' + t('daysLeft') + '</div></div></div>';
+  // Weekly countdown banner
+  html += '<div style="text-align:center;margin-bottom:14px;">' +
+    '<div style="font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:1px;margin-bottom:4px;">REWARDS CREDIT IN</div>' +
+    '<div id="weeklyCountdown" style="font-family:Orbitron,sans-serif;font-size:15px;color:#FFD700;font-weight:700;letter-spacing:2px;">--d --h --m --s</div>' +
+    '</div>';
 
-  // My rank card
-  var m = getMyMedal();
-  html += '<div style="background:#1a0000;border:1px solid #FF0000;border-radius:12px;padding:12px;margin-bottom:12px;display:flex;align-items:center;gap:10px;">' +
-    '<div style="width:48px;height:48px;border-radius:50%;background:#2a0000;border:2px solid #FF0000;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:bold;color:#FF0000;flex-shrink:0;">' + (tgUser?tgUser.first_name[0].toUpperCase():'?') + '</div>' +
-    '<div style="flex:1;"><div style="font-size:11px;color:#aaa;">' + t('myRankLabel') + '</div>' +
-    '<div style="font-size:22px;font-family:Orbitron,sans-serif;color:#FF0000;">#' + myRank + '</div>' +
-    '<div style="font-size:11px;color:#00FF88;">🔴 ' + Math.floor(record).toLocaleString() + ' RECORD</div></div>' +
-    '<div style="text-align:center;"><div style="font-size:28px;">' + m.emoji + '</div>' +
-    '<div style="font-size:9px;color:' + m.color + ';">' + m.name + '</div></div></div>';
+  // My rank bar
+  var myName = tgUser ? (tgUser.first_name || 'You') : 'You';
+  var rankColor = myRank === 1 ? '#FFD700' : myRank === 2 ? '#C0C0C0' : myRank === 3 ? '#CD7F32' : '#FF6644';
+  html += '<div style="background:rgba(255,100,50,0.1);border:1px solid rgba(255,100,50,0.3);border-radius:14px;padding:12px 14px;margin-bottom:16px;display:flex;align-items:center;gap:12px;">' +
+    '<div style="font-family:Orbitron,sans-serif;font-size:16px;font-weight:900;color:' + rankColor + ';min-width:40px;">#' + myRank + '</div>' +
+    '<div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#FF4444,#CC0000);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:bold;color:white;flex-shrink:0;">' + myName[0].toUpperCase() + '</div>' +
+    '<div style="flex:1;"><div style="font-size:14px;font-weight:700;color:white;">' + myName + ' 👈</div>' +
+    '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;">⚡ ' + recPerSec.toFixed(6) + ' REC/s</div></div>' +
+    '<div style="text-align:right;"><div style="font-size:13px;color:#00FF88;font-weight:700;">' + rec.toFixed(3) + '</div><div style="font-size:9px;color:rgba(255,255,255,0.3);">REC</div></div>' +
+    '</div>';
 
-  if(top100.length === 0) { cont.innerHTML = html + '<div style="text-align:center;color:#555;padding:20px;">🏆</div>'; return; }
+  if(top100.length === 0) { cont.innerHTML = html + '<div style="text-align:center;color:#555;padding:30px;">🏆</div>'; return; }
 
-  // Podium top 3
-  var emojis = ['🥇','🥈','🥉'];
-  var colors = ['#FFD700','#C0C0C0','#CD7F32'];
-  html += '<div style="display:flex;justify-content:center;align-items:flex-end;gap:6px;margin-bottom:15px;">';
-  var order = [1,0,2]; // 2nd, 1st, 3rd
-  order.forEach(function(i) {
-    var p = top100[i]; if(!p) return;
-    var isFirst = i === 0;
-    html += '<div style="flex:1;text-align:center;background:#1a1a1a;border:1px solid ' + colors[i] + ';border-radius:12px 12px 0 0;padding:' + (isFirst?'20px':'12px') + ' 6px 10px;' + (isFirst?'margin-bottom:-8px;':'') + 'position:relative;">' +
-      (isFirst ? '<div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-size:20px;">👑</div>' : '') +
-      '<div style="font-size:' + (isFirst?'24':'18') + 'px;font-weight:bold;color:' + colors[i] + ';">' + emojis[i] + '</div>' +
-      '<div style="width:38px;height:38px;border-radius:50%;background:#333;display:inline-flex;align-items:center;justify-content:center;font-size:16px;font-weight:bold;color:white;margin:4px auto;">' + (p.name||'?')[0].toUpperCase() + '</div>' +
-      '<div style="font-size:10px;color:#ddd;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (p.name||'User') + '</div>' +
-      '<div style="font-size:9px;color:#FF0000;margin-top:2px;">' + Math.floor(p.record).toLocaleString() + '</div></div>';
-  });
-  html += '</div>';
+  // Player list — all in same card style like Player Top
+  var rankColors = { 1:'#FFD700', 2:'#C0C0C0', 3:'#CD7F32' };
+  var rankBg     = { 1:'rgba(255,215,0,0.08)', 2:'rgba(192,192,192,0.06)', 3:'rgba(205,127,50,0.06)' };
 
-  // List 4-100
-  top100.slice(3).forEach(function(p) {
+  top100.forEach(function(p) {
     var isMe = tgUser && p.telegramId == tgUser.id;
-    html += '<div style="display:flex;align-items:center;gap:8px;background:' + (isMe?'#1a0000':'#161616') + ';border:1px solid ' + (isMe?'#FF0000':'#222') + ';border-radius:10px;padding:8px 10px;margin-bottom:6px;">' +
-      '<div style="font-size:12px;color:#555;min-width:26px;text-align:center;">#' + p.rank + '</div>' +
-      '<div style="font-size:18px;">👤</div>' +
-      '<div style="flex:1;"><div style="font-size:12px;color:' + (isMe?'#FF0000':'#ddd') + ';">' + (p.name||'User') + (isMe?' ←':'') + '</div>' +
-      '<div style="font-size:10px;color:#FF0000;">' + Math.floor(p.record).toLocaleString() + ' REC</div></div>' +
-      '<div style="font-size:10px;color:#00FF88;text-align:right;">' + (p.rec||0).toFixed(3) + ' REC</div></div>';
+    var rCol = rankColors[p.rank] || (isMe ? '#FF6644' : 'rgba(255,255,255,0.35)');
+    var bg   = isMe ? 'rgba(255,100,50,0.1)' : (rankBg[p.rank] || 'rgba(255,255,255,0.03)');
+    var border = isMe ? 'rgba(255,100,50,0.4)' : (p.rank <= 3 ? rCol+'50' : 'rgba(255,255,255,0.07)');
+    var initial = (p.name||'?')[0].toUpperCase();
+    var avatarBg = p.rank === 1 ? 'linear-gradient(135deg,#CC8800,#FFD700)' :
+                   p.rank === 2 ? 'linear-gradient(135deg,#888,#C0C0C0)' :
+                   p.rank === 3 ? 'linear-gradient(135deg,#7a4f2a,#CD7F32)' :
+                   isMe         ? 'linear-gradient(135deg,#FF4444,#CC0000)' :
+                                  'linear-gradient(135deg,#2a2a3a,#3a3a4a)';
+
+    html += '<div style="display:flex;align-items:center;gap:12px;background:' + bg + ';border:1px solid ' + border + ';border-radius:14px;padding:12px 14px;margin-bottom:8px;">' +
+      // Rank number
+      '<div style="font-family:Orbitron,sans-serif;font-size:15px;font-weight:900;color:' + rCol + ';min-width:36px;text-align:center;">#' + p.rank + '</div>' +
+      // Avatar
+      '<div data-uid="' + p.telegramId + '" style="width:42px;height:42px;border-radius:50%;background:' + avatarBg + ';display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:bold;color:white;flex-shrink:0;">' + initial + '</div>' +
+      // Name + speed
+      '<div style="flex:1;min-width:0;">' +
+        '<div style="font-size:14px;font-weight:700;color:' + (isMe?'#FF6644':'white') + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (p.name||'User') + (isMe?' 👈':'') + '</div>' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:2px;">⚡ ' + (p.miningSpeed||0).toFixed(6) + ' REC/s</div>' +
+      '</div>' +
+      // REC amount
+      '<div style="text-align:right;flex-shrink:0;">' +
+        '<div style="font-size:13px;color:#00FF88;font-weight:700;">' + (p.rec||0).toFixed(3) + '</div>' +
+        '<div style="font-size:9px;color:rgba(255,255,255,0.3);">REC</div>' +
+      '</div>' +
+      '</div>';
   });
 
-  // Show neighbors if outside top 100
+  // Neighbors if outside top 100
   if(myRankData && myRankData.myRank > 100) {
-    html += '<div style="text-align:center;color:#555;font-size:11px;padding:5px 0;">• • •</div>';
+    html += '<div style="text-align:center;color:rgba(255,255,255,0.2);font-size:12px;padding:6px 0;">• • •</div>';
     (myRankData.neighbors||[]).forEach(function(p) {
       var isMe = p.isMe;
-      html += '<div style="display:flex;align-items:center;gap:8px;background:' + (isMe?'#1a0000':'#161616') + ';border:1px solid ' + (isMe?'#FF0000':'#222') + ';border-radius:10px;padding:8px 10px;margin-bottom:6px;">' +
-        '<div style="font-size:12px;color:#555;min-width:26px;text-align:center;">#' + p.rank + '</div>' +
-        '<div style="width:32px;height:32px;border-radius:50%;background:' + (isMe?'#3a0000':'#222') + ';display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:bold;color:' + (isMe?'#FF0000':'#aaa') + ';flex-shrink:0;">' + (p.name||'?')[0].toUpperCase() + '</div>' +
-        '<div style="flex:1;"><div style="font-size:12px;color:' + (isMe?'#FF0000':'#ddd') + ';">' + (p.name||'User') + (isMe?' ←':'') + '</div></div>' +
-        '<div style="font-size:10px;color:#FF0000;">' + Math.floor(p.record).toLocaleString() + '</div></div>';
+      html += '<div style="display:flex;align-items:center;gap:12px;background:' + (isMe?'rgba(255,100,50,0.1)':'rgba(255,255,255,0.03)') + ';border:1px solid ' + (isMe?'rgba(255,100,50,0.4)':'rgba(255,255,255,0.07)') + ';border-radius:14px;padding:12px 14px;margin-bottom:8px;">' +
+        '<div style="font-family:Orbitron,sans-serif;font-size:15px;font-weight:900;color:rgba(255,255,255,0.4);min-width:36px;text-align:center;">#' + p.rank + '</div>' +
+        '<div style="width:42px;height:42px;border-radius:50%;background:' + (isMe?'linear-gradient(135deg,#FF4444,#CC0000)':'linear-gradient(135deg,#2a2a3a,#3a3a4a)') + ';display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:bold;color:white;flex-shrink:0;">' + (p.name||'?')[0].toUpperCase() + '</div>' +
+        '<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;color:' + (isMe?'#FF6644':'white') + ';">' + (p.name||'User') + (isMe?' 👈':'') + '</div>' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:2px;">⚡ ' + (p.miningSpeed||0).toFixed(6) + ' REC/s</div></div>' +
+        '<div style="text-align:right;"><div style="font-size:13px;color:#00FF88;font-weight:700;">' + (p.rec||0).toFixed(3) + '</div><div style="font-size:9px;color:rgba(255,255,255,0.3);">REC</div></div>' +
+        '</div>';
     });
   }
 
   cont.innerHTML = html;
 
-  // Load real photos async
-  top100.slice(0,10).forEach(function(p) {
-    getAvatar(p.telegramId, p.name, 32, function(avatarHtml) {
-      var els = document.querySelectorAll('[data-uid="' + p.telegramId + '"]');
-      els.forEach(function(el) { el.outerHTML = avatarHtml; });
+  // Load avatars async
+  top100.slice(0,15).forEach(function(p) {
+    getAvatar(p.telegramId, p.name, 42, function(avatarHtml) {
+      document.querySelectorAll('[data-uid="' + p.telegramId + '"]').forEach(function(el) { el.outerHTML = avatarHtml; });
     });
   });
 }
