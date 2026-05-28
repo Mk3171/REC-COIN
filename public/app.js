@@ -274,8 +274,8 @@ function showPage(id,btn){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});
   document.getElementById(id).classList.add('active');
-  btn.classList.add('active'); closeLangMenu();
-  if(id==='rank') loadLeaderboard(currentTab||'global');
+  if(btn) btn.classList.add('active'); closeLangMenu();
+  if(id==='rank') loadLeaderboard('global');
   if(id==='profile') loadProfilePhoto();
 }
 
@@ -2035,11 +2035,66 @@ function renderGlobal(top100, myRankData, weekly) {
 
   var html = '';
 
-  // Weekly countdown banner
-  html += '<div style="text-align:center;margin-bottom:14px;">' +
-    '<div style="font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:1px;margin-bottom:4px;">REWARDS CREDIT IN</div>' +
-    '<div id="weeklyCountdown" style="font-family:Orbitron,sans-serif;font-size:15px;color:#FFD700;font-weight:700;letter-spacing:2px;">--d --h --m --s</div>' +
+  // Weekly countdown
+  html += '<div style="text-align:center;margin-bottom:16px;">' +
+    '<div style="font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:2px;margin-bottom:4px;">REWARDS CREDIT IN</div>' +
+    '<div id="weeklyCountdown" style="font-family:Orbitron,sans-serif;font-size:16px;color:#FFD700;font-weight:700;letter-spacing:2px;">--d --h --m --s</div>' +
     '</div>';
+
+  if(top100.length === 0) {
+    cont.innerHTML = html + '<div style="text-align:center;color:#555;padding:30px;">🏆</div>';
+    return;
+  }
+
+  // Full list from #1 — highlight current user naturally
+  var rankColors = { 1:'#FFD700', 2:'#C0C0C0', 3:'#CD7F32' };
+  var avatarBgs  = { 1:'linear-gradient(135deg,#CC8800,#FFD700)', 2:'linear-gradient(135deg,#777,#C0C0C0)', 3:'linear-gradient(135deg,#7a4f2a,#CD7F32)' };
+
+  top100.forEach(function(p) {
+    var isMe   = tgUser && p.telegramId == tgUser.id;
+    var rCol   = rankColors[p.rank] || (isMe ? '#FF6644' : 'rgba(255,255,255,0.4)');
+    var bg     = isMe ? 'rgba(255,100,50,0.12)' : 'rgba(255,255,255,0.03)';
+    var border = isMe ? 'rgba(255,100,50,0.5)' : (rankColors[p.rank] ? rCol+'40' : 'rgba(255,255,255,0.07)');
+    var avBg   = avatarBgs[p.rank] || (isMe ? 'linear-gradient(135deg,#FF4444,#CC0000)' : 'linear-gradient(135deg,#2a2a3a,#3a3a4a)');
+
+    html += '<div style="display:flex;align-items:center;gap:12px;background:' + bg + ';border:1px solid ' + border + ';border-radius:14px;padding:12px 14px;margin-bottom:8px;">' +
+      '<div style="font-family:Orbitron,sans-serif;font-size:15px;font-weight:900;color:' + rCol + ';min-width:36px;text-align:center;">#' + p.rank + '</div>' +
+      '<div data-uid="' + p.telegramId + '" style="width:42px;height:42px;border-radius:50%;background:' + avBg + ';display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:bold;color:white;flex-shrink:0;">' + (p.name||'?')[0].toUpperCase() + '</div>' +
+      '<div style="flex:1;min-width:0;">' +
+        '<div style="font-size:14px;font-weight:700;color:' + (isMe?'#FF6644':'white') + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (p.name||'User') + (isMe?' 👈':'') + '</div>' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px;">⚡ ' + (p.miningSpeed||0).toFixed(6) + ' REC/s</div>' +
+      '</div>' +
+      '<div style="text-align:right;flex-shrink:0;">' +
+        '<div style="font-size:14px;color:#00FF88;font-weight:700;">' + (p.rec||0).toFixed(3) + '</div>' +
+        '<div style="font-size:9px;color:rgba(255,255,255,0.3);">REC</div>' +
+      '</div>' +
+    '</div>';
+  });
+
+  // If user is outside top 100
+  if(myRankData && myRankData.myRank > 100) {
+    html += '<div style="text-align:center;color:rgba(255,255,255,0.2);font-size:12px;padding:6px 0;">• • •</div>';
+    (myRankData.neighbors||[]).forEach(function(p) {
+      var isMe = p.isMe;
+      html += '<div style="display:flex;align-items:center;gap:12px;background:' + (isMe?'rgba(255,100,50,0.12)':'rgba(255,255,255,0.03)') + ';border:1px solid ' + (isMe?'rgba(255,100,50,0.5)':'rgba(255,255,255,0.07)') + ';border-radius:14px;padding:12px 14px;margin-bottom:8px;">' +
+        '<div style="font-family:Orbitron,sans-serif;font-size:15px;font-weight:900;color:rgba(255,255,255,0.35);min-width:36px;text-align:center;">#' + p.rank + '</div>' +
+        '<div style="width:42px;height:42px;border-radius:50%;background:' + (isMe?'linear-gradient(135deg,#FF4444,#CC0000)':'linear-gradient(135deg,#2a2a3a,#3a3a4a)') + ';display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:bold;color:white;flex-shrink:0;">' + (p.name||'?')[0].toUpperCase() + '</div>' +
+        '<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;color:' + (isMe?'#FF6644':'white') + ';">' + (p.name||'User') + (isMe?' 👈':'') + '</div>' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.3);">⚡ ' + (p.miningSpeed||0).toFixed(6) + ' REC/s</div></div>' +
+        '<div style="text-align:right;"><div style="font-size:14px;color:#00FF88;font-weight:700;">' + (p.rec||0).toFixed(3) + '</div><div style="font-size:9px;color:rgba(255,255,255,0.3);">REC</div></div>' +
+      '</div>';
+    });
+  }
+
+  cont.innerHTML = html;
+
+  // Load avatars async
+  top100.slice(0,15).forEach(function(p) {
+    getAvatar(p.telegramId, p.name, 42, function(avatarHtml) {
+      document.querySelectorAll('[data-uid="' + p.telegramId + '"]').forEach(function(el) { el.outerHTML = avatarHtml; });
+    });
+  });
+}
 
   // My rank bar
   var myName = tgUser ? (tgUser.first_name || 'You') : 'You';
