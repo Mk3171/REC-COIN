@@ -25,7 +25,6 @@ var T = {
 };
 
 var currentLang='ar';
-var weeklyEndMs = 0;
 try{var sl=localStorage.getItem('lang_'+saveKey);if(sl&&T[sl])currentLang=sl;}catch(e){}
 
 function t(key,params){
@@ -174,6 +173,7 @@ function saveToServer(){
         completedTasks, cardLevels, cardUpgrades,
         refCount, claimedMilest,
         dailyLogin, mysteryLastDate, dailyTasksData, cardTasksClaimed, totalTaps,
+        miningSpeed: recPerSec,
         refillData: window.refillData
       })
     }).then(function(r){ return r.json(); })
@@ -450,18 +450,7 @@ function updateTimerDisplays(){
       else{el.textContent='⏳ '+formatWait(rem);}
     }
   });
-  var wEl=document.getElementById('weeklyCountdown');
-  if(wEl&&weeklyEndMs>0){
-    var diff=Math.max(0,weeklyEndMs-now);
-    var dd=Math.floor(diff/86400000);
-    var hh=Math.floor((diff%86400000)/3600000);
-    var mm=Math.floor((diff%3600000)/60000);
-    var ss=Math.floor((diff%60000)/1000);
-    wEl.textContent=pad2(dd)+'d '+pad2(hh)+'h '+pad2(mm)+'m '+pad2(ss)+'s';
-  }
 }
-
-function pad2(n){return n<10?'0'+n:''+n;}
 
 function updateUI(){
   var s=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
@@ -1806,7 +1795,6 @@ function renderGlobal(top100, myRankData, weekly) {
   var cont = document.getElementById('lbContent');
   var myRank = myRankData ? myRankData.myRank : '-';
   var daysLeft = weekly ? weekly.daysLeft : 7;
-  weeklyEndMs = Date.now() + daysLeft * 24 * 60 * 60 * 1000;
 
   var html = '';
 
@@ -1814,8 +1802,8 @@ function renderGlobal(top100, myRankData, weekly) {
   html += '<div style="background:linear-gradient(135deg,#1a0a00,#2a1500);border:1px solid #FFD700;border-radius:12px;padding:12px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">' +
     '<div><div style="color:#FFD700;font-size:13px;font-weight:bold;">' + t('weeklyChallenge') + '</div>' +
     '<div style="color:#aaa;font-size:11px;margin-top:2px;">' + t('weeklyPrize') + '</div></div>' +
-    '<div id="weeklyCountdown" style="font-family:Orbitron,sans-serif;font-size:13px;color:#FFD700;letter-spacing:1px;">--d --h --m --s</div>' +
-    '</div>';
+    '<div style="text-align:center;"><div style="font-size:22px;font-family:Orbitron,sans-serif;color:#FFD700;">' + daysLeft + '</div>' +
+    '<div style="font-size:9px;color:#aaa;">' + t('daysLeft') + '</div></div></div>';
 
   // My rank card
   var m = getMyMedal();
@@ -1842,7 +1830,7 @@ function renderGlobal(top100, myRankData, weekly) {
       '<div style="font-size:' + (isFirst?'24':'18') + 'px;font-weight:bold;color:' + colors[i] + ';">' + emojis[i] + '</div>' +
       '<div style="width:38px;height:38px;border-radius:50%;background:#333;display:inline-flex;align-items:center;justify-content:center;font-size:16px;font-weight:bold;color:white;margin:4px auto;">' + (p.name||'?')[0].toUpperCase() + '</div>' +
       '<div style="font-size:10px;color:#ddd;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">' + (p.name||'User') + '</div>' +
-      '<div style="font-size:9px;color:#FF0000;margin-top:2px;">' + Math.floor(p.record).toLocaleString() + '</div></div>';
+      '<div style="font-size:9px;color:#00FF88;margin-top:2px;">' + (p.rec||0).toFixed(3) + ' REC</div></div>';
   });
   html += '</div>';
 
@@ -1853,7 +1841,7 @@ function renderGlobal(top100, myRankData, weekly) {
       '<div style="font-size:12px;color:#555;min-width:26px;text-align:center;">#' + p.rank + '</div>' +
       '<div style="font-size:18px;">👤</div>' +
       '<div style="flex:1;"><div style="font-size:12px;color:' + (isMe?'#FF0000':'#ddd') + ';">' + (p.name||'User') + (isMe?' ←':'') + '</div>' +
-      '<div style="font-size:10px;color:#FF0000;">' + Math.floor(p.record).toLocaleString() + ' REC</div></div>' +
+      '<div style="font-size:10px;color:#aaa;">⚡ ' + (p.miningSpeed||0).toFixed(6) + ' REC/s</div></div>' +
       '<div style="font-size:10px;color:#00FF88;text-align:right;">' + (p.rec||0).toFixed(3) + ' REC</div></div>';
   });
 
@@ -1865,8 +1853,9 @@ function renderGlobal(top100, myRankData, weekly) {
       html += '<div style="display:flex;align-items:center;gap:8px;background:' + (isMe?'#1a0000':'#161616') + ';border:1px solid ' + (isMe?'#FF0000':'#222') + ';border-radius:10px;padding:8px 10px;margin-bottom:6px;">' +
         '<div style="font-size:12px;color:#555;min-width:26px;text-align:center;">#' + p.rank + '</div>' +
         '<div style="width:32px;height:32px;border-radius:50%;background:' + (isMe?'#3a0000':'#222') + ';display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:bold;color:' + (isMe?'#FF0000':'#aaa') + ';flex-shrink:0;">' + (p.name||'?')[0].toUpperCase() + '</div>' +
-        '<div style="flex:1;"><div style="font-size:12px;color:' + (isMe?'#FF0000':'#ddd') + ';">' + (p.name||'User') + (isMe?' ←':'') + '</div></div>' +
-        '<div style="font-size:10px;color:#FF0000;">' + Math.floor(p.record).toLocaleString() + '</div></div>';
+        '<div style="flex:1;"><div style="font-size:12px;color:' + (isMe?'#FF0000':'#ddd') + ';">' + (p.name||'User') + (isMe?' ←':'') + '</div>' +
+        '<div style="font-size:10px;color:#aaa;">⚡ ' + (p.miningSpeed||0).toFixed(6) + ' REC/s</div></div>' +
+        '<div style="font-size:10px;color:#00FF88;">' + (p.rec||0).toFixed(3) + ' REC</div></div>';
     });
   }
 
