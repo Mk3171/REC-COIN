@@ -289,6 +289,7 @@ async function sendJetton(toAddress, amount, comment) {
 // ====== BOT ======
 const bot = new TelegramBot(process.env.BOT_TOKEN);
 const MINI_APP_URL = 'https://rec-coin.onrender.com';
+const LANDING_URL  = 'https://mk3171.github.io/rec-mining';
 
 function getWelcomeText(username, lang, refId) {
   const isArabic = lang === 'ar';
@@ -353,11 +354,96 @@ bot.onText(/\/start(.*)/, async (msg, match) => {
   const welcomeText = getWelcomeText(from.first_name || from.username, lang, refId);
   const buttonText = getButtonText(lang);
   try {
-    await bot.sendPhoto(chatId, path.join(__dirname, 'public', 'logo.jpeg'), { caption: welcomeText, reply_markup: { inline_keyboard: [[{ text: buttonText, web_app: { url: MINI_APP_URL } }]] } });
+    const termsText = lang === 'ar' ? '📋 الشروط والأحكام' : lang === 'uk' ? '📋 Умови використання' : lang === 'zh' ? '📋 使用条款' : '📋 Terms & Conditions';
+    const keyboard = { inline_keyboard: [
+      [{ text: buttonText, web_app: { url: MINI_APP_URL } }],
+      [{ text: termsText, url: LANDING_URL + '#terms' }]
+    ]};
+    await bot.sendPhoto(chatId, path.join(__dirname, 'public', 'logo.jpeg'), { caption: welcomeText, reply_markup: keyboard });
   } catch(e) {
-    await bot.sendMessage(chatId, welcomeText, { reply_markup: { inline_keyboard: [[{ text: buttonText, web_app: { url: MINI_APP_URL } }]] } });
+    const termsText = lang === 'ar' ? '📋 الشروط والأحكام' : '📋 Terms & Conditions';
+    const keyboard = { inline_keyboard: [
+      [{ text: buttonText, web_app: { url: MINI_APP_URL } }],
+      [{ text: termsText, url: LANDING_URL + '#terms' }]
+    ]};
+    await bot.sendMessage(chatId, welcomeText, { reply_markup: keyboard });
   }
 });
+
+// ====== /terms COMMAND ======
+bot.onText(/\/terms/, async (msg) => {
+  const chatId = msg.chat.id;
+  const lang = msg.from.language_code || 'en';
+  const isAr = lang === 'ar';
+
+  const text = isAr
+    ? `📋 *الشروط والأحكام — REC Mining*\n\n` +
+      `1️⃣ *ملكية العملة*\n` +
+      `عملات REC و RECORD داخل اللعبة — ما في ضمان لقيمتها حتى يصير الإدراج الرسمي.\n\n` +
+      `2️⃣ *السحب والتداول*\n` +
+      `زر السحب مقفل حالياً — الإدراج على منصات DEX قرار مستقبلي.\n\n` +
+      `3️⃣ *منع الغش*\n` +
+      `أي محاولة تلاعب بالأرقام أو استغلال ثغرات = حذف الحساب فوراً بلا رجعة.\n\n` +
+      `4️⃣ *الخصوصية*\n` +
+      `البوت يحفظ Telegram ID والاسم فقط — ما يشارك بيانات مع طرف ثالث.\n\n` +
+      `5️⃣ *تغيير القواعد*\n` +
+      `المطور حق له تعديل ميكانيكيات اللعبة أو التوكينوميكس في أي وقت.\n\n` +
+      `6️⃣ *المسؤولية*\n` +
+      `المشروع غير مسؤول عن أي خسائر مالية ناتجة عن استخدام البوت.`
+    : `📋 *Terms & Conditions — REC Mining*\n\n` +
+      `1️⃣ *Coin Ownership*\n` +
+      `REC & RECORD coins are in-game assets — no guaranteed value until official listing.\n\n` +
+      `2️⃣ *Withdrawal & Trading*\n` +
+      `Withdrawal is currently locked — DEX listing is a future decision.\n\n` +
+      `3️⃣ *Anti-Cheat*\n` +
+      `Any attempt to manipulate numbers or exploit bugs = immediate account deletion.\n\n` +
+      `4️⃣ *Privacy*\n` +
+      `We store only your Telegram ID and name — no data is shared with third parties.\n\n` +
+      `5️⃣ *Rule Changes*\n` +
+      `The developer reserves the right to modify game mechanics or tokenomics at any time.\n\n` +
+      `6️⃣ *Liability*\n` +
+      `The project is not responsible for any financial losses from using this bot.`;
+
+  await bot.sendMessage(chatId, text, {
+    parse_mode: 'Markdown',
+    reply_markup: { inline_keyboard: [
+      [{ text: isAr ? '🌐 الموقع الرسمي' : '🌐 Official Website', url: LANDING_URL }],
+      [{ text: isAr ? '🚀 ابدأ التعدين' : '🚀 Start Mining', web_app: { url: MINI_APP_URL } }]
+    ]}
+  });
+});
+
+// ====== /help COMMAND ======
+bot.onText(/\/help/, async (msg) => {
+  const chatId = msg.chat.id;
+  const lang = msg.from.language_code || 'en';
+  const isAr = lang === 'ar';
+  const text = isAr
+    ? `❓ *مساعدة — REC Mining*\n\n` +
+      `🔴 /start — ابدأ البوت\n` +
+      `📋 /terms — الشروط والأحكام\n` +
+      `❓ /help — المساعدة\n\n` +
+      `💬 للدعم الفني: @Momokhli\n` +
+      `🌐 الموقع: [rec-mining](${LANDING_URL})`
+    : `❓ *Help — REC Mining*\n\n` +
+      `🔴 /start — Start the bot\n` +
+      `📋 /terms — Terms & Conditions\n` +
+      `❓ /help — Help\n\n` +
+      `💬 Support: @Momokhli\n` +
+      `🌐 Website: [rec-mining](${LANDING_URL})`;
+
+  await bot.sendMessage(chatId, text, {
+    parse_mode: 'Markdown',
+    reply_markup: { inline_keyboard: [[{ text: '🚀 ' + (isAr ? 'ابدأ التعدين' : 'Start Mining'), web_app: { url: MINI_APP_URL } }]] }
+  });
+});
+
+// ====== SET BOT COMMANDS ======
+bot.setMyCommands([
+  { command: 'start', description: '🔴 ابدأ التعدين / Start Mining' },
+  { command: 'terms', description: '📋 الشروط والأحكام / Terms & Conditions' },
+  { command: 'help',  description: '❓ المساعدة / Help' }
+]).catch(() => {});
 
 bot.on('callback_query', async (query) => {
   const chatId = query.message.chat.id;
