@@ -68,21 +68,19 @@ function closeSideMenu(){
 
   <!-- ===== BALANCE ROW ===== -->
   <div class="balance-row">
-    <div class="balance-card">
+    <div class="balance-card" style="pointer-events:none;">
       <div class="balance-card-icon">⚡</div>
       <div>
         <div class="balance-card-label">REC</div>
         <div class="balance-card-value green"><span id="recMini">0.000000</span></div>
       </div>
-      <div class="balance-card-plus" onclick="showPage('profile', document.querySelector('.nav-btn'))">?</div>
     </div>
-    <div class="balance-card">
+    <div class="balance-card" style="pointer-events:none;">
       <div class="balance-card-icon">🔴</div>
       <div>
         <div class="balance-card-label">RECORD</div>
         <div class="balance-card-value red"><span id="recordCount">0</span></div>
       </div>
-      <div class="balance-card-plus" onclick="openExchange()">🔄</div>
     </div>
   </div>
 
