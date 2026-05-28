@@ -471,6 +471,9 @@ function updateUI(){
   var mrn=document.getElementById('myRankName');if(mrn){mrn.textContent=m.name;mrn.style.color=m.color;}
   s('myRankRecord',Math.floor(record).toLocaleString());
   s('refCountDisplay',refCount);
+  updateInviteLinkDisplay();
+  var commEl = document.getElementById('totalCommissionDisplay');
+  if(commEl) commEl.textContent = rec.toFixed(2);
 }
 
 // ====== UPGRADE OVERLAY (tap power + energy) ======
@@ -1055,103 +1058,95 @@ function updateUpgradeUI(){
   var rb=document.getElementById('energyRefillBtn');if(rb)rb.disabled=window.refillData.count<=0;
 }
 
-// ====== PROFILE POPUP ======
-function openProfilePopup() {
-  var popup = document.getElementById('profilePopup');
-  var overlay = document.getElementById('profilePopupOverlay');
-  if(!popup) return;
+// ====== INVITE PAGE FUNCTIONS ======
+var refData = { l1:[], l2:[], l3:[] };
+var currentRefLevel = 1;
 
-  // Header
-  var name = tgUser ? (tgUser.first_name || 'Miner') : 'Miner';
-  var username = tgUser ? (tgUser.username ? '@'+tgUser.username : 'ID: '+tgUser.id) : '';
-  document.getElementById('ppName').textContent = name;
-  document.getElementById('ppUsername').textContent = username;
+function switchInviteTab(tab, btn) {
+  document.getElementById('inviteTabContent_invite').style.display = tab==='invite' ? 'block' : 'none';
+  document.getElementById('inviteTabContent_referrals').style.display = tab==='referrals' ? 'block' : 'none';
+  ['invite','referrals'].forEach(function(t){
+    var b = document.getElementById('inviteTab_'+t);
+    if(b) {
+      if(t===tab) {
+        b.style.background='rgba(255,100,50,0.15)';
+        b.style.borderColor='rgba(255,100,50,0.5)';
+        b.style.color='#FF6644';
+      } else {
+        b.style.background='rgba(255,255,255,0.04)';
+        b.style.borderColor='rgba(255,255,255,0.08)';
+        b.style.color='rgba(255,255,255,0.4)';
+      }
+    }
+  });
+  if(tab==='referrals') loadRefList();
+}
 
-  // Avatar
-  var avatarEl = document.getElementById('ppAvatar');
-  var photoEl = document.getElementById('topBarAvatarImg');
-  if(photoEl && photoEl.src && !photoEl.src.includes('undefined')) {
-    avatarEl.innerHTML = '<img src="'+photoEl.src+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%;">';
-  } else {
-    avatarEl.textContent = name[0].toUpperCase();
+function switchRefLevel(lvl) {
+  currentRefLevel = lvl;
+  [1,2,3].forEach(function(l){
+    var b = document.getElementById('refLvlBtn_'+l);
+    if(!b) return;
+    if(l===lvl) {
+      b.style.background='rgba(255,100,50,0.15)';
+      b.style.borderColor='rgba(255,100,50,0.5)';
+      b.style.color='#FF6644';
+    } else {
+      b.style.background='rgba(255,255,255,0.04)';
+      b.style.borderColor='rgba(255,255,255,0.08)';
+      b.style.color='rgba(255,255,255,0.3)';
+    }
+  });
+  renderRefList();
+}
+
+function loadRefList() {
+  if(!tgUser) return;
+  var el = document.getElementById('refListContent');
+  if(el) el.innerHTML = '<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.2);font-size:13px;">⏳ Loading...</div>';
+  fetch('/api/referrals/'+tgUser.id)
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      refData = d;
+      renderRefList();
+    })
+    .catch(function(){
+      var el = document.getElementById('refListContent');
+      if(el) el.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.2);">Could not load</div>';
+    });
+}
+
+function renderRefList() {
+  var el = document.getElementById('refListContent');
+  if(!el) return;
+  var list = currentRefLevel===1 ? refData.l1 : currentRefLevel===2 ? refData.l2 : refData.l3;
+  if(!list || list.length === 0) {
+    el.innerHTML = '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:24px;text-align:center;"><div style="font-size:32px;margin-bottom:8px;">👥</div><div style="font-size:13px;color:rgba(255,255,255,0.25);">No referrals yet</div></div>';
+    return;
   }
-
-  // Count upgraded cards
-  var totalCards = 0;
-  var upgradedCards = 0;
-  var categories_list = typeof categories !== 'undefined' ? categories : [];
-  categories_list.forEach(function(cat){ totalCards += cat.cards.length; });
-  Object.keys(cardLevels).forEach(function(k){ if((cardLevels[k]||0) > 0) upgradedCards++; });
-
-  // Total card levels sum
-  var totalCardLevels = Object.values(cardLevels).reduce(function(s,v){ return s+(v||0); }, 0);
-
-  // Tasks
-  var tasksTotal = 3; // social tasks
-  var tasksDone = completedTasks.length;
-
-  // Mining speed
-  var speed = recPerSec > 0 ? recPerSec.toFixed(8) : '0.00000000';
-  var speedPerHour = (recPerSec * 3600).toFixed(4);
-
-  // Stats grid
-  var stats = [
-    { icon:'⛏️', label:'CARDS UPGRADED', val: upgradedCards + ' / ' + totalCards, color:'#AA66FF' },
-    { icon:'⚡', label:'REC SPEED', val: speed + '/s', color:'#00FF88' },
-    { icon:'🔴', label:'RECORD', val: Math.floor(record).toLocaleString(), color:'#FF6644' },
-    { icon:'💚', label:'REC BALANCE', val: rec.toFixed(4), color:'#00FF88' },
-    { icon:'👆', label:'TOTAL TAPS', val: (totalTaps||0).toLocaleString(), color:'#FFD700' },
-    { icon:'✅', label:'TASKS DONE', val: tasksDone, color:'#44FFAA' },
-    { icon:'👥', label:'FRIENDS', val: refCount, color:'#44CCFF' },
-    { icon:'📈', label:'CARD LEVELS', val: totalCardLevels, color:'#FF8844' },
-  ];
-
-  var grid = document.getElementById('ppStatsGrid');
-  grid.innerHTML = stats.map(function(s){
-    return '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:12px 10px;text-align:center;">' +
-      '<div style="font-size:22px;margin-bottom:4px;">'+s.icon+'</div>' +
-      '<div style="font-size:13px;font-weight:700;color:'+s.color+';font-family:Orbitron,sans-serif;line-height:1.2;word-break:break-all;">'+s.val+'</div>' +
-      '<div style="font-size:9px;color:rgba(255,255,255,0.3);margin-top:4px;letter-spacing:1px;">'+s.label+'</div>' +
+  el.innerHTML = list.map(function(u){
+    var name = u.username ? '@'+u.username : (u.firstName||'User');
+    var speed = (u.miningSpeed||0).toFixed(6);
+    var earned = (u.rec||0).toFixed(3);
+    return '<div style="display:grid;grid-template-columns:1fr 80px 80px;gap:4px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:10px 12px;margin-bottom:6px;align-items:center;">'+
+      '<div style="font-size:13px;color:white;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+name+'</div>'+
+      '<div style="font-size:10px;color:rgba(0,255,136,0.7);text-align:center;">'+speed+'</div>'+
+      '<div style="font-size:11px;color:#00FF88;text-align:right;font-weight:700;">'+earned+'</div>'+
       '</div>';
   }).join('');
-
-  // Cards grid — show top upgraded cards
-  var cardsList = [];
-  categories_list.forEach(function(cat){
-    cat.cards.forEach(function(card, idx){
-      var key = (cat.nameKey||'cat')+'_'+idx;
-      var lvl = cardLevels[key] || 0;
-      if(lvl > 0) cardsList.push({ e: card.e||'🃏', n: card.en||card.n||'Card', lvl: lvl });
-    });
-  });
-  cardsList.sort(function(a,b){ return b.lvl - a.lvl; });
-  var topCards = cardsList.slice(0, 12);
-
-  var cardsGrid = document.getElementById('ppCardsGrid');
-  if(topCards.length === 0) {
-    cardsGrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,0.25);font-size:12px;padding:10px 0;">No cards upgraded yet</div>';
-  } else {
-    cardsGrid.innerHTML = topCards.map(function(c){
-      return '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:8px 4px;text-align:center;">' +
-        '<div style="font-size:22px;">'+c.e+'</div>' +
-        '<div style="font-size:9px;color:rgba(255,255,255,0.5);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+c.n+'</div>' +
-        '<div style="font-size:10px;color:#FF6644;font-weight:700;margin-top:1px;">LVL '+c.lvl+'</div>' +
-        '</div>';
-    }).join('');
-  }
-
-  overlay.style.display = 'block';
-  popup.style.display = 'block';
-  popup.style.animation = 'slideUp 0.3s ease';
 }
 
-function closeProfilePopup() {
-  document.getElementById('profilePopup').style.display = 'none';
-  document.getElementById('profilePopupOverlay').style.display = 'none';
+// Update invite link display when page loads
+function updateInviteLinkDisplay() {
+  var el = document.getElementById('inviteLinkDisplay');
+  if(!el || !tgUser) return;
+  var botUsername = 'RecMiningGame_bot';
+  el.textContent = 'https://t.me/'+botUsername+'?start='+tgUser.id;
 }
 
-// ====== END PROFILE POPUP ======
+// ====== END INVITE PAGE ======
 
+// ====== CARDS ======
 var categories=[
   {nameKey:'catAnime',cards:[
     {n:'ناروتو',en:'Naruto',e:'🍥'},{n:'غوكو',en:'Goku',e:'⚡'},{n:'لوفي',en:'Luffy',e:'🏴‍☠️'},{n:'ساسكي',en:'Sasuke',e:'🌩️'},
