@@ -232,12 +232,46 @@ function closeSideMenu(){
     <!-- TASKS PAGE -->
     <div id="tasks" class="page">
       <div class="page-title" data-i18n="tasksTitle">✅ Tasks</div>
+
+      <!-- Tabs -->
       <div style="display:flex;gap:6px;margin-bottom:14px;">
-        <button id="taskTab_social" style="flex:1;padding:8px;border-radius:8px;background:rgba(255,50,0,0.12);border:1px solid rgba(255,0,0,0.4);color:#FF6644;font-size:11px;cursor:pointer;font-family:Rajdhani,sans-serif;" onclick="switchTaskTab('social',this)">📱 Social</button>
-        <button id="taskTab_daily" style="flex:1;padding:8px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.3);font-size:11px;cursor:pointer;font-family:Rajdhani,sans-serif;" onclick="switchTaskTab('daily',this)">📅 Daily</button>
-        <button id="taskTab_cards" style="flex:1;padding:8px;border-radius:8px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.3);font-size:11px;cursor:pointer;font-family:Rajdhani,sans-serif;" onclick="switchTaskTab('cards',this)">🃏 Cards</button>
+        <button class="lb-tab active" id="ttab_social" onclick="showTaskTab('social',this)">📢 Social</button>
+        <button class="lb-tab" id="ttab_daily" onclick="showTaskTab('daily',this)">⚡ Daily</button>
+        <button class="lb-tab" id="ttab_missions" onclick="showTaskTab('missions',this)">🎯 Missions</button>
       </div>
-      <div id="tasksContent"></div>
+
+      <!-- SOCIAL TASKS -->
+      <div id="taskTab-social">
+        <div style="font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin-bottom:8px;">📢 JOIN OUR CHANNELS — +5 REC EACH</div>
+        <div id="blocksChannelTask"></div>
+        <div id="chatGroupTask"></div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin:14px 0 8px;">FOLLOW US</div>
+        <div id="telegramFollowTask"></div>
+        <div id="twitterFollowTask"></div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin:14px 0 8px;">❤️ LIKE TWEETS — +5 REC EACH</div>
+        <div id="likeTasks"></div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin:14px 0 8px;">🔁 RETWEET — +5 REC EACH</div>
+        <div id="retweetTasks"></div>
+      </div>
+
+      <!-- DAILY TASKS -->
+      <div id="taskTab-daily" style="display:none;">
+        <div style="background:linear-gradient(135deg,#0d0010,#150020);border:1px solid rgba(180,0,255,0.35);border-radius:14px;padding:14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="openMysteryBox()">
+          <div>
+            <div style="font-size:15px;color:#CC88FF;font-weight:bold;">📦 Mystery Box</div>
+            <div style="color:#aaa;font-size:11px;margin-top:3px;">Free daily — random RECORD or REC!</div>
+          </div>
+          <button style="background:linear-gradient(135deg,#4a0080,#8800FF);border:none;color:white;padding:9px 14px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:bold;" onclick="event.stopPropagation();openMysteryBox()">Open 🎲</button>
+        </div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin-bottom:8px;">TODAY'S TASKS — resets midnight</div>
+        <div id="dailyTasksCont"></div>
+      </div>
+
+      <!-- CARD MISSIONS -->
+      <div id="taskTab-missions" style="display:none;">
+        <div style="font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin-bottom:8px;">CARD MISSIONS — one-time rewards</div>
+        <div id="cardMissionsCont"></div>
+      </div>
     </div>
 
     <!-- INVITE PAGE -->
@@ -326,7 +360,7 @@ function closeSideMenu(){
   <!-- ===== NAV BAR ===== -->
   <nav class="nav">
     <button class="nav-btn" id="navProfileBtn" onclick="showPage('profile',this)"><span>👤</span><span data-i18n="navProfile">Profile</span></button>
-    <button class="nav-btn" id="navRankBtn" onclick="showPage('rank',this)"><span>🏆</span><span data-i18n="navRank">Rank</span></button>
+    <button class="nav-btn" id="navRankBtn" onclick="openGames()"><span>🎮</span><span>Games</span></button>
     <button class="nav-btn active" id="navHomeBtn" onclick="showPage('home',this)"><span>🏠</span><span data-i18n="navHome">Home</span></button>
     <button class="nav-btn" id="navInviteBtn" onclick="showPage('invite',this)"><span>👥</span><span data-i18n="navInvite">Invite</span></button>
     <button class="nav-btn" id="navTasksBtn" onclick="showPage('tasks',this)"><span>✅</span><span data-i18n="navTasks">Tasks</span></button>
