@@ -344,13 +344,8 @@ function closeSideMenu(){
 
 
     <!-- RANK PAGE -->
-    <div id="rank" class="page" onappear="loadLeaderboard('global')">
-      <div class="page-title" data-i18n="rankTitle">🏆 Leaderboard</div>
-      <div style="display:flex;gap:6px;margin-bottom:14px;">
-        <button id="tab_global" class="lb-tab active" onclick="switchLeaderTab('global')" data-i18n="tabGlobal">🌍 Global</button>
-        <button id="tab_friends" class="lb-tab" onclick="switchLeaderTab('friends')" data-i18n="tabFriends">👥 Friends</button>
-        <button id="tab_mylevel" class="lb-tab" onclick="switchLeaderTab('mylevel')" data-i18n="tabMyLevel">📊 My Level</button>
-      </div>
+    <div id="rank" class="page">
+      <div class="page-title" data-i18n="rankTitle">🏆 LEADERBOARD</div>
       <div id="lbContent">
         <div style="text-align:center;padding:30px;color:#555;" data-i18n="loadingLeader">⏳ Loading...</div>
       </div>
