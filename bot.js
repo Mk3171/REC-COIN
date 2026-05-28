@@ -426,16 +426,21 @@ bot.on('message', async (msg) => {
 });
 
 // ====== API: LEADERBOARD ======
-// ====== MINING SPEED CALCULATOR (server-side) ======
+// ====== MINING SPEED CALCULATOR (matches app.js formula exactly) ======
+function cardRECSpeed(lvl) {
+  if(lvl <= 0) return 0;
+  return 0.0000001 * Math.pow(1000, (lvl-1)/99);
+}
 function calcMiningSpeed(cardLevels) {
-  if(!cardLevels) return 0;
+  if(!cardLevels || typeof cardLevels !== 'object') return 0;
   var speed = 0;
-  Object.keys(cardLevels).forEach(function(key) {
-    var lvl = cardLevels[key] || 0;
-    if(lvl > 0) {
-      speed += parseFloat((0.000001 * Math.pow(1.15, lvl)).toFixed(8));
-    }
-  });
+  try {
+    Object.keys(cardLevels).forEach(function(key) {
+      var lvl = cardLevels[key] || 0;
+      var m = (parseInt(key.split('_')[0]) === 4) ? 3 : 1; // limited cards x3
+      speed += cardRECSpeed(lvl) * m;
+    });
+  } catch(e) {}
   return parseFloat(speed.toFixed(8));
 }
 
@@ -443,9 +448,11 @@ app.get('/api/leaderboard/global', async (req, res) => {
   try {
     var allUsers = await User.find({ banned: false })
       .sort({ rec: -1 }).limit(100)
-      .select('telegramId username firstName rec miningSpeed');
+      .select('telegramId username firstName rec miningSpeed cardLevels')
+      .lean();
     res.json({ top100: allUsers.map(function(u, i) {
-      return { rank: i+1, telegramId: u.telegramId, name: u.username||u.firstName||'User', rec: u.rec, miningSpeed: u.miningSpeed||0 };
+      var speed = u.miningSpeed > 0 ? u.miningSpeed : calcMiningSpeed(u.cardLevels);
+      return { rank: i+1, telegramId: u.telegramId, name: u.username||u.firstName||'User', rec: u.rec, miningSpeed: speed };
     })});
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
@@ -454,13 +461,14 @@ app.get('/api/leaderboard/myrank/:telegramId', async (req, res) => {
   try {
     var userId = parseInt(req.params.telegramId);
     var allUsers = await User.find({ banned: false }).sort({ rec: -1 }).limit(500)
-      .select('telegramId username firstName rec miningSpeed');
+      .select('telegramId username firstName rec miningSpeed cardLevels').lean();
     var myIndex = allUsers.findIndex(function(u) { return u.telegramId === userId; });
     var myRank = myIndex < 0 ? 999 : myIndex + 1;
     var start = Math.max(0, myIndex - 2);
     var end = Math.min(allUsers.length, myIndex + 3);
     var neighbors = myIndex < 0 ? [] : allUsers.slice(start, end).map(function(u, i) {
-      return { rank: start+i+1, telegramId: u.telegramId, name: u.username||u.firstName||'User', rec: u.rec, miningSpeed: u.miningSpeed||0, isMe: u.telegramId===userId };
+      var speed = u.miningSpeed > 0 ? u.miningSpeed : calcMiningSpeed(u.cardLevels);
+      return { rank: start+i+1, telegramId: u.telegramId, name: u.username||u.firstName||'User', rec: u.rec, miningSpeed: speed, isMe: u.telegramId===userId };
     });
     res.json({ myRank, total: allUsers.length, neighbors });
   } catch(e) { res.status(500).json({ error: e.message }); }
