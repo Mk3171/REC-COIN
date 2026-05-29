@@ -141,6 +141,11 @@ function closeSideMenu(){
 
           <!-- RIGHT SIDE BUTTONS -->
           <div class="side-col">
+            <div class="side-action-btn" onclick="openCombo()" style="border-color:rgba(255,200,0,0.4);position:relative;" id="comboBtnWrap">
+              <span class="sa-icon">🎯</span>
+              <span class="sa-label" style="color:#FFD700;">Combo</span>
+              <div id="comboDotBadge" style="display:none;position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:#FF4444;"></div>
+            </div>
             <div class="side-action-btn" onclick="openUpgrade()" style="border-color:rgba(255,100,50,0.25);">
               <span class="sa-icon">⬆️</span>
               <span class="sa-label" style="color:#FF8844;">Upgrade</span>
@@ -582,6 +587,44 @@ function closeSideMenu(){
 </div>
 
 <!-- PROFILE STATS POPUP -->
+<!-- COMBO OVERLAY -->
+<div id="comboOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9995;" onclick="closeCombo()"></div>
+<div id="comboPopup" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9996;background:linear-gradient(180deg,#0e0a22,#080518);border-radius:24px 24px 0 0;border-top:1px solid rgba(255,200,0,0.4);padding:20px 16px 36px;max-height:90vh;overflow-y:auto;">
+
+  <!-- Header -->
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+    <div style="font-size:18px;font-weight:900;color:#FFD700;font-family:Orbitron,sans-serif;">🎯 DAILY COMBO</div>
+    <div onclick="closeCombo()" style="width:30px;height:30px;background:rgba(255,255,255,0.08);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.5);font-size:13px;">✕</div>
+  </div>
+  <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:16px;">رقّ الثلاث بطاقات اليومية واحصل على مكافأة!</div>
+
+  <!-- Reward -->
+  <div style="background:rgba(255,200,0,0.08);border:1px solid rgba(255,200,0,0.25);border-radius:12px;padding:10px 14px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
+    <span style="font-size:13px;color:rgba(255,255,255,0.6);">المكافأة اليومية</span>
+    <span style="font-size:16px;font-weight:700;color:#FFD700;">+5 REC ⚡</span>
+  </div>
+
+  <!-- 3 Card Slots -->
+  <div id="comboCardSlots" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;">
+    <!-- filled by JS -->
+  </div>
+
+  <!-- Claim button -->
+  <div id="comboClaimArea" style="display:none;">
+    <button onclick="claimCombo()" style="width:100%;background:linear-gradient(135deg,#CC8800,#FFD700);border:none;color:#000;padding:13px;border-radius:14px;font-size:15px;font-weight:900;cursor:pointer;font-family:Orbitron,sans-serif;letter-spacing:1px;">🎉 CLAIM +5 REC</button>
+  </div>
+  <div id="comboClaimed" style="display:none;text-align:center;padding:10px;color:#00FF88;font-weight:700;font-size:14px;">✅ تم استلام المكافأة اليوم!</div>
+
+  <!-- Admin Panel (only for admin) -->
+  <div id="comboAdminPanel" style="display:none;margin-top:20px;border-top:1px solid rgba(255,255,255,0.08);padding-top:16px;">
+    <div style="font-size:12px;color:rgba(255,100,50,0.7);letter-spacing:1px;margin-bottom:10px;">🔧 ADMIN — اختر بطاقات الكومبو</div>
+    <div id="comboAdminSlots" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;">
+      <!-- 3 selectors -->
+    </div>
+    <button onclick="saveAdminCombo()" style="width:100%;background:rgba(255,100,50,0.2);border:1px solid rgba(255,100,50,0.4);color:#FF6644;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:Rajdhani,sans-serif;">💾 حفظ الكومبو اليومي</button>
+  </div>
+</div>
+
 <div id="profilePopupOverlay" style="display:none;position:fixed;inset:0;z-index:9990;background:rgba(0,0,0,0.75);" onclick="closeProfilePopup()"></div>
 <div id="profilePopup" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9991;background:linear-gradient(180deg,#0e0a22,#080518);border-radius:24px 24px 0 0;border-top:1px solid rgba(255,100,50,0.3);padding:20px 16px 36px;max-height:85vh;overflow-y:auto;">
   <div style="width:40px;height:4px;background:rgba(255,255,255,0.15);border-radius:2px;margin:0 auto 16px;"></div>
