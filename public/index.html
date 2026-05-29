@@ -150,11 +150,11 @@ function closeSideMenu(){
           <div class="side-col">
             <div class="side-action-btn" onclick="openDailyLogin()" style="border-color:rgba(0,200,100,0.25);">
               <span class="sa-icon">📅</span>
-              <span class="sa-label" style="color:#00CC66;">Daily</span>
+              <span class="sa-label" style="color:#00CC66;" data-i18n="sideDaily">Daily</span>
             </div>
             <div class="side-action-btn" onclick="showPage('rank', document.getElementById('navRankBtn'))" style="border-color:rgba(255,215,0,0.25);">
               <span class="sa-icon">🏆</span>
-              <span class="sa-label" style="color:#FFD700;" data-i18n="navRank">Rank</span>
+              <span class="sa-label" style="color:#FFD700;" data-i18n="sideRank">Rank</span>
             </div>
           </div>
 
@@ -170,16 +170,16 @@ function closeSideMenu(){
           <div class="side-col">
             <div class="side-action-btn" onclick="openCombo()" style="border-color:rgba(255,200,0,0.4);position:relative;" id="comboBtnWrap">
               <span class="sa-icon">🎯</span>
-              <span class="sa-label" style="color:#FFD700;">Combo</span>
+              <span class="sa-label" style="color:#FFD700;" data-i18n="sideCombo">Combo</span>
               <div id="comboDotBadge" style="display:none;position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:#FF4444;"></div>
             </div>
             <div class="side-action-btn" onclick="openUpgrade()" style="border-color:rgba(255,100,50,0.25);">
               <span class="sa-icon">⬆️</span>
-              <span class="sa-label" style="color:#FF8844;">Upgrade</span>
+              <span class="sa-label" style="color:#FF8844;" data-i18n="sideUpgrade">Upgrade</span>
             </div>
             <div class="side-action-btn" onclick="openStarsShop()" style="border-color:rgba(255,220,0,0.25);">
               <span class="sa-icon">⭐</span>
-              <span class="sa-label" style="color:#FFD700;">Shop</span>
+              <span class="sa-label" style="color:#FFD700;" data-i18n="sideShop">Shop</span>
             </div>
           </div>
 
@@ -219,8 +219,8 @@ function closeSideMenu(){
             <div class="quick-btn" style="opacity:0;pointer-events:none;"></div>
             <div class="quick-btn" onclick="openExchange()">
               <span class="qb-icon">🔄</span>
-              <span class="qb-label" style="color:rgba(255,255,255,0.7);">Exchange</span>
-              <span class="qb-sub" style="color:#00FF88;">SWAP</span>
+              <span class="qb-label" style="color:rgba(255,255,255,0.7);" data-i18n="qbExchange">Exchange</span>
+              <span class="qb-sub" style="color:#00FF88;" data-i18n="qbSwap">SWAP</span>
             </div>
             <div class="quick-btn" style="opacity:0;pointer-events:none;"></div>
           </div>
@@ -503,10 +503,10 @@ function closeSideMenu(){
     <button class="nav-btn" style="display:none;" id="navProfileBtn" onclick="showPage('profile',this)"></button>
     <button class="nav-btn" style="display:none;" id="navRankBtn"></button>
     <button class="nav-btn" style="display:none;" id="navTasksBtn" onclick="showPage('tasks',this)"></button>
-    <button class="nav-btn" id="navGamesBtn" onclick="openGames()"><span>🎮</span><span>Games</span></button>
+    <button class="nav-btn" id="navGamesBtn" onclick="openGames()"><span>🎮</span><span data-i18n="navGames">Games</span></button>
     <button class="nav-btn active" id="navHomeBtn" onclick="showPage('home',this)"><span>🏠</span><span data-i18n="navHome">Home</span></button>
     <button class="nav-btn" id="navInviteBtn" onclick="showPage('invite',this)"><span>👥</span><span data-i18n="navInvite">Invite</span></button>
-    <button class="nav-btn" id="navWalletBtn" onclick="showPage('wallet',this)"><span>💳</span><span>Wallet</span></button>
+    <button class="nav-btn" id="navWalletBtn" onclick="showPage('wallet',this)"><span>💳</span><span data-i18n="navWallet">Wallet</span></button>
   </nav>
 
 </div><!-- end app-wrapper -->
@@ -623,7 +623,7 @@ function closeSideMenu(){
     <div style="font-size:18px;font-weight:900;color:#FFD700;font-family:Orbitron,sans-serif;">🎯 DAILY COMBO</div>
     <div onclick="closeCombo()" style="width:30px;height:30px;background:rgba(255,255,255,0.08);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.5);font-size:13px;">✕</div>
   </div>
-  <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:16px;">رقّ الثلاث بطاقات اليومية واحصل على مكافأة!</div>
+  <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:16px;" data-i18n="comboSubtitle">رقّ الثلاث بطاقات اليومية واحصل على مكافأة!</div>
 
   <!-- Reward -->
   <div style="background:rgba(255,200,0,0.08);border:1px solid rgba(255,200,0,0.25);border-radius:12px;padding:10px 14px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
