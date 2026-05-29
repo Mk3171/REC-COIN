@@ -1345,7 +1345,7 @@ function cardRECSpeed(lvl){
 // RECORD cost to upgrade from current level
 // Level 0→1: 10K | Level 50: 110M | Level 75: 11.5B | Level 99→100: 1T
 function cardCost(lvl){
-  return Math.floor(10000*Math.pow(1e8,lvl/99));
+  return Math.floor(10000*Math.pow(1e10,lvl/99));
 }
 // Wait time to upgrade — Level 0: 1min | Level 50: 3h | Level 75: 2d | Level 99: 30d
 function cardWait(lvl){
