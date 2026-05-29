@@ -101,12 +101,13 @@ function closeSideMenu(){
       </div>
       <div onclick="openRECInfo()" style="pointer-events:auto;position:absolute;top:7px;right:8px;width:20px;height:20px;border-radius:50%;background:rgba(0,255,136,0.15);border:1px solid rgba(0,255,136,0.35);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#00FF88;cursor:pointer;z-index:5;">?</div>
     </div>
-    <div class="balance-card" style="pointer-events:none;">
+    <div class="balance-card" style="pointer-events:none;position:relative;">
       <div class="balance-card-icon">🔴</div>
       <div>
         <div class="balance-card-label">RECORD</div>
         <div class="balance-card-value red"><span id="recordCount">0</span></div>
       </div>
+      <div onclick="openRECORDInfo()" style="pointer-events:auto;position:absolute;top:7px;right:8px;width:20px;height:20px;border-radius:50%;background:rgba(255,100,50,0.15);border:1px solid rgba(255,100,50,0.35);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#FF6644;cursor:pointer;z-index:5;">?</div>
     </div>
   </div>
 
@@ -627,6 +628,115 @@ function closeSideMenu(){
 </div>
 
 <!-- REC INFO POPUP -->
+<!-- RECORD INFO POPUP -->
+<div id="recordInfoOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9993;" onclick="closeRECORDInfo()"></div>
+<div id="recordInfoPopup" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9994;background:linear-gradient(180deg,#1a0800,#0d0400);border-radius:24px 24px 0 0;border-top:2px solid rgba(255,100,50,0.4);padding:20px 16px 36px;max-height:88vh;overflow-y:auto;">
+
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+    <div style="font-size:17px;font-weight:900;color:#FF6644;font-family:Orbitron,sans-serif;">🔴 عملة RECORD</div>
+    <div onclick="closeRECORDInfo()" style="width:30px;height:30px;background:rgba(255,255,255,0.08);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.4);font-size:13px;">✕</div>
+  </div>
+  <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:20px;">كيف تجمع RECORD وما هو دورها</div>
+
+  <!-- What is RECORD -->
+  <div style="background:rgba(255,100,50,0.08);border:1px solid rgba(255,100,50,0.25);border-radius:14px;padding:14px;margin-bottom:10px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <div style="font-size:26px;">🔴</div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#FF6644;">ما هي عملة RECORD؟</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);">عملة التعدين الأساسية</div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.6;">
+      RECORD هي العملة الرئيسية في اللعبة. تُستخدم لترقية البطاقات وشراء العناصر. رصيدك الحالي:
+      <div style="margin-top:6px;padding:8px;background:rgba(0,0,0,0.3);border-radius:8px;font-family:Orbitron,sans-serif;font-size:10px;color:#FF6644;">
+        <span id="infoRecordBalance">0</span> RECORD
+      </div>
+    </div>
+  </div>
+
+  <!-- Method 1: Tapping -->
+  <div style="background:rgba(255,150,50,0.06);border:1px solid rgba(255,150,50,0.2);border-radius:14px;padding:14px;margin-bottom:10px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <div style="font-size:26px;">👆</div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#FF9933;">الضغط على الدائرة</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);">الطريقة الأسرع</div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.6;">
+      كل ضغطة على الدائرة الحمراء تعطيك RECORD. كلما زادت قوة الضغط (Tap Power) كلما حصلت على أكثر في كل ضغطة.
+    </div>
+    <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+      <div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:8px;text-align:center;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.3);">ترقية Tap Power</div>
+        <div style="font-size:12px;color:#FF9933;font-weight:700;">↑ RECORD/ضغطة</div>
+      </div>
+      <div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:8px;text-align:center;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.3);">ترقية Energy</div>
+        <div style="font-size:12px;color:#FF9933;font-weight:700;">↑ ضغطات أكثر</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Method 2: Auto mining -->
+  <div style="background:rgba(255,200,50,0.06);border:1px solid rgba(255,200,50,0.2);border-radius:14px;padding:14px;margin-bottom:10px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <div style="font-size:26px;">⚙️</div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#FFD700;">التعدين التلقائي</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);">مستمر 24/7</div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.6;">
+      البطاقات تعدّن RECORD تلقائياً حتى وأنت غير متصل. رصيدك يزيد كل ثانية حسب سرعة تعدينك.
+      <div style="margin-top:6px;padding:8px;background:rgba(0,0,0,0.3);border-radius:8px;font-family:Orbitron,sans-serif;font-size:10px;color:#FFD700;">
+        سرعتك: <span id="infoRecordSpeed">0.00000000</span> REC/s
+      </div>
+    </div>
+  </div>
+
+  <!-- Method 3: Mystery Box -->
+  <div style="background:rgba(170,100,255,0.06);border:1px solid rgba(170,100,255,0.2);border-radius:14px;padding:14px;margin-bottom:10px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <div style="font-size:26px;">📦</div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#AA66FF;">Mystery Box</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);">مجاناً كل يوم</div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.6;">
+      افتح صندوق المفاجآت اليومي مجاناً من قسم Tasks. قد تحصل على كمية كبيرة من RECORD أو REC!
+    </div>
+  </div>
+
+  <!-- Method 4: Energy Refill -->
+  <div style="background:rgba(0,200,100,0.06);border:1px solid rgba(0,200,100,0.2);border-radius:14px;padding:14px;margin-bottom:10px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <div style="font-size:26px;">⚡</div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#00CC66;">إعادة شحن الطاقة</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);">مرتان يومياً مجاناً</div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.6;">
+      عندما تنتهي طاقتك يمكنك إعادة شحنها مرتين يومياً مجاناً لمواصلة الضغط وجمع المزيد من RECORD.
+    </div>
+  </div>
+
+  <!-- How to spend -->
+  <div style="background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);border-radius:14px;padding:14px;">
+    <div style="font-size:12px;font-weight:700;color:#FFD700;margin-bottom:8px;">💡 كيف تستخدم RECORD؟</div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.7;">
+      ١. 🃏 ترقية بطاقات التعدين لزيادة سرعة REC<br>
+      ٢. ⬆️ رفع مستوى Tap Power للحصول على أكثر لكل ضغطة<br>
+      ٣. ⚡ توسيع سعة الطاقة لضغطات أكثر<br>
+      ٤. ⭐ شراء بطاقات محدودة من المتجر
+    </div>
+  </div>
+
+</div>
+
 <div id="recInfoOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9993;" onclick="closeRECInfo()"></div>
 <div id="recInfoPopup" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9994;background:linear-gradient(180deg,#0a1a0e,#040d08);border-radius:24px 24px 0 0;border-top:2px solid rgba(0,255,136,0.4);padding:20px 16px 36px;max-height:88vh;overflow-y:auto;">
 
