@@ -1204,26 +1204,30 @@ function buildAdminComboSlots() {
 }
 
 function saveAdminCombo() {
-  if(!tgUser || tgUser.id !== ADMIN_TG_ID) return;
+  if(!tgUser) { showToast('❌ No tgUser'); return; }
+  if(String(tgUser.id) !== String(ADMIN_TG_ID)) { showToast('❌ Not admin: '+tgUser.id); return; }
   var cards = [];
   for(var i=0;i<3;i++) {
     var sel = document.getElementById('adminComboSlot_'+i);
-    if(!sel || !sel.value) { showToast('❌ اختر 3 بطاقات'); return; }
+    if(!sel) { showToast('❌ Select '+i+' not found'); return; }
+    if(!sel.value) { showToast('❌ اختر بطاقة '+(i+1)); return; }
     var parts = sel.value.split('|');
+    if(parts.length < 3) { showToast('❌ قيمة خاطئة: '+sel.value); return; }
     cards.push({ key: parts[0], categoryIndex: parseInt(parts[1]), cardIndex: parseInt(parts[2]) });
   }
   if(cards[0].key===cards[1].key || cards[1].key===cards[2].key || cards[0].key===cards[2].key) {
     showToast('❌ لا تكرر نفس البطاقة'); return;
   }
+  showToast('⏳ جاري الحفظ...');
   fetch('/api/combo/set', {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ adminId: tgUser.id, cards })
+    body: JSON.stringify({ adminId: parseInt(tgUser.id), cards })
   }).then(function(r){ return r.json(); })
   .then(function(d){
-    if(d.success) { showToast('✅ تم حفظ الكومبو!'); loadComboData(); }
-    else showToast('❌ خطأ: ' + d.error);
-  }).catch(function(){ showToast('❌ خطأ في الاتصال'); });
+    if(d.success) { showToast('✅ تم حفظ الكومبو! ' + d.date); loadComboData(); }
+    else showToast('❌ ' + JSON.stringify(d));
+  }).catch(function(e){ showToast('❌ Fetch error: '+e.message); });
 }
 // ====== END DAILY COMBO ======
 
