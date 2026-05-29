@@ -1772,24 +1772,22 @@ function getTapCost(l){return Math.floor(30000*Math.pow(33333,l/99));}
 // Energy upgrade cost: Level 1=30K, Level 100=1B
 function getEnergyCost(l){return Math.floor(30000*Math.pow(33333,l/99));}
 function openVIP() {
-  var ol = document.getElementById('vipOverlay');
-  var pp = document.getElementById('vipPopup');
-  if(!ol || !pp) return;
   renderVIPPage();
-  ol.style.display = 'block';
-  pp.style.display = 'flex';
+  showPage('vip', null);
 }
 function closeVIP() {
-  document.getElementById('vipOverlay').style.display = 'none';
-  document.getElementById('vipPopup').style.display = 'none';
+  showPage('home', document.getElementById('navHomeBtn'));
 }
 function renderVIPPage() {
-  var pp = document.getElementById('vipPopup');
+  var pp = document.getElementById('vipPageContent');
   pp.innerHTML =
     '<div style="width:100%;max-height:90vh;overflow-y:auto;">' +
 
     // Header
-    '<div style="text-align:center;padding:20px 16px 10px;">' +
+    '<div style="display:flex;align-items:center;padding:16px 16px 0;">' +
+      '<div onclick="closeVIP()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:8px 14px;cursor:pointer;font-size:12px;color:rgba(255,255,255,0.6);">← ' + t('backBtn').replace('← ','') + '</div>' +
+    '</div>' +
+    '<div style="text-align:center;padding:12px 16px 10px;">' +
       '<div style="font-family:Impact,sans-serif;font-size:42px;font-weight:900;' +
         'color:#FFD700;text-shadow:3px 3px 0 #aa6600,0 0 20px rgba(255,215,0,0.6);' +
         'letter-spacing:4px;">VIP</div>' +
