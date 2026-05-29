@@ -117,32 +117,6 @@ function closeSideMenu(){
   </div>
 
   <!-- ===== BALANCE ROW ===== -->
-  <!-- VIP STICKER -->
-  <div style="display:flex;justify-content:flex-end;padding:0 4px;margin-bottom:-6px;position:relative;z-index:10;">
-    <div onclick="openVIP()" style="
-      cursor:pointer;
-      background:linear-gradient(135deg,#cc0000,#ff2222,#aa0000);
-      border:2px solid #ff4444;
-      border-radius:8px;
-      padding:5px 14px;
-      transform:rotate(-2deg);
-      box-shadow:0 3px 12px rgba(255,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.2);
-      position:relative;
-      overflow:hidden;
-    ">
-      <div style="position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 4px,rgba(0,0,0,0.08) 4px,rgba(0,0,0,0.08) 8px);"></div>
-      <span style="
-        font-family:Impact,Arial Black,sans-serif;
-        font-size:20px;
-        font-weight:900;
-        color:#FFD700;
-        text-shadow:2px 2px 0 #aa6600,-1px -1px 0 #ff8800,0 0 8px rgba(255,215,0,0.8);
-        letter-spacing:2px;
-        position:relative;z-index:1;
-      ">VIP</span>
-    </div>
-  </div>
-
   <div class="balance-row" dir="ltr" style="direction:ltr!important;">
     <div class="balance-card" style="pointer-events:none;position:relative;">
       <div class="balance-card-icon">⚡</div>
@@ -159,6 +133,14 @@ function closeSideMenu(){
         <div class="balance-card-value red"><span id="recordCount">0</span></div>
       </div>
       <div onclick="openRECORDInfo()" style="pointer-events:auto;position:absolute;top:7px;right:8px;width:20px;height:20px;border-radius:50%;background:rgba(255,100,50,0.15);border:1px solid rgba(255,100,50,0.35);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#FF6644;cursor:pointer;z-index:5;">?</div>
+    </div>
+  </div>
+
+  <!-- VIP STICKER -->
+  <div style="display:flex;justify-content:flex-end;padding:2px 4px 0;">
+    <div onclick="openVIP()" style="cursor:pointer;background:linear-gradient(135deg,#cc0000,#ff2222,#aa0000);border:2px solid #ff4444;border-radius:8px;padding:5px 16px;transform:rotate(-1deg);box-shadow:0 3px 14px rgba(255,0,0,0.5);position:relative;overflow:hidden;">
+      <div style="position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 4px,rgba(0,0,0,0.08) 4px,rgba(0,0,0,0.08) 8px);"></div>
+      <span style="font-family:Impact,Arial Black,sans-serif;font-size:22px;font-weight:900;color:#FFD700;text-shadow:2px 2px 0 #aa6600,0 0 10px rgba(255,215,0,0.8);letter-spacing:3px;position:relative;z-index:1;">VIP</span>
     </div>
   </div>
 
