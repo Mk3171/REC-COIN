@@ -1084,7 +1084,20 @@ function closeRECInfo() {
   document.getElementById('recInfoOverlay').style.display = 'none';
   document.getElementById('recInfoPopup').style.display = 'none';
 }
-// ====== END REC INFO ======
+
+function openRECORDInfo() {
+  var el = document.getElementById('infoRecordBalance');
+  if(el) el.textContent = Math.floor(record).toLocaleString();
+  var el2 = document.getElementById('infoRecordSpeed');
+  if(el2) el2.textContent = recordPerSec.toFixed(8);
+  document.getElementById('recordInfoOverlay').style.display = 'block';
+  document.getElementById('recordInfoPopup').style.display = 'block';
+}
+function closeRECORDInfo() {
+  document.getElementById('recordInfoOverlay').style.display = 'none';
+  document.getElementById('recordInfoPopup').style.display = 'none';
+}
+// ====== END INFO POPUPS ======
 
 // ====== DAILY COMBO ======
 var comboData = null;
