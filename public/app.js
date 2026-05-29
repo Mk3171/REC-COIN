@@ -1770,6 +1770,192 @@ function updateUI(){
 function getTapCost(l){return Math.floor(30000*Math.pow(33333,l/99));}
 // Energy upgrade cost: Level 1=30K, Level 100=1B
 function getEnergyCost(l){return Math.floor(30000*Math.pow(33333,l/99));}
+function openVIP() {
+  var ol = document.getElementById('vipOverlay');
+  var pp = document.getElementById('vipPopup');
+  if(!ol || !pp) return;
+  renderVIPPage();
+  ol.style.display = 'block';
+  pp.style.display = 'flex';
+}
+function closeVIP() {
+  document.getElementById('vipOverlay').style.display = 'none';
+  document.getElementById('vipPopup').style.display = 'none';
+}
+function renderVIPPage() {
+  var pp = document.getElementById('vipPopup');
+  pp.innerHTML =
+    '<div style="width:100%;max-height:90vh;overflow-y:auto;">' +
+
+    // Header
+    '<div style="text-align:center;padding:20px 16px 10px;">' +
+      '<div style="font-family:Impact,sans-serif;font-size:42px;font-weight:900;' +
+        'color:#FFD700;text-shadow:3px 3px 0 #aa6600,0 0 20px rgba(255,215,0,0.6);' +
+        'letter-spacing:4px;">VIP</div>' +
+      '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px;">Exclusive Membership</div>' +
+    '</div>' +
+
+    // Tabs
+    '<div style="display:flex;gap:8px;padding:0 16px;margin-bottom:16px;">' +
+      '<div onclick="switchVIPTab(1)" id="vipTab1" style="flex:1;text-align:center;padding:10px;border-radius:12px;background:linear-gradient(135deg,#cc0000,#ff2222);border:1px solid #ff4444;cursor:pointer;">' +
+        '<div style="font-size:13px;font-weight:700;color:#FFD700;">👑 VIP I</div>' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.7);margin-top:2px;">1 TON / شهر</div>' +
+      '</div>' +
+      '<div onclick="switchVIPTab(2)" id="vipTab2" style="flex:1;text-align:center;padding:10px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);cursor:pointer;">' +
+        '<div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.4);">👑 VIP II</div>' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px;">قريباً</div>' +
+      '</div>' +
+      '<div onclick="switchVIPTab(3)" id="vipTab3" style="flex:1;text-align:center;padding:10px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);cursor:pointer;">' +
+        '<div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.4);">👑 VIP III</div>' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px;">قريباً</div>' +
+      '</div>' +
+    '</div>' +
+
+    '<div id="vipTabContent" style="padding:0 16px 30px;"></div>' +
+    '</div>';
+
+  switchVIPTab(1);
+}
+
+function switchVIPTab(n) {
+  [1,2,3].forEach(function(i) {
+    var tab = document.getElementById('vipTab'+i);
+    if(!tab) return;
+    if(i === n) {
+      tab.style.background = 'linear-gradient(135deg,#cc0000,#ff2222)';
+      tab.style.border = '1px solid #ff4444';
+      tab.querySelector('div').style.color = '#FFD700';
+    } else {
+      tab.style.background = 'rgba(255,255,255,0.05)';
+      tab.style.border = '1px solid rgba(255,255,255,0.1)';
+      tab.querySelector('div').style.color = 'rgba(255,255,255,0.4)';
+    }
+  });
+
+  var content = document.getElementById('vipTabContent');
+  if(!content) return;
+
+  if(n === 1) {
+    var hasVIP = vipData && vipData.tier >= 1 && vipData.expiry > Date.now();
+    content.innerHTML =
+      // Boxes section
+      '<div style="font-size:13px;font-weight:700;color:#FFD700;margin-bottom:10px;">📦 الصناديق اليومية</div>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">' +
+        _vipBox('common', hasVIP) +
+        _vipBox('rare', hasVIP) +
+        _vipBox('epic', hasVIP) +
+      '</div>' +
+
+      // Features
+      '<div style="background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);border-radius:14px;padding:14px;margin-bottom:16px;">' +
+        '<div style="font-size:12px;font-weight:700;color:#FFD700;margin-bottom:10px;">✨ مميزات VIP I</div>' +
+        '<div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:2;">' +
+          '📦 3 صناديق يومية (Common, Rare, Epic)<br>' +
+          '🦅 فرصة الحصول على بطاقة Epic النادرة<br>' +
+          '🎁 مكافآت عشوائية يومية<br>' +
+          '👑 شارة VIP على ملفك الشخصي' +
+        '</div>' +
+      '</div>' +
+
+      // Buy button
+      (hasVIP ?
+        '<div style="background:rgba(0,255,100,0.1);border:1px solid rgba(0,255,100,0.3);border-radius:14px;padding:14px;text-align:center;">' +
+          '<div style="font-size:14px;font-weight:700;color:#00FF88;">✅ عضويتك فعالة</div>' +
+          '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px;">تنتهي: ' + new Date(vipData.expiry).toLocaleDateString() + '</div>' +
+        '</div>' :
+        '<div onclick="buyVIP(1)" style="background:linear-gradient(135deg,#cc0000,#ff3333);border:none;border-radius:14px;padding:16px;text-align:center;cursor:pointer;box-shadow:0 4px 20px rgba(255,0,0,0.4);">' +
+          '<div style="font-size:16px;font-weight:900;color:#FFD700;">👑 اشتراك VIP I</div>' +
+          '<div style="font-size:12px;color:rgba(255,255,255,0.8);margin-top:4px;">1 TON / شهر</div>' +
+        '</div>'
+      );
+  } else {
+    content.innerHTML =
+      '<div style="text-align:center;padding:40px 20px;">' +
+        '<div style="font-size:40px;margin-bottom:12px;">🔒</div>' +
+        '<div style="font-size:16px;font-weight:700;color:rgba(255,255,255,0.4);">قريباً</div>' +
+        '<div style="font-size:12px;color:rgba(255,255,255,0.2);margin-top:6px;">هذا المستوى سيُفتح قريباً</div>' +
+      '</div>';
+  }
+}
+
+function _vipBox(type, unlocked) {
+  var configs = {
+    common: { label:'Common', color:'#aaaaaa', bg:'rgba(170,170,170,0.1)', border:'rgba(170,170,170,0.3)', icon:'📦' },
+    rare:   { label:'Rare',   color:'#4488ff', bg:'rgba(68,136,255,0.1)',  border:'rgba(68,136,255,0.3)',  icon:'💎' },
+    epic:   { label:'Epic',   color:'#aa44ff', bg:'rgba(170,68,255,0.1)', border:'rgba(170,68,255,0.3)',  icon:'🌌' }
+  };
+  var c = configs[type];
+  var canOpen = unlocked && !(vipData.boxes && vipData.boxes[type] === getTodayStr());
+  return '<div onclick="' + (unlocked ? 'openVIPBox(\'' + type + '\')' : '') + '" style="' +
+    'background:' + c.bg + ';border:1px solid ' + c.border + ';border-radius:14px;' +
+    'padding:12px 8px;text-align:center;cursor:' + (unlocked ? 'pointer' : 'default') + ';">' +
+    '<div style="font-size:28px;">' + (unlocked ? c.icon : '🔒') + '</div>' +
+    '<div style="font-size:10px;font-weight:700;color:' + c.color + ';margin-top:6px;">' + c.label + '</div>' +
+    '<div style="font-size:9px;color:rgba(255,255,255,0.4);margin-top:3px;">' +
+      (unlocked ? (canOpen ? 'افتح' : '✅ تم اليوم') : 'مقفل') +
+    '</div>' +
+  '</div>';
+}
+
+function openVIPBox(type) {
+  if(!vipData || vipData.tier < 1 || vipData.expiry <= Date.now()) return;
+  if(!vipData.boxes) vipData.boxes = {};
+  var today = getTodayStr();
+  if(vipData.boxes[type] === today) { showToast('✅ فتحت هذا الصندوق اليوم!'); return; }
+
+  var reward = rollVIPBox(type);
+  vipData.boxes[type] = today;
+
+  // Apply reward
+  if(reward.type === 'record') {
+    record += reward.amount;
+    showToast('📦 ' + type.toUpperCase() + ': +' + formatNumber(reward.amount) + ' RECORD!');
+  } else if(reward.type === 'rec') {
+    rec += reward.amount;
+    showToast('📦 ' + type.toUpperCase() + ': +' + reward.amount.toFixed(6) + ' REC!');
+  } else if(reward.type === 'boost') {
+    vipData.boost = { multi: reward.multi, expiry: Date.now() + 3600000 };
+    showToast('📦 ' + type.toUpperCase() + ': ×' + reward.multi + ' تسريع لساعة!');
+  } else if(reward.type === 'epicCard') {
+    vipData.hasEpicCard = true;
+    vipData.epicExpiry = vipData.expiry;
+    showToast('🦅 حصلت على بطاقة EPIC النادرة!!');
+  }
+
+  saveData(true);
+  updateUI();
+  renderVIPPage();
+}
+
+function rollVIPBox(type) {
+  var r = Math.random();
+  var multi = type === 'common' ? 1 : type === 'rare' ? 2 : 3;
+
+  // Epic card chance: 1%
+  if(type === 'epic' && r < 0.01 && !vipData.hasEpicCard) {
+    return { type:'epicCard' };
+  }
+
+  var r2 = Math.random();
+  if(r2 < 0.45) {
+    // RECORD
+    var base = 10000 + Math.random() * 490000;
+    return { type:'record', amount: Math.floor(base * multi) };
+  } else if(r2 < 0.85) {
+    // REC
+    var base = 0.000001 + Math.random() * 0.000299;
+    return { type:'rec', amount: parseFloat((base * multi).toFixed(6)) };
+  } else {
+    // Boost
+    var boosts = [2,3,4,5];
+    var b = boosts[Math.floor(Math.random() * boosts.length)];
+    return { type:'boost', multi: Math.min(b * (multi > 1 ? 2 : 1), 5) };
+  }
+}
+
+function buyVIP(tier) {
+  showToast('⏳ قريباً — نظام VIP قيد التطوير');
+}
 function openUpgrade(){updateUpgradeUI();document.getElementById('upgradePage').classList.add('open');}
 
 // ====== TASK TABS ======
