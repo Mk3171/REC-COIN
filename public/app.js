@@ -1131,15 +1131,12 @@ function renderComboSlots(d) {
 
   var claimArea = document.getElementById('comboClaimArea');
   var claimed = document.getElementById('comboClaimed');
-  var allDone = d.allDone;
-  var alreadyClaimed = d.cards.every(function(c){ return c.done; }) && allDone;
-
-  if(claimArea) claimArea.style.display = allDone && !d.rewardClaimed ? 'block' : 'none';
+  if(claimArea) claimArea.style.display = (d.allDone && !d.rewardClaimed) ? 'block' : 'none';
   if(claimed) claimed.style.display = d.rewardClaimed ? 'block' : 'none';
 
   // Update badge on home
   var badge = document.getElementById('comboDotBadge');
-  if(badge) badge.style.display = (d.exists && !allDone) ? 'block' : 'none';
+  if(badge) badge.style.display = (d.exists && !d.allDone) ? 'block' : 'none';
 }
 
 function getCardInfo(catIdx, cardIdx) {
