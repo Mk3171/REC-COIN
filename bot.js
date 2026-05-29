@@ -1091,7 +1091,9 @@ app.get('/api/combo/today/:telegramId', async (req, res) => {
         done: progress.indexOf(c.key) !== -1
       };
     });
-    res.json({ exists: true, cards, reward: combo.reward, allDone: progress.length >= 3 });
+    var allDone = combo.cards.every(function(c){ return progress.indexOf(c.key) !== -1; });
+    var rewardClaimed = user && user.comboProgress && user.comboProgress.date === today && user.comboProgress.claimed;
+    res.json({ exists: true, cards, reward: combo.reward, allDone, rewardClaimed: !!rewardClaimed });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -1104,7 +1106,7 @@ app.post('/api/combo/set', async (req, res) => {
     var today = new Date().toISOString().split('T')[0];
     await DailyCombo.findOneAndUpdate(
       { date: today },
-      { date: today, cards, reward: 5 },
+      { $set: { cards: cards, reward: 5 } },
       { upsert: true, new: true }
     );
     res.json({ success: true, date: today });
@@ -1123,22 +1125,33 @@ app.post('/api/combo/check', async (req, res) => {
     var isComboCard = combo.cards.some(function(c){ return c.key === cardKey; });
     if(!isComboCard) return res.json({ matched: false });
 
-    // Update user's combo progress
     var user = await User.findOne({ telegramId: parseInt(telegramId) }).select('comboProgress rec');
     var progress = (user && user.comboProgress && user.comboProgress.date === today)
       ? user.comboProgress.done.slice() : [];
+    var claimed = user && user.comboProgress && user.comboProgress.date === today && user.comboProgress.claimed;
 
     if(progress.indexOf(cardKey) === -1) progress.push(cardKey);
-    var allDone = progress.length >= 3 && combo.cards.every(function(c){ return progress.indexOf(c.key) !== -1; });
-    var claimed = user && user.comboProgress && user.comboProgress.claimed;
 
-    var update = { 'comboProgress.date': today, 'comboProgress.done': progress };
-    if(allDone && !claimed) {
-      update['comboProgress.claimed'] = true;
-      update.$inc = { rec: combo.reward };
+    // Check all 3 specific combo cards are done
+    var allDone = combo.cards.every(function(c){ return progress.indexOf(c.key) !== -1; });
+    var giveReward = allDone && !claimed;
+
+    var setOp = { 'comboProgress.date': today, 'comboProgress.done': progress };
+    if(giveReward) setOp['comboProgress.claimed'] = true;
+
+    if(giveReward) {
+      await User.findOneAndUpdate(
+        { telegramId: parseInt(telegramId) },
+        { $set: setOp, $inc: { rec: combo.reward } }
+      );
+    } else {
+      await User.findOneAndUpdate(
+        { telegramId: parseInt(telegramId) },
+        { $set: setOp }
+      );
     }
-    await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, { $set: update });
-    res.json({ matched: true, done: progress.length, allDone, reward: allDone && !claimed ? combo.reward : 0 });
+
+    res.json({ matched: true, done: progress.length, allDone, reward: giveReward ? combo.reward : 0 });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
