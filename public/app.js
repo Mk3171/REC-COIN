@@ -1073,6 +1073,19 @@ function updateUpgradeUI(){
   var rb=document.getElementById('energyRefillBtn');if(rb)rb.disabled=window.refillData.count<=0;
 }
 
+// ====== REC INFO POPUP ======
+function openRECInfo() {
+  var el = document.getElementById('infoRecSpeed');
+  if(el) el.textContent = recPerSec.toFixed(8);
+  document.getElementById('recInfoOverlay').style.display = 'block';
+  document.getElementById('recInfoPopup').style.display = 'block';
+}
+function closeRECInfo() {
+  document.getElementById('recInfoOverlay').style.display = 'none';
+  document.getElementById('recInfoPopup').style.display = 'none';
+}
+// ====== END REC INFO ======
+
 // ====== DAILY COMBO ======
 var comboData = null;
 var ADMIN_TG_ID = 6995765586;
