@@ -1344,7 +1344,8 @@ function cardRECSpeed(lvl){
 }
 // RECORD cost to upgrade from current level
 // Level 0→1: 10K | Level 50: 110M | Level 75: 11.5B | Level 99→100: 1T
-function cardCost(lvl){
+function cardCost(lvl, isLimited){
+  if(isLimited) return Math.floor(100000*Math.pow(9e9,lvl/99));
   return Math.floor(10000*Math.pow(1e10,lvl/99));
 }
 // Wait time to upgrade — Level 0: 1min | Level 50: 3h | Level 75: 2d | Level 99: 30d
@@ -3051,7 +3052,7 @@ function directUpgrade(ci, idx, event) {
   if(lvl >= 100){ showToast(t('cardMaxLevel')); return; }
   var upg = cardUpgrades[key];
   if(upg && upg.endTime > Date.now()){ showToast(t('toastAlreadyUpgrading')); return; }
-  var cost = cardCost(lvl);
+  var cost = cardCost(lvl, ci===4);
   if(record < cost){ showToast('⛔ ' + t('toastNotEnoughRecord')); return; }
   record -= cost;
   var wait = cardWait(lvl);
@@ -3074,12 +3075,12 @@ function renderCardGridItem(div, key, card) {
   var isUpgrading = upg && upg.endTime > now;
   var rem = isUpgrading ? Math.max(0, Math.ceil((upg.endTime-now)/1000)) : 0;
   var recRec = cardRecordSpeed(lvl);
-  var cost = cardCost(lvl);
+  var isLimited = ci === 4;
+  var cost = cardCost(lvl, isLimited);
   var rarity = getCardRarity(lvl);
   var cardName = getCardName(card);
   var bg = getCardBg(ci, idx);
   var canUpgrade = record >= cost && lvl < 100 && !isUpgrading;
-  var isLimited = ci === 4;
   var multi = isLimited ? 3 : 1;
   var boostedRec = recRec * multi;
 
