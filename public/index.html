@@ -117,6 +117,32 @@ function closeSideMenu(){
   </div>
 
   <!-- ===== BALANCE ROW ===== -->
+  <!-- VIP STICKER -->
+  <div style="display:flex;justify-content:flex-end;padding:0 4px;margin-bottom:-6px;position:relative;z-index:10;">
+    <div onclick="openVIP()" style="
+      cursor:pointer;
+      background:linear-gradient(135deg,#cc0000,#ff2222,#aa0000);
+      border:2px solid #ff4444;
+      border-radius:8px;
+      padding:5px 14px;
+      transform:rotate(-2deg);
+      box-shadow:0 3px 12px rgba(255,0,0,0.5),inset 0 1px 0 rgba(255,255,255,0.2);
+      position:relative;
+      overflow:hidden;
+    ">
+      <div style="position:absolute;inset:0;background:repeating-linear-gradient(45deg,transparent,transparent 4px,rgba(0,0,0,0.08) 4px,rgba(0,0,0,0.08) 8px);"></div>
+      <span style="
+        font-family:Impact,Arial Black,sans-serif;
+        font-size:20px;
+        font-weight:900;
+        color:#FFD700;
+        text-shadow:2px 2px 0 #aa6600,-1px -1px 0 #ff8800,0 0 8px rgba(255,215,0,0.8);
+        letter-spacing:2px;
+        position:relative;z-index:1;
+      ">VIP</span>
+    </div>
+  </div>
+
   <div class="balance-row" dir="ltr" style="direction:ltr!important;">
     <div class="balance-card" style="pointer-events:none;position:relative;">
       <div class="balance-card-icon">⚡</div>
@@ -760,6 +786,12 @@ function closeSideMenu(){
     </div>
   </div>
 
+</div>
+
+<!-- VIP OVERLAY -->
+<div id="vipOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9990;" onclick="closeVIP()"></div>
+<div id="vipPopup" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9991;background:linear-gradient(180deg,#1a0000,#0d0000);border-radius:24px 24px 0 0;border-top:2px solid rgba(255,50,50,0.5);max-height:90vh;overflow-y:auto;flex-direction:column;align-items:center;" onclick="event.stopPropagation()">
+  <div onclick="closeVIP()" style="position:absolute;top:12px;right:14px;width:30px;height:30px;background:rgba(255,255,255,0.08);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.4);font-size:13px;z-index:2;">✕</div>
 </div>
 
 <div id="recInfoOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9993;" onclick="closeRECInfo()"></div>
