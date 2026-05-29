@@ -1385,6 +1385,7 @@ try{var ls=JSON.parse(localStorage.getItem(saveKey));if(ls)G=Object.assign({},de
 var record,rec,energy,maxEnergy,tapLevelVal,energyLevelVal,tapPowerVal,
     completedTasks,cardLevels,cardUpgrades,refCount,claimedMilest,
     dailyLogin,mysteryLastDate,dailyTasksData,cardTasksClaimed,totalTaps;
+var vipData = {tier:0, expiry:0, boxes:{}, boost:null, hasEpicCard:false, epicExpiry:0};
 
 function applyData(d){
   record=d.record||0; rec=d.rec||0;
