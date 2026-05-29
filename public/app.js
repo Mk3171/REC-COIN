@@ -1781,7 +1781,7 @@ function closeVIP() {
 function renderVIPPage() {
   var pp = document.getElementById('vipPageContent');
   pp.innerHTML =
-    '<div style="width:100%;max-height:90vh;overflow-y:auto;">' +
+    '<div style="width:100%;min-height:100vh;background:linear-gradient(180deg,#1a0000 0%,#0d0000 40%,#0a0010 100%);">' +
 
     // Header
     '<div style="display:flex;align-items:center;padding:16px 16px 0;">' +
@@ -1879,9 +1879,9 @@ function switchVIPTab(n) {
 
 function _vipBox(type, unlocked) {
   var configs = {
-    common: { label:'Common', color:'#aaaaaa', bg:'rgba(170,170,170,0.1)', border:'rgba(170,170,170,0.3)', icon:'📦' },
-    rare:   { label:'Rare',   color:'#4488ff', bg:'rgba(68,136,255,0.1)',  border:'rgba(68,136,255,0.3)',  icon:'💎' },
-    epic:   { label:'Epic',   color:'#aa44ff', bg:'rgba(170,68,255,0.1)', border:'rgba(170,68,255,0.3)',  icon:'🌌' }
+    common: { label:'Common', color:'#cccccc', bg:'rgba(200,200,200,0.08)', border:'rgba(200,200,200,0.25)', icon:'📦' },
+    rare:   { label:'Rare',   color:'#66aaff', bg:'rgba(68,136,255,0.12)', border:'rgba(68,136,255,0.4)',  icon:'💎' },
+    epic:   { label:'Epic',   color:'#cc66ff', bg:'rgba(170,68,255,0.15)', border:'rgba(170,68,255,0.5)', icon:'🌌' }
   };
   var c = configs[type];
   var canOpen = unlocked && !(vipData.boxes && vipData.boxes[type] === getTodayStr());
