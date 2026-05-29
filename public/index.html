@@ -404,7 +404,7 @@ function closeSideMenu(){
       <div style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px;margin-bottom:10px;">
         <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.2);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">💰</div>
         <div style="flex:1;">
-          <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;">Assets</div>
+          <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;" data-i18n="walletAssets">Assets</div>
           <div style="font-size:18px;color:#00FF88;font-weight:700;margin-top:2px;font-family:Orbitron,sans-serif;" id="walletAssets">0.000000 REC</div>
         </div>
       </div>
@@ -414,22 +414,22 @@ function closeSideMenu(){
         <div style="width:44px;height:44px;border-radius:12px;background:rgba(75,158,255,0.1);border:1px solid rgba(75,158,255,0.2);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🏛️</div>
         <div style="flex:1;">
           <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;" data-i18n="poolWallet">Pool Wallet</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:1px;" data-i18n="withdrawable">Withdrawable balance</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:1px;" data-i18n="withdrawable" data-i18n="withdrawable">Withdrawable balance</div>
           <div style="font-size:18px;color:#4B9EFF;font-weight:700;margin-top:4px;font-family:Orbitron,sans-serif;" id="walletPool">0.000000 REC</div>
         </div>
       </div>
 
       <!-- Controls header -->
-      <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.5);letter-spacing:2px;text-align:center;margin-bottom:10px;">CONTROLS</div>
+      <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.5);letter-spacing:2px;text-align:center;margin-bottom:10px;" data-i18n="walletControls">CONTROLS</div>
 
       <!-- Withdraw Pool — Locked -->
       <div style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:16px;padding:16px;margin-bottom:10px;opacity:0.5;">
         <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🏦</div>
         <div style="flex:1;">
-          <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;" data-i18n="withdrawPool">Withdraw Pool</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:1px;" data-i18n="transferPool">Transfer Pool to Wallet</div>
+          <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;" data-i18n="withdrawPool" data-i18n="withdrawPool">Withdraw Pool</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:1px;" data-i18n="transferPool" data-i18n="transferPool">Transfer Pool to Wallet</div>
         </div>
-        <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:7px 14px;font-size:11px;color:rgba(255,255,255,0.3);font-weight:700;font-family:Rajdhani,sans-serif;letter-spacing:1px;flex-shrink:0;">🔒 SOON</div>
+        <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:7px 14px;font-size:11px;color:rgba(255,255,255,0.3);font-weight:700;font-family:Rajdhani,sans-serif;letter-spacing:1px;flex-shrink:0;" data-i18n="walletSoon">🔒 SOON</div>
       </div>
 
       <!-- History — Open -->
@@ -437,9 +437,9 @@ function closeSideMenu(){
         <div style="width:44px;height:44px;border-radius:12px;background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.15);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">📄</div>
         <div style="flex:1;">
           <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;" data-i18n="history">History</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:1px;" data-i18n="yourWithdrawals">Your withdrawals</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:1px;" data-i18n="yourWithdrawals" data-i18n="yourWithdrawals">Your withdrawals</div>
         </div>
-        <div style="background:linear-gradient(135deg,#006633,#00AA55);border:none;border-radius:10px;padding:7px 16px;font-size:12px;color:white;font-weight:700;font-family:Rajdhani,sans-serif;letter-spacing:1px;flex-shrink:0;">Open →</div>
+        <div style="background:linear-gradient(135deg,#006633,#00AA55);border:none;border-radius:10px;padding:7px 16px;font-size:12px;color:white;font-weight:700;font-family:Rajdhani,sans-serif;letter-spacing:1px;flex-shrink:0;" data-i18n="walletOpen">Open →</div>
       </div>
 
       <!-- Support -->
@@ -475,7 +475,7 @@ function closeSideMenu(){
       </div>
       <div data-i18n="controls" style="color:#aaa;font-size:12px;text-align:right;margin-bottom:8px;padding-right:4px;">Controls</div>
       <div class="info-card" style="display:flex;justify-content:space-between;align-items:center;opacity:0.6;">
-        <div style="background:rgba(255,255,255,0.06);color:#aaa;border:1px solid rgba(255,255,255,0.1);padding:4px 10px;border-radius:8px;font-size:12px;white-space:nowrap;" data-i18n="comingSoon">Coming Soon</div>
+        <div style="background:rgba(255,255,255,0.06);color:#aaa;border:1px solid rgba(255,255,255,0.1);padding:4px 10px;border-radius:8px;font-size:12px;white-space:nowrap;" data-i18n="comingSoon" data-i18n="comingSoon">Coming Soon</div>
         <div style="text-align:right;flex:1;margin:0 10px;">
           <div data-i18n="withdrawPool" style="font-size:14px;">Withdraw Pool</div>
           <div style="color:#aaa;font-size:11px;" data-i18n="transferPool">Transfer Pool to Wallet</div>
@@ -561,7 +561,7 @@ function closeSideMenu(){
       style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px 16px;text-decoration:none;transition:all 0.2s;-webkit-tap-highlight-color:transparent;">
       <span style="font-size:22px;">🎧</span>
       <div>
-        <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;">Support</div>
+        <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;" data-i18n="menuSupport">Support</div>
         <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:1px;">@Momokhli</div>
       </div>
       <span style="margin-left:auto;color:rgba(255,255,255,0.2);font-size:16px;">›</span>
@@ -572,8 +572,8 @@ function closeSideMenu(){
       style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px 16px;text-decoration:none;transition:all 0.2s;-webkit-tap-highlight-color:transparent;">
       <span style="font-size:22px;">📢</span>
       <div>
-        <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;">News</div>
-        <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:1px;">Updates & Announcements</div>
+        <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;" data-i18n="menuNews">News</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:1px;" data-i18n="menuNewsDesc">Updates & Announcements</div>
       </div>
       <span style="margin-left:auto;color:rgba(255,255,255,0.2);font-size:16px;">›</span>
     </a>
@@ -583,8 +583,8 @@ function closeSideMenu(){
       style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px 16px;text-decoration:none;transition:all 0.2s;-webkit-tap-highlight-color:transparent;">
       <span style="font-size:22px;">💬</span>
       <div>
-        <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;">Chat</div>
-        <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:1px;">Community Chat</div>
+        <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;" data-i18n="menuChat">Chat</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:1px;" data-i18n="menuChatDesc">Community Chat</div>
       </div>
       <span style="margin-left:auto;color:rgba(255,255,255,0.2);font-size:16px;">›</span>
     </a>
@@ -593,7 +593,7 @@ function closeSideMenu(){
     <div style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);border-radius:14px;padding:14px 16px;opacity:0.4;cursor:not-allowed;">
       <span style="font-size:22px;">💸</span>
       <div>
-        <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;">Payouts</div>
+        <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;" data-i18n="menuPayouts">Payouts</div>
         <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:1px;">Coming Soon</div>
       </div>
       <span style="margin-left:auto;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.3);font-size:9px;padding:3px 8px;border-radius:6px;font-family:Rajdhani,sans-serif;font-weight:700;letter-spacing:1px;">SOON</span>
@@ -604,8 +604,8 @@ function closeSideMenu(){
       style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px 16px;text-decoration:none;transition:all 0.2s;-webkit-tap-highlight-color:transparent;">
       <span style="font-size:22px;">📋</span>
       <div>
-        <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;">FAQ & Terms</div>
-        <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:1px;">Rules & Conditions</div>
+        <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;" data-i18n="menuFaq">FAQ & Terms</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:1px;" data-i18n="menuFaqDesc">Rules & Conditions</div>
       </div>
       <span style="margin-left:auto;color:rgba(255,255,255,0.2);font-size:16px;">›</span>
     </a>
