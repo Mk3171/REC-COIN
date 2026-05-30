@@ -2415,6 +2415,36 @@ function switchVIPTab(n) {
           '<div style="font-size:12px;color:rgba(255,255,255,0.8);margin-top:4px;">' + t('vipPriceLabel') + '</div>' +
         '</div>'
       );
+  } else if(n === 2) {
+    var today = getTodayStr();
+    var spunToday = vipData && vipData.wheelDate === today;
+    content.innerHTML =
+      // Section 1: Wheel
+      '<div style="background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.25);border-radius:16px;padding:16px;margin-bottom:10px;text-align:center;">' +
+        '<div style="font-size:13px;font-weight:700;color:#FFD700;margin-bottom:14px;">🎰 جرّب حظك</div>' +
+        '<div style="position:relative;display:inline-block;margin-bottom:14px;">' +
+          '<div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-top:22px solid #FFD700;z-index:6;filter:drop-shadow(0 0 6px rgba(255,215,0,0.8));"></div>' +
+          '<canvas id="vip2Wheel" width="260" height="260" style="border-radius:50%;display:block;"></canvas>' +
+          '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:36px;height:36px;border-radius:50%;background:radial-gradient(circle,#fff,#ccc);border:3px solid #FFD700;box-shadow:0 0 15px rgba(255,215,0,0.6);z-index:5;"></div>' +
+        '</div>' +
+        (spunToday
+          ? '<div style="font-size:12px;color:rgba(0,255,136,0.7);padding:10px;">✅ تفقد غداً للدوران مجدداً</div>'
+          : '<button id="vip2SpinBtn" onclick="spinVIP2Wheel()" style="background:linear-gradient(135deg,#AA6600,#FFD700);border:none;color:#000;padding:12px 30px;border-radius:12px;font-size:14px;font-weight:900;cursor:pointer;font-family:Orbitron,sans-serif;letter-spacing:1px;box-shadow:0 4px 20px rgba(255,215,0,0.4);">🎰 أدر العجلة</button>'
+        ) +
+      '</div>' +
+
+      // Sections 2-6: coming soon
+      '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px;">' +
+        [1,2,3,4,5].map(function(){ return '<div style="background:rgba(255,255,255,0.02);border:1px dashed rgba(255,255,255,0.07);border-radius:12px;padding:14px;text-align:center;"><div style="font-size:11px;color:rgba(255,255,255,0.2);">🔒 قريباً</div></div>'; }).join('') +
+      '</div>' +
+
+      // Subscribe: locked
+      '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:14px;text-align:center;">' +
+        '<div style="font-size:14px;font-weight:700;color:rgba(255,255,255,0.25);">🔒 الاشتراك قريباً</div>' +
+      '</div>';
+
+    setTimeout(initVIP2Wheel, 60);
+
   } else {
     content.innerHTML =
       '<div style="text-align:center;padding:40px 20px;">' +
@@ -3597,7 +3627,139 @@ function saveAdminCombo() {
     else showToast('❌ ' + JSON.stringify(d));
   }).catch(function(e){ showToast('❌ Fetch error: '+e.message); });
 }
-// ====== END DAILY COMBO ======
+// ====== VIP II WHEEL ======
+var vip2Prizes = [
+  { label:'1 REC',   value:1,           type:'rec',    color:'#FF7744', weight:70   },
+  { label:'5 REC',   value:5,           type:'rec',    color:'#FF9922', weight:50   },
+  { label:'10 REC',  value:10,          type:'rec',    color:'#FFCC00', weight:35   },
+  { label:'5M 🔴',   value:5000000,     type:'record', color:'#FF4444', weight:80   },
+  { label:'20M 🔴',  value:20000000,    type:'record', color:'#FF2200', weight:60   },
+  { label:'50M 🔴',  value:50000000,    type:'record', color:'#DD0000', weight:40   },
+  { label:'100M 🔴', value:100000000,   type:'record', color:'#CC0000', weight:20   },
+  { label:'500M 🔴', value:500000000,   type:'record', color:'#AA0000', weight:5    },
+  { label:'1B 🔴',   value:1000000000,  type:'record', color:'#880000', weight:1    },
+  { label:'5B 🔴',   value:5000000000,  type:'record', color:'#550000', weight:0.5  },
+  { label:'50 REC',  value:50,          type:'rec',    color:'#00FF88', weight:2    },
+  { label:'500 REC', value:500,         type:'rec',    color:'#00FFAA', weight:0.01 },
+  { label:'🍀',      value:0,           type:'luck',   color:'#1a2a1a', weight:50   },
+  { label:'🍀',      value:0,           type:'luck',   color:'#0d1a0d', weight:50   },
+  { label:'🍀',      value:0,           type:'luck',   color:'#152015', weight:50   }
+];
+var vip2WheelAngle = 0;
+var vip2Spinning = false;
+
+function initVIP2Wheel() {
+  var canvas = document.getElementById('vip2Wheel');
+  if(!canvas) return;
+  vip2WheelAngle = 0;
+  drawVIP2Wheel(canvas, 0);
+}
+
+function drawVIP2Wheel(canvas, rotation) {
+  var ctx = canvas.getContext('2d');
+  var W = canvas.width, H = canvas.height;
+  var cx = W/2, cy = H/2, r = W/2 - 3;
+  var n = vip2Prizes.length;
+  var arc = (2*Math.PI) / n;
+  ctx.clearRect(0,0,W,H);
+  vip2Prizes.forEach(function(p,i){
+    var start = rotation + i*arc - Math.PI/2;
+    var end   = start + arc;
+    ctx.beginPath(); ctx.moveTo(cx,cy);
+    ctx.arc(cx,cy,r,start,end); ctx.closePath();
+    ctx.fillStyle = p.color; ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,0.4)'; ctx.lineWidth=1; ctx.stroke();
+    ctx.save();
+    ctx.translate(cx,cy); ctx.rotate(start+arc/2);
+    ctx.textAlign='right'; ctx.fillStyle='#fff';
+    ctx.font='bold 8px Orbitron,sans-serif';
+    ctx.shadowColor='#000'; ctx.shadowBlur=3;
+    ctx.fillText(p.label, r-6, 3);
+    ctx.restore();
+  });
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,2*Math.PI);
+  ctx.strokeStyle='#FFD700'; ctx.lineWidth=3; ctx.stroke();
+}
+
+function spinVIP2Wheel() {
+  if(vip2Spinning) return;
+  if(vipData && vipData.wheelDate === getTodayStr()) {
+    showToast('✅ دورت العجلة اليوم! تفقد غداً'); return;
+  }
+  vip2Spinning = true;
+  var btn = document.getElementById('vip2SpinBtn');
+  if(btn){ btn.disabled=true; btn.style.opacity='0.5'; }
+
+  // Weighted random
+  var total = vip2Prizes.reduce(function(s,p){ return s+p.weight; },0);
+  var rand = Math.random()*total, cumul=0, selectedIdx=0;
+  for(var i=0;i<vip2Prizes.length;i++){
+    cumul+=vip2Prizes[i].weight;
+    if(rand<=cumul){ selectedIdx=i; break; }
+  }
+
+  // Target angle
+  var arc = (2*Math.PI)/vip2Prizes.length;
+  var targetOffset = -(selectedIdx*arc + arc/2);
+  var extraSpins   = (5+Math.floor(Math.random()*4))*2*Math.PI;
+  var finalAngle   = targetOffset - extraSpins;
+
+  var startAngle = vip2WheelAngle;
+  var startTime  = null;
+  var duration   = 4500;
+  var canvas     = document.getElementById('vip2Wheel');
+
+  function animate(ts){
+    if(!startTime) startTime=ts;
+    var prog = Math.min((ts-startTime)/duration,1);
+    var ease = 1-Math.pow(1-prog,4);
+    vip2WheelAngle = startAngle+(finalAngle-startAngle)*ease;
+    if(canvas) drawVIP2Wheel(canvas, vip2WheelAngle);
+    if(prog<1){ requestAnimationFrame(animate); return; }
+
+    vip2Spinning=false;
+    var prize=vip2Prizes[selectedIdx];
+    if(!vipData) vipData={};
+    vipData.wheelDate=getTodayStr();
+
+    if(prize.type==='rec')    rec    += prize.value;
+    if(prize.type==='record') record += prize.value;
+    saveData(true);
+
+    if(tgUser && prize.type!=='luck'){
+      fetch('/api/vip2/spin',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({telegramId:tgUser.id,prize:prize})}).catch(function(){});
+    }
+    showVIP2SpinResult(prize);
+  }
+  requestAnimationFrame(animate);
+}
+
+function showVIP2SpinResult(prize) {
+  var icon  = prize.type==='rec'?'⚡':prize.type==='record'?'🔴':'🍀';
+  var isLuck= prize.type==='luck';
+  var title = isLuck?'حظاً أوفر!':'🎉 مبروك!';
+  var val   = isLuck?'جرب غداً!':'+'+formatPrizeNum(prize.value)+' '+(prize.type==='rec'?'REC':'RECORD');
+  var ol=document.createElement('div');
+  ol.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:99999;display:flex;align-items:center;justify-content:center;';
+  ol.innerHTML=
+    '<div style="background:linear-gradient(180deg,#0e0a22,#080518);border:2px solid rgba(255,215,0,0.4);border-radius:20px;padding:30px 24px;width:80vw;max-width:300px;text-align:center;">' +
+      '<div style="font-size:54px;margin-bottom:10px;">'+icon+'</div>' +
+      '<div style="font-family:Orbitron,sans-serif;font-size:20px;font-weight:900;color:#FFD700;margin-bottom:8px;">'+title+'</div>' +
+      '<div style="font-size:22px;font-weight:700;color:'+(isLuck?'#888':'#00FF88')+';margin-bottom:20px;">'+val+'</div>' +
+      '<div onclick="this.parentElement.parentElement.remove();renderVIPPage();" style="background:linear-gradient(135deg,#AA6600,#FFD700);border-radius:12px;padding:12px;cursor:pointer;font-size:14px;font-weight:700;color:#000;">حسناً 👍</div>' +
+    '</div>';
+  ol.addEventListener('click',function(e){if(e.target===ol){ol.remove();renderVIPPage();}});
+  document.body.appendChild(ol);
+}
+
+function formatPrizeNum(n){
+  if(n>=1000000000) return (n/1000000000).toFixed(n%1000000000===0?0:1)+'B';
+  if(n>=1000000)    return (n/1000000).toFixed(n%1000000===0?0:1)+'M';
+  if(n>=1000)       return (n/1000).toFixed(n%1000===0?0:1)+'K';
+  return n+'';
+}
+// ====== END VIP II WHEEL ======
 
 // ====== ADMIN: UPGRADE LIMITED CARDS ======
 function adminUpgradeLimitedCards() {
