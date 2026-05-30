@@ -1370,10 +1370,6 @@ function calcTotalSpeeds(){
     recordPerSec+=cardRecordSpeed(lvl)*m;
     recPerSec+=cardRECSpeed(lvl)*m;
   });
-  // VIP I: ×1.5 REC mining speed
-  if(vipData && parseInt(vipData.tier||0) >= 1 && parseInt(vipData.expiry||0) > Date.now()) {
-    recPerSec *= 1.5;
-  }
 }
 
 // ====== DATA ======
@@ -1975,6 +1971,9 @@ function _vipBox(type, unlocked) {
     'padding:12px 8px;text-align:center;cursor:' + (unlocked ? 'pointer' : 'default') + ';">' +
     '<div style="font-size:28px;">' + (unlocked ? c.icon : '🔒') + '</div>' +
     '<div style="font-size:10px;font-weight:700;color:' + c.color + ';margin-top:6px;">' + c.label + '</div>' +
+    '<div style="font-size:9px;color:rgba(255,255,255,0.4);margin-top:3px;">' +
+      (unlocked ? (canOpen ? 'افتح' : '✅ تم اليوم') : 'مقفل') +
+    '</div>' +
   '</div>';
 }
 
@@ -2797,10 +2796,10 @@ function useEnergyRefill(){
 }
 
 function loadRefillData(){
+  // البيانات تتحمل من applyData — بس نتأكد من التاريخ
   var today=getTodayStr();
-  var maxRefills = (vipData && parseInt(vipData.tier||0) >= 1 && parseInt(vipData.expiry||0) > Date.now()) ? 6 : 3;
   if(!window.refillData || window.refillData.date!==today){
-    window.refillData={date:today,count:maxRefills};
+    window.refillData={date:today,count:3};
   }
 }
 
@@ -2814,9 +2813,7 @@ function updateUpgradeUI(){
   var eb=document.getElementById('energyUpgradeBtn');if(eb)eb.disabled=record<getEnergyCost(energyLevelVal)||energyLevelVal>=100;
   // refill button
   loadRefillData();
-  var maxRefills = (vipData && parseInt(vipData.tier||0) >= 1 && parseInt(vipData.expiry||0) > Date.now()) ? 6 : 3;
   var rc=document.getElementById('refillCount');if(rc)rc.textContent=window.refillData.count;
-  var mrc=document.getElementById('maxRefillCount');if(mrc)mrc.textContent=maxRefills;
   var rb=document.getElementById('energyRefillBtn');if(rb)rb.disabled=window.refillData.count<=0;
 }
 
@@ -4268,31 +4265,22 @@ function initTonConnect() {
 }
 
 function updateWalletBtn(wallet) {
-  var btns = [document.getElementById('walletBtn'), document.getElementById('walletBtnProfile')];
-  btns.forEach(function(btn) {
-    if (!btn) return;
-    if (wallet && wallet.account && wallet.account.address) {
-      var addr = wallet.account.address;
-      var short = shortTonAddr(addr);
-      btn.textContent = '💎 ' + short;
-      btn.style.background = '#1a6b1a';
-      btn.style.border = '1px solid #4eff4e';
-      btn.style.color = '#4eff4e';
-      btn.removeAttribute('data-i18n');
-      btn.setAttribute('data-raw', rawToFriendly(addr));
-    } else {
-      btn.textContent = t('connectWallet');
-      btn.style.background = '#4B9EFF';
-      btn.style.border = 'none';
-      btn.style.color = 'white';
-      btn.setAttribute('data-i18n', 'connectWallet');
-    }
-  });
-  // Save wallet to server (once, not per button)
+  var btn = document.getElementById('walletBtn');
+  if (!btn) return;
   if (wallet && wallet.account && wallet.account.address) {
     var addr = wallet.account.address;
+    // Convert raw hex address to friendly TON format (UQDu...6PP2)
+    var short = shortTonAddr(addr);
+    btn.textContent = '💎 ' + short;
+    btn.style.background = '#1a6b1a';
+    btn.style.border = '1px solid #4eff4e';
+    btn.style.color = '#4eff4e';
+    btn.removeAttribute('data-i18n');
+    btn.setAttribute('data-raw', rawToFriendly(addr)); // save for withdrawal
+    // Save to storage
     try { localStorage.setItem('ton_wallet_' + saveKey, addr); } catch(e) {}
     if (CS) { try { CS.setItem('tonWallet', addr); } catch(e) {} }
+    // Save wallet to server
     if(tgUser) {
       fetch('/api/user/save', {
         method:'POST',
@@ -4300,6 +4288,12 @@ function updateWalletBtn(wallet) {
         body: JSON.stringify({ telegramId: tgUser.id, walletAddress: rawToFriendly(addr) })
       }).catch(function(){});
     }
+  } else {
+    btn.textContent = t('connectWallet');
+    btn.style.background = '#4B9EFF';
+    btn.style.border = 'none';
+    btn.style.color = 'white';
+    btn.setAttribute('data-i18n', 'connectWallet');
   }
 }
 
