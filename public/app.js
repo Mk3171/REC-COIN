@@ -1790,6 +1790,10 @@ function getEnergyCost(l){return Math.floor(30000*Math.pow(33333,l/99));}
 function openVIP() {
   renderVIPPage();
   showPage('vip', null);
+  loadComboData(function() {
+    var vipPage = document.getElementById('vip');
+    if(vipPage && vipPage.classList.contains('active')) switchVIPTab(1);
+  });
 }
 function closeVIP() {
   showPage('home', document.getElementById('navHomeBtn'));
@@ -1816,12 +1820,12 @@ function openVIPInfo() {
       '<div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1.9;">' +
         '📦 ٣ صناديق يومية (Common, Rare, Epic)<br>' +
         '🦅 فرصة الحصول على بطاقة Epic النادرة (1%)<br>' +
-        '⚡ ×١.٥ سرعة تعدين REC<br>' +
+        '⚡ بوست تعدين ×١.٥ REC يومياً<br>' +
         '🔋 شحن طاقة ٦ مرات يومياً<br>' +
-        '💰 حد سحب يومي من 1,000 حتى 20,000 REC<br>' +
-        '🎯 تلميح بطاقة واحدة من الكومبو اليومي<br>' +
-        '🎁 مكافأة ترحيبية فورية 1,000,000 RECORD<br>' +
-        '👑 شارة VIP ذهبية بالليدربورد' +
+        '💰 سحب يومي حتى 20,000 REC<br>' +
+        '🎯 كشف بطاقات الكومبو اليومي<br>' +
+        '🎁 +50 REC هدية ترحيبية<br>' +
+        '👑 شارة ذهبية بالليدربورد' +
       '</div>' +
     '</div>' +
 
@@ -1951,7 +1955,6 @@ function switchVIPTab(n) {
         'cursor:' + (!boostToday ? 'pointer' : 'default') + ';">' +
         '<div>' +
           '<div style="font-size:13px;font-weight:700;color:' + (!boostToday ? '#FFD700' : 'rgba(255,255,255,0.25)') + ';">⚡ بوست تعدين ×١.٥ REC</div>' +
-          '<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:3px;">مرة واحدة يومياً</div>' +
         '</div>' +
         (!boostToday
           ? '<div style="background:linear-gradient(135deg,#AA6600,#FFD700);border-radius:8px;padding:7px 14px;font-size:11px;color:#000;font-weight:900;">تفعيل ⚡</div>'
@@ -1968,7 +1971,6 @@ function switchVIPTab(n) {
         'cursor:' + (!refill6Today ? 'pointer' : 'default') + ';">' +
         '<div>' +
           '<div style="font-size:13px;font-weight:700;color:' + (!refill6Today ? '#44AAFF' : 'rgba(255,255,255,0.25)') + ';">🔋 شحن الطاقة ٦ مرات</div>' +
-          '<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:3px;">مرة واحدة يومياً</div>' +
         '</div>' +
         (!refill6Today
           ? '<div style="background:linear-gradient(135deg,#004499,#0077FF);border-radius:8px;padding:7px 14px;font-size:11px;color:white;font-weight:700;">تفعيل 🔋</div>'
@@ -1979,10 +1981,7 @@ function switchVIPTab(n) {
     // --- Withdrawal limit ---
     var withdrawHtml =
       '<div style="background:rgba(0,255,136,0.04);border:1px solid rgba(0,255,136,0.15);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">' +
-        '<div>' +
-          '<div style="font-size:13px;font-weight:700;color:#00CC88;">💰 حد السحب اليومي</div>' +
-          '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:3px;">20,000 REC يومياً</div>' +
-        '</div>' +
+        '<div style="font-size:13px;font-weight:700;color:#00CC88;">💰 حد السحب اليومي</div>' +
         '<div style="background:rgba(255,200,0,0.12);border:1px solid rgba(255,200,0,0.3);border-radius:8px;padding:5px 10px;font-size:10px;color:#FFD700;font-weight:700;">🔒 قريباً</div>' +
       '</div>';
 
@@ -1997,21 +1996,6 @@ function switchVIPTab(n) {
 
       // New sections (only shown for active VIP)
       (hasVIP ? boostHtml + refill6Html + withdrawHtml + comboBoxesHtml : '') +
-
-      // Features list
-      '<div style="background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);border-radius:14px;padding:14px;margin-bottom:16px;">' +
-        '<div style="font-size:12px;font-weight:700;color:#FFD700;margin-bottom:10px;">✨ مميزات VIP I</div>' +
-        '<div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1.9;">' +
-          '📦 ٣ صناديق يومية (Common, Rare, Epic)<br>' +
-          '🦅 فرصة بطاقة Epic النادرة (1%)<br>' +
-          '⚡ بوست تعدين ×١.٥ يومياً<br>' +
-          '🔋 شحن طاقة ٦ مرات يومياً<br>' +
-          '💰 سحب يومي حتى 20,000 REC<br>' +
-          '🎯 كشف بطاقات الكومبو اليومي<br>' +
-          '🎁 +50 REC هدية ترحيبية<br>' +
-          '👑 شارة ذهبية بالليدربورد' +
-        '</div>' +
-      '</div>' +
 
       // Buy / Active button
       (hasVIP ?
@@ -2047,9 +2031,6 @@ function _vipBox(type, unlocked) {
     'padding:12px 8px;text-align:center;cursor:' + (unlocked ? 'pointer' : 'default') + ';">' +
     '<div style="font-size:28px;">' + (unlocked ? c.icon : '🔒') + '</div>' +
     '<div style="font-size:10px;font-weight:700;color:' + c.color + ';margin-top:6px;">' + c.label + '</div>' +
-    '<div style="font-size:9px;color:rgba(255,255,255,0.4);margin-top:3px;">' +
-      (unlocked ? (canOpen ? 'افتح' : '✅ تم اليوم') : 'مقفل') +
-    '</div>' +
   '</div>';
 }
 
