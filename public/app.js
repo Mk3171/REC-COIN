@@ -1401,6 +1401,11 @@ function applyData(d){
   dailyTasksData=d.dailyTasksData||{date:'',done:[],taps:0,upgrades:0,spent:0};
   cardTasksClaimed=d.cardTasksClaimed||[];
   totalTaps=d.totalTaps||0;
+  // vipData
+  if(d.vipData) {
+    vipData = d.vipData;
+    vipData.boxes = vipData.boxes || {};
+  }
   // refillData — 3 فرص يومية لتعبئة الطاقة
   var _today=getTodayStr();
   if(d.refillData && d.refillData.date===_today){
@@ -1418,7 +1423,7 @@ function saveData(immediate){
   var d=JSON.stringify({record,rec,energy,maxEnergy,tapLevelVal,energyLevelVal,tapPowerVal,
     completedTasks,cardLevels,cardUpgrades,refCount,claimedMilest,
     dailyLogin,mysteryLastDate,dailyTasksData,cardTasksClaimed,totalTaps,
-    refillData:window.refillData});
+    refillData:window.refillData,vipData});
   try{localStorage.setItem(saveKey,d);}catch(e){}
   if(CS){try{CS.setItem('gameData',d);}catch(e){}}
   if(immediate){
