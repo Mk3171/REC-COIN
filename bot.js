@@ -593,12 +593,23 @@ app.post('/api/vip/verify', async (req, res) => {
       { vip: { tier, expiry, boxes: {}, txId: foundTxId } }
     );
 
-    // Notify user
-    try {
-      await bot.sendMessage(telegramId,
-        `👑 تم تفعيل VIP ${tier === 1 ? 'I' : tier === 2 ? 'II' : 'III'} بنجاح!\n⏳ تنتهي في: ${new Date(expiry).toLocaleDateString('ar')}`
-      );
-    } catch(e) {}
+    // Notify user in their language
+    const vipTierName = tier === 1 ? 'I' : tier === 2 ? 'II' : 'III';
+    const expiryDate = new Date(expiry).toLocaleDateString();
+    const vipMsgs = {
+      ar: `👑 تم تفعيل VIP ${vipTierName} بنجاح!\n⏳ تنتهي في: ${expiryDate}`,
+      en: `👑 VIP ${vipTierName} activated successfully!\n⏳ Expires: ${expiryDate}`,
+      ru: `👑 VIP ${vipTierName} успешно активирован!\n⏳ Истекает: ${expiryDate}`,
+      uk: `👑 VIP ${vipTierName} успішно активовано!\n⏳ Закінчується: ${expiryDate}`,
+      pt: `👑 VIP ${vipTierName} ativado com sucesso!\n⏳ Expira: ${expiryDate}`,
+      es: `👑 ¡VIP ${vipTierName} activado con éxito!\n⏳ Expira: ${expiryDate}`,
+      tr: `👑 VIP ${vipTierName} başarıyla etkinleştirildi!\n⏳ Bitiş: ${expiryDate}`,
+      vi: `👑 VIP ${vipTierName} đã được kích hoạt!\n⏳ Hết hạn: ${expiryDate}`,
+      zh: `👑 VIP ${vipTierName} 激活成功！\n⏳ 到期：${expiryDate}`
+    };
+    const userLang = user.lang || 'en';
+    const msg = vipMsgs[userLang] || vipMsgs.en;
+    try { await bot.sendMessage(telegramId, msg); } catch(e) {}
 
     res.json({ success: true, expiry, tier });
   } catch(e) {
