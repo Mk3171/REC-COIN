@@ -3211,6 +3211,20 @@ function saveAdminCombo() {
 }
 // ====== END DAILY COMBO ======
 
+// ====== ADMIN: UPGRADE LIMITED CARDS ======
+function adminUpgradeLimitedCards() {
+  if(!tgUser || String(tgUser.id) !== String(ADMIN_TG_ID)) return;
+  var MAX_LVL = 100;
+  // 4_0 = Dragon Emperor, 4_1 = Crystal Phoenix
+  cardLevels['4_0'] = MAX_LVL;
+  cardLevels['4_1'] = MAX_LVL;
+  calcTotalSpeeds();
+  updateUI();
+  buildCards();
+  saveData(true);
+  showToast('⭐ تم ترقية Dragon Emperor و Crystal Phoenix للمستوى 100!');
+}
+
 // ====== WALLET PAGE ======
 function updateWalletPage() {
   var name = tgUser ? (tgUser.first_name || 'Miner') : 'Miner';
