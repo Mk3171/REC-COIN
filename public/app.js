@@ -3050,11 +3050,11 @@ var adminComboSelection = [null, null, null];
 function openCombo() {
   document.getElementById('comboOverlay').style.display = 'block';
   document.getElementById('comboPopup').style.display = 'block';
-  loadComboData();
-  if(tgUser && tgUser.id === ADMIN_TG_ID) {
-    document.getElementById('comboAdminPanel').style.display = 'block';
-    buildAdminComboSlots();
-  }
+  var isAdmin = tgUser && tgUser.id === ADMIN_TG_ID;
+  if(isAdmin) document.getElementById('comboAdminPanel').style.display = 'block';
+  loadComboData(function() {
+    if(isAdmin) buildAdminComboSlots();
+  });
 }
 
 function closeCombo() {
@@ -3062,8 +3062,8 @@ function closeCombo() {
   document.getElementById('comboPopup').style.display = 'none';
 }
 
-function loadComboData() {
-  if(!tgUser) return;
+function loadComboData(callback) {
+  if(!tgUser) { if(callback) callback(); return; }
   var slots = document.getElementById('comboCardSlots');
   if(slots) slots.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,0.3);padding:20px;">⏳ Loading...</div>';
 
@@ -3072,10 +3072,12 @@ function loadComboData() {
     .then(function(d){
       comboData = d;
       renderComboSlots(d);
+      if(callback) callback();
     })
     .catch(function(){
       var slots = document.getElementById('comboCardSlots');
       if(slots) slots.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,0.3);padding:20px;">ما في كومبو اليوم بعد</div>';
+      if(callback) callback();
     });
 }
 
@@ -3162,11 +3164,20 @@ function buildAdminComboSlots() {
     });
   });
 
+  // Get saved combo keys if exist
+  var savedKeys = [];
+  if(comboData && comboData.exists && comboData.cards) {
+    savedKeys = comboData.cards.map(function(c){ return c.key || (c.categoryIndex+'_'+c.cardIndex); });
+  }
+
   panel.innerHTML = [0,1,2].map(function(slot) {
+    var savedVal = savedKeys[slot] ? savedKeys[slot]+'|'+savedKeys[slot].split('_')[0]+'|'+savedKeys[slot].split('_')[1] : '';
     return '<select id="adminComboSlot_'+slot+'" style="width:100%;background:rgba(0,0,0,0.5);border:1px solid rgba(255,100,50,0.3);color:white;padding:8px;border-radius:8px;font-size:11px;">' +
       '<option value="">-- بطاقة '+(slot+1)+' --</option>' +
       allCards.map(function(c) {
-        return '<option value="'+c.key+'|'+c.ci+'|'+c.idx+'">'+c.label+'</option>';
+        var val = c.key+'|'+c.ci+'|'+c.idx;
+        var selected = savedKeys[slot] === c.key ? ' selected' : '';
+        return '<option value="'+val+'"'+selected+'>'+c.label+'</option>';
       }).join('') +
       '</select>';
   }).join('');
