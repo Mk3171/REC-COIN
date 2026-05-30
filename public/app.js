@@ -1402,7 +1402,10 @@ function applyData(d){
   cardTasksClaimed=d.cardTasksClaimed||[];
   totalTaps=d.totalTaps||0;
   // vipData
-  if(d.vipData) {
+  if(d.vip && d.vip.tier > 0) {
+    vipData = d.vip;
+    vipData.boxes = vipData.boxes || {};
+  } else if(d.vipData && d.vipData.tier > 0) {
     vipData = d.vipData;
     vipData.boxes = vipData.boxes || {};
   }
@@ -1423,7 +1426,7 @@ function saveData(immediate){
   var d=JSON.stringify({record,rec,energy,maxEnergy,tapLevelVal,energyLevelVal,tapPowerVal,
     completedTasks,cardLevels,cardUpgrades,refCount,claimedMilest,
     dailyLogin,mysteryLastDate,dailyTasksData,cardTasksClaimed,totalTaps,
-    refillData:window.refillData,vipData});
+    refillData:window.refillData,vip:vipData});
   try{localStorage.setItem(saveKey,d);}catch(e){}
   if(CS){try{CS.setItem('gameData',d);}catch(e){}}
   if(immediate){
@@ -1455,7 +1458,8 @@ function saveToServer(){
         refCount, claimedMilest,
         dailyLogin, mysteryLastDate, dailyTasksData, cardTasksClaimed, totalTaps,
         miningSpeed: recPerSec,
-        refillData: window.refillData
+        refillData: window.refillData,
+        vip: vipData
       })
     }).then(function(r){ return r.json(); })
     .then(function(data){
@@ -1504,6 +1508,7 @@ function loadFromServer(callback){
             if(!res.data.dailyTasksData && ls.dailyTasksData) res.data.dailyTasksData=ls.dailyTasksData;
             if(!res.data.cardTasksClaimed && ls.cardTasksClaimed) res.data.cardTasksClaimed=ls.cardTasksClaimed;
             if(!res.data.totalTaps && ls.totalTaps) res.data.totalTaps=ls.totalTaps;
+            if(ls.vipData && ls.vipData.tier > 0) res.data.vip=ls.vipData;
           }
         }catch(e){}
 
@@ -1840,7 +1845,7 @@ function switchVIPTab(n) {
   if(!content) return;
 
   if(n === 1) {
-    var hasVIP = vipData && vipData.tier >= 1 && vipData.expiry > Date.now();
+    var hasVIP = vipData && parseInt(vipData.tier||0) >= 1 && parseInt(vipData.expiry||0) > Date.now();
     content.innerHTML =
       // Boxes section
       '<div style="font-size:13px;font-weight:700;color:#FFD700;margin-bottom:10px;">📦 الصناديق اليومية</div>' +
@@ -1902,7 +1907,7 @@ function _vipBox(type, unlocked) {
 }
 
 function openVIPBox(type) {
-  if(!vipData || vipData.tier < 1 || vipData.expiry <= Date.now()) return;
+  if(!vipData || vipData.tier < 1 || parseInt(vipData.expiry||0) <= Date.now()) return;
   if(!vipData.boxes) vipData.boxes = {};
   var today = getTodayStr();
   if(vipData.boxes[type] === today) {
@@ -1936,7 +1941,8 @@ function openVIPBox(type) {
 
     saveData(true);
     updateUI();
-    showVIPBoxResult(type, reward, false);
+    if(reward) showVIPBoxResult(type, reward, false);
+    else showToast('❌ خطأ في فتح الصندوق');
   });
 }
 
@@ -1999,7 +2005,7 @@ function showVIPBoxResult(type, reward, alreadyOpened) {
   var rewardIcon, rewardTitle, rewardValue, rewardColor;
   if(reward.type === 'record') {
     rewardIcon = '🔴'; rewardTitle = 'RECORD'; rewardColor = '#FF6644';
-    rewardValue = '+' + formatNumber(reward.amount) + ' RECORD';
+    rewardValue = '+' + formatCost(reward.amount) + ' RECORD';
   } else if(reward.type === 'rec') {
     rewardIcon = '⚡'; rewardTitle = 'REC'; rewardColor = '#00FF88';
     rewardValue = '+' + reward.amount.toFixed(6) + ' REC';
