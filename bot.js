@@ -530,6 +530,87 @@ app.post('/api/create-invoice', async (req, res) => {
 });
 
 // ====== API: WITHDRAW ======
+
+// ====== VIP PURCHASE ======
+const BOT_WALLET_ADDRESS = process.env.BOT_WALLET_ADDRESS || 'UQDu5EqcKVBEE2MJPFCX8z6PP2...'; // set in Render env
+
+app.post('/api/vip/verify', async (req, res) => {
+  try {
+    const { telegramId, txHash, tier } = req.body;
+    if (!telegramId || !txHash || !tier) return res.status(400).json({ error: 'Missing params' });
+
+    const user = await User.findOne({ telegramId });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    // Check if this tx was already used
+    if (user.vip && user.vip.txHash === txHash) {
+      return res.json({ success: false, error: 'Transaction already used' });
+    }
+
+    // Verify tx on TON Center
+    const apiKey = process.env.TONCENTER_API_KEY || '';
+    const verifyUrl = `https://toncenter.com/api/v2/getTransaction?hash=${txHash}`;
+    const verifyRes = await fetch(verifyUrl, {
+      headers: apiKey ? { 'X-API-Key': apiKey } : {}
+    });
+    const verifyData = await verifyRes.json();
+
+    if (!verifyData.ok || !verifyData.result) {
+      return res.json({ success: false, error: 'Transaction not found' });
+    }
+
+    const tx = verifyData.result;
+    const amount = parseInt(tx.in_msg?.value || 0);
+    const toAddr = tx.in_msg?.destination || '';
+    const expectedAmount = tier === 1 ? 1000000000 : tier === 2 ? 3000000000 : 10000000000; // 1/3/10 TON in nanotons
+
+    if (amount < expectedAmount * 0.95) {
+      return res.json({ success: false, error: 'Insufficient amount' });
+    }
+
+    // Activate VIP
+    const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days
+    await User.findOneAndUpdate(
+      { telegramId },
+      { vip: { tier, expiry, boxes: {}, txHash } }
+    );
+
+    // Notify user
+    try {
+      await bot.sendMessage(telegramId, 
+        `👑 تم تفعيل VIP ${tier === 1 ? 'I' : tier === 2 ? 'II' : 'III'} بنجاح!\n⏳ تنتهي العضوية في: ${new Date(expiry).toLocaleDateString('ar')}`
+      );
+    } catch(e) {}
+
+    res.json({ success: true, expiry, tier });
+  } catch(e) {
+    console.error('VIP verify error:', e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.post('/api/vip/boxes/save', async (req, res) => {
+  try {
+    const { telegramId, boxes } = req.body;
+    if (!telegramId) return res.status(400).json({ error: 'Missing telegramId' });
+    await User.findOneAndUpdate({ telegramId }, { 'vip.boxes': boxes });
+    res.json({ success: true });
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+app.get('/api/vip/:telegramId', async (req, res) => {
+  try {
+    const user = await User.findOne({ telegramId: req.params.telegramId });
+    if (!user) return res.status(404).json({ error: 'Not found' });
+    res.json({ vip: user.vip || { tier:0, expiry:0, boxes:{} } });
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+// ====== END VIP ======
+
 app.post('/api/withdraw', async (req, res) => {
   const { telegramId, amount } = req.body;
   if (!telegramId || !amount) return res.status(400).json({ error: 'Missing data' });
