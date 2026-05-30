@@ -1788,14 +1788,73 @@ function openVIP() {
 function closeVIP() {
   showPage('home', document.getElementById('navHomeBtn'));
 }
+function openVIPInfo() {
+  var ol = document.createElement('div');
+  ol.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:99999;display:flex;align-items:flex-end;';
+  ol.className = 'vip-info-ol'; ol.onclick = function(e){ if(e.target===ol) ol.remove(); };
+
+  ol.innerHTML = '<div style="width:100%;background:linear-gradient(180deg,#1a0a00,#0d0500);border-radius:24px 24px 0 0;border-top:2px solid rgba(255,200,0,0.3);padding:20px 16px 36px;max-height:88vh;overflow-y:auto;" onclick="event.stopPropagation()">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">' +
+      '<div style="font-size:18px;font-weight:900;color:#FFD700;font-family:Impact,sans-serif;letter-spacing:2px;">👑 مستويات VIP</div>' +
+      '<div onclick="document.querySelectorAll(\'.vip-info-ol\')[0].remove()" style="width:30px;height:30px;background:rgba(255,255,255,0.08);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.4);font-size:13px;">✕</div>' +
+    '</div>' +
+
+    // VIP I
+    '<div style="background:rgba(255,50,50,0.08);border:1px solid rgba(255,50,50,0.3);border-radius:14px;padding:14px;margin-bottom:10px;">' +
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">' +
+        '<div style="font-size:22px;">👑</div>' +
+        '<div><div style="font-size:15px;font-weight:700;color:#FF6644;">VIP I</div>' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.4);">1 TON / شهر</div></div>' +
+        '<div style="margin-left:auto;background:rgba(255,50,50,0.2);border-radius:8px;padding:4px 10px;font-size:10px;color:#FF6644;font-weight:700;">متاح ✅</div>' +
+      '</div>' +
+      '<div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1.9;">' +
+        '📦 ٣ صناديق يومية (Common, Rare, Epic)<br>' +
+        '🦅 فرصة الحصول على بطاقة Epic النادرة (1%)<br>' +
+        '⚡ ×١.٥ سرعة تعدين REC<br>' +
+        '🔋 شحن طاقة ٦ مرات يومياً<br>' +
+        '💰 حد سحب يومي من 1,000 حتى 20,000 REC<br>' +
+        '🎯 تلميح بطاقة واحدة من الكومبو اليومي<br>' +
+        '🎁 مكافأة ترحيبية فورية 1,000,000 RECORD<br>' +
+        '👑 شارة VIP ذهبية بالليدربورد' +
+      '</div>' +
+    '</div>' +
+
+    // VIP II
+    '<div style="background:rgba(100,100,255,0.06);border:1px solid rgba(100,100,255,0.2);border-radius:14px;padding:14px;margin-bottom:10px;">' +
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">' +
+        '<div style="font-size:22px;">👑</div>' +
+        '<div><div style="font-size:15px;font-weight:700;color:#6688FF;">VIP II</div>' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.4);">قريباً</div></div>' +
+        '<div style="margin-left:auto;background:rgba(255,255,255,0.05);border-radius:8px;padding:4px 10px;font-size:10px;color:rgba(255,255,255,0.3);font-weight:700;">🔒 قريباً</div>' +
+      '</div>' +
+      '<div style="font-size:11px;color:rgba(255,255,255,0.3);">كل مميزات VIP I + مميزات حصرية إضافية</div>' +
+    '</div>' +
+
+    // VIP III
+    '<div style="background:rgba(170,100,255,0.06);border:1px solid rgba(170,100,255,0.2);border-radius:14px;padding:14px;">' +
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">' +
+        '<div style="font-size:22px;">💎</div>' +
+        '<div><div style="font-size:15px;font-weight:700;color:#AA66FF;">VIP III</div>' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.4);">قريباً</div></div>' +
+        '<div style="margin-left:auto;background:rgba(255,255,255,0.05);border-radius:8px;padding:4px 10px;font-size:10px;color:rgba(255,255,255,0.3);font-weight:700;">🔒 قريباً</div>' +
+      '</div>' +
+      '<div style="font-size:11px;color:rgba(255,255,255,0.3);">المستوى الأعلى — مميزات لا مثيل لها</div>' +
+    '</div>' +
+
+  '</div>';
+
+  document.body.appendChild(ol);
+}
+
 function renderVIPPage() {
   var pp = document.getElementById('vipPageContent');
   pp.innerHTML =
     '<div style="width:100%;min-height:100vh;background:linear-gradient(180deg,#1a0000 0%,#0d0000 40%,#0a0010 100%);">' +
 
     // Header
-    '<div style="display:flex;align-items:center;padding:16px 16px 0;">' +
+    '<div style="display:flex;align-items:center;justify-content:space-between;padding:16px 16px 0;">' +
       '<div onclick="closeVIP()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:8px 14px;cursor:pointer;font-size:12px;color:rgba(255,255,255,0.6);">← ' + t('backBtn').replace('← ','') + '</div>' +
+      '<div onclick="openVIPInfo()" style="width:32px;height:32px;border-radius:50%;background:rgba(255,215,0,0.12);border:1px solid rgba(255,215,0,0.3);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;font-weight:900;color:#FFD700;">?</div>' +
     '</div>' +
     '<div style="text-align:center;padding:12px 16px 10px;">' +
       '<div style="font-family:Impact,sans-serif;font-size:42px;font-weight:900;' +
@@ -1847,6 +1906,13 @@ function switchVIPTab(n) {
   if(n === 1) {
     var hasVIP = vipData && parseInt(vipData.tier||0) >= 1 && parseInt(vipData.expiry||0) > Date.now();
     content.innerHTML =
+      // Combo hint for VIP
+      (hasVIP && comboCards && comboCards.length > 0 ?
+        '<div style="background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.25);border-radius:14px;padding:12px;margin-bottom:12px;">' +
+          '<div style="font-size:12px;font-weight:700;color:#FFD700;margin-bottom:6px;">🎯 تلميح الكومبو اليومي</div>' +
+          '<div style="font-size:11px;color:rgba(255,255,255,0.6);">إحدى بطاقات الكومبو هي من فئة: <span style="color:#FFD700;font-weight:700;">' + (comboCards[0] ? getCardName(getCardInfo(comboCards[0].categoryIndex, comboCards[0].cardIndex)) : '???') + '</span></div>' +
+        '</div>' : '') +
+
       // Boxes section
       '<div style="font-size:13px;font-weight:700;color:#FFD700;margin-bottom:10px;">📦 الصناديق اليومية</div>' +
       '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">' +
@@ -1858,11 +1924,15 @@ function switchVIPTab(n) {
       // Features
       '<div style="background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);border-radius:14px;padding:14px;margin-bottom:16px;">' +
         '<div style="font-size:12px;font-weight:700;color:#FFD700;margin-bottom:10px;">✨ مميزات VIP I</div>' +
-        '<div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:2;">' +
-          '📦 3 صناديق يومية (Common, Rare, Epic)<br>' +
-          '🦅 فرصة الحصول على بطاقة Epic النادرة<br>' +
-          '🎁 مكافآت عشوائية يومية<br>' +
-          '👑 شارة VIP على ملفك الشخصي' +
+        '<div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1.9;">' +
+          '📦 ٣ صناديق يومية (Common, Rare, Epic)<br>' +
+          '🦅 فرصة بطاقة Epic النادرة (1%)<br>' +
+          '⚡ تعدين REC أسرع بـ ×١.٥<br>' +
+          '🔋 شحن طاقة ٦ مرات يومياً<br>' +
+          '💰 سحب يومي حتى 20,000 REC<br>' +
+          '🎯 تلميح بطاقة من الكومبو<br>' +
+          '🎁 +1,000,000 RECORD فورياً<br>' +
+          '👑 شارة ذهبية بالليدربورد' +
         '</div>' +
       '</div>' +
 
@@ -2123,7 +2193,17 @@ function buyVIP(tier) {
           vipData.tier = data.tier;
           vipData.expiry = data.expiry;
           vipData.boxes = {};
-          showToast('👑 تم تفعيل VIP ' + (tier===1?'I':tier===2?'II':'III') + ' بنجاح!');
+          // Welcome bonus: 1,000,000 RECORD
+          if(data.tier === 1) {
+            record += 1000000;
+            showToast('🎁 +1,000,000 RECORD مكافأة ترحيبية!');
+            setTimeout(function(){
+              showToast('👑 تم تفعيل VIP I بنجاح!');
+            }, 2000);
+          } else {
+            showToast('👑 تم تفعيل VIP ' + (tier===1?'I':tier===2?'II':'III') + ' بنجاح!');
+          }
+          saveData(true);
           renderVIPPage();
         } else {
           showToast('❌ ' + (data.error || 'فشل التحقق، تواصل مع الدعم'));
