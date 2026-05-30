@@ -1907,10 +1907,10 @@ function switchVIPTab(n) {
     var hasVIP = vipData && parseInt(vipData.tier||0) >= 1 && parseInt(vipData.expiry||0) > Date.now();
     content.innerHTML =
       // Combo hint for VIP
-      (hasVIP && comboCards && comboCards.length > 0 ?
+      (hasVIP && comboData && comboData.cards && comboData.cards.length > 0 ?
         '<div style="background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.25);border-radius:14px;padding:12px;margin-bottom:12px;">' +
           '<div style="font-size:12px;font-weight:700;color:#FFD700;margin-bottom:6px;">🎯 تلميح الكومبو اليومي</div>' +
-          '<div style="font-size:11px;color:rgba(255,255,255,0.6);">إحدى بطاقات الكومبو هي من فئة: <span style="color:#FFD700;font-weight:700;">' + (comboCards[0] ? getCardName(getCardInfo(comboCards[0].categoryIndex, comboCards[0].cardIndex)) : '???') + '</span></div>' +
+          '<div style="font-size:11px;color:rgba(255,255,255,0.6);">إحدى بطاقات الكومبو من فئة: <span style="color:#FFD700;font-weight:700;">' + (comboData.cards[0] ? getCardName(getCardInfo(comboData.cards[0].categoryIndex, comboData.cards[0].cardIndex)) : '???') + '</span></div>' +
         '</div>' : '') +
 
       // Boxes section
