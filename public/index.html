@@ -17,12 +17,6 @@
   from { transform: translateX(100%); }
   to { transform: translateX(0); }
 }
-/* Fix: profile popup above tap circle */
-#profilePopupOverlay { z-index: 99990 !important; }
-#profilePopup        { z-index: 99991 !important; }
-/* Fix: side menu above everything */
-#sideMenuOverlay     { z-index: 99980 !important; }
-#sideMenu            { z-index: 99985 !important; }
 </style>
 <script>
 function openSideMenu(){
@@ -440,8 +434,8 @@ function closeSideMenu(){
       <div style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:16px;padding:16px;margin-bottom:10px;opacity:0.5;">
         <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🏦</div>
         <div style="flex:1;">
-          <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;" data-i18n="withdrawPool">Withdraw Pool</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:1px;" data-i18n="transferPool">Transfer Pool to Wallet</div>
+          <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;" data-i18n="withdrawPool" data-i18n="withdrawPool">Withdraw Pool</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:1px;" data-i18n="transferPool" data-i18n="transferPool">Transfer Pool to Wallet</div>
         </div>
         <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:7px 14px;font-size:11px;color:rgba(255,255,255,0.3);font-weight:700;font-family:Rajdhani,sans-serif;letter-spacing:1px;flex-shrink:0;" data-i18n="walletSoon">🔒 SOON</div>
       </div>
@@ -451,7 +445,7 @@ function closeSideMenu(){
         <div style="width:44px;height:44px;border-radius:12px;background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.15);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">📄</div>
         <div style="flex:1;">
           <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;" data-i18n="history">History</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:1px;" data-i18n="yourWithdrawals">Your withdrawals</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:1px;" data-i18n="yourWithdrawals" data-i18n="yourWithdrawals">Your withdrawals</div>
         </div>
         <div style="background:linear-gradient(135deg,#006633,#00AA55);border:none;border-radius:10px;padding:7px 16px;font-size:12px;color:white;font-weight:700;font-family:Rajdhani,sans-serif;letter-spacing:1px;flex-shrink:0;" data-i18n="walletOpen">Open →</div>
       </div>
@@ -474,7 +468,9 @@ function closeSideMenu(){
     <!-- PROFILE PAGE -->
     <div id="profile" class="page">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;gap:8px;">
-        <button onclick="connectWallet()" id="walletBtnProfile"
+        <button onclick="connectWallet()" id="walletBtn"
+          style="background:linear-gradient(135deg,#1144AA,#4B9EFF);border:none;color:white;padding:8px 14px;border-radius:20px;cursor:pointer;font-size:13px;max-width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:Rajdhani,sans-serif;font-weight:700;"
+          data-i18n="connectWallet">Connect Wallet</button>
         <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:6px 12px;font-size:12px;color:#aaa;white-space:nowrap;">ID: <span id="profileId">-</span></div>
       </div>
       <div class="info-card" style="text-align:center;padding:20px;margin-bottom:12px;">
@@ -549,7 +545,7 @@ function closeSideMenu(){
   <div class="upg-card">
     <div style="font-size:16px;">⚡ Energy Refill</div>
     <div style="color:#aaa;font-size:12px;margin:5px 0;">Instantly refill your energy</div>
-    <div style="color:#FF6644;font-size:13px;margin:5px 0;">Remaining today: <span id="refillCount">3</span> / <span id="maxRefillCount">3</span></div>
+    <div style="color:#FF6644;font-size:13px;margin:5px 0;">Remaining today: <span id="refillCount">3</span> / 3</div>
     <button class="do-btn" id="energyRefillBtn" onclick="useEnergyRefill()">⚡ Refill Energy</button>
   </div>
 </div>
