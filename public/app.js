@@ -181,7 +181,27 @@ var T = {
     recordSpend2:'⬆️ رفع مستوى Tap Power للحصول على أكثر',
     recordSpend3:'⚡ توسيع سعة الطاقة لضغطات أكثر',
     recordSpend4:'⭐ شراء بطاقات محدودة من المتجر',
-    yourLevel:'مستواك الحالي', yourBalance:'رصيدك:'
+    yourLevel:'مستواك الحالي', yourBalance:'رصيدك:',
+    vipBoxesTitle:'📦 الصناديق اليومية',
+    vipBoostLabel:'⚡ بوست تعدين ×١.٥ REC',
+    vipActivateBoost:'تفعيل ⚡',
+    vipActivatedToday:'✅ فعّال اليوم',
+    vipRefillLabel:'🔋 شحن الطاقة ٦ مرات',
+    vipActivateRefill:'تفعيل 🔋',
+    vipWithdrawTitle:'💰 حد السحب اليومي',
+    vipComingSoonBadge:'🔒 قريباً',
+    vipComboTitle:'🎯 بطاقات كومبو اليوم',
+    vipComboEmpty:'لم يُحدد كومبو اليوم بعد',
+    vipActiveMembership:'✅ عضويتك فعالة',
+    vipExpires:'تنتهي:',
+    vipSubscribeBtn:'👑 اشتراك VIP I',
+    vipPriceLabel:'1 TON / شهر',
+    vipComingSoonTier:'قريباً',
+    vipComingSoonDesc:'هذا المستوى سيُفتح قريباً',
+    vipThankTitle:'شكراً لدعمك!',
+    vipThankDesc:'أنت الآن عضو VIP I\nدعمك يساعدنا على النمو 🚀',
+    vipGiftLabel:'هدية ترحيبية',
+    vipStartBtn:'🚀 ابدأ الاستمتاع!'
   },
 
   en: {
@@ -327,7 +347,27 @@ var T = {
     recordSpend2:'⬆️ Upgrade Tap Power for more per tap',
     recordSpend3:'⚡ Expand energy capacity for more taps',
     recordSpend4:'⭐ Buy limited cards from the shop',
-    yourLevel:'Your Current Level', yourBalance:'Your Balance:'
+    yourLevel:'Your Current Level', yourBalance:'Your Balance:',
+    vipBoxesTitle:'📦 Daily Chests',
+    vipBoostLabel:'⚡ Mining Boost ×1.5 REC',
+    vipActivateBoost:'Activate ⚡',
+    vipActivatedToday:'✅ Active Today',
+    vipRefillLabel:'🔋 Energy Refill 6x',
+    vipActivateRefill:'Activate 🔋',
+    vipWithdrawTitle:'💰 Daily Withdrawal Limit',
+    vipComingSoonBadge:'🔒 Soon',
+    vipComboTitle:'🎯 Today\'s Combo Cards',
+    vipComboEmpty:'No combo set for today yet',
+    vipActiveMembership:'✅ Your membership is active',
+    vipExpires:'Expires:',
+    vipSubscribeBtn:'👑 Subscribe VIP I',
+    vipPriceLabel:'1 TON / month',
+    vipComingSoonTier:'Coming Soon',
+    vipComingSoonDesc:'This tier will be unlocked soon',
+    vipThankTitle:'Thank you for your support!',
+    vipThankDesc:'You are now VIP I\nYour support helps us grow 🚀',
+    vipGiftLabel:'Welcome gift',
+    vipStartBtn:'🚀 Start Enjoying!'
   },
 
   ru: {
@@ -467,7 +507,27 @@ var T = {
     recordSpend1:'🃏 Улучшение карточек майнинга для увеличения REC',
     recordSpend2:'⬆️ Улучшение Tap Power', recordSpend3:'⚡ Расширение ёмкости энергии',
     recordSpend4:'⭐ Покупка лимитных карточек в магазине',
-    yourLevel:'Ваш текущий уровень', yourBalance:'Ваш баланс:'
+    yourLevel:'Ваш текущий уровень', yourBalance:'Ваш баланс:',
+    vipBoxesTitle:'📦 Ежедневные сундуки',
+    vipBoostLabel:'⚡ Буст добычи ×1.5 REC',
+    vipActivateBoost:'Активировать ⚡',
+    vipActivatedToday:'✅ Активно сегодня',
+    vipRefillLabel:'🔋 Заряд энергии 6 раз',
+    vipActivateRefill:'Активировать 🔋',
+    vipWithdrawTitle:'💰 Суточный лимит вывода',
+    vipComingSoonBadge:'🔒 Скоро',
+    vipComboTitle:'🎯 Карты комбо сегодня',
+    vipComboEmpty:'Комбо на сегодня не установлено',
+    vipActiveMembership:'✅ Ваше членство активно',
+    vipExpires:'Истекает:',
+    vipSubscribeBtn:'👑 Подписаться VIP I',
+    vipPriceLabel:'1 TON / месяц',
+    vipComingSoonTier:'Скоро',
+    vipComingSoonDesc:'Этот уровень скоро откроется',
+    vipThankTitle:'Спасибо за поддержку!',
+    vipThankDesc:'Вы теперь VIP I\nВаша поддержка помогает нам расти 🚀',
+    vipGiftLabel:'Приветственный подарок',
+    vipStartBtn:'🚀 Начать!'
   },
 
   uk: {
@@ -606,7 +666,27 @@ var T = {
     recordSpend1:'🃏 Покращення карточок для збільшення REC',
     recordSpend2:'⬆️ Покращення Tap Power', recordSpend3:'⚡ Розширення ємності енергії',
     recordSpend4:'⭐ Купівля лімітних карточок у магазині',
-    yourLevel:'Ваш поточний рівень', yourBalance:'Ваш баланс:'
+    yourLevel:'Ваш поточний рівень', yourBalance:'Ваш баланс:',
+    vipBoxesTitle:'📦 Щоденні скрині',
+    vipBoostLabel:'⚡ Буст видобутку ×1.5 REC',
+    vipActivateBoost:'Активувати ⚡',
+    vipActivatedToday:'✅ Активно сьогодні',
+    vipRefillLabel:'🔋 Заряд енергії 6 разів',
+    vipActivateRefill:'Активувати 🔋',
+    vipWithdrawTitle:'💰 Добовий ліміт виводу',
+    vipComingSoonBadge:'🔒 Незабаром',
+    vipComboTitle:'🎯 Карти комбо сьогодні',
+    vipComboEmpty:'Комбо на сьогодні не встановлено',
+    vipActiveMembership:'✅ Ваше членство активне',
+    vipExpires:'Закінчується:',
+    vipSubscribeBtn:'👑 Підписатися VIP I',
+    vipPriceLabel:'1 TON / місяць',
+    vipComingSoonTier:'Незабаром',
+    vipComingSoonDesc:'Цей рівень скоро відкриється',
+    vipThankTitle:'Дякуємо за підтримку!',
+    vipThankDesc:'Тепер ви VIP I\nВаша підтримка допомагає нам зростати 🚀',
+    vipGiftLabel:'Вітальний подарунок',
+    vipStartBtn:'🚀 Почати!'
   },
 
   pt: {
@@ -743,7 +823,27 @@ var T = {
     recordHowSpend:'💡 Como usar RECORD?',
     recordSpend1:'🃏 Melhorar cartas de mineração', recordSpend2:'⬆️ Melhorar Tap Power',
     recordSpend3:'⚡ Expandir capacidade de energia', recordSpend4:'⭐ Comprar cartas limitadas',
-    yourLevel:'Seu Nível Atual', yourBalance:'Seu Saldo:'
+    yourLevel:'Seu Nível Atual', yourBalance:'Seu Saldo:',
+    vipBoxesTitle:'📦 Caixas Diárias',
+    vipBoostLabel:'⚡ Boost de Mineração ×1.5 REC',
+    vipActivateBoost:'Ativar ⚡',
+    vipActivatedToday:'✅ Ativo Hoje',
+    vipRefillLabel:'🔋 Recarga de Energia 6x',
+    vipActivateRefill:'Ativar 🔋',
+    vipWithdrawTitle:'💰 Limite Diário de Saque',
+    vipComingSoonBadge:'🔒 Em Breve',
+    vipComboTitle:'🎯 Cartas Combo de Hoje',
+    vipComboEmpty:'Nenhum combo definido para hoje',
+    vipActiveMembership:'✅ Sua assinatura está ativa',
+    vipExpires:'Expira em:',
+    vipSubscribeBtn:'👑 Assinar VIP I',
+    vipPriceLabel:'1 TON / mês',
+    vipComingSoonTier:'Em Breve',
+    vipComingSoonDesc:'Este nível será desbloqueado em breve',
+    vipThankTitle:'Obrigado pelo seu apoio!',
+    vipThankDesc:'Você agora é VIP I\nSeu apoio nos ajuda a crescer 🚀',
+    vipGiftLabel:'Presente de boas-vindas',
+    vipStartBtn:'🚀 Começar!'
   },
 
   es: {
@@ -880,7 +980,27 @@ var T = {
     recordHowSpend:'💡 ¿Cómo usar RECORD?',
     recordSpend1:'🃏 Mejorar tarjetas de minería', recordSpend2:'⬆️ Mejorar Tap Power',
     recordSpend3:'⚡ Expandir capacidad de energía', recordSpend4:'⭐ Comprar tarjetas limitadas',
-    yourLevel:'Tu Nivel Actual', yourBalance:'Tu Saldo:'
+    yourLevel:'Tu Nivel Actual', yourBalance:'Tu Saldo:',
+    vipBoxesTitle:'📦 Cofres Diarios',
+    vipBoostLabel:'⚡ Boost de Minería ×1.5 REC',
+    vipActivateBoost:'Activar ⚡',
+    vipActivatedToday:'✅ Activo Hoy',
+    vipRefillLabel:'🔋 Recarga de Energía 6x',
+    vipActivateRefill:'Activar 🔋',
+    vipWithdrawTitle:'💰 Límite Diario de Retiro',
+    vipComingSoonBadge:'🔒 Próximamente',
+    vipComboTitle:'🎯 Cartas Combo de Hoy',
+    vipComboEmpty:'No hay combo definido para hoy',
+    vipActiveMembership:'✅ Tu membresía está activa',
+    vipExpires:'Vence:',
+    vipSubscribeBtn:'👑 Suscribirse VIP I',
+    vipPriceLabel:'1 TON / mes',
+    vipComingSoonTier:'Próximamente',
+    vipComingSoonDesc:'Este nivel se desbloqueará pronto',
+    vipThankTitle:'¡Gracias por tu apoyo!',
+    vipThankDesc:'Ahora eres VIP I\nTu apoyo nos ayuda a crecer 🚀',
+    vipGiftLabel:'Regalo de bienvenida',
+    vipStartBtn:'🚀 ¡Empezar!'
   },
 
   tr: {
@@ -1018,7 +1138,27 @@ var T = {
     recordHowSpend:'💡 RECORD nasıl kullanılır?',
     recordSpend1:'🃏 Madencilik kartlarını yükselt', recordSpend2:'⬆️ Tap Power yükselt',
     recordSpend3:'⚡ Enerji kapasitesini genişlet', recordSpend4:'⭐ Sınırlı kartlar satın al',
-    yourLevel:'Mevcut Seviyeniz', yourBalance:'Bakiyeniz:'
+    yourLevel:'Mevcut Seviyeniz', yourBalance:'Bakiyeniz:',
+    vipBoxesTitle:'📦 Günlük Sandıklar',
+    vipBoostLabel:'⚡ Madencilik Boost ×1.5 REC',
+    vipActivateBoost:'Etkinleştir ⚡',
+    vipActivatedToday:'✅ Bugün Aktif',
+    vipRefillLabel:'🔋 Enerji Dolumu 6 Kez',
+    vipActivateRefill:'Etkinleştir 🔋',
+    vipWithdrawTitle:'💰 Günlük Çekim Limiti',
+    vipComingSoonBadge:'🔒 Yakında',
+    vipComboTitle:'🎯 Bugünün Combo Kartları',
+    vipComboEmpty:'Bugün için combo belirlenmedi',
+    vipActiveMembership:'✅ Üyeliğiniz aktif',
+    vipExpires:'Bitiş:',
+    vipSubscribeBtn:'👑 VIP I Aboneliği',
+    vipPriceLabel:'1 TON / ay',
+    vipComingSoonTier:'Yakında',
+    vipComingSoonDesc:'Bu seviye yakında açılacak',
+    vipThankTitle:'Desteğiniz için teşekkürler!',
+    vipThankDesc:'Artık VIP I üyesisiniz\nDesteğiniz büyümemize yardımcı olur 🚀',
+    vipGiftLabel:'Hoş geldin hediyesi',
+    vipStartBtn:'🚀 Başla!'
   },
 
   vi: {
@@ -1156,7 +1296,27 @@ var T = {
     recordHowSpend:'💡 Cách sử dụng RECORD?',
     recordSpend1:'🃏 Nâng cấp thẻ khai thác', recordSpend2:'⬆️ Nâng cấp Tap Power',
     recordSpend3:'⚡ Mở rộng dung lượng năng lượng', recordSpend4:'⭐ Mua thẻ giới hạn',
-    yourLevel:'Cấp độ hiện tại', yourBalance:'Số dư:'
+    yourLevel:'Cấp độ hiện tại', yourBalance:'Số dư:',
+    vipBoxesTitle:'📦 Rương Hàng Ngày',
+    vipBoostLabel:'⚡ Tăng Tốc Đào ×1.5 REC',
+    vipActivateBoost:'Kích hoạt ⚡',
+    vipActivatedToday:'✅ Đã kích hoạt hôm nay',
+    vipRefillLabel:'🔋 Nạp năng lượng 6 lần',
+    vipActivateRefill:'Kích hoạt 🔋',
+    vipWithdrawTitle:'💰 Hạn mức rút hàng ngày',
+    vipComingSoonBadge:'🔒 Sắp ra mắt',
+    vipComboTitle:'🎯 Thẻ Combo Hôm Nay',
+    vipComboEmpty:'Chưa có combo hôm nay',
+    vipActiveMembership:'✅ Thành viên của bạn đang hoạt động',
+    vipExpires:'Hết hạn:',
+    vipSubscribeBtn:'👑 Đăng ký VIP I',
+    vipPriceLabel:'1 TON / tháng',
+    vipComingSoonTier:'Sắp ra mắt',
+    vipComingSoonDesc:'Cấp độ này sẽ được mở sớm',
+    vipThankTitle:'Cảm ơn bạn đã ủng hộ!',
+    vipThankDesc:'Bạn đã là VIP I\nSự ủng hộ của bạn giúp chúng tôi phát triển 🚀',
+    vipGiftLabel:'Quà chào mừng',
+    vipStartBtn:'🚀 Bắt đầu!'
   },
 
   zh: {
@@ -1293,7 +1453,27 @@ var T = {
     recordHowSpend:'💡 如何使用RECORD?',
     recordSpend1:'🃏 升级挖矿卡片', recordSpend2:'⬆️ 升级点击力量',
     recordSpend3:'⚡ 扩展能量容量', recordSpend4:'⭐ 从商店购买限定卡',
-    yourLevel:'您的当前级别', yourBalance:'您的余额:'
+    yourLevel:'您的当前级别', yourBalance:'您的余额:',
+    vipBoxesTitle:'📦 每日宝箱',
+    vipBoostLabel:'⚡ 挖矿加速 ×1.5 REC',
+    vipActivateBoost:'激活 ⚡',
+    vipActivatedToday:'✅ 今日已激活',
+    vipRefillLabel:'🔋 能量补充 6次',
+    vipActivateRefill:'激活 🔋',
+    vipWithdrawTitle:'💰 每日提现限额',
+    vipComingSoonBadge:'🔒 即将推出',
+    vipComboTitle:'🎯 今日连击卡',
+    vipComboEmpty:'今日尚未设置连击',
+    vipActiveMembership:'✅ 您的会员资格有效',
+    vipExpires:'到期：',
+    vipSubscribeBtn:'👑 订阅 VIP I',
+    vipPriceLabel:'1 TON / 月',
+    vipComingSoonTier:'即将推出',
+    vipComingSoonDesc:'此级别即将开放',
+    vipThankTitle:'感谢您的支持！',
+    vipThankDesc:'您现在是 VIP I 会员\n您的支持帮助我们成长 🚀',
+    vipGiftLabel:'欢迎礼物',
+    vipStartBtn:'🚀 开始享受！'
   }
 };
 
@@ -1935,14 +2115,14 @@ function switchVIPTab(n) {
       });
       comboBoxesHtml =
         '<div style="background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);border-radius:14px;padding:14px;margin-bottom:10px;">' +
-          '<div style="font-size:12px;font-weight:700;color:#FFD700;margin-bottom:10px;">🎯 بطاقات كومبو اليوم</div>' +
+          '<div style="font-size:12px;font-weight:700;color:#FFD700;margin-bottom:10px;">' + t('vipComboTitle') + '</div>' +
           '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">' + boxesInner + '</div>' +
         '</div>';
     } else if(hasVIP) {
       comboBoxesHtml =
         '<div style="background:rgba(255,215,0,0.04);border:1px solid rgba(255,215,0,0.12);border-radius:14px;padding:14px;margin-bottom:10px;text-align:center;">' +
           '<div style="font-size:12px;font-weight:700;color:#FFD700;margin-bottom:6px;">🎯 بطاقات كومبو اليوم</div>' +
-          '<div style="font-size:11px;color:rgba(255,255,255,0.3);">لم يُحدد كومبو اليوم بعد</div>' +
+          '<div style="font-size:11px;color:rgba(255,255,255,0.3);">' + t('vipComboEmpty') + '</div>' +
         '</div>';
     }
 
@@ -1954,11 +2134,11 @@ function switchVIPTab(n) {
         'border-radius:14px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;' +
         'cursor:' + (!boostToday ? 'pointer' : 'default') + ';">' +
         '<div>' +
-          '<div style="font-size:13px;font-weight:700;color:' + (!boostToday ? '#FFD700' : 'rgba(255,255,255,0.25)') + ';">⚡ بوست تعدين ×١.٥ REC</div>' +
+          t('vipBoostLabel') +
         '</div>' +
         (!boostToday
-          ? '<div style="background:linear-gradient(135deg,#AA6600,#FFD700);border-radius:8px;padding:7px 14px;font-size:11px;color:#000;font-weight:900;">تفعيل ⚡</div>'
-          : '<div style="font-size:11px;color:rgba(0,255,136,0.7);">✅ فعّال اليوم</div>'
+          ? '<div style="background:linear-gradient(135deg,#AA6600,#FFD700);border-radius:8px;padding:7px 14px;font-size:11px;color:#000;font-weight:900;">' + t('vipActivateBoost') + '</div>'
+          : '<div style="font-size:11px;color:rgba(0,255,136,0.7);">' + t('vipActivatedToday') + '</div>'
         ) +
       '</div>';
 
@@ -1970,24 +2150,24 @@ function switchVIPTab(n) {
         'border-radius:14px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;' +
         'cursor:' + (!refill6Today ? 'pointer' : 'default') + ';">' +
         '<div>' +
-          '<div style="font-size:13px;font-weight:700;color:' + (!refill6Today ? '#44AAFF' : 'rgba(255,255,255,0.25)') + ';">🔋 شحن الطاقة ٦ مرات</div>' +
+          t('vipRefillLabel') +
         '</div>' +
         (!refill6Today
-          ? '<div style="background:linear-gradient(135deg,#004499,#0077FF);border-radius:8px;padding:7px 14px;font-size:11px;color:white;font-weight:700;">تفعيل 🔋</div>'
-          : '<div style="font-size:11px;color:rgba(0,255,136,0.7);">✅ فعّال اليوم</div>'
+          ? '<div style="background:linear-gradient(135deg,#004499,#0077FF);border-radius:8px;padding:7px 14px;font-size:11px;color:white;font-weight:700;">' + t('vipActivateRefill') + '</div>'
+          : '<div style="font-size:11px;color:rgba(0,255,136,0.7);">' + t('vipActivatedToday') + '</div>'
         ) +
       '</div>';
 
     // --- Withdrawal limit ---
     var withdrawHtml =
       '<div style="background:rgba(0,255,136,0.04);border:1px solid rgba(0,255,136,0.15);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">' +
-        '<div style="font-size:13px;font-weight:700;color:#00CC88;">💰 حد السحب اليومي</div>' +
-        '<div style="background:rgba(255,200,0,0.12);border:1px solid rgba(255,200,0,0.3);border-radius:8px;padding:5px 10px;font-size:10px;color:#FFD700;font-weight:700;">🔒 قريباً</div>' +
+        '<div style="font-size:13px;font-weight:700;color:#00CC88;">' + t('vipWithdrawTitle') + '</div>' +
+        '<div style="background:rgba(255,200,0,0.12);border:1px solid rgba(255,200,0,0.3);border-radius:8px;padding:5px 10px;font-size:10px;color:#FFD700;font-weight:700;">' + t('vipComingSoonBadge') + '</div>' +
       '</div>';
 
     content.innerHTML =
       // Boxes section
-      '<div style="font-size:13px;font-weight:700;color:#FFD700;margin-bottom:10px;">📦 الصناديق اليومية</div>' +
+      t('vipBoxesTitle') +
       '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">' +
         _vipBox('common', hasVIP) +
         _vipBox('rare', hasVIP) +
@@ -2000,20 +2180,20 @@ function switchVIPTab(n) {
       // Buy / Active button
       (hasVIP ?
         '<div style="background:rgba(0,255,100,0.1);border:1px solid rgba(0,255,100,0.3);border-radius:14px;padding:14px;text-align:center;">' +
-          '<div style="font-size:14px;font-weight:700;color:#00FF88;">✅ عضويتك فعالة</div>' +
-          '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px;">تنتهي: ' + new Date(vipData.expiry).toLocaleDateString() + '</div>' +
+          '<div style="font-size:14px;font-weight:700;color:#00FF88;">' + t('vipActiveMembership') + '</div>' +
+          '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px;">' + t('vipExpires') + ' ' + new Date(vipData.expiry).toLocaleDateString() + '</div>' +
         '</div>' :
         '<div onclick="buyVIP(1)" style="background:linear-gradient(135deg,#cc0000,#ff3333);border:none;border-radius:14px;padding:16px;text-align:center;cursor:pointer;box-shadow:0 4px 20px rgba(255,0,0,0.4);">' +
-          '<div style="font-size:16px;font-weight:900;color:#FFD700;">👑 اشتراك VIP I</div>' +
-          '<div style="font-size:12px;color:rgba(255,255,255,0.8);margin-top:4px;">1 TON / شهر</div>' +
+          '<div style="font-size:16px;font-weight:900;color:#FFD700;">' + t('vipSubscribeBtn') + '</div>' +
+          '<div style="font-size:12px;color:rgba(255,255,255,0.8);margin-top:4px;">' + t('vipPriceLabel') + '</div>' +
         '</div>'
       );
   } else {
     content.innerHTML =
       '<div style="text-align:center;padding:40px 20px;">' +
         '<div style="font-size:40px;margin-bottom:12px;">🔒</div>' +
-        '<div style="font-size:16px;font-weight:700;color:rgba(255,255,255,0.4);">قريباً</div>' +
-        '<div style="font-size:12px;color:rgba(255,255,255,0.2);margin-top:6px;">هذا المستوى سيُفتح قريباً</div>' +
+        '<div style="font-size:16px;font-weight:700;color:rgba(255,255,255,0.4);">' + t('vipComingSoonTier') + '</div>' +
+        '<div style="font-size:12px;color:rgba(255,255,255,0.2);margin-top:6px;">' + t('vipComingSoonDesc') + '</div>' +
       '</div>';
   }
 }
@@ -2261,13 +2441,13 @@ function buyVIP(tier) {
             ol.innerHTML =
               '<div style="background:linear-gradient(180deg,#0a0020,#050010);border:2px solid rgba(255,215,0,0.5);border-radius:20px;padding:28px 20px;width:85vw;max-width:320px;text-align:center;box-shadow:0 0 60px rgba(255,215,0,0.3);">' +
                 '<div style="font-size:44px;margin-bottom:10px;">👑</div>' +
-                '<div style="font-family:Orbitron,sans-serif;font-size:18px;font-weight:900;color:#FFD700;margin-bottom:8px;">شكراً لدعمك!</div>' +
-                '<div style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:16px;">أنت الآن عضو VIP I<br>دعمك يساعدنا على النمو 🚀</div>' +
+                '<div style="font-family:Orbitron,sans-serif;font-size:18px;font-weight:900;color:#FFD700;margin-bottom:8px;">' + t('vipThankTitle') + '</div>' +
+                '<div style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:16px;">' + t('vipThankDesc').replace('\\n','<br>') + '</div>' +
                 '<div style="background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);border-radius:12px;padding:12px;margin-bottom:20px;">' +
                   '<div style="font-size:22px;font-weight:900;color:#00FF88;font-family:Orbitron,sans-serif;">🎁 +50 REC</div>' +
-                  '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:4px;">هدية ترحيبية</div>' +
+                  '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:4px;">' + t('vipGiftLabel') + '</div>' +
                 '</div>' +
-                '<div onclick="this.parentElement.parentElement.remove()" style="background:linear-gradient(135deg,#CC0000,#FF3300);border-radius:12px;padding:12px;cursor:pointer;font-size:14px;font-weight:700;color:white;">🚀 ابدأ الاستمتاع!</div>' +
+                '<div onclick="this.parentElement.parentElement.remove()" style="background:linear-gradient(135deg,#CC0000,#FF3300);border-radius:12px;padding:12px;cursor:pointer;font-size:14px;font-weight:700;color:white;">' + t('vipStartBtn') + '</div>' +
               '</div>';
             document.body.appendChild(ol);
             ol.addEventListener('click', function(e){ if(e.target===ol) ol.remove(); });
