@@ -8,7 +8,15 @@ app.use(express.json());
 
 // ====== MONGODB ======
 mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('MongoDB connected ✅'))
+  .then(async () => {
+    console.log('MongoDB connected ✅');
+    // Load total blocks from DB so block# doesn't reset on restart
+    try {
+      var count = await User.aggregate([{ $group: { _id: null, total: { $sum: '$totalBlocksFound' } } }]);
+      if (count && count[0]) totalBlocksMined = count[0].total || 0;
+      console.log('Total blocks loaded from DB:', totalBlocksMined);
+    } catch(e) { console.log('loadTotalBlocks error:', e.message); }
+  })
   .catch(err => console.log('MongoDB error:', err));
 
 // ====== SECURITY SYSTEM ======
@@ -55,7 +63,7 @@ const BLOCKS_CHANNEL_ID = -1004293036864;
 // Every tap has 1/500 chance to find a block
 // Block rewards based on user's mining level
 const BLOCK_CHANCE = 1 / 500;
-var totalBlocksMined = 0; // track globally
+var totalBlocksMined = 0; // loaded from DB on startup
 
 function isRealisticIncrease(oldRec, newRec, oldRecord, newRecord, timeDiff, telegramId) {
   // Admin always passes
@@ -120,7 +128,9 @@ const UserSchema = new mongoose.Schema({
   referredByL2:    { type: String, default: '' },
   referredByL3:    { type: String, default: '' },
   totalRefCommission: { type: Number, default: 0 },
-  comboProgress:   { type: Object, default: { date: '', done: [], claimed: false } }
+  comboProgress:   { type: Object, default: { date: '', done: [], claimed: false } },
+  vip:             { type: Object, default: { tier: 0, expiry: 0, boxes: {} } },
+  gameEarnToday:   { type: Object, default: { date: '', earned: 0 } }
 });
 
 const User = mongoose.model('User', UserSchema);
@@ -607,7 +617,7 @@ app.post('/api/vip/verify', async (req, res) => {
       vi: `👑 VIP ${vipTierName} đã được kích hoạt!\n⏳ Hết hạn: ${expiryDate}`,
       zh: `👑 VIP ${vipTierName} 激活成功！\n⏳ 到期：${expiryDate}`
     };
-    const userLang = user.lang || 'en';
+    const userLang = user.language || 'en';
     const msg = vipMsgs[userLang] || vipMsgs.en;
     try { await bot.sendMessage(telegramId, msg); } catch(e) {}
 
@@ -1087,8 +1097,8 @@ app.post('/api/game-earn', async (req, res) => {
 
     // تحقق من الحد اليومي على السيرفر
     const today = new Date().toISOString().split('T')[0];
-    const gameEarnKey = 'gameEarn_' + today;
-    const todayEarned = user.get(gameEarnKey) || 0;
+    const gameEarn = user.gameEarnToday || { date: '', earned: 0 };
+    const todayEarned = gameEarn.date === today ? (gameEarn.earned || 0) : 0;
     const remaining = Math.max(0, 10 - todayEarned);
 
     if(remaining <= 0) return res.json({ success: false, reason: 'daily_limit' });
@@ -1097,7 +1107,7 @@ app.post('/api/game-earn', async (req, res) => {
 
     await User.findOneAndUpdate(
       { telegramId: parseInt(telegramId) },
-      { $inc: { rec: toAdd }, $set: { [gameEarnKey]: todayEarned + toAdd } }
+      { $inc: { rec: toAdd }, gameEarnToday: { date: today, earned: todayEarned + toAdd } }
     );
 
     res.json({ success: true, added: toAdd, remaining: remaining - toAdd });
