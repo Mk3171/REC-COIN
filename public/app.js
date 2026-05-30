@@ -1993,30 +1993,44 @@ function buyVIP(tier) {
     }]
   }).then(function(result) {
     showToast('⏳ جاري التحقق من الدفع...');
-    var txHash = result.boc;
 
-    // Verify with server
-    return fetch('/api/vip/verify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        telegramId: tgUser ? tgUser.id : null,
-        txHash: txHash,
-        tier: tier
+    // Get user wallet address
+    var userWallet = '';
+    try {
+      if(tonConnect && tonConnect.wallet && tonConnect.wallet.account) {
+        userWallet = rawToFriendly(tonConnect.wallet.account.address);
+      }
+    } catch(e) {}
+
+    // Wait 8 seconds then verify by checking bot wallet transactions
+    setTimeout(function() {
+      fetch('/api/vip/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          telegramId: tgUser ? tgUser.id : null,
+          userWallet: userWallet,
+          tier: tier
+        })
       })
-    });
-  }).then(function(r) { return r.json(); })
-  .then(function(data) {
-    if (data.success) {
-      vipData.tier = data.tier;
-      vipData.expiry = data.expiry;
-      showToast('👑 تم تفعيل VIP ' + (tier===1?'I':tier===2?'II':'III') + ' بنجاح!');
-      renderVIPPage();
-    } else {
-      showToast('❌ فشل التحقق: ' + (data.error || 'حاول مرة أخرى'));
-    }
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.success) {
+          vipData.tier = data.tier;
+          vipData.expiry = data.expiry;
+          vipData.boxes = {};
+          showToast('👑 تم تفعيل VIP ' + (tier===1?'I':tier===2?'II':'III') + ' بنجاح!');
+          renderVIPPage();
+        } else {
+          showToast('❌ ' + (data.error || 'فشل التحقق، تواصل مع الدعم'));
+        }
+      }).catch(function() {
+        showToast('❌ خطأ في الاتصال بالسيرفر');
+      });
+    }, 8000);
+
   }).catch(function(e) {
-    if (e && e.message && e.message.includes('cancel')) {
+    if (e && e.message && (e.message.includes('cancel') || e.message.includes('reject'))) {
       showToast('تم إلغاء الدفع');
     } else {
       showToast('❌ خطأ في الدفع');
