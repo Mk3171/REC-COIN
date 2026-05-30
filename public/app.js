@@ -1900,30 +1900,123 @@ function openVIPBox(type) {
   if(!vipData || vipData.tier < 1 || vipData.expiry <= Date.now()) return;
   if(!vipData.boxes) vipData.boxes = {};
   var today = getTodayStr();
-  if(vipData.boxes[type] === today) { showToast('✅ فتحت هذا الصندوق اليوم!'); return; }
-
-  var reward = rollVIPBox(type);
-  vipData.boxes[type] = today;
-
-  // Apply reward
-  if(reward.type === 'record') {
-    record += reward.amount;
-    showToast('📦 ' + type.toUpperCase() + ': +' + formatNumber(reward.amount) + ' RECORD!');
-  } else if(reward.type === 'rec') {
-    rec += reward.amount;
-    showToast('📦 ' + type.toUpperCase() + ': +' + reward.amount.toFixed(6) + ' REC!');
-  } else if(reward.type === 'boost') {
-    vipData.boost = { multi: reward.multi, expiry: Date.now() + 3600000 };
-    showToast('📦 ' + type.toUpperCase() + ': ×' + reward.multi + ' تسريع لساعة!');
-  } else if(reward.type === 'epicCard') {
-    vipData.hasEpicCard = true;
-    vipData.epicExpiry = vipData.expiry;
-    showToast('🦅 حصلت على بطاقة EPIC النادرة!!');
+  if(vipData.boxes[type] === today) {
+    showVIPBoxResult(type, null, true);
+    return;
   }
 
-  saveData(true);
-  updateUI();
-  renderVIPPage();
+  // Show opening animation first
+  showVIPBoxOpening(type, function() {
+    var reward = rollVIPBox(type);
+    vipData.boxes[type] = today;
+
+    // Apply reward
+    if(reward.type === 'record') {
+      record += reward.amount;
+    } else if(reward.type === 'rec') {
+      rec += reward.amount;
+    } else if(reward.type === 'boost') {
+      vipData.boost = { multi: reward.multi, expiry: Date.now() + 3600000 };
+    } else if(reward.type === 'epicCard') {
+      vipData.hasEpicCard = true;
+      vipData.epicExpiry = vipData.expiry;
+    }
+
+    // Save to server
+    fetch('/api/vip/boxes/save', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ telegramId: tgUser ? tgUser.id : null, boxes: vipData.boxes })
+    }).catch(function(){});
+
+    saveData(true);
+    updateUI();
+    showVIPBoxResult(type, reward, false);
+  });
+}
+
+function showVIPBoxOpening(type, callback) {
+  var configs = {
+    common: { icon:'📦', color:'#cccccc', name:'Common', bg:'rgba(200,200,200,0.15)' },
+    rare:   { icon:'💎', color:'#66aaff', name:'Rare',   bg:'rgba(68,136,255,0.15)' },
+    epic:   { icon:'🌌', color:'#cc66ff', name:'Epic',   bg:'rgba(170,68,255,0.15)' }
+  };
+  var c = configs[type];
+
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:99999;display:flex;align-items:center;justify-content:center;flex-direction:column;';
+
+  overlay.innerHTML =
+    '<div style="text-align:center;">' +
+      '<div id="boxAnim" style="font-size:80px;animation:boxShake 0.5s infinite;margin-bottom:20px;">' + c.icon + '</div>' +
+      '<div style="font-size:22px;font-weight:900;color:' + c.color + ';margin-bottom:8px;">' + c.name + ' Box</div>' +
+      '<div style="font-size:14px;color:rgba(255,255,255,0.5);">جاري الفتح...</div>' +
+    '</div>';
+
+  // Add shake animation
+  var style = document.createElement('style');
+  style.innerHTML = '@keyframes boxShake{0%,100%{transform:rotate(-5deg) scale(1)}50%{transform:rotate(5deg) scale(1.1)}}';
+  document.head.appendChild(style);
+  document.body.appendChild(overlay);
+
+  setTimeout(function() {
+    document.body.removeChild(overlay);
+    callback();
+  }, 1500);
+}
+
+function showVIPBoxResult(type, reward, alreadyOpened) {
+  var configs = {
+    common: { color:'#cccccc', name:'Common', bg:'linear-gradient(135deg,#1a1a1a,#2a2a2a)', border:'rgba(200,200,200,0.3)' },
+    rare:   { color:'#66aaff', name:'Rare',   bg:'linear-gradient(135deg,#001133,#002266)', border:'rgba(68,136,255,0.5)' },
+    epic:   { color:'#cc66ff', name:'Epic',   bg:'linear-gradient(135deg,#1a0033,#2d0066)', border:'rgba(170,68,255,0.6)' }
+  };
+  var c = configs[type];
+
+  var overlay = document.createElement('div');
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:99999;display:flex;align-items:center;justify-content:center;';
+  overlay.onclick = function() { document.body.removeChild(overlay); renderVIPPage(); };
+
+  if(alreadyOpened) {
+    overlay.innerHTML =
+      '<div style="background:' + c.bg + ';border:2px solid ' + c.border + ';border-radius:24px;padding:36px 32px;max-width:300px;text-align:center;">' +
+        '<div style="font-size:50px;margin-bottom:16px;">🔒</div>' +
+        '<div style="font-size:18px;font-weight:700;color:' + c.color + ';margin-bottom:8px;">' + c.name + ' Box</div>' +
+        '<div style="font-size:14px;color:rgba(255,255,255,0.5);margin-bottom:20px;">فتحت هذا الصندوق اليوم!</div>' +
+        '<div style="font-size:12px;color:rgba(255,255,255,0.3);">عد غداً للفتح مرة أخرى</div>' +
+        '<div style="margin-top:20px;background:rgba(255,255,255,0.08);border-radius:12px;padding:12px;cursor:pointer;color:rgba(255,255,255,0.7);font-size:14px;">إغلاق</div>' +
+      '</div>';
+    document.body.appendChild(overlay);
+    return;
+  }
+
+  // Build reward display
+  var rewardIcon, rewardTitle, rewardValue, rewardColor;
+  if(reward.type === 'record') {
+    rewardIcon = '🔴'; rewardTitle = 'RECORD'; rewardColor = '#FF6644';
+    rewardValue = '+' + formatNumber(reward.amount) + ' RECORD';
+  } else if(reward.type === 'rec') {
+    rewardIcon = '⚡'; rewardTitle = 'REC'; rewardColor = '#00FF88';
+    rewardValue = '+' + reward.amount.toFixed(6) + ' REC';
+  } else if(reward.type === 'boost') {
+    rewardIcon = '🚀'; rewardTitle = 'تسريع التعدين'; rewardColor = '#FFD700';
+    rewardValue = '×' + reward.multi + ' لمدة ساعة';
+  } else if(reward.type === 'epicCard') {
+    rewardIcon = '🦅'; rewardTitle = 'بطاقة EPIC النادرة!'; rewardColor = '#FFD700';
+    rewardValue = 'تعدين 0.001 REC/ثانية';
+  }
+
+  overlay.innerHTML =
+    '<div style="background:' + c.bg + ';border:2px solid ' + c.border + ';border-radius:24px;padding:36px 32px;max-width:300px;text-align:center;box-shadow:0 0 40px ' + c.border + ';">' +
+      '<div style="font-size:14px;color:' + c.color + ';font-weight:700;margin-bottom:16px;letter-spacing:2px;">' + c.name.toUpperCase() + ' BOX</div>' +
+      '<div style="font-size:64px;margin-bottom:20px;">' + rewardIcon + '</div>' +
+      '<div style="font-size:16px;color:rgba(255,255,255,0.6);margin-bottom:8px;">حصلت على</div>' +
+      '<div style="font-size:24px;font-weight:900;color:' + rewardColor + ';margin-bottom:6px;">' + rewardTitle + '</div>' +
+      '<div style="font-size:20px;font-weight:700;color:white;margin-bottom:24px;">' + rewardValue + '</div>' +
+      '<div style="background:' + c.border + ';border-radius:12px;padding:12px;cursor:pointer;color:white;font-size:14px;font-weight:700;">🎉 رائع!</div>' +
+    '</div>';
+
+  document.body.appendChild(overlay);
 }
 
 function rollVIPBox(type) {
