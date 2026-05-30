@@ -1414,7 +1414,8 @@ function applyData(d){
   if(d.refillData && d.refillData.date===_today){
     window.refillData=d.refillData;
   } else {
-    window.refillData={date:_today,count:3};
+    var initMax = (vipData && parseInt(vipData.tier||0) >= 1 && parseInt(vipData.expiry||0) > Date.now()) ? 6 : 3;
+    window.refillData={date:_today,count:initMax};
   }
   calcTotalSpeeds();
 }
@@ -2780,8 +2781,9 @@ function upgradeEnergy(){
 // ====== ENERGY REFILL ======
 function useEnergyRefill(){
   var today=getTodayStr();
+  var maxRefillsToday = (vipData && parseInt(vipData.tier||0) >= 1 && parseInt(vipData.expiry||0) > Date.now()) ? 6 : 3;
   if(!window.refillData || window.refillData.date!==today){
-    window.refillData={date:today,count:3};
+    window.refillData={date:today,count:maxRefillsToday};
   }
   if(window.refillData.count<=0){
     showToast('❌ انتهت فرصك اليوم! انتظر الغد');
@@ -4110,7 +4112,7 @@ function renderGlobal(top100, myRankData, weekly) {
       '<div style="font-family:Orbitron,sans-serif;font-size:15px;font-weight:900;color:' + rCol + ';min-width:36px;text-align:center;">#' + p.rank + '</div>' +
       '<div data-uid="' + p.telegramId + '" style="width:42px;height:42px;border-radius:50%;background:' + avBg + ';display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:bold;color:white;flex-shrink:0;">' + (p.name||'?')[0].toUpperCase() + '</div>' +
       '<div style="flex:1;min-width:0;">' +
-        '<div style="font-size:14px;font-weight:700;color:' + (isMe?'#FF6644':'white') + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (p.name||'User') + (isMe?' 👈':'') + '</div>' +
+        '<div style="font-size:14px;font-weight:700;color:' + (isMe?'#FF6644':'white') + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (p.vip ? '<span style="color:#FFD700;font-size:11px;">👑</span> ' : '') + (p.name||'User') + (isMe?' 👈':'') + '</div>' +
         '<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px;">⚡ ' + speedStr + (speed > 0 ? ' REC/s' : '') + '</div>' +
       '</div>' +
       '<div style="text-align:right;flex-shrink:0;">' +
@@ -4128,7 +4130,7 @@ function renderGlobal(top100, myRankData, weekly) {
       html += '<div style="display:flex;align-items:center;gap:12px;background:' + (isMe?'rgba(255,100,50,0.12)':'rgba(255,255,255,0.03)') + ';border:1px solid ' + (isMe?'rgba(255,100,50,0.5)':'rgba(255,255,255,0.07)') + ';border-radius:14px;padding:12px 14px;margin-bottom:8px;">' +
         '<div style="font-family:Orbitron,sans-serif;font-size:15px;font-weight:900;color:rgba(255,255,255,0.35);min-width:36px;text-align:center;">#' + p.rank + '</div>' +
         '<div style="width:42px;height:42px;border-radius:50%;background:' + (isMe?'linear-gradient(135deg,#FF4444,#CC0000)':'linear-gradient(135deg,#2a2a3a,#3a3a4a)') + ';display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:bold;color:white;flex-shrink:0;">' + (p.name||'?')[0].toUpperCase() + '</div>' +
-        '<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;color:' + (isMe?'#FF6644':'white') + ';">' + (p.name||'User') + (isMe?' 👈':'') + '</div>' +
+        '<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:700;color:' + (isMe?'#FF6644':'white') + ';">' + (p.vip ? '<span style="color:#FFD700;font-size:11px;">👑</span> ' : '') + (p.name||'User') + (isMe?' 👈':'') + '</div>' +
         '<div style="font-size:10px;color:rgba(255,255,255,0.3);">⚡ ' + (p.miningSpeed||0).toFixed(6) + ' REC/s</div></div>' +
         '<div style="text-align:right;"><div style="font-size:14px;color:#00FF88;font-weight:700;">' + (p.rec||0).toFixed(3) + '</div><div style="font-size:9px;color:rgba(255,255,255,0.3);">REC</div></div>' +
       '</div>';
