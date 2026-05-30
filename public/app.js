@@ -1370,6 +1370,11 @@ function calcTotalSpeeds(){
     recordPerSec+=cardRecordSpeed(lvl)*m;
     recPerSec+=cardRECSpeed(lvl)*m;
   });
+  // ×1.5 boost — only when user manually activates it today
+  if(vipData && parseInt(vipData.tier||0)>=1 && parseInt(vipData.expiry||0)>Date.now() &&
+     vipData.boostDate === getTodayStr()) {
+    recPerSec *= 1.5;
+  }
 }
 
 // ====== DATA ======
@@ -1906,14 +1911,82 @@ function switchVIPTab(n) {
 
   if(n === 1) {
     var hasVIP = vipData && parseInt(vipData.tier||0) >= 1 && parseInt(vipData.expiry||0) > Date.now();
-    content.innerHTML =
-      // Combo hint for VIP
-      (hasVIP && comboData && comboData.cards && comboData.cards.length > 0 ?
-        '<div style="background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.25);border-radius:14px;padding:12px;margin-bottom:12px;">' +
-          '<div style="font-size:12px;font-weight:700;color:#FFD700;margin-bottom:6px;">🎯 تلميح الكومبو اليومي</div>' +
-          '<div style="font-size:11px;color:rgba(255,255,255,0.6);">إحدى بطاقات الكومبو من فئة: <span style="color:#FFD700;font-weight:700;">' + (comboData.cards[0] ? getCardName(getCardInfo(comboData.cards[0].categoryIndex, comboData.cards[0].cardIndex)) : '???') + '</span></div>' +
-        '</div>' : '') +
+    var today = getTodayStr();
+    var boostToday  = hasVIP && vipData.boostDate  === today;
+    var refill6Today = hasVIP && vipData.refill6Date === today;
 
+    // --- Combo hint boxes (3 cards) ---
+    var comboBoxesHtml = '';
+    if(hasVIP && comboData && comboData.cards && comboData.cards.length > 0) {
+      var boxesInner = '';
+      comboData.cards.forEach(function(c) {
+        var card = getCardInfo(c.categoryIndex, c.cardIndex);
+        var emoji = card ? (card.e || '🃏') : '🃏';
+        var name  = card ? getCardName(card) : '???';
+        boxesInner +=
+          '<div style="background:rgba(0,0,0,0.3);border:1px solid ' + (c.done ? 'rgba(0,255,136,0.5)' : 'rgba(255,215,0,0.25)') + ';border-radius:12px;padding:10px 4px;text-align:center;">' +
+            '<div style="font-size:26px;line-height:1;">' + (c.done ? '✅' : emoji) + '</div>' +
+            '<div style="font-size:9px;color:' + (c.done ? '#00FF88' : '#FFD700') + ';margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 2px;">' + name + '</div>' +
+          '</div>';
+      });
+      comboBoxesHtml =
+        '<div style="background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);border-radius:14px;padding:14px;margin-bottom:10px;">' +
+          '<div style="font-size:12px;font-weight:700;color:#FFD700;margin-bottom:10px;">🎯 بطاقات كومبو اليوم</div>' +
+          '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">' + boxesInner + '</div>' +
+        '</div>';
+    } else if(hasVIP) {
+      comboBoxesHtml =
+        '<div style="background:rgba(255,215,0,0.04);border:1px solid rgba(255,215,0,0.12);border-radius:14px;padding:14px;margin-bottom:10px;text-align:center;">' +
+          '<div style="font-size:12px;font-weight:700;color:#FFD700;margin-bottom:6px;">🎯 بطاقات كومبو اليوم</div>' +
+          '<div style="font-size:11px;color:rgba(255,255,255,0.3);">لم يُحدد كومبو اليوم بعد</div>' +
+        '</div>';
+    }
+
+    // --- Boost button ---
+    var boostHtml =
+      '<div onclick="' + (!boostToday ? 'useVIPBoost()' : '') + '" style="' +
+        'background:' + (!boostToday ? 'linear-gradient(135deg,rgba(255,200,0,0.12),rgba(255,140,0,0.08))' : 'rgba(255,255,255,0.03)') + ';' +
+        'border:1px solid ' + (!boostToday ? 'rgba(255,200,0,0.4)' : 'rgba(255,255,255,0.06)') + ';' +
+        'border-radius:14px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;' +
+        'cursor:' + (!boostToday ? 'pointer' : 'default') + ';">' +
+        '<div>' +
+          '<div style="font-size:13px;font-weight:700;color:' + (!boostToday ? '#FFD700' : 'rgba(255,255,255,0.25)') + ';">⚡ بوست تعدين ×١.٥ REC</div>' +
+          '<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:3px;">مرة واحدة يومياً</div>' +
+        '</div>' +
+        (!boostToday
+          ? '<div style="background:linear-gradient(135deg,#AA6600,#FFD700);border-radius:8px;padding:7px 14px;font-size:11px;color:#000;font-weight:900;">تفعيل ⚡</div>'
+          : '<div style="font-size:11px;color:rgba(0,255,136,0.7);">✅ فعّال اليوم</div>'
+        ) +
+      '</div>';
+
+    // --- Refill 6x button ---
+    var refill6Html =
+      '<div onclick="' + (!refill6Today ? 'useVIPRefill6()' : '') + '" style="' +
+        'background:' + (!refill6Today ? 'linear-gradient(135deg,rgba(0,100,255,0.1),rgba(0,150,255,0.06))' : 'rgba(255,255,255,0.03)') + ';' +
+        'border:1px solid ' + (!refill6Today ? 'rgba(0,150,255,0.4)' : 'rgba(255,255,255,0.06)') + ';' +
+        'border-radius:14px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;' +
+        'cursor:' + (!refill6Today ? 'pointer' : 'default') + ';">' +
+        '<div>' +
+          '<div style="font-size:13px;font-weight:700;color:' + (!refill6Today ? '#44AAFF' : 'rgba(255,255,255,0.25)') + ';">🔋 شحن الطاقة ٦ مرات</div>' +
+          '<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:3px;">مرة واحدة يومياً</div>' +
+        '</div>' +
+        (!refill6Today
+          ? '<div style="background:linear-gradient(135deg,#004499,#0077FF);border-radius:8px;padding:7px 14px;font-size:11px;color:white;font-weight:700;">تفعيل 🔋</div>'
+          : '<div style="font-size:11px;color:rgba(0,255,136,0.7);">✅ فعّال اليوم</div>'
+        ) +
+      '</div>';
+
+    // --- Withdrawal limit ---
+    var withdrawHtml =
+      '<div style="background:rgba(0,255,136,0.04);border:1px solid rgba(0,255,136,0.15);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">' +
+        '<div>' +
+          '<div style="font-size:13px;font-weight:700;color:#00CC88;">💰 حد السحب اليومي</div>' +
+          '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:3px;">20,000 REC يومياً</div>' +
+        '</div>' +
+        '<div style="background:rgba(255,200,0,0.12);border:1px solid rgba(255,200,0,0.3);border-radius:8px;padding:5px 10px;font-size:10px;color:#FFD700;font-weight:700;">🔒 قريباً</div>' +
+      '</div>';
+
+    content.innerHTML =
       // Boxes section
       '<div style="font-size:13px;font-weight:700;color:#FFD700;margin-bottom:10px;">📦 الصناديق اليومية</div>' +
       '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">' +
@@ -1922,22 +1995,25 @@ function switchVIPTab(n) {
         _vipBox('epic', hasVIP) +
       '</div>' +
 
-      // Features
+      // New sections (only shown for active VIP)
+      (hasVIP ? boostHtml + refill6Html + withdrawHtml + comboBoxesHtml : '') +
+
+      // Features list
       '<div style="background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);border-radius:14px;padding:14px;margin-bottom:16px;">' +
         '<div style="font-size:12px;font-weight:700;color:#FFD700;margin-bottom:10px;">✨ مميزات VIP I</div>' +
         '<div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1.9;">' +
           '📦 ٣ صناديق يومية (Common, Rare, Epic)<br>' +
           '🦅 فرصة بطاقة Epic النادرة (1%)<br>' +
-          '⚡ تعدين REC أسرع بـ ×١.٥<br>' +
+          '⚡ بوست تعدين ×١.٥ يومياً<br>' +
           '🔋 شحن طاقة ٦ مرات يومياً<br>' +
           '💰 سحب يومي حتى 20,000 REC<br>' +
-          '🎯 تلميح بطاقة من الكومبو<br>' +
-          '🎁 +1,000,000 RECORD فورياً<br>' +
+          '🎯 كشف بطاقات الكومبو اليومي<br>' +
+          '🎁 +50 REC هدية ترحيبية<br>' +
           '👑 شارة ذهبية بالليدربورد' +
         '</div>' +
       '</div>' +
 
-      // Buy button
+      // Buy / Active button
       (hasVIP ?
         '<div style="background:rgba(0,255,100,0.1);border:1px solid rgba(0,255,100,0.3);border-radius:14px;padding:14px;text-align:center;">' +
           '<div style="font-size:14px;font-weight:700;color:#00FF88;">✅ عضويتك فعالة</div>' +
@@ -2194,13 +2270,26 @@ function buyVIP(tier) {
           vipData.tier = data.tier;
           vipData.expiry = data.expiry;
           vipData.boxes = {};
-          // Welcome bonus: 1,000,000 RECORD
+          // Welcome bonus: 50 REC
           if(data.tier === 1) {
-            record += 1000000;
-            showToast('🎁 +1,000,000 RECORD مكافأة ترحيبية!');
-            setTimeout(function(){
-              showToast('👑 تم تفعيل VIP I بنجاح!');
-            }, 2000);
+            rec += 50;
+            saveData(true);
+            // Thank you popup
+            var ol = document.createElement('div');
+            ol.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:99999;display:flex;align-items:center;justify-content:center;';
+            ol.innerHTML =
+              '<div style="background:linear-gradient(180deg,#0a0020,#050010);border:2px solid rgba(255,215,0,0.5);border-radius:20px;padding:28px 20px;width:85vw;max-width:320px;text-align:center;box-shadow:0 0 60px rgba(255,215,0,0.3);">' +
+                '<div style="font-size:44px;margin-bottom:10px;">👑</div>' +
+                '<div style="font-family:Orbitron,sans-serif;font-size:18px;font-weight:900;color:#FFD700;margin-bottom:8px;">شكراً لدعمك!</div>' +
+                '<div style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:16px;">أنت الآن عضو VIP I<br>دعمك يساعدنا على النمو 🚀</div>' +
+                '<div style="background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);border-radius:12px;padding:12px;margin-bottom:20px;">' +
+                  '<div style="font-size:22px;font-weight:900;color:#00FF88;font-family:Orbitron,sans-serif;">🎁 +50 REC</div>' +
+                  '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:4px;">هدية ترحيبية</div>' +
+                '</div>' +
+                '<div onclick="this.parentElement.parentElement.remove()" style="background:linear-gradient(135deg,#CC0000,#FF3300);border-radius:12px;padding:12px;cursor:pointer;font-size:14px;font-weight:700;color:white;">🚀 ابدأ الاستمتاع!</div>' +
+              '</div>';
+            document.body.appendChild(ol);
+            ol.addEventListener('click', function(e){ if(e.target===ol) ol.remove(); });
           } else {
             showToast('👑 تم تفعيل VIP ' + (tier===1?'I':tier===2?'II':'III') + ' بنجاح!');
           }
@@ -2234,14 +2323,34 @@ function loadVIPData(callback) {
       vipData.boxes = vipData.boxes || {};
       // Refresh VIP page if open
       var vipPage = document.getElementById('vip');
-      if(vipPage && vipPage.classList.contains('open')) renderVIPPage();
+      if(vipPage && vipPage.classList.contains('active')) renderVIPPage();
     }
     if(callback) callback();
   }).catch(function(){ if(callback) callback(); });
 }
 function openUpgrade(){updateUpgradeUI();document.getElementById('upgradePage').classList.add('open');}
 
-// ====== TASK TABS ======
+// ====== VIP DAILY ACTIONS ======
+function useVIPBoost() {
+  if(!vipData || parseInt(vipData.tier||0)<1 || parseInt(vipData.expiry||0)<=Date.now()) return;
+  if(vipData.boostDate === getTodayStr()) { showToast('✅ تم استخدام البوست اليوم!'); return; }
+  vipData.boostDate = getTodayStr();
+  calcTotalSpeeds();
+  saveData(true);
+  renderVIPPage();
+  showToast('⚡ تم تفعيل بوست ×١.٥ REC لهذا اليوم!');
+}
+
+function useVIPRefill6() {
+  if(!vipData || parseInt(vipData.tier||0)<1 || parseInt(vipData.expiry||0)<=Date.now()) return;
+  if(vipData.refill6Date === getTodayStr()) { showToast('✅ تم تفعيل ٦ تعبئات اليوم!'); return; }
+  vipData.refill6Date = getTodayStr();
+  window.refillData = { date: getTodayStr(), count: 6 };
+  saveData(true);
+  updateUpgradeUI();
+  renderVIPPage();
+  showToast('🔋 تم تفعيل ٦ تعبئات طاقة لهذا اليوم!');
+}
 function showTaskTab(name, btn){
   ['social','daily','missions'].forEach(function(t){
     document.getElementById('taskTab-'+t).style.display = t===name ? 'block' : 'none';
@@ -2796,10 +2905,10 @@ function useEnergyRefill(){
 }
 
 function loadRefillData(){
+  // البيانات تتحمل من applyData — بس نتأكد من التاريخ
   var today=getTodayStr();
-  var maxRefills = (vipData && parseInt(vipData.tier||0) >= 1 && parseInt(vipData.expiry||0) > Date.now()) ? 6 : 3;
   if(!window.refillData || window.refillData.date!==today){
-    window.refillData={date:today,count:maxRefills};
+    window.refillData={date:today,count:3};
   }
 }
 
