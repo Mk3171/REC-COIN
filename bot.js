@@ -536,49 +536,67 @@ const BOT_WALLET_ADDRESS = process.env.BOT_WALLET_ADDRESS || 'UQDu5EqcKVBEE2MJPF
 
 app.post('/api/vip/verify', async (req, res) => {
   try {
-    const { telegramId, txHash, tier } = req.body;
-    if (!telegramId || !txHash || !tier) return res.status(400).json({ error: 'Missing params' });
+    const { telegramId, userWallet, tier } = req.body;
+    if (!telegramId || !tier) return res.status(400).json({ error: 'Missing params' });
 
     const user = await User.findOne({ telegramId });
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    // Check if this tx was already used
-    if (user.vip && user.vip.txHash === txHash) {
-      return res.json({ success: false, error: 'Transaction already used' });
+    // Check if VIP already active
+    if (user.vip && user.vip.tier >= tier && user.vip.expiry > Date.now()) {
+      return res.json({ success: false, error: 'VIP already active' });
     }
 
-    // Verify tx on TON Center
+    const expectedNano = tier === 1 ? 1000000000 : tier === 2 ? 3000000000 : 10000000000;
+    const BOT_WALLET = process.env.BOT_WALLET_ADDRESS || 'UQD-FoGlRG5pBxZpkf3H9ZOsNTL5basBbTEZE8zvMgHLB99o';
     const apiKey = process.env.TONCENTER_API_KEY || '';
-    const verifyUrl = `https://toncenter.com/api/v2/getTransaction?hash=${txHash}`;
-    const verifyRes = await fetch(verifyUrl, {
+
+    // Get recent transactions to bot wallet
+    const txUrl = `https://toncenter.com/api/v2/getTransactions?address=${BOT_WALLET}&limit=20`;
+    const txRes = await fetch(txUrl, {
       headers: apiKey ? { 'X-API-Key': apiKey } : {}
     });
-    const verifyData = await verifyRes.json();
+    const txData = await txRes.json();
 
-    if (!verifyData.ok || !verifyData.result) {
-      return res.json({ success: false, error: 'Transaction not found' });
+    if (!txData.ok || !txData.result) {
+      return res.json({ success: false, error: 'Cannot check transactions' });
     }
 
-    const tx = verifyData.result;
-    const amount = parseInt(tx.in_msg?.value || 0);
-    const toAddr = tx.in_msg?.destination || '';
-    const expectedAmount = tier === 1 ? 1000000000 : tier === 2 ? 3000000000 : 10000000000; // 1/3/10 TON in nanotons
+    // Look for matching payment in last 5 minutes
+    const fiveMinAgo = Math.floor(Date.now()/1000) - 300;
+    let found = false;
+    let foundTxId = null;
 
-    if (amount < expectedAmount * 0.95) {
-      return res.json({ success: false, error: 'Insufficient amount' });
+    for (const tx of txData.result) {
+      if (tx.utime < fiveMinAgo) continue;
+      const inMsg = tx.in_msg;
+      if (!inMsg) continue;
+      const amount = parseInt(inMsg.value || 0);
+      if (amount >= expectedNano * 0.95) {
+        // Check not already used
+        const alreadyUsed = await User.findOne({ 'vip.txId': tx.transaction_id?.lt });
+        if (alreadyUsed) continue;
+        found = true;
+        foundTxId = tx.transaction_id?.lt;
+        break;
+      }
+    }
+
+    if (!found) {
+      return res.json({ success: false, error: 'Payment not found — please wait and try again' });
     }
 
     // Activate VIP
-    const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days
+    const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000;
     await User.findOneAndUpdate(
       { telegramId },
-      { vip: { tier, expiry, boxes: {}, txHash } }
+      { vip: { tier, expiry, boxes: {}, txId: foundTxId } }
     );
 
     // Notify user
     try {
-      await bot.sendMessage(telegramId, 
-        `👑 تم تفعيل VIP ${tier === 1 ? 'I' : tier === 2 ? 'II' : 'III'} بنجاح!\n⏳ تنتهي العضوية في: ${new Date(expiry).toLocaleDateString('ar')}`
+      await bot.sendMessage(telegramId,
+        `👑 تم تفعيل VIP ${tier === 1 ? 'I' : tier === 2 ? 'II' : 'III'} بنجاح!\n⏳ تنتهي في: ${new Date(expiry).toLocaleDateString('ar')}`
       );
     } catch(e) {}
 
