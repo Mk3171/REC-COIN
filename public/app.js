@@ -201,7 +201,8 @@ var T = {
     vipThankTitle:'شكراً لدعمك!',
     vipThankDesc:'أنت الآن عضو VIP I\nدعمك يساعدنا على النمو 🚀',
     vipGiftLabel:'هدية ترحيبية',
-    vipStartBtn:'🚀 ابدأ الاستمتاع!'
+    vipStartBtn:'🚀 ابدأ الاستمتاع!',
+    vipExclusiveMembership:'عضوية حصرية'
   },
 
   en: {
@@ -369,7 +370,8 @@ var T = {
     vipThankTitle:'Thank you for your support!',
     vipThankDesc:'You are now VIP I\nYour support helps us grow 🚀',
     vipGiftLabel:'Welcome gift',
-    vipStartBtn:'🚀 Start Enjoying!'
+    vipStartBtn:'🚀 Start Enjoying!',
+    vipExclusiveMembership:'Exclusive Membership'
   },
 
   ru: {
@@ -537,7 +539,8 @@ var T = {
     vipThankTitle:'Спасибо за поддержку!',
     vipThankDesc:'Вы теперь VIP I\nВаша поддержка помогает нам расти 🚀',
     vipGiftLabel:'Приветственный подарок',
-    vipStartBtn:'🚀 Начать!'
+    vipStartBtn:'🚀 Начать!',
+    vipExclusiveMembership:'Эксклюзивное членство'
   },
 
   uk: {
@@ -705,7 +708,8 @@ var T = {
     vipThankTitle:'Дякуємо за підтримку!',
     vipThankDesc:'Тепер ви VIP I\nВаша підтримка допомагає нам зростати 🚀',
     vipGiftLabel:'Вітальний подарунок',
-    vipStartBtn:'🚀 Почати!'
+    vipStartBtn:'🚀 Почати!',
+    vipExclusiveMembership:'Ексклюзивне членство'
   },
 
   pt: {
@@ -873,7 +877,8 @@ var T = {
     vipThankTitle:'Obrigado pelo seu apoio!',
     vipThankDesc:'Você agora é VIP I\nSeu apoio nos ajuda a crescer 🚀',
     vipGiftLabel:'Presente de boas-vindas',
-    vipStartBtn:'🚀 Começar!'
+    vipStartBtn:'🚀 Começar!',
+    vipExclusiveMembership:'Assinatura Exclusiva'
   },
 
   es: {
@@ -1041,7 +1046,8 @@ var T = {
     vipThankTitle:'¡Gracias por tu apoyo!',
     vipThankDesc:'Ahora eres VIP I\nTu apoyo nos ayuda a crecer 🚀',
     vipGiftLabel:'Regalo de bienvenida',
-    vipStartBtn:'🚀 ¡Empezar!'
+    vipStartBtn:'🚀 ¡Empezar!',
+    vipExclusiveMembership:'Membresía Exclusiva'
   },
 
   tr: {
@@ -1211,7 +1217,8 @@ var T = {
     vipThankTitle:'Desteğiniz için teşekkürler!',
     vipThankDesc:'Artık VIP I üyesisiniz\nDesteğiniz büyümemize yardımcı olur 🚀',
     vipGiftLabel:'Hoş geldin hediyesi',
-    vipStartBtn:'🚀 Başla!'
+    vipStartBtn:'🚀 Başla!',
+    vipExclusiveMembership:'Özel Üyelik'
   },
 
   vi: {
@@ -1379,7 +1386,8 @@ var T = {
     vipThankTitle:'Cảm ơn bạn đã ủng hộ!',
     vipThankDesc:'Bạn đã là VIP I\nSự ủng hộ của bạn giúp chúng tôi phát triển 🚀',
     vipGiftLabel:'Quà chào mừng',
-    vipStartBtn:'🚀 Bắt đầu!'
+    vipStartBtn:'🚀 Bắt đầu!',
+    vipExclusiveMembership:'Thành viên Độc quyền'
   },
 
   zh: {
@@ -1547,7 +1555,8 @@ var T = {
     vipThankTitle:'感谢您的支持！',
     vipThankDesc:'您现在是 VIP I 会员\n您的支持帮助我们成长 🚀',
     vipGiftLabel:'欢迎礼物',
-    vipStartBtn:'🚀 开始享受！'
+    vipStartBtn:'🚀 开始享受！',
+    vipExclusiveMembership:'专属会员'
   }
 };
 
@@ -2124,22 +2133,22 @@ function renderVIPPage() {
       '<div style="font-family:Impact,sans-serif;font-size:42px;font-weight:900;' +
         'color:#FFD700;text-shadow:3px 3px 0 #aa6600,0 0 20px rgba(255,215,0,0.6);' +
         'letter-spacing:4px;">VIP</div>' +
-      '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px;">Exclusive Membership</div>' +
+      '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px;">' + t('vipExclusiveMembership') + '</div>' +
     '</div>' +
 
     // Tabs
     '<div style="display:flex;gap:8px;padding:0 16px;margin-bottom:16px;">' +
       '<div onclick="switchVIPTab(1)" id="vipTab1" style="flex:1;text-align:center;padding:10px;border-radius:12px;background:linear-gradient(135deg,#cc0000,#ff2222);border:1px solid #ff4444;cursor:pointer;">' +
         '<div style="font-size:13px;font-weight:700;color:#FFD700;">👑 VIP I</div>' +
-        '<div style="font-size:10px;color:rgba(255,255,255,0.7);margin-top:2px;">1 TON / شهر</div>' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.7);margin-top:2px;">' + t('vipPriceLabel') + '</div>' +
       '</div>' +
       '<div onclick="switchVIPTab(2)" id="vipTab2" style="flex:1;text-align:center;padding:10px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);cursor:pointer;">' +
         '<div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.4);">👑 VIP II</div>' +
-        '<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px;">قريباً</div>' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px;">' + t('vipComingSoonTier') + '</div>' +
       '</div>' +
       '<div onclick="switchVIPTab(3)" id="vipTab3" style="flex:1;text-align:center;padding:10px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);cursor:pointer;">' +
         '<div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.4);">👑 VIP III</div>' +
-        '<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px;">قريباً</div>' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px;">' + t('vipComingSoonTier') + '</div>' +
       '</div>' +
     '</div>' +
 
