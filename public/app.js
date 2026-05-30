@@ -2796,10 +2796,10 @@ function useEnergyRefill(){
 }
 
 function loadRefillData(){
-  // البيانات تتحمل من applyData — بس نتأكد من التاريخ
   var today=getTodayStr();
+  var maxRefills = (vipData && parseInt(vipData.tier||0) >= 1 && parseInt(vipData.expiry||0) > Date.now()) ? 6 : 3;
   if(!window.refillData || window.refillData.date!==today){
-    window.refillData={date:today,count:3};
+    window.refillData={date:today,count:maxRefills};
   }
 }
 
