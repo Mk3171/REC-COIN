@@ -2417,9 +2417,9 @@ function switchVIPTab(n) {
       );
   } else if(n === 2) {
     var today = getTodayStr();
-    var spunToday = vipData && vipData.wheelDate === today;
+    var hasVIP2 = vipData && parseInt(vipData.tier||0) >= 2 && parseInt(vipData.expiry||0) > Date.now();
+    var spunToday = hasVIP2 && vipData.wheelDate === today;
     content.innerHTML =
-      // Section 1: Wheel
       '<div style="background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.25);border-radius:16px;padding:16px;margin-bottom:10px;text-align:center;">' +
         '<div style="font-size:13px;font-weight:700;color:#FFD700;margin-bottom:14px;">🎰 جرّب حظك</div>' +
         '<div style="position:relative;display:inline-block;margin-bottom:14px;">' +
@@ -2429,16 +2429,14 @@ function switchVIPTab(n) {
         '</div>' +
         (spunToday
           ? '<div style="font-size:12px;color:rgba(0,255,136,0.7);padding:10px;">✅ تفقد غداً للدوران مجدداً</div>'
-          : '<button id="vip2SpinBtn" onclick="spinVIP2Wheel()" style="background:linear-gradient(135deg,#AA6600,#FFD700);border:none;color:#000;padding:12px 30px;border-radius:12px;font-size:14px;font-weight:900;cursor:pointer;font-family:Orbitron,sans-serif;letter-spacing:1px;box-shadow:0 4px 20px rgba(255,215,0,0.4);">🎰 أدر العجلة</button>'
+          : hasVIP2
+            ? '<button id="vip2SpinBtn" onclick="spinVIP2Wheel()" style="background:linear-gradient(135deg,#AA6600,#FFD700);border:none;color:#000;padding:12px 30px;border-radius:12px;font-size:14px;font-weight:900;cursor:pointer;font-family:Orbitron,sans-serif;letter-spacing:1px;box-shadow:0 4px 20px rgba(255,215,0,0.4);">🎰 أدر العجلة</button>'
+            : '<div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 28px;font-size:13px;color:rgba(255,255,255,0.3);cursor:not-allowed;">🔒 VIP II فقط</div>'
         ) +
       '</div>' +
-
-      // Sections 2-6: coming soon
       '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px;">' +
         [1,2,3,4,5].map(function(){ return '<div style="background:rgba(255,255,255,0.02);border:1px dashed rgba(255,255,255,0.07);border-radius:12px;padding:14px;text-align:center;"><div style="font-size:11px;color:rgba(255,255,255,0.2);">🔒 قريباً</div></div>'; }).join('') +
       '</div>' +
-
-      // Subscribe: locked
       '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:14px;text-align:center;">' +
         '<div style="font-size:14px;font-weight:700;color:rgba(255,255,255,0.25);">🔒 الاشتراك قريباً</div>' +
       '</div>';
@@ -3705,7 +3703,10 @@ function drawVIP2Wheel(canvas, rotation) {
 
 function spinVIP2Wheel() {
   if(vip2Spinning) return;
-  if(vipData && vipData.wheelDate === getTodayStr()) {
+  if(!vipData || parseInt(vipData.tier||0) < 2 || parseInt(vipData.expiry||0) <= Date.now()) {
+    showToast('🔒 هذه الميزة لـ VIP II فقط'); return;
+  }
+  if(vipData.wheelDate === getTodayStr()) {
     showToast('✅ دورت العجلة اليوم! تفقد غداً'); return;
   }
   vip2Spinning = true;
