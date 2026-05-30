@@ -1953,7 +1953,72 @@ function rollVIPBox(type) {
 }
 
 function buyVIP(tier) {
-  showToast('⏳ قريباً — نظام VIP قيد التطوير');
+  // Check wallet connected
+  if (!tonConnect || !tonConnect.connected) {
+    showToast('❌ ربط محفظتك أولاً من صفحة Wallet!');
+    return;
+  }
+
+  var prices = { 1: '1000000000', 2: '3000000000', 3: '10000000000' }; // nanoTON
+  var labels = { 1: 'VIP I — 1 TON', 2: 'VIP II — 3 TON', 3: 'VIP III — 10 TON' };
+  var nanoAmount = prices[tier];
+
+  showToast('⏳ جاري فتح محفظتك...');
+
+  var BOT_WALLET = 'UQDu5EqcKVBEE2MJPFCX8z6PP2'; // محفظة البوت — نفس محفظة السحب
+
+  // Send TON transaction
+  tonConnect.sendTransaction({
+    validUntil: Math.floor(Date.now() / 1000) + 600,
+    messages: [{
+      address: BOT_WALLET,
+      amount: nanoAmount,
+      payload: btoa('VIP' + tier + ':' + (tgUser ? tgUser.id : ''))
+    }]
+  }).then(function(result) {
+    showToast('⏳ جاري التحقق من الدفع...');
+    var txHash = result.boc;
+
+    // Verify with server
+    return fetch('/api/vip/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        telegramId: tgUser ? tgUser.id : null,
+        txHash: txHash,
+        tier: tier
+      })
+    });
+  }).then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.success) {
+      vipData.tier = data.tier;
+      vipData.expiry = data.expiry;
+      showToast('👑 تم تفعيل VIP ' + (tier===1?'I':tier===2?'II':'III') + ' بنجاح!');
+      renderVIPPage();
+    } else {
+      showToast('❌ فشل التحقق: ' + (data.error || 'حاول مرة أخرى'));
+    }
+  }).catch(function(e) {
+    if (e && e.message && e.message.includes('cancel')) {
+      showToast('تم إلغاء الدفع');
+    } else {
+      showToast('❌ خطأ في الدفع');
+    }
+  });
+}
+
+// Load VIP data from server
+function loadVIPData() {
+  if (!tgUser) return;
+  fetch('/api/vip/' + tgUser.id)
+  .then(function(r) { return r.json(); })
+  .then(function(data) {
+    if (data.vip) {
+      vipData = data.vip;
+      vipData.boxes = vipData.boxes || {};
+    }
+  }).catch(function(){});
 }
 function openUpgrade(){updateUpgradeUI();document.getElementById('upgradePage').classList.add('open');}
 
@@ -4129,6 +4194,7 @@ function initApp() {
     calcTotalSpeeds();
     checkUpgradeTimers();
     applyLang(currentLang);
+  loadVIPData();
     buildCards();
     buildMilestones();
     restoreTasksUI();
