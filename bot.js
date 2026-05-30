@@ -461,7 +461,7 @@ app.get('/api/leaderboard/global', async (req, res) => {
       .lean();
     res.json({ top100: allUsers.map(function(u, i) {
       var speed = u.miningSpeed > 0 ? u.miningSpeed : calcMiningSpeed(u.cardLevels);
-      return { rank: i+1, telegramId: u.telegramId, name: u.username||u.firstName||'User', rec: u.rec, miningSpeed: speed };
+      return { rank: i+1, telegramId: u.telegramId, name: u.username||u.firstName||'User', rec: u.rec, miningSpeed: speed, vip: u.vip && u.vip.tier > 0 && u.vip.expiry > Date.now() ? u.vip.tier : 0 };
     })});
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
@@ -477,7 +477,7 @@ app.get('/api/leaderboard/myrank/:telegramId', async (req, res) => {
     var end = Math.min(allUsers.length, myIndex + 3);
     var neighbors = myIndex < 0 ? [] : allUsers.slice(start, end).map(function(u, i) {
       var speed = u.miningSpeed > 0 ? u.miningSpeed : calcMiningSpeed(u.cardLevels);
-      return { rank: start+i+1, telegramId: u.telegramId, name: u.username||u.firstName||'User', rec: u.rec, miningSpeed: speed, isMe: u.telegramId===userId };
+      return { rank: start+i+1, telegramId: u.telegramId, name: u.username||u.firstName||'User', rec: u.rec, miningSpeed: speed, isMe: u.telegramId===userId, vip: u.vip && u.vip.tier > 0 && u.vip.expiry > Date.now() ? u.vip.tier : 0 };
     });
     res.json({ myRank, total: allUsers.length, neighbors });
   } catch(e) { res.status(500).json({ error: e.message }); }
