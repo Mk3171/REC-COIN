@@ -2143,16 +2143,20 @@ function buyVIP(tier) {
 }
 
 // Load VIP data from server
-function loadVIPData() {
-  if (!tgUser) return;
+function loadVIPData(callback) {
+  if (!tgUser) { if(callback) callback(); return; }
   fetch('/api/vip/' + tgUser.id)
   .then(function(r) { return r.json(); })
   .then(function(data) {
-    if (data.vip) {
+    if (data.vip && parseInt(data.vip.tier||0) > 0) {
       vipData = data.vip;
       vipData.boxes = vipData.boxes || {};
+      // Refresh VIP page if open
+      var vipPage = document.getElementById('vip');
+      if(vipPage && vipPage.classList.contains('open')) renderVIPPage();
     }
-  }).catch(function(){});
+    if(callback) callback();
+  }).catch(function(){ if(callback) callback(); });
 }
 function openUpgrade(){updateUpgradeUI();document.getElementById('upgradePage').classList.add('open');}
 
@@ -4356,12 +4360,18 @@ function loadAndInit() {
   } catch(e) {}
 
   if(hasLocalData) {
-    // Local data exists - use it, sync server in background only
+    // Local data exists - use it immediately
     initApp();
-    // Background sync from server to recover if local is empty
+    // Always sync VIP from server (critical for membership status)
     loadFromServer(function(serverData) {
-      if(serverData && serverData.record > record * 1.5) {
-        // Server has significantly more - might be from another device
+      if(!serverData) return;
+      // Sync VIP status always
+      if(serverData.vip && parseInt(serverData.vip.tier||0) > 0) {
+        vipData = serverData.vip;
+        vipData.boxes = vipData.boxes || {};
+      }
+      // Sync record if server has significantly more
+      if(serverData.record > record * 1.5) {
         applyData(serverData);
         updateUI();
       }
