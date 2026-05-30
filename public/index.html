@@ -17,6 +17,12 @@
   from { transform: translateX(100%); }
   to { transform: translateX(0); }
 }
+/* Fix: profile popup above tap circle */
+#profilePopupOverlay { z-index: 99990 !important; }
+#profilePopup        { z-index: 99991 !important; }
+/* Fix: side menu above everything */
+#sideMenuOverlay     { z-index: 99980 !important; }
+#sideMenu            { z-index: 99985 !important; }
 </style>
 <script>
 function openSideMenu(){
