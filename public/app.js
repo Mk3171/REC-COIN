@@ -1965,7 +1965,7 @@ function buyVIP(tier) {
 
   showToast('⏳ جاري فتح محفظتك...');
 
-  var BOT_WALLET = 'UQDu5EqcKVBEE2MJPFCX8z6PP2'; // محفظة البوت — نفس محفظة السحب
+  var BOT_WALLET = 'UQD-FoGlRG5pBxZpkf3H9ZOsNTL5basBbTEZE8zvMgHLB99o'; // محفظة البوت — نفس محفظة السحب
 
   // Send TON transaction
   tonConnect.sendTransaction({
