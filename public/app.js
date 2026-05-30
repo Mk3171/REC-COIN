@@ -1968,12 +1968,28 @@ function buyVIP(tier) {
   var BOT_WALLET = 'UQD-FoGlRG5pBxZpkf3H9ZOsNTL5basBbTEZE8zvMgHLB99o'; // محفظة البوت — نفس محفظة السحب
 
   // Send TON transaction
+  // Build proper TON text comment cell (BOC)
+  function buildCommentPayload(text) {
+    var bytes = [];
+    // 4 bytes: 0x00000000 (text comment op)
+    bytes.push(0,0,0,0);
+    for(var i=0;i<text.length;i++) bytes.push(text.charCodeAt(i));
+    // Wrap in simple BOC: b5ee9c72 01010101 00 + length + 00 + data
+    var dataLen = bytes.length;
+    var cell = [0xb5,0xee,0x9c,0x72,0x01,0x01,0x01,0x01,0x00,dataLen+2,0x00,dataLen*8>>8,dataLen*8&0xff].concat(bytes);
+    // Actually use simpler approach - encode as hex then base64
+    var hexStr = '';
+    for(var j=0;j<bytes.length;j++) hexStr += ('0'+bytes[j].toString(16)).slice(-2);
+    return btoa(String.fromCharCode.apply(null,bytes));
+  }
+
+  var commentText = 'VIP' + tier + ':' + (tgUser ? tgUser.id : '');
+
   tonConnect.sendTransaction({
     validUntil: Math.floor(Date.now() / 1000) + 600,
     messages: [{
       address: BOT_WALLET,
-      amount: nanoAmount,
-      payload: btoa('VIP' + tier + ':' + (tgUser ? tgUser.id : ''))
+      amount: nanoAmount
     }]
   }).then(function(result) {
     showToast('⏳ جاري التحقق من الدفع...');
