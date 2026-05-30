@@ -202,7 +202,23 @@ var T = {
     vipThankDesc:'أنت الآن عضو VIP I\nدعمك يساعدنا على النمو 🚀',
     vipGiftLabel:'هدية ترحيبية',
     vipStartBtn:'🚀 ابدأ الاستمتاع!',
-    vipExclusiveMembership:'عضوية حصرية'
+    vipExclusiveMembership:'عضوية حصرية',
+    vipBoxCommon:'صندوق عادي',
+    vipBoxRare:'صندوق نادر',
+    vipBoxEpic:'صندوق أسطوري',
+    vipBoxOpening:'جاري الفتح...',
+    vipBoxAlreadyOpened:'فتحت هذا الصندوق اليوم!',
+    vipBoxComeBack:'عد غداً للفتح مرة أخرى',
+    vipBoxClose:'إغلاق',
+    vipBoxYouGot:'حصلت على',
+    vipBoxGreat:'🎉 رائع!',
+    vipBoxBoostTitle:'تسريع التعدين',
+    vipBoxBoostValue:'×{n} لمدة ساعة',
+    vipBoxEpicCardTitle:'بطاقة Epic النادرة!',
+    vipBoxEpicCardValue:'تعدين 0.001 REC/ثانية',
+    vipCommon:'عادي',
+    vipRare:'نادر',
+    vipEpic:'أسطوري',
   },
 
   en: {
@@ -371,7 +387,23 @@ var T = {
     vipThankDesc:'You are now VIP I\nYour support helps us grow 🚀',
     vipGiftLabel:'Welcome gift',
     vipStartBtn:'🚀 Start Enjoying!',
-    vipExclusiveMembership:'Exclusive Membership'
+    vipExclusiveMembership:'Exclusive Membership',
+    vipBoxCommon:'Common Box',
+    vipBoxRare:'Rare Box',
+    vipBoxEpic:'Epic Box',
+    vipBoxOpening:'Opening...',
+    vipBoxAlreadyOpened:'You opened this box today!',
+    vipBoxComeBack:'Come back tomorrow to open again',
+    vipBoxClose:'Close',
+    vipBoxYouGot:'You got',
+    vipBoxGreat:'🎉 Amazing!',
+    vipBoxBoostTitle:'Mining Boost',
+    vipBoxBoostValue:'×{n} for 1 hour',
+    vipBoxEpicCardTitle:'Rare Epic Card!',
+    vipBoxEpicCardValue:'Mining 0.001 REC/sec',
+    vipCommon:'Common',
+    vipRare:'Rare',
+    vipEpic:'Epic',
   },
 
   ru: {
@@ -540,7 +572,23 @@ var T = {
     vipThankDesc:'Вы теперь VIP I\nВаша поддержка помогает нам расти 🚀',
     vipGiftLabel:'Приветственный подарок',
     vipStartBtn:'🚀 Начать!',
-    vipExclusiveMembership:'Эксклюзивное членство'
+    vipExclusiveMembership:'Эксклюзивное членство',
+    vipBoxCommon:'Обычный сундук',
+    vipBoxRare:'Редкий сундук',
+    vipBoxEpic:'Эпический сундук',
+    vipBoxOpening:'Открываем...',
+    vipBoxAlreadyOpened:'Вы уже открыли этот сундук сегодня!',
+    vipBoxComeBack:'Возвращайтесь завтра',
+    vipBoxClose:'Закрыть',
+    vipBoxYouGot:'Вы получили',
+    vipBoxGreat:'🎉 Отлично!',
+    vipBoxBoostTitle:'Ускорение добычи',
+    vipBoxBoostValue:'×{n} на 1 час',
+    vipBoxEpicCardTitle:'Редкая карта Epic!',
+    vipBoxEpicCardValue:'Добыча 0.001 REC/сек',
+    vipCommon:'Обычный',
+    vipRare:'Редкий',
+    vipEpic:'Эпический',
   },
 
   uk: {
@@ -709,7 +757,23 @@ var T = {
     vipThankDesc:'Тепер ви VIP I\nВаша підтримка допомагає нам зростати 🚀',
     vipGiftLabel:'Вітальний подарунок',
     vipStartBtn:'🚀 Почати!',
-    vipExclusiveMembership:'Ексклюзивне членство'
+    vipExclusiveMembership:'Ексклюзивне членство',
+    vipBoxCommon:'Звичайна скриня',
+    vipBoxRare:'Рідкісна скриня',
+    vipBoxEpic:'Епічна скриня',
+    vipBoxOpening:'Відкриваємо...',
+    vipBoxAlreadyOpened:'Ви вже відкрили цю скриню сьогодні!',
+    vipBoxComeBack:'Повертайтесь завтра',
+    vipBoxClose:'Закрити',
+    vipBoxYouGot:'Ви отримали',
+    vipBoxGreat:'🎉 Чудово!',
+    vipBoxBoostTitle:'Прискорення видобутку',
+    vipBoxBoostValue:'×{n} на 1 годину',
+    vipBoxEpicCardTitle:'Рідкісна карта Epic!',
+    vipBoxEpicCardValue:'Видобуток 0.001 REC/сек',
+    vipCommon:'Звичайний',
+    vipRare:'Рідкісний',
+    vipEpic:'Епічний',
   },
 
   pt: {
@@ -878,7 +942,23 @@ var T = {
     vipThankDesc:'Você agora é VIP I\nSeu apoio nos ajuda a crescer 🚀',
     vipGiftLabel:'Presente de boas-vindas',
     vipStartBtn:'🚀 Começar!',
-    vipExclusiveMembership:'Assinatura Exclusiva'
+    vipExclusiveMembership:'Assinatura Exclusiva',
+    vipBoxCommon:'Caixa Comum',
+    vipBoxRare:'Caixa Rara',
+    vipBoxEpic:'Caixa Épica',
+    vipBoxOpening:'Abrindo...',
+    vipBoxAlreadyOpened:'Você já abriu esta caixa hoje!',
+    vipBoxComeBack:'Volte amanhã para abrir novamente',
+    vipBoxClose:'Fechar',
+    vipBoxYouGot:'Você ganhou',
+    vipBoxGreat:'🎉 Incrível!',
+    vipBoxBoostTitle:'Boost de Mineração',
+    vipBoxBoostValue:'×{n} por 1 hora',
+    vipBoxEpicCardTitle:'Carta Epic Rara!',
+    vipBoxEpicCardValue:'Mineração 0.001 REC/seg',
+    vipCommon:'Comum',
+    vipRare:'Raro',
+    vipEpic:'Épico',
   },
 
   es: {
@@ -1047,7 +1127,23 @@ var T = {
     vipThankDesc:'Ahora eres VIP I\nTu apoyo nos ayuda a crecer 🚀',
     vipGiftLabel:'Regalo de bienvenida',
     vipStartBtn:'🚀 ¡Empezar!',
-    vipExclusiveMembership:'Membresía Exclusiva'
+    vipExclusiveMembership:'Membresía Exclusiva',
+    vipBoxCommon:'Cofre Común',
+    vipBoxRare:'Cofre Raro',
+    vipBoxEpic:'Cofre Épico',
+    vipBoxOpening:'Abriendo...',
+    vipBoxAlreadyOpened:'¡Ya abriste este cofre hoy!',
+    vipBoxComeBack:'Vuelve mañana para abrir de nuevo',
+    vipBoxClose:'Cerrar',
+    vipBoxYouGot:'Obtuviste',
+    vipBoxGreat:'🎉 ¡Increíble!',
+    vipBoxBoostTitle:'Boost de Minería',
+    vipBoxBoostValue:'×{n} por 1 hora',
+    vipBoxEpicCardTitle:'¡Carta Epic Rara!',
+    vipBoxEpicCardValue:'Minería 0.001 REC/seg',
+    vipCommon:'Común',
+    vipRare:'Raro',
+    vipEpic:'Épico',
   },
 
   tr: {
@@ -1218,7 +1314,23 @@ var T = {
     vipThankDesc:'Artık VIP I üyesisiniz\nDesteğiniz büyümemize yardımcı olur 🚀',
     vipGiftLabel:'Hoş geldin hediyesi',
     vipStartBtn:'🚀 Başla!',
-    vipExclusiveMembership:'Özel Üyelik'
+    vipExclusiveMembership:'Özel Üyelik',
+    vipBoxCommon:'Normal Sandık',
+    vipBoxRare:'Nadir Sandık',
+    vipBoxEpic:'Epik Sandık',
+    vipBoxOpening:'Açılıyor...',
+    vipBoxAlreadyOpened:'Bu sandığı bugün açtınız!',
+    vipBoxComeBack:'Tekrar açmak için yarın gelin',
+    vipBoxClose:'Kapat',
+    vipBoxYouGot:'Kazandınız',
+    vipBoxGreat:'🎉 Harika!',
+    vipBoxBoostTitle:'Madencilik Boost',
+    vipBoxBoostValue:'1 saat için ×{n}',
+    vipBoxEpicCardTitle:'Nadir Epic Kart!',
+    vipBoxEpicCardValue:'0.001 REC/sn madencilik',
+    vipCommon:'Normal',
+    vipRare:'Nadir',
+    vipEpic:'Epik',
   },
 
   vi: {
@@ -1387,7 +1499,23 @@ var T = {
     vipThankDesc:'Bạn đã là VIP I\nSự ủng hộ của bạn giúp chúng tôi phát triển 🚀',
     vipGiftLabel:'Quà chào mừng',
     vipStartBtn:'🚀 Bắt đầu!',
-    vipExclusiveMembership:'Thành viên Độc quyền'
+    vipExclusiveMembership:'Thành viên Độc quyền',
+    vipBoxCommon:'Rương Thường',
+    vipBoxRare:'Rương Hiếm',
+    vipBoxEpic:'Rương Sử Thi',
+    vipBoxOpening:'Đang mở...',
+    vipBoxAlreadyOpened:'Bạn đã mở rương này hôm nay!',
+    vipBoxComeBack:'Quay lại ngày mai để mở lại',
+    vipBoxClose:'Đóng',
+    vipBoxYouGot:'Bạn nhận được',
+    vipBoxGreat:'🎉 Tuyệt vời!',
+    vipBoxBoostTitle:'Tăng tốc khai thác',
+    vipBoxBoostValue:'×{n} trong 1 giờ',
+    vipBoxEpicCardTitle:'Thẻ Epic hiếm!',
+    vipBoxEpicCardValue:'Khai thác 0.001 REC/giây',
+    vipCommon:'Thường',
+    vipRare:'Hiếm',
+    vipEpic:'Sử Thi',
   },
 
   zh: {
@@ -1556,7 +1684,23 @@ var T = {
     vipThankDesc:'您现在是 VIP I 会员\n您的支持帮助我们成长 🚀',
     vipGiftLabel:'欢迎礼物',
     vipStartBtn:'🚀 开始享受！',
-    vipExclusiveMembership:'专属会员'
+    vipExclusiveMembership:'专属会员',
+    vipBoxCommon:'普通宝箱',
+    vipBoxRare:'稀有宝箱',
+    vipBoxEpic:'史诗宝箱',
+    vipBoxOpening:'正在开启...',
+    vipBoxAlreadyOpened:'您今天已经开启了这个宝箱！',
+    vipBoxComeBack:'明天再来开启',
+    vipBoxClose:'关闭',
+    vipBoxYouGot:'您获得了',
+    vipBoxGreat:'🎉 太棒了！',
+    vipBoxBoostTitle:'挖矿加速',
+    vipBoxBoostValue:'×{n} 持续1小时',
+    vipBoxEpicCardTitle:'稀有Epic卡！',
+    vipBoxEpicCardValue:'挖矿 0.001 REC/秒',
+    vipCommon:'普通',
+    vipRare:'稀有',
+    vipEpic:'史诗',
   }
 };
 
@@ -2283,9 +2427,9 @@ function switchVIPTab(n) {
 
 function _vipBox(type, unlocked) {
   var configs = {
-    common: { label:'Common', color:'#cccccc', bg:'rgba(200,200,200,0.08)', border:'rgba(200,200,200,0.25)', icon:'📦' },
-    rare:   { label:'Rare',   color:'#66aaff', bg:'rgba(68,136,255,0.12)', border:'rgba(68,136,255,0.4)',  icon:'💎' },
-    epic:   { label:'Epic',   color:'#cc66ff', bg:'rgba(170,68,255,0.15)', border:'rgba(170,68,255,0.5)', icon:'🌌' }
+    common: { label:t('vipCommon'), color:'#cccccc', bg:'rgba(200,200,200,0.08)', border:'rgba(200,200,200,0.25)', icon:'📦' },
+    rare:   { label:t('vipRare'),   color:'#66aaff', bg:'rgba(68,136,255,0.12)', border:'rgba(68,136,255,0.4)',  icon:'💎' },
+    epic:   { label:t('vipEpic'),   color:'#cc66ff', bg:'rgba(170,68,255,0.15)', border:'rgba(170,68,255,0.5)', icon:'🌌' }
   };
   var c = configs[type];
   var canOpen = unlocked && !(vipData.boxes && vipData.boxes[type] === getTodayStr());
@@ -2339,9 +2483,9 @@ function openVIPBox(type) {
 
 function showVIPBoxOpening(type, callback) {
   var configs = {
-    common: { icon:'📦', color:'#cccccc', name:'Common', bg:'rgba(200,200,200,0.15)' },
-    rare:   { icon:'💎', color:'#66aaff', name:'Rare',   bg:'rgba(68,136,255,0.15)' },
-    epic:   { icon:'🌌', color:'#cc66ff', name:'Epic',   bg:'rgba(170,68,255,0.15)' }
+    common: { icon:'📦', color:'#cccccc', name:t('vipCommon'), bg:'rgba(200,200,200,0.15)' },
+    rare:   { icon:'💎', color:'#66aaff', name:t('vipRare'),   bg:'rgba(68,136,255,0.15)' },
+    epic:   { icon:'🌌', color:'#cc66ff', name:t('vipEpic'),   bg:'rgba(170,68,255,0.15)' }
   };
   var c = configs[type];
 
@@ -2351,8 +2495,8 @@ function showVIPBoxOpening(type, callback) {
   overlay.innerHTML =
     '<div style="text-align:center;">' +
       '<div id="boxAnim" style="font-size:80px;animation:boxShake 0.5s infinite;margin-bottom:20px;">' + c.icon + '</div>' +
-      '<div style="font-size:22px;font-weight:900;color:' + c.color + ';margin-bottom:8px;">' + c.name + ' Box</div>' +
-      '<div style="font-size:14px;color:rgba(255,255,255,0.5);">جاري الفتح...</div>' +
+      '<div style="font-size:22px;font-weight:900;color:' + c.color + ';margin-bottom:8px;">' + t('vipBox'+type.charAt(0).toUpperCase()+type.slice(1)) + '</div>' +
+      '<div style="font-size:14px;color:rgba(255,255,255,0.5);">' + t('vipBoxOpening') + '</div>' +
     '</div>';
 
   // Add shake animation
@@ -2369,9 +2513,9 @@ function showVIPBoxOpening(type, callback) {
 
 function showVIPBoxResult(type, reward, alreadyOpened) {
   var configs = {
-    common: { color:'#cccccc', name:'Common', bg:'linear-gradient(135deg,#1a1a1a,#2a2a2a)', border:'rgba(200,200,200,0.3)' },
-    rare:   { color:'#66aaff', name:'Rare',   bg:'linear-gradient(135deg,#001133,#002266)', border:'rgba(68,136,255,0.5)' },
-    epic:   { color:'#cc66ff', name:'Epic',   bg:'linear-gradient(135deg,#1a0033,#2d0066)', border:'rgba(170,68,255,0.6)' }
+    common: { color:'#cccccc', name:t('vipCommon'), bg:'linear-gradient(135deg,#1a1a1a,#2a2a2a)', border:'rgba(200,200,200,0.3)' },
+    rare:   { color:'#66aaff', name:t('vipRare'),   bg:'linear-gradient(135deg,#001133,#002266)', border:'rgba(68,136,255,0.5)' },
+    epic:   { color:'#cc66ff', name:t('vipEpic'),   bg:'linear-gradient(135deg,#1a0033,#2d0066)', border:'rgba(170,68,255,0.6)' }
   };
   var c = configs[type];
 
@@ -2383,10 +2527,10 @@ function showVIPBoxResult(type, reward, alreadyOpened) {
     overlay.innerHTML =
       '<div style="background:' + c.bg + ';border:2px solid ' + c.border + ';border-radius:24px;padding:36px 32px;max-width:300px;text-align:center;">' +
         '<div style="font-size:50px;margin-bottom:16px;">🔒</div>' +
-        '<div style="font-size:18px;font-weight:700;color:' + c.color + ';margin-bottom:8px;">' + c.name + ' Box</div>' +
-        '<div style="font-size:14px;color:rgba(255,255,255,0.5);margin-bottom:20px;">فتحت هذا الصندوق اليوم!</div>' +
-        '<div style="font-size:12px;color:rgba(255,255,255,0.3);">عد غداً للفتح مرة أخرى</div>' +
-        '<div style="margin-top:20px;background:rgba(255,255,255,0.08);border-radius:12px;padding:12px;cursor:pointer;color:rgba(255,255,255,0.7);font-size:14px;">إغلاق</div>' +
+        '<div style="font-size:18px;font-weight:700;color:' + c.color + ';margin-bottom:8px;">' + t('vipBox'+type.charAt(0).toUpperCase()+type.slice(1)) + '</div>' +
+        '<div style="font-size:14px;color:rgba(255,255,255,0.5);margin-bottom:20px;">' + t('vipBoxAlreadyOpened') + '</div>' +
+        '<div style="font-size:12px;color:rgba(255,255,255,0.3);">' + t('vipBoxComeBack') + '</div>' +
+        '<div style="margin-top:20px;background:rgba(255,255,255,0.08);border-radius:12px;padding:12px;cursor:pointer;color:rgba(255,255,255,0.7);font-size:14px;">' + t('vipBoxClose') + '</div>' +
       '</div>';
     document.body.appendChild(overlay);
     return;
@@ -2401,21 +2545,21 @@ function showVIPBoxResult(type, reward, alreadyOpened) {
     rewardIcon = '⚡'; rewardTitle = 'REC'; rewardColor = '#00FF88';
     rewardValue = '+' + reward.amount.toFixed(6) + ' REC';
   } else if(reward.type === 'boost') {
-    rewardIcon = '🚀'; rewardTitle = 'تسريع التعدين'; rewardColor = '#FFD700';
-    rewardValue = '×' + reward.multi + ' لمدة ساعة';
+    rewardIcon = '🚀'; rewardTitle = t('vipBoxBoostTitle'); rewardColor = '#FFD700';
+    rewardValue = t('vipBoxBoostValue').replace('{n}', reward.multi);
   } else if(reward.type === 'epicCard') {
-    rewardIcon = '🦅'; rewardTitle = 'بطاقة EPIC النادرة!'; rewardColor = '#FFD700';
-    rewardValue = 'تعدين 0.001 REC/ثانية';
+    rewardIcon = '🦅'; rewardTitle = t('vipBoxEpicCardTitle'); rewardColor = '#FFD700';
+    rewardValue = t('vipBoxEpicCardValue');
   }
 
   overlay.innerHTML =
     '<div style="background:' + c.bg + ';border:2px solid ' + c.border + ';border-radius:24px;padding:36px 32px;max-width:300px;text-align:center;box-shadow:0 0 40px ' + c.border + ';">' +
-      '<div style="font-size:14px;color:' + c.color + ';font-weight:700;margin-bottom:16px;letter-spacing:2px;">' + c.name.toUpperCase() + ' BOX</div>' +
+      '<div style="font-size:14px;color:' + c.color + ';font-weight:700;margin-bottom:16px;letter-spacing:2px;">' + (t('vipBox'+type.charAt(0).toUpperCase()+type.slice(1))||'').toUpperCase() + '</div>' +
       '<div style="font-size:64px;margin-bottom:20px;">' + rewardIcon + '</div>' +
-      '<div style="font-size:16px;color:rgba(255,255,255,0.6);margin-bottom:8px;">حصلت على</div>' +
+      '<div style="font-size:16px;color:rgba(255,255,255,0.6);margin-bottom:8px;">' + t('vipBoxYouGot') + '</div>' +
       '<div style="font-size:24px;font-weight:900;color:' + rewardColor + ';margin-bottom:6px;">' + rewardTitle + '</div>' +
       '<div style="font-size:20px;font-weight:700;color:white;margin-bottom:24px;">' + rewardValue + '</div>' +
-      '<div style="background:' + c.border + ';border-radius:12px;padding:12px;cursor:pointer;color:white;font-size:14px;font-weight:700;">🎉 رائع!</div>' +
+      '<div style="background:' + c.border + ';border-radius:12px;padding:12px;cursor:pointer;color:white;font-size:14px;font-weight:700;">' + t('vipBoxGreat') + '</div>' +
     '</div>';
 
   document.body.appendChild(overlay);
