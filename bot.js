@@ -622,7 +622,7 @@ app.post('/api/vip/boxes/save', async (req, res) => {
   try {
     const { telegramId, boxes } = req.body;
     if (!telegramId) return res.status(400).json({ error: 'Missing telegramId' });
-    await User.findOneAndUpdate({ telegramId }, { 'vip.boxes': boxes });
+    await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, { 'vip.boxes': boxes });
     res.json({ success: true });
   } catch(e) {
     res.status(500).json({ error: e.message });
