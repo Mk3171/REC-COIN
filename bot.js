@@ -237,7 +237,7 @@ const REC_CONTRACT = 'EQCNkOinRhMSplM0DzP18Fz-4WV293YMHF6umS9tGsvOGDV9';
 const FEE_WALLET   = 'UQD-FoGlRG5pBxZpkf3H9ZOsNTL5basBbTEZE8zvMgHLB99o';
 const WITHDRAW_FEE = 70;
 const MIN_WITHDRAW = 500;
-const DAILY_LIMIT  = 10000;
+const DAILY_LIMIT_DEFAULT = 10000;
 
 async function sendJetton(toAddress, amount, comment) {
   try {
@@ -457,7 +457,7 @@ app.get('/api/leaderboard/global', async (req, res) => {
   try {
     var allUsers = await User.find({ banned: false })
       .sort({ rec: -1 }).limit(100)
-      .select('telegramId username firstName rec miningSpeed cardLevels')
+      .select('telegramId username firstName rec miningSpeed cardLevels vip')
       .lean();
     res.json({ top100: allUsers.map(function(u, i) {
       var speed = u.miningSpeed > 0 ? u.miningSpeed : calcMiningSpeed(u.cardLevels);
@@ -658,6 +658,7 @@ app.post('/api/withdraw', async (req, res) => {
     // Check daily limit
     const today = new Date().toISOString().split('T')[0];
     const dailyWithdrawn = user.lastWithdrawDate === today ? (user.dailyWithdrawn || 0) : 0;
+    const DAILY_LIMIT = (user.vip && user.vip.tier >= 1 && user.vip.expiry > Date.now()) ? 20000 : DAILY_LIMIT_DEFAULT;
     if (dailyWithdrawn + amount > DAILY_LIMIT) {
       return res.status(400).json({ error: 'daily_limit', remaining: DAILY_LIMIT - dailyWithdrawn });
     }
