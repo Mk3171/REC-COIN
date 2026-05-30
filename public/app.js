@@ -4268,22 +4268,31 @@ function initTonConnect() {
 }
 
 function updateWalletBtn(wallet) {
-  var btn = document.getElementById('walletBtn');
-  if (!btn) return;
+  var btns = [document.getElementById('walletBtn'), document.getElementById('walletBtnProfile')];
+  btns.forEach(function(btn) {
+    if (!btn) return;
+    if (wallet && wallet.account && wallet.account.address) {
+      var addr = wallet.account.address;
+      var short = shortTonAddr(addr);
+      btn.textContent = '💎 ' + short;
+      btn.style.background = '#1a6b1a';
+      btn.style.border = '1px solid #4eff4e';
+      btn.style.color = '#4eff4e';
+      btn.removeAttribute('data-i18n');
+      btn.setAttribute('data-raw', rawToFriendly(addr));
+    } else {
+      btn.textContent = t('connectWallet');
+      btn.style.background = '#4B9EFF';
+      btn.style.border = 'none';
+      btn.style.color = 'white';
+      btn.setAttribute('data-i18n', 'connectWallet');
+    }
+  });
+  // Save wallet to server (once, not per button)
   if (wallet && wallet.account && wallet.account.address) {
     var addr = wallet.account.address;
-    // Convert raw hex address to friendly TON format (UQDu...6PP2)
-    var short = shortTonAddr(addr);
-    btn.textContent = '💎 ' + short;
-    btn.style.background = '#1a6b1a';
-    btn.style.border = '1px solid #4eff4e';
-    btn.style.color = '#4eff4e';
-    btn.removeAttribute('data-i18n');
-    btn.setAttribute('data-raw', rawToFriendly(addr)); // save for withdrawal
-    // Save to storage
     try { localStorage.setItem('ton_wallet_' + saveKey, addr); } catch(e) {}
     if (CS) { try { CS.setItem('tonWallet', addr); } catch(e) {} }
-    // Save wallet to server
     if(tgUser) {
       fetch('/api/user/save', {
         method:'POST',
@@ -4291,12 +4300,6 @@ function updateWalletBtn(wallet) {
         body: JSON.stringify({ telegramId: tgUser.id, walletAddress: rawToFriendly(addr) })
       }).catch(function(){});
     }
-  } else {
-    btn.textContent = t('connectWallet');
-    btn.style.background = '#4B9EFF';
-    btn.style.border = 'none';
-    btn.style.color = 'white';
-    btn.setAttribute('data-i18n', 'connectWallet');
   }
 }
 
