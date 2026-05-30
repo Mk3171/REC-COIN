@@ -3630,20 +3630,20 @@ function saveAdminCombo() {
 // ====== VIP II WHEEL ======
 var vip2Prizes = [
   { label:'1 REC',   value:1,           type:'rec',    color:'#FF7744', weight:70   },
-  { label:'5 REC',   value:5,           type:'rec',    color:'#FF9922', weight:50   },
-  { label:'10 REC',  value:10,          type:'rec',    color:'#FFCC00', weight:35   },
   { label:'5M 🔴',   value:5000000,     type:'record', color:'#FF4444', weight:80   },
+  { label:'5 REC',   value:5,           type:'rec',    color:'#FF9922', weight:50   },
   { label:'20M 🔴',  value:20000000,    type:'record', color:'#FF2200', weight:60   },
-  { label:'50M 🔴',  value:50000000,    type:'record', color:'#DD0000', weight:40   },
-  { label:'100M 🔴', value:100000000,   type:'record', color:'#CC0000', weight:20   },
-  { label:'500M 🔴', value:500000000,   type:'record', color:'#AA0000', weight:5    },
-  { label:'1B 🔴',   value:1000000000,  type:'record', color:'#880000', weight:1    },
-  { label:'5B 🔴',   value:5000000000,  type:'record', color:'#550000', weight:0.5  },
-  { label:'50 REC',  value:50,          type:'rec',    color:'#00FF88', weight:2    },
-  { label:'500 REC', value:500,         type:'rec',    color:'#00FFAA', weight:0.01 },
   { label:'🍀',      value:0,           type:'luck',   color:'#1a2a1a', weight:50   },
+  { label:'10 REC',  value:10,          type:'rec',    color:'#FFCC00', weight:35   },
+  { label:'50M 🔴',  value:50000000,    type:'record', color:'#DD0000', weight:40   },
+  { label:'50 REC',  value:50,          type:'rec',    color:'#00FF88', weight:2    },
+  { label:'100M 🔴', value:100000000,   type:'record', color:'#CC0000', weight:20   },
   { label:'🍀',      value:0,           type:'luck',   color:'#0d1a0d', weight:50   },
-  { label:'🍀',      value:0,           type:'luck',   color:'#152015', weight:50   }
+  { label:'500M 🔴', value:500000000,   type:'record', color:'#AA0000', weight:5    },
+  { label:'500 REC', value:500,         type:'rec',    color:'#00FFAA', weight:0.01 },
+  { label:'1B 🔴',   value:1000000000,  type:'record', color:'#880000', weight:1    },
+  { label:'🍀',      value:0,           type:'luck',   color:'#152015', weight:50   },
+  { label:'5B 🔴',   value:5000000000,  type:'record', color:'#550000', weight:0.5  }
 ];
 var vip2WheelAngle = 0;
 var vip2Spinning = false;
@@ -3662,21 +3662,43 @@ function drawVIP2Wheel(canvas, rotation) {
   var n = vip2Prizes.length;
   var arc = (2*Math.PI) / n;
   ctx.clearRect(0,0,W,H);
+
   vip2Prizes.forEach(function(p,i){
     var start = rotation + i*arc - Math.PI/2;
     var end   = start + arc;
+    // Draw segment
     ctx.beginPath(); ctx.moveTo(cx,cy);
     ctx.arc(cx,cy,r,start,end); ctx.closePath();
     ctx.fillStyle = p.color; ctx.fill();
-    ctx.strokeStyle='rgba(0,0,0,0.4)'; ctx.lineWidth=1; ctx.stroke();
+    ctx.strokeStyle='rgba(0,0,0,0.5)'; ctx.lineWidth=1.5; ctx.stroke();
+
+    // Draw text - fix mirroring
+    var midAngle = start + arc/2;
+    var norm = ((midAngle % (2*Math.PI)) + 4*Math.PI) % (2*Math.PI);
+    var isLeft = norm > Math.PI/2 && norm < 3*Math.PI/2;
+    var textR = r * 0.68;
+
     ctx.save();
-    ctx.translate(cx,cy); ctx.rotate(start+arc/2);
-    ctx.textAlign='right'; ctx.fillStyle='#fff';
-    ctx.font='bold 8px Orbitron,sans-serif';
-    ctx.shadowColor='#000'; ctx.shadowBlur=3;
-    ctx.fillText(p.label, r-6, 3);
+    ctx.translate(cx, cy);
+    ctx.rotate(midAngle);
+    if(isLeft) {
+      ctx.rotate(Math.PI);
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 7.5px Arial, sans-serif';
+      ctx.shadowColor = '#000'; ctx.shadowBlur = 4;
+      ctx.fillText(p.label, -textR, 3);
+    } else {
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 7.5px Arial, sans-serif';
+      ctx.shadowColor = '#000'; ctx.shadowBlur = 4;
+      ctx.fillText(p.label, textR, 3);
+    }
     ctx.restore();
   });
+
+  // Outer border
   ctx.beginPath(); ctx.arc(cx,cy,r,0,2*Math.PI);
   ctx.strokeStyle='#FFD700'; ctx.lineWidth=3; ctx.stroke();
 }
