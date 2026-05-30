@@ -8,14 +8,7 @@ app.use(express.json());
 
 // ====== MONGODB ======
 mongoose.connect(process.env.MONGODB_URI)
-  .then(async () => {
-    console.log('MongoDB connected ✅');
-    try {
-      var count = await User.aggregate([{ $group: { _id: null, total: { $sum: '$totalBlocksFound' } } }]);
-      if (count && count[0]) totalBlocksMined = count[0].total || 0;
-      console.log('Total blocks loaded:', totalBlocksMined);
-    } catch(e) { console.log('loadTotalBlocks error:', e.message); }
-  })
+  .then(() => console.log('MongoDB connected ✅'))
   .catch(err => console.log('MongoDB error:', err));
 
 // ====== SECURITY SYSTEM ======
@@ -127,9 +120,7 @@ const UserSchema = new mongoose.Schema({
   referredByL2:    { type: String, default: '' },
   referredByL3:    { type: String, default: '' },
   totalRefCommission: { type: Number, default: 0 },
-  comboProgress:   { type: Object, default: { date: '', done: [], claimed: false } },
-  vip:             { type: Object, default: { tier: 0, expiry: 0, boxes: {} } },
-  gameEarnToday:   { type: Object, default: { date: '', earned: 0 } }
+  comboProgress:   { type: Object, default: { date: '', done: [], claimed: false } }
 });
 
 const User = mongoose.model('User', UserSchema);
@@ -616,7 +607,7 @@ app.post('/api/vip/verify', async (req, res) => {
       vi: `👑 VIP ${vipTierName} đã được kích hoạt!\n⏳ Hết hạn: ${expiryDate}`,
       zh: `👑 VIP ${vipTierName} 激活成功！\n⏳ 到期：${expiryDate}`
     };
-    const userLang = user.language || 'en';
+    const userLang = user.lang || 'en';
     const msg = vipMsgs[userLang] || vipMsgs.en;
     try { await bot.sendMessage(telegramId, msg); } catch(e) {}
 
@@ -1094,9 +1085,10 @@ app.post('/api/game-earn', async (req, res) => {
     const user = await User.findOne({ telegramId: parseInt(telegramId) });
     if(!user) return res.status(404).json({ error: 'User not found' });
 
+    // تحقق من الحد اليومي على السيرفر
     const today = new Date().toISOString().split('T')[0];
-    const gameEarn = user.gameEarnToday || { date: '', earned: 0 };
-    const todayEarned = gameEarn.date === today ? (gameEarn.earned || 0) : 0;
+    const gameEarnKey = 'gameEarn_' + today;
+    const todayEarned = user.get(gameEarnKey) || 0;
     const remaining = Math.max(0, 10 - todayEarned);
 
     if(remaining <= 0) return res.json({ success: false, reason: 'daily_limit' });
@@ -1105,7 +1097,7 @@ app.post('/api/game-earn', async (req, res) => {
 
     await User.findOneAndUpdate(
       { telegramId: parseInt(telegramId) },
-      { $inc: { rec: toAdd }, gameEarnToday: { date: today, earned: todayEarned + toAdd } }
+      { $inc: { rec: toAdd }, $set: { [gameEarnKey]: todayEarned + toAdd } }
     );
 
     res.json({ success: true, added: toAdd, remaining: remaining - toAdd });
@@ -1213,6 +1205,19 @@ app.get('/api/combo/today/:telegramId', async (req, res) => {
     var allDone = combo.cards.every(function(c){ return progress.indexOf(c.key) !== -1; });
     var rewardClaimed = user && user.comboProgress && user.comboProgress.date === today && user.comboProgress.claimed;
     res.json({ exists: true, cards, reward: combo.reward, allDone, rewardClaimed: !!rewardClaimed });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// ====== VIP II SPIN ======
+app.post('/api/vip2/spin', async (req, res) => {
+  try {
+    const { telegramId, prize } = req.body;
+    if(!telegramId || !prize) return res.status(400).json({ error: 'Missing data' });
+    const user = await User.findOne({ telegramId: parseInt(telegramId) });
+    if(!user) return res.status(404).json({ error: 'User not found' });
+    if(prize.type === 'rec')    await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, { $inc: { rec: parseFloat(prize.value) } });
+    if(prize.type === 'record') await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, { $inc: { record: parseFloat(prize.value) } });
+    res.json({ success: true });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
