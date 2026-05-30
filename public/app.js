@@ -1370,6 +1370,10 @@ function calcTotalSpeeds(){
     recordPerSec+=cardRecordSpeed(lvl)*m;
     recPerSec+=cardRECSpeed(lvl)*m;
   });
+  // VIP I: ×1.5 REC mining speed
+  if(vipData && parseInt(vipData.tier||0) >= 1 && parseInt(vipData.expiry||0) > Date.now()) {
+    recPerSec *= 1.5;
+  }
 }
 
 // ====== DATA ======
@@ -1971,7 +1975,6 @@ function _vipBox(type, unlocked) {
     'padding:12px 8px;text-align:center;cursor:' + (unlocked ? 'pointer' : 'default') + ';">' +
     '<div style="font-size:28px;">' + (unlocked ? c.icon : '🔒') + '</div>' +
     '<div style="font-size:10px;font-weight:700;color:' + c.color + ';margin-top:6px;">' + c.label + '</div>' +
-    (!canOpen && unlocked ? '<div style="font-size:16px;margin-top:2px;">✅</div>' : '') +
   '</div>';
 }
 
@@ -2794,10 +2797,10 @@ function useEnergyRefill(){
 }
 
 function loadRefillData(){
-  // البيانات تتحمل من applyData — بس نتأكد من التاريخ
   var today=getTodayStr();
+  var maxRefills = (vipData && parseInt(vipData.tier||0) >= 1 && parseInt(vipData.expiry||0) > Date.now()) ? 6 : 3;
   if(!window.refillData || window.refillData.date!==today){
-    window.refillData={date:today,count:3};
+    window.refillData={date:today,count:maxRefills};
   }
 }
 
@@ -2811,7 +2814,9 @@ function updateUpgradeUI(){
   var eb=document.getElementById('energyUpgradeBtn');if(eb)eb.disabled=record<getEnergyCost(energyLevelVal)||energyLevelVal>=100;
   // refill button
   loadRefillData();
+  var maxRefills = (vipData && parseInt(vipData.tier||0) >= 1 && parseInt(vipData.expiry||0) > Date.now()) ? 6 : 3;
   var rc=document.getElementById('refillCount');if(rc)rc.textContent=window.refillData.count;
+  var mrc=document.getElementById('maxRefillCount');if(mrc)mrc.textContent=maxRefills;
   var rb=document.getElementById('energyRefillBtn');if(rb)rb.disabled=window.refillData.count<=0;
 }
 
