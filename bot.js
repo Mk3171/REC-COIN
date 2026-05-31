@@ -8,22 +8,7 @@ app.use(express.json());
 
 // ====== MONGODB ======
 mongoose.connect(process.env.MONGODB_URI)
-  .then(async () => {
-    console.log('MongoDB connected ✅');
-    // Check for missed weekly distribution on startup
-    setTimeout(async function() {
-      try {
-        var weekId = getWeekId();
-        var weekStart = getWeekStart();
-        var hoursSinceStart = (Date.now() - weekStart) / 3600000;
-        var existing = await WeeklyChallenge.findOne({ weekId });
-        if((!existing || !existing.distributed) && hoursSinceStart >= 0 && hoursSinceStart < 48) {
-          console.log('Missed weekly distribution detected, running now...');
-          await distributeWeeklyRewards();
-        }
-      } catch(e) { console.log('Startup weekly check error:', e.message); }
-    }, 5000);
-  })
+  .then(() => console.log('MongoDB connected ✅'))
   .catch(err => console.log('MongoDB error:', err));
 
 // ====== SECURITY SYSTEM ======
@@ -196,7 +181,7 @@ async function distributeWeeklyRewards() {
     if (existing && existing.distributed) return;
 
     var top100 = await User.find({ rec: { $gt: 0 } })
-      .sort({ record: -1 }).limit(100)
+      .sort({ rec: -1 }).limit(100)
       .select('telegramId username firstName walletAddress record rec');
 
     if (top100.length === 0) return;
@@ -241,19 +226,10 @@ async function distributeWeeklyRewards() {
 
 // Check every hour if weekly distribution needed
 setInterval(async function() {
-  try {
-    var now = new Date();
-    var weekId = getWeekId();
-    var weekStart = getWeekStart();
-    var hoursSinceStart = (now - weekStart) / 3600000;
-    // Distribute in first 6 hours of Monday if not done yet
-    if(now.getDay() === 1 && hoursSinceStart < 6) {
-      var existing = await WeeklyChallenge.findOne({ weekId });
-      if(!existing || !existing.distributed) {
-        await distributeWeeklyRewards();
-      }
-    }
-  } catch(e) { console.log('Weekly check error:', e.message); }
+  var now = new Date();
+  if (now.getDay() === 1 && now.getHours() === 0) { // Monday midnight
+    await distributeWeeklyRewards();
+  }
 }, 3600000);
 
 // ====== TON TRANSFER ======
@@ -1229,19 +1205,6 @@ app.get('/api/combo/today/:telegramId', async (req, res) => {
     var allDone = combo.cards.every(function(c){ return progress.indexOf(c.key) !== -1; });
     var rewardClaimed = user && user.comboProgress && user.comboProgress.date === today && user.comboProgress.claimed;
     res.json({ exists: true, cards, reward: combo.reward, allDone, rewardClaimed: !!rewardClaimed });
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
-
-// ====== ADMIN: MANUAL WEEKLY DISTRIBUTION ======
-app.post('/api/admin/distribute-weekly', async (req, res) => {
-  try {
-    const { adminId } = req.body;
-    if(String(adminId) !== String(ADMIN_ID)) return res.status(403).json({ error: 'Not admin' });
-    // Force reset distributed flag for current week then distribute
-    var weekId = getWeekId();
-    await WeeklyChallenge.findOneAndUpdate({ weekId }, { distributed: false });
-    await distributeWeeklyRewards();
-    res.json({ success: true, message: 'Weekly rewards distributed for week: ' + weekId });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
