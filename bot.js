@@ -192,13 +192,14 @@ async function distributeWeeklyRewards() {
     if (top100[1]) rewards[top100[1].telegramId] = 150;
     if (top100[2]) rewards[top100[2].telegramId] = 100;
 
-    // Ranks 4-100: 500 REC distributed by inverse weight
+    // Ranks 4-100: 500 REC distributed equally
     var pool500 = top100.slice(3);
-    var totalWeight = pool500.reduce(function(sum, _, i) { return sum + (pool500.length - i); }, 0);
-    pool500.forEach(function(user, i) {
-      var weight = pool500.length - i;
-      rewards[user.telegramId] = parseFloat((weight / totalWeight * 500).toFixed(4));
-    });
+    if(pool500.length > 0) {
+      var shareEach = parseFloat((500 / pool500.length).toFixed(4));
+      pool500.forEach(function(user) {
+        rewards[user.telegramId] = shareEach;
+      });
+    }
 
     // Send rewards
     for (var telegramId in rewards) {
