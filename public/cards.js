@@ -1017,14 +1017,19 @@ function calcOfflineEarnings() {
     // Only apply if offline for more than 30 seconds
     if(elapsed < 30) return;
 
-    // Cap at 8 hours to prevent abuse
-    var maxSeconds = 8 * 3600;
+    // Cap at 24 hours
+    var maxSeconds = 24 * 3600;
     var seconds = Math.min(elapsed, maxSeconds);
 
     // Calculate earnings based on current card speeds
     calcTotalSpeeds();
     var earnedRecord = Math.floor(recordPerSec * seconds);
-    var earnedRec = recPerSec * seconds;
+    // Apply VIP boost if active today
+    var _offRec = recPerSec;
+    if(vipData && parseInt(vipData.tier||0)>=1 && parseInt(vipData.expiry||0)>Date.now() && vipData.boostDate===getTodayStr()){
+      _offRec *= 1.5;
+    }
+    var earnedRec = _offRec * seconds;
 
     // Energy recharge offline: +12 كل 3 ثواني
     var energyGained = Math.floor(seconds / 3) * 12;
