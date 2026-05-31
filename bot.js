@@ -1222,6 +1222,19 @@ app.post('/api/admin/distribute-weekly', async (req, res) => {
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
+// Tax collection - add to admin account
+app.post('/api/exchange/tax', async (req, res) => {
+  try {
+    const { taxAmount } = req.body;
+    if(!taxAmount || taxAmount <= 0) return res.json({ success: false });
+    await User.findOneAndUpdate(
+      { telegramId: ADMIN_ID },
+      { $inc: { rec: taxAmount } }
+    );
+    res.json({ success: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
 // POST set combo (admin only)
 app.post('/api/combo/set', async (req, res) => {
   try {
