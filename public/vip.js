@@ -50,8 +50,8 @@ function openVIPInfo() {
       '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">' +
         '<div style="font-size:22px;">👑</div>' +
         '<div><div style="font-size:15px;font-weight:700;color:#6688FF;">VIP II</div>' +
-        '<div style="font-size:10px;color:rgba(255,255,255,0.4);">قريباً</div></div>' +
-        '<div style="margin-left:auto;background:rgba(255,255,255,0.05);border-radius:8px;padding:4px 10px;font-size:10px;color:rgba(255,255,255,0.3);font-weight:700;">🔒 قريباً</div>' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.4);">'+t('comingSoon')+'</div></div>' +
+        '<div style="margin-left:auto;background:rgba(255,255,255,0.05);border-radius:8px;padding:4px 10px;font-size:10px;color:rgba(255,255,255,0.3);font-weight:700;">🔒 '+t('comingSoon')+'</div>' +
       '</div>' +
       '<div style="font-size:11px;color:rgba(255,255,255,0.3);">كل مميزات VIP I + مميزات حصرية إضافية</div>' +
     '</div>' +
@@ -61,8 +61,8 @@ function openVIPInfo() {
       '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">' +
         '<div style="font-size:22px;">💎</div>' +
         '<div><div style="font-size:15px;font-weight:700;color:#AA66FF;">VIP III</div>' +
-        '<div style="font-size:10px;color:rgba(255,255,255,0.4);">قريباً</div></div>' +
-        '<div style="margin-left:auto;background:rgba(255,255,255,0.05);border-radius:8px;padding:4px 10px;font-size:10px;color:rgba(255,255,255,0.3);font-weight:700;">🔒 قريباً</div>' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.4);">'+t('comingSoon')+'</div></div>' +
+        '<div style="margin-left:auto;background:rgba(255,255,255,0.05);border-radius:8px;padding:4px 10px;font-size:10px;color:rgba(255,255,255,0.3);font-weight:700;">🔒 '+t('comingSoon')+'</div>' +
       '</div>' +
       '<div style="font-size:11px;color:rgba(255,255,255,0.3);">المستوى الأعلى — مميزات لا مثيل لها</div>' +
     '</div>' +
@@ -97,7 +97,7 @@ function renderVIPPage() {
       '</div>' +
       '<div onclick="switchVIPTab(2)" id="vipTab2" style="flex:1;text-align:center;padding:10px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);cursor:pointer;">' +
         '<div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.4);">👑 VIP II</div>' +
-        '<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px;">قريباً</div>' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px;">'+t('comingSoon')+'</div>' +
       '</div>' +
       '<div onclick="switchVIPTab(3)" id="vipTab3" style="flex:1;text-align:center;padding:10px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);cursor:pointer;">' +
         '<div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.4);">👑 VIP III</div>' +
@@ -203,9 +203,9 @@ function switchVIPTab(n) {
 
 function _vipBox(type, unlocked) {
   var configs = {
-    common: { label:'Common', color:'#cccccc', bg:'rgba(200,200,200,0.08)', border:'rgba(200,200,200,0.25)', icon:'📦' },
-    rare:   { label:'Rare',   color:'#66aaff', bg:'rgba(68,136,255,0.12)', border:'rgba(68,136,255,0.4)',  icon:'💎' },
-    epic:   { label:'Epic',   color:'#cc66ff', bg:'rgba(170,68,255,0.15)', border:'rgba(170,68,255,0.5)', icon:'🌌' }
+    common: { label:t('vipBoxCommon'), color:'#cccccc', bg:'rgba(200,200,200,0.08)', border:'rgba(200,200,200,0.25)', icon:'📦' },
+    rare:   { label:t('vipBoxRare'),   color:'#66aaff', bg:'rgba(68,136,255,0.12)', border:'rgba(68,136,255,0.4)',  icon:'💎' },
+    epic:   { label:t('vipBoxEpic'),   color:'#cc66ff', bg:'rgba(170,68,255,0.15)', border:'rgba(170,68,255,0.5)', icon:'🌌' }
   };
   var c = configs[type];
   var canOpen = unlocked && !(vipData.boxes && vipData.boxes[type] === getTodayStr());
@@ -307,9 +307,9 @@ function showVIPBoxResult(type, reward, alreadyOpened) {
       '<div style="background:' + c.bg + ';border:2px solid ' + c.border + ';border-radius:24px;padding:36px 32px;max-width:300px;text-align:center;">' +
         '<div style="font-size:50px;margin-bottom:16px;">🔒</div>' +
         '<div style="font-size:18px;font-weight:700;color:' + c.color + ';margin-bottom:8px;">' + c.name + ' Box</div>' +
-        '<div style="font-size:14px;color:rgba(255,255,255,0.5);margin-bottom:20px;">فتحت هذا الصندوق اليوم!</div>' +
-        '<div style="font-size:12px;color:rgba(255,255,255,0.3);">عد غداً للفتح مرة أخرى</div>' +
-        '<div style="margin-top:20px;background:rgba(255,255,255,0.08);border-radius:12px;padding:12px;cursor:pointer;color:rgba(255,255,255,0.7);font-size:14px;">إغلاق</div>' +
+        '<div style="font-size:14px;color:rgba(255,255,255,0.5);margin-bottom:20px;">'+t('vipBoxAlreadyOpened')+'</div>' +
+        '<div style="font-size:12px;color:rgba(255,255,255,0.3);">'+t('vipBoxComeBack')+'</div>' +
+        '<div style="margin-top:20px;background:rgba(255,255,255,0.08);border-radius:12px;padding:12px;cursor:pointer;color:rgba(255,255,255,0.7);font-size:14px;">'+t('vipBoxClose')+'</div>' +
       '</div>';
     document.body.appendChild(overlay);
     return;
@@ -335,7 +335,7 @@ function showVIPBoxResult(type, reward, alreadyOpened) {
     '<div style="background:' + c.bg + ';border:2px solid ' + c.border + ';border-radius:24px;padding:36px 32px;max-width:300px;text-align:center;box-shadow:0 0 40px ' + c.border + ';">' +
       '<div style="font-size:14px;color:' + c.color + ';font-weight:700;margin-bottom:16px;letter-spacing:2px;">' + c.name.toUpperCase() + ' BOX</div>' +
       '<div style="font-size:64px;margin-bottom:20px;">' + rewardIcon + '</div>' +
-      '<div style="font-size:16px;color:rgba(255,255,255,0.6);margin-bottom:8px;">حصلت على</div>' +
+      '<div style="font-size:16px;color:rgba(255,255,255,0.6);margin-bottom:8px;">'+t('vipBoxYouGot')+'</div>' +
       '<div style="font-size:24px;font-weight:900;color:' + rewardColor + ';margin-bottom:6px;">' + rewardTitle + '</div>' +
       '<div style="font-size:20px;font-weight:700;color:white;margin-bottom:24px;">' + rewardValue + '</div>' +
       '<div style="background:' + c.border + ';border-radius:12px;padding:12px;cursor:pointer;color:white;font-size:14px;font-weight:700;">🎉 رائع!</div>' +
