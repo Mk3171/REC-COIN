@@ -95,7 +95,8 @@ function saveData(immediate){
   var d=JSON.stringify({record,rec,energy,maxEnergy,tapLevelVal,energyLevelVal,tapPowerVal,
     completedTasks,cardLevels,cardUpgrades,refCount,claimedMilest,
     dailyLogin,mysteryLastDate,dailyTasksData,cardTasksClaimed,totalTaps,
-    refillData:window.refillData,vip:vipData});
+    refillData:window.refillData,vip:vipData,
+    lastSaveTime:Date.now()});
   try{localStorage.setItem(saveKey,d);}catch(e){}
   if(CS){try{CS.setItem('gameData',d);}catch(e){}}
   if(immediate){
@@ -462,7 +463,9 @@ function updateUI(){
   // Mining speeds on home
   var recs=document.getElementById('recSpeedShow');
   var recs2=document.getElementById('recordSpeedShow');
-  if(recs)recs.textContent=recPerSec>0?recPerSec.toFixed(8):'0.00000000';
+  var _displayRec = recPerSec;
+  if(vipData && parseInt(vipData.tier||0)>=1 && parseInt(vipData.expiry||0)>Date.now() && vipData.boostDate===getTodayStr()) _displayRec*=1.5;
+  if(recs)recs.textContent=_displayRec>0?_displayRec.toFixed(8):'0.00000000';
   if(recs2)recs2.textContent=recordPerSec>0?Math.floor(recordPerSec).toLocaleString():'0';
   // Rank
   var m=getMyMedal();
@@ -542,7 +545,7 @@ function openRECInfo() {
 
     _infoCard('#00FF88','⛏️', t('recAutoMining'), t('recAutoMining'),
       t('recAutoMiningDesc') + '<div style="margin-top:6px;padding:8px;background:rgba(0,0,0,0.3);border-radius:8px;font-family:Orbitron,sans-serif;font-size:10px;color:#00FF88;">' +
-      t('recYourSpeed') + ' ' + recPerSec.toFixed(8) + ' REC/s</div>') +
+      t('recYourSpeed') + ' ' + (function(){var s=recPerSec;if(vipData&&parseInt(vipData.tier||0)>=1&&parseInt(vipData.expiry||0)>Date.now()&&vipData.boostDate===getTodayStr())s*=1.5;return s.toFixed(8);}()) + ' REC/s</div>') +
 
     _infoCard('#AA66FF','🃏', t('recCardUpgrade'), t('recCardUpgrade'),
       t('recCardUpgradeDesc') +
