@@ -215,7 +215,7 @@ function _vipBox(type, unlocked) {
     '<div style="font-size:28px;">' + (unlocked ? c.icon : '🔒') + '</div>' +
     '<div style="font-size:10px;font-weight:700;color:' + c.color + ';margin-top:6px;">' + c.label + '</div>' +
     '<div style="font-size:9px;color:rgba(255,255,255,0.4);margin-top:3px;">' +
-      (unlocked ? (canOpen ? 'افتح' : '✅ تم اليوم') : 'مقفل') +
+      (unlocked ? (canOpen ? t('vipBoxOpen') : t('vipBoxDone')) : t('locked')) +
     '</div>' +
   '</div>';
 }
