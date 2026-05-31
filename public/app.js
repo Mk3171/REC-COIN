@@ -1591,7 +1591,7 @@ function showBlockNotification(recAmount, blockNum) {
       '<div style="font-size:10px;color:#555;margin-top:4px;">تمت الإضافة لرصيدك تلقائياً ✅</div>'+
     '</div>'+
     '<div style="font-size:10px;color:#444;margin-bottom:14px;">📢 تم الإعلان في قناة REC Blocks</div>'+
-    '<button onclick="document.getElementById(\'blockPopupOverlay\').remove()" style="background:linear-gradient(135deg,#CC0000,#FF2200);border:none;color:white;padding:13px;border-radius:12px;cursor:pointer;font-size:15px;font-weight:bold;width:100%;">🔴 COLLECT</button>';
+    '<button onclick="saveData(true);document.getElementById(\'blockPopupOverlay\').remove()" style="background:linear-gradient(135deg,#CC0000,#FF2200);border:none;color:white;padding:13px;border-radius:12px;cursor:pointer;font-size:15px;font-weight:bold;width:100%;">🔴 COLLECT</button>';
 
   ol.addEventListener('click', function(e){ if(e.target===ol) ol.remove(); });
   ol.appendChild(pp);
@@ -1670,7 +1670,7 @@ function showBlockPopup(blockNum, rewardRecord, rewardRec) {
       '<div style="font-size:24px;color:#00FF88;font-family:Orbitron,sans-serif;font-weight:bold;">+'+rewardRec.toFixed(4)+'</div>'+
     '</div>'+
     '<div style="font-size:10px;color:#444;margin-bottom:14px;">📢 تم الإعلان في قناة REC Blocks</div>'+
-    '<button onclick="document.getElementById(\'blockPopupOverlay\').remove()" style="background:linear-gradient(135deg,#CC0000,#FF2200);border:none;color:white;padding:13px;border-radius:12px;cursor:pointer;font-size:15px;font-weight:bold;width:100%;letter-spacing:1px;">🔴 COLLECT</button>';
+    '<button onclick="saveData(true);document.getElementById(\'blockPopupOverlay\').remove()" style="background:linear-gradient(135deg,#CC0000,#FF2200);border:none;color:white;padding:13px;border-radius:12px;cursor:pointer;font-size:15px;font-weight:bold;width:100%;letter-spacing:1px;">🔴 COLLECT</button>';
 
   ol.addEventListener('click', function(e){ if(e.target===ol) ol.remove(); });
   ol.appendChild(pp);
@@ -1713,9 +1713,13 @@ setInterval(function(){
   checkUpgradeTimers();
   // تعدين RECORD من البطاقات — مستقل
   if(recordPerSec>0) record+=recordPerSec*3;
-  // تعدين REC من البطاقات — مستقل
+  // تعدين REC — مع بوست VIP لو مفعّل
   if(recPerSec>0){
-    rec+=recPerSec*3;
+    var _effectiveRec = recPerSec;
+    if(vipData && parseInt(vipData.tier||0)>=1 && parseInt(vipData.expiry||0)>Date.now() && vipData.boostDate===getTodayStr()){
+      _effectiveRec *= 1.5;
+    }
+    rec+=_effectiveRec*3;
     checkForBlock();
   }
   // شحن الطاقة — مستقل
@@ -1815,7 +1819,7 @@ function openVIPInfo() {
         '🔋 شحن طاقة ٦ مرات يومياً<br>' +
         '💰 حد سحب يومي من 1,000 حتى 20,000 REC<br>' +
         '🎯 تلميح بطاقة واحدة من الكومبو اليومي<br>' +
-        '🎁 مكافأة ترحيبية فورية 1,000,000 RECORD<br>' +
+        '🎁 +50 REC مكافأة ترحيبية فورية<br>' +
         '👑 شارة VIP ذهبية بالليدربورد' +
       '</div>' +
     '</div>' +
@@ -1921,6 +1925,32 @@ function switchVIPTab(n) {
         _vipBox('rare', hasVIP) +
         _vipBox('epic', hasVIP) +
       '</div>' +
+
+      // Action buttons (VIP only)
+      (hasVIP ?
+        '<div style="margin-bottom:14px;">' +
+          // Boost button
+          '<div style="background:rgba(255,200,0,0.08);border:1px solid rgba(255,200,0,0.25);border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">' +
+            '<div><div style="font-size:12px;font-weight:700;color:#FFD700;">⚡ تسريع التعدين ×١.٥</div>' +
+            '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;">مرة واحدة يومياً</div></div>' +
+            (vipData.boostDate === getTodayStr() ?
+              '<div style="background:rgba(255,215,0,0.15);border:1px solid rgba(255,215,0,0.3);border-radius:10px;padding:6px 12px;font-size:11px;color:#FFD700;">✅ مفعّل</div>' :
+              '<div onclick="useVIPBoost()" style="background:linear-gradient(135deg,#886600,#FFD700);border-radius:10px;padding:7px 16px;font-size:11px;color:#000;font-weight:700;cursor:pointer;">فعّل</div>'
+            ) +
+          '</div>' +
+          // Energy refill
+          '<div style="background:rgba(0,200,255,0.07);border:1px solid rgba(0,200,255,0.22);border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">' +
+            '<div><div style="font-size:12px;font-weight:700;color:#00CCFF;">🔋 شحن الطاقة</div>' +
+            '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;">متبقي: ' + (window.refillData ? window.refillData.count : 6) + ' / 6 اليوم</div></div>' +
+            '<div onclick="useEnergyRefill()" style="background:linear-gradient(135deg,#004466,#0088CC);border-radius:10px;padding:7px 16px;font-size:11px;color:white;font-weight:700;cursor:pointer;">شحن</div>' +
+          '</div>' +
+          // Withdrawal limit
+          '<div style="background:rgba(0,255,100,0.05);border:1px solid rgba(0,255,100,0.18);border-radius:14px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;">' +
+            '<div><div style="font-size:12px;font-weight:700;color:#00CC66;">💰 حد السحب اليومي</div>' +
+            '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;">حتى 20,000 REC / يوم</div></div>' +
+            '<div style="font-size:11px;color:rgba(0,255,136,0.5);">قريباً 🔒</div>' +
+          '</div>' +
+        '</div>' : '') +
 
       // Features
       '<div style="background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);border-radius:14px;padding:14px;margin-bottom:16px;">' +
@@ -2194,10 +2224,10 @@ function buyVIP(tier) {
           vipData.tier = data.tier;
           vipData.expiry = data.expiry;
           vipData.boxes = {};
-          // Welcome bonus: 1,000,000 RECORD
+          // Welcome bonus: 50 REC
           if(data.tier === 1) {
-            record += 1000000;
-            showToast('🎁 +1,000,000 RECORD مكافأة ترحيبية!');
+            rec += 50;
+            showToast('🎁 +50 REC مكافأة ترحيبية!');
             setTimeout(function(){
               showToast('👑 تم تفعيل VIP I بنجاح!');
             }, 2000);
@@ -2776,6 +2806,16 @@ function upgradeEnergy(){
   record-=cost; energyLevelVal++;
   maxEnergy=Math.floor(1000*Math.pow(10000,energyLevelVal/99));
   saveData(true); updateUpgradeUI(); updateUI();
+}
+
+function useVIPBoost() {
+  if(!vipData || parseInt(vipData.tier||0) < 1 || parseInt(vipData.expiry||0) <= Date.now()) return;
+  var today = getTodayStr();
+  if(vipData.boostDate === today) { showToast('✅ البوست مفعّل اليوم مسبقاً'); return; }
+  vipData.boostDate = today;
+  saveData(true);
+  showToast('⚡ تم تفعيل ×١.٥ تعدين REC لبقية اليوم!');
+  renderVIPPage();
 }
 
 // ====== ENERGY REFILL ======
