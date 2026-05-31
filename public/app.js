@@ -422,6 +422,31 @@ function updateTimerDisplays(){
     var ss=Math.floor((diff%60000)/1000);
     wEl.textContent=pad2(dd)+'d '+pad2(hh)+'h '+pad2(mm)+'m '+pad2(ss)+'s';
   }
+  // Combo timer countdown
+  var cEl=document.getElementById('comboTimerCount');
+  var cLbl=document.getElementById('comboTimerLabel');
+  if(cEl && window._comboExpiresAt){
+    var rem=Math.max(0, window._comboExpiresAt - now);
+    if(rem<=0){
+      cEl.style.color='#FF4444';
+      cEl.textContent='00:00:00';
+      if(cLbl) cLbl.textContent= window._comboIsAdmin ? t('comboAdminTimerLabel') : t('comboTimerLabel');
+      // لو انتهى وفي بيانات — أعد تحميل لإخفاء الكومبو
+      if(comboData && comboData.exists && !window._comboExpiredReloaded){
+        window._comboExpiredReloaded = true;
+        comboData.exists = false;
+        renderComboSlots(comboData);
+      }
+    } else {
+      window._comboExpiredReloaded = false;
+      cEl.style.color='#FFD700';
+      var h=Math.floor(rem/3600000);
+      var m=Math.floor((rem%3600000)/60000);
+      var s=Math.floor((rem%60000)/1000);
+      cEl.textContent=pad2(h)+':'+pad2(m)+':'+pad2(s);
+      if(cLbl) cLbl.textContent= window._comboIsAdmin ? t('comboAdminTimerLabel') : t('comboTimerLabel');
+    }
+  }
 }
 
 function updateUI(){
@@ -659,8 +684,32 @@ function renderComboSlots(d) {
   var slots = document.getElementById('comboCardSlots');
   if(!slots) return;
 
-  if(!d || !d.exists) {
-    slots.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;"><div style="font-size:32px;margin-bottom:8px;">🔒</div><div style="color:rgba(255,255,255,0.3);font-size:13px;">لم يُحدد كومبو اليوم بعد</div></div>';
+  var isAdmin = tgUser && String(tgUser.id) === '6995765586';
+  var now = Date.now();
+  var expired = d && d.expiresAt && now > d.expiresAt;
+
+  // Admin: show timer always
+  var timerEl = document.getElementById('comboTimerRow');
+  if(timerEl) {
+    if(d && d.expiresAt) {
+      timerEl.style.display = 'block';
+      window._comboExpiresAt = d.expiresAt;
+      window._comboIsAdmin = isAdmin;
+    } else {
+      timerEl.style.display = 'none';
+    }
+  }
+
+  if(!d || !d.exists || expired) {
+    if(isAdmin && expired) {
+      slots.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;"><div style="font-size:32px;margin-bottom:8px;">⏰</div><div style="color:#FFD700;font-size:13px;font-weight:700;">' + t('comboExpiredAdmin') + '</div></div>';
+    } else {
+      slots.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;"><div style="font-size:32px;margin-bottom:8px;">🔒</div></div>';
+    }
+    var claimArea = document.getElementById('comboClaimArea');
+    var claimed = document.getElementById('comboClaimed');
+    if(claimArea) claimArea.style.display = 'none';
+    if(claimed) claimed.style.display = 'none';
     return;
   }
 
@@ -679,9 +728,8 @@ function renderComboSlots(d) {
   if(claimArea) claimArea.style.display = (d.allDone && !d.rewardClaimed) ? 'block' : 'none';
   if(claimed) claimed.style.display = d.rewardClaimed ? 'block' : 'none';
 
-  // Update badge on home
   var badge = document.getElementById('comboDotBadge');
-  if(badge) badge.style.display = (d.exists && !d.allDone) ? 'block' : 'none';
+  if(badge) badge.style.display = (d.exists && !d.allDone && !expired) ? 'block' : 'none';
 }
 
 function getCardInfo(catIdx, cardIdx) {
