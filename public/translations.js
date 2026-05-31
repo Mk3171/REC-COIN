@@ -181,7 +181,29 @@ var T = {
     recordSpend2:'⬆️ رفع مستوى Tap Power للحصول على أكثر',
     recordSpend3:'⚡ توسيع سعة الطاقة لضغطات أكثر',
     recordSpend4:'⭐ شراء بطاقات محدودة من المتجر',
-    yourLevel:'مستواك الحالي', yourBalance:'رصيدك:'
+    yourLevel:'مستواك الحالي', yourBalance:'رصيدك:',
+    // VIP I
+    vipDailyBoxes:'📦 الصناديق اليومية',
+    vipComboHint:'🎯 تلميح الكومبو اليومي',
+    vipComboFrom:'إحدى بطاقات الكومبو من فئة:',
+    vipBoostTitle:'⚡ تسريع التعدين ×١.٥',
+    vipBoostOnce:'مرة واحدة يومياً',
+    vipBoostActivate:'فعّل',
+    vipBoostActivated:'✅ مفعّل',
+    vipEnergyTitle:'🔋 شحن الطاقة',
+    vipEnergyRemaining:'متبقي: {n} / {max} اليوم',
+    vipEnergyBtn:'شحن',
+    vipWithdrawTitle:'💰 حد السحب اليومي',
+    vipWithdrawDesc:'حتى 20,000 REC / يوم',
+    vipSoonLock:'قريباً 🔒',
+    vipActiveMembership:'✅ عضويتك فعالة',
+    vipExpiryDate:'تنتهي:',
+    vipSubscribeBtn:'👑 اشتراك VIP I',
+    vipPriceLabel:'1 TON / شهر',
+    // Combo timer
+    comboTimerLabel:'⏱ ينتهي الكومبو بعد:',
+    comboExpiredAdmin:'⏰ انتهى الوقت! اختر ٣ بطاقات جديدة',
+    comboAdminTimerLabel:'متبقي لنهاية الكومبو الحالي:'
   },
 
   en: {
@@ -327,7 +349,17 @@ var T = {
     recordSpend2:'⬆️ Upgrade Tap Power for more per tap',
     recordSpend3:'⚡ Expand energy capacity for more taps',
     recordSpend4:'⭐ Buy limited cards from the shop',
-    yourLevel:'Your Current Level', yourBalance:'Your Balance:'
+    yourLevel:'Your Current Level', yourBalance:'Your Balance:',
+    vipDailyBoxes:'📦 Daily Boxes', vipComboHint:'🎯 Daily Combo Hint',
+    vipComboFrom:'One combo card from:', vipBoostTitle:'⚡ Mining Speed ×1.5',
+    vipBoostOnce:'Once per day', vipBoostActivate:'Activate', vipBoostActivated:'✅ Active',
+    vipEnergyTitle:'🔋 Energy Refill', vipEnergyRemaining:'Remaining: {n} / {max} today',
+    vipEnergyBtn:'Refill', vipWithdrawTitle:'💰 Daily Withdrawal Limit',
+    vipWithdrawDesc:'Up to 20,000 REC / day', vipSoonLock:'Soon 🔒',
+    vipActiveMembership:'✅ Membership Active', vipExpiryDate:'Expires:',
+    vipSubscribeBtn:'👑 Subscribe VIP I', vipPriceLabel:'1 TON / month',
+    comboTimerLabel:'⏱ Combo expires in:', comboExpiredAdmin:'⏰ Time up! Choose 3 new cards',
+    comboAdminTimerLabel:'Time left for current combo:'
   },
 
   ru: {
@@ -467,7 +499,17 @@ var T = {
     recordSpend1:'🃏 Улучшение карточек майнинга для увеличения REC',
     recordSpend2:'⬆️ Улучшение Tap Power', recordSpend3:'⚡ Расширение ёмкости энергии',
     recordSpend4:'⭐ Покупка лимитных карточек в магазине',
-    yourLevel:'Ваш текущий уровень', yourBalance:'Ваш баланс:'
+    yourLevel:'Ваш текущий уровень', yourBalance:'Ваш баланс:',
+    vipDailyBoxes:'📦 Ежедневные ящики', vipComboHint:'🎯 Подсказка комбо',
+    vipComboFrom:'Одна карта комбо из:', vipBoostTitle:'⚡ Скорость ×1.5',
+    vipBoostOnce:'Раз в день', vipBoostActivate:'Активировать', vipBoostActivated:'✅ Активно',
+    vipEnergyTitle:'🔋 Зарядка энергии', vipEnergyRemaining:'Осталось: {n} / {max} сегодня',
+    vipEnergyBtn:'Зарядить', vipWithdrawTitle:'💰 Лимит вывода в день',
+    vipWithdrawDesc:'До 20,000 REC / день', vipSoonLock:'Скоро 🔒',
+    vipActiveMembership:'✅ Членство активно', vipExpiryDate:'Истекает:',
+    vipSubscribeBtn:'👑 Подписка VIP I', vipPriceLabel:'1 TON / месяц',
+    comboTimerLabel:'⏱ Комбо истекает через:', comboExpiredAdmin:'⏰ Время вышло! Выберите 3 новые карты',
+    comboAdminTimerLabel:'Осталось для текущего комбо:'
   },
 
   uk: {
@@ -606,7 +648,17 @@ var T = {
     recordSpend1:'🃏 Покращення карточок для збільшення REC',
     recordSpend2:'⬆️ Покращення Tap Power', recordSpend3:'⚡ Розширення ємності енергії',
     recordSpend4:'⭐ Купівля лімітних карточок у магазині',
-    yourLevel:'Ваш поточний рівень', yourBalance:'Ваш баланс:'
+    yourLevel:'Ваш поточний рівень', yourBalance:'Ваш баланс:',
+    vipDailyBoxes:'📦 Щоденні скриньки', vipComboHint:'🎯 Підказка комбо',
+    vipComboFrom:'Одна карта комбо з:', vipBoostTitle:'⚡ Швидкість ×1.5',
+    vipBoostOnce:'Раз на день', vipBoostActivate:'Активувати', vipBoostActivated:'✅ Активно',
+    vipEnergyTitle:'🔋 Зарядка енергії', vipEnergyRemaining:'Залишилось: {n} / {max} сьогодні',
+    vipEnergyBtn:'Зарядити', vipWithdrawTitle:'💰 Ліміт виведення на день',
+    vipWithdrawDesc:'До 20,000 REC / день', vipSoonLock:'Скоро 🔒',
+    vipActiveMembership:'✅ Членство активне', vipExpiryDate:'Спливає:',
+    vipSubscribeBtn:'👑 Підписка VIP I', vipPriceLabel:'1 TON / місяць',
+    comboTimerLabel:'⏱ Комбо закінчується через:', comboExpiredAdmin:'⏰ Час вийшов! Оберіть 3 нові карти',
+    comboAdminTimerLabel:'Залишилось для поточного комбо:'
   },
 
   pt: {
@@ -743,7 +795,17 @@ var T = {
     recordHowSpend:'💡 Como usar RECORD?',
     recordSpend1:'🃏 Melhorar cartas de mineração', recordSpend2:'⬆️ Melhorar Tap Power',
     recordSpend3:'⚡ Expandir capacidade de energia', recordSpend4:'⭐ Comprar cartas limitadas',
-    yourLevel:'Seu Nível Atual', yourBalance:'Seu Saldo:'
+    yourLevel:'Seu Nível Atual', yourBalance:'Seu Saldo:',
+    vipDailyBoxes:'📦 Caixas Diárias', vipComboHint:'🎯 Dica do Combo Diário',
+    vipComboFrom:'Uma carta do combo de:', vipBoostTitle:'⚡ Velocidade ×1.5',
+    vipBoostOnce:'Uma vez por dia', vipBoostActivate:'Ativar', vipBoostActivated:'✅ Ativo',
+    vipEnergyTitle:'🔋 Recarga de Energia', vipEnergyRemaining:'Restante: {n} / {max} hoje',
+    vipEnergyBtn:'Recarregar', vipWithdrawTitle:'💰 Limite Diário de Saque',
+    vipWithdrawDesc:'Até 20.000 REC / dia', vipSoonLock:'Em breve 🔒',
+    vipActiveMembership:'✅ Assinatura Ativa', vipExpiryDate:'Expira:',
+    vipSubscribeBtn:'👑 Assinar VIP I', vipPriceLabel:'1 TON / mês',
+    comboTimerLabel:'⏱ Combo expira em:', comboExpiredAdmin:'⏰ Tempo esgotado! Escolha 3 novas cartas',
+    comboAdminTimerLabel:'Tempo restante do combo atual:'
   },
 
   es: {
@@ -880,7 +942,17 @@ var T = {
     recordHowSpend:'💡 ¿Cómo usar RECORD?',
     recordSpend1:'🃏 Mejorar tarjetas de minería', recordSpend2:'⬆️ Mejorar Tap Power',
     recordSpend3:'⚡ Expandir capacidad de energía', recordSpend4:'⭐ Comprar tarjetas limitadas',
-    yourLevel:'Tu Nivel Actual', yourBalance:'Tu Saldo:'
+    yourLevel:'Tu Nivel Actual', yourBalance:'Tu Saldo:',
+    vipDailyBoxes:'📦 Cajas Diarias', vipComboHint:'🎯 Pista del Combo Diario',
+    vipComboFrom:'Una carta del combo de:', vipBoostTitle:'⚡ Velocidad ×1.5',
+    vipBoostOnce:'Una vez al día', vipBoostActivate:'Activar', vipBoostActivated:'✅ Activo',
+    vipEnergyTitle:'🔋 Recarga de Energía', vipEnergyRemaining:'Restante: {n} / {max} hoy',
+    vipEnergyBtn:'Recargar', vipWithdrawTitle:'💰 Límite Diario de Retiro',
+    vipWithdrawDesc:'Hasta 20,000 REC / día', vipSoonLock:'Próximamente 🔒',
+    vipActiveMembership:'✅ Membresía Activa', vipExpiryDate:'Expira:',
+    vipSubscribeBtn:'👑 Suscribirse VIP I', vipPriceLabel:'1 TON / mes',
+    comboTimerLabel:'⏱ El combo expira en:', comboExpiredAdmin:'⏰ ¡Tiempo agotado! Elige 3 nuevas cartas',
+    comboAdminTimerLabel:'Tiempo restante del combo actual:'
   },
 
   tr: {
@@ -1018,7 +1090,17 @@ var T = {
     recordHowSpend:'💡 RECORD nasıl kullanılır?',
     recordSpend1:'🃏 Madencilik kartlarını yükselt', recordSpend2:'⬆️ Tap Power yükselt',
     recordSpend3:'⚡ Enerji kapasitesini genişlet', recordSpend4:'⭐ Sınırlı kartlar satın al',
-    yourLevel:'Mevcut Seviyeniz', yourBalance:'Bakiyeniz:'
+    yourLevel:'Mevcut Seviyeniz', yourBalance:'Bakiyeniz:',
+    vipDailyBoxes:'📦 Günlük Kutular', vipComboHint:'🎯 Günlük Kombo İpucu',
+    vipComboFrom:'Kombo kartı kategorisi:', vipBoostTitle:'⚡ Hız ×1.5',
+    vipBoostOnce:'Günde bir kez', vipBoostActivate:'Etkinleştir', vipBoostActivated:'✅ Aktif',
+    vipEnergyTitle:'🔋 Enerji Şarjı', vipEnergyRemaining:'Kalan: {n} / {max} bugün',
+    vipEnergyBtn:'Şarj Et', vipWithdrawTitle:'💰 Günlük Çekim Limiti',
+    vipWithdrawDesc:'20.000 REC kadar / gün', vipSoonLock:'Yakında 🔒',
+    vipActiveMembership:'✅ Üyelik Aktif', vipExpiryDate:'Bitiş:',
+    vipSubscribeBtn:'👑 VIP I Aboneliği', vipPriceLabel:'1 TON / ay',
+    comboTimerLabel:'⏱ Kombo bitiyor:', comboExpiredAdmin:'⏰ Süre doldu! 3 yeni kart seç',
+    comboAdminTimerLabel:'Mevcut kombo için kalan süre:'
   },
 
   vi: {
@@ -1156,7 +1238,17 @@ var T = {
     recordHowSpend:'💡 Cách sử dụng RECORD?',
     recordSpend1:'🃏 Nâng cấp thẻ khai thác', recordSpend2:'⬆️ Nâng cấp Tap Power',
     recordSpend3:'⚡ Mở rộng dung lượng năng lượng', recordSpend4:'⭐ Mua thẻ giới hạn',
-    yourLevel:'Cấp độ hiện tại', yourBalance:'Số dư:'
+    yourLevel:'Cấp độ hiện tại', yourBalance:'Số dư:',
+    vipDailyBoxes:'📦 Hộp Hàng Ngày', vipComboHint:'🎯 Gợi ý Combo Hàng Ngày',
+    vipComboFrom:'Một thẻ combo từ:', vipBoostTitle:'⚡ Tốc độ ×1.5',
+    vipBoostOnce:'Một lần mỗi ngày', vipBoostActivate:'Kích hoạt', vipBoostActivated:'✅ Đã kích hoạt',
+    vipEnergyTitle:'🔋 Nạp Năng Lượng', vipEnergyRemaining:'Còn lại: {n} / {max} hôm nay',
+    vipEnergyBtn:'Nạp', vipWithdrawTitle:'💰 Hạn mức rút hàng ngày',
+    vipWithdrawDesc:'Đến 20,000 REC / ngày', vipSoonLock:'Sắp có 🔒',
+    vipActiveMembership:'✅ Thành viên Hoạt động', vipExpiryDate:'Hết hạn:',
+    vipSubscribeBtn:'👑 Đăng ký VIP I', vipPriceLabel:'1 TON / tháng',
+    comboTimerLabel:'⏱ Combo hết hạn sau:', comboExpiredAdmin:'⏰ Hết giờ! Chọn 3 thẻ mới',
+    comboAdminTimerLabel:'Thời gian còn lại của combo:'
   },
 
   zh: {
@@ -1293,7 +1385,17 @@ var T = {
     recordHowSpend:'💡 如何使用RECORD?',
     recordSpend1:'🃏 升级挖矿卡片', recordSpend2:'⬆️ 升级点击力量',
     recordSpend3:'⚡ 扩展能量容量', recordSpend4:'⭐ 从商店购买限定卡',
-    yourLevel:'您的当前级别', yourBalance:'您的余额:'
+    yourLevel:'您的当前级别', yourBalance:'您的余额:',
+    vipDailyBoxes:'📦 每日宝箱', vipComboHint:'🎯 每日组合提示',
+    vipComboFrom:'组合牌来自:', vipBoostTitle:'⚡ 挖矿速度 ×1.5',
+    vipBoostOnce:'每天一次', vipBoostActivate:'激活', vipBoostActivated:'✅ 已激活',
+    vipEnergyTitle:'🔋 能量充值', vipEnergyRemaining:'剩余: {n} / {max} 今天',
+    vipEnergyBtn:'充值', vipWithdrawTitle:'💰 每日提现限额',
+    vipWithdrawDesc:'每天最多 20,000 REC', vipSoonLock:'即将推出 🔒',
+    vipActiveMembership:'✅ 会员已激活', vipExpiryDate:'到期:',
+    vipSubscribeBtn:'👑 订阅 VIP I', vipPriceLabel:'1 TON / 月',
+    comboTimerLabel:'⏱ 组合到期:', comboExpiredAdmin:'⏰ 时间到！选择3张新牌',
+    comboAdminTimerLabel:'当前组合剩余时间:'
   }
 };
 
