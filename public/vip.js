@@ -132,10 +132,10 @@ function switchVIPTab(n) {
   if(n === 1) {
     var hasVIP = vipData && parseInt(vipData.tier||0) >= 1 && parseInt(vipData.expiry||0) > Date.now();
     content.innerHTML =
-      // Combo hint for VIP - كل الثلاث بطاقات مع أيقوناتهن
+      // Combo hint
       (hasVIP && comboData && comboData.cards && comboData.cards.length > 0 ?
         '<div style="background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.25);border-radius:14px;padding:12px;margin-bottom:12px;">' +
-          '<div style="font-size:12px;font-weight:700;color:#FFD700;margin-bottom:10px;">🎯 تلميح الكومبو اليومي</div>' +
+          '<div style="font-size:12px;font-weight:700;color:#FFD700;margin-bottom:10px;">' + t('vipComboHint') + '</div>' +
           '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">' +
             comboData.cards.map(function(c){
               var ci = getCardInfo(c.categoryIndex, c.cardIndex);
@@ -150,7 +150,7 @@ function switchVIPTab(n) {
         '</div>' : '') +
 
       // Boxes section
-      '<div style="font-size:13px;font-weight:700;color:#FFD700;margin-bottom:10px;">📦 الصناديق اليومية</div>' +
+      '<div style="font-size:13px;font-weight:700;color:#FFD700;margin-bottom:10px;">' + t('vipDailyBoxes') + '</div>' +
       '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">' +
         _vipBox('common', hasVIP) +
         _vipBox('rare', hasVIP) +
@@ -160,38 +160,35 @@ function switchVIPTab(n) {
       // Action buttons (VIP only)
       (hasVIP ?
         '<div style="margin-bottom:14px;">' +
-          // Boost button
           '<div style="background:rgba(255,200,0,0.08);border:1px solid rgba(255,200,0,0.25);border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">' +
-            '<div><div style="font-size:12px;font-weight:700;color:#FFD700;">⚡ تسريع التعدين ×١.٥</div>' +
-            '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;">مرة واحدة يومياً</div></div>' +
+            '<div><div style="font-size:12px;font-weight:700;color:#FFD700;">' + t('vipBoostTitle') + '</div>' +
+            '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;">' + t('vipBoostOnce') + '</div></div>' +
             (vipData.boostDate === getTodayStr() ?
-              '<div style="background:rgba(255,215,0,0.15);border:1px solid rgba(255,215,0,0.3);border-radius:10px;padding:6px 12px;font-size:11px;color:#FFD700;">✅ مفعّل</div>' :
-              '<div onclick="useVIPBoost()" style="background:linear-gradient(135deg,#886600,#FFD700);border-radius:10px;padding:7px 16px;font-size:11px;color:#000;font-weight:700;cursor:pointer;">فعّل</div>'
+              '<div style="background:rgba(255,215,0,0.15);border:1px solid rgba(255,215,0,0.3);border-radius:10px;padding:6px 12px;font-size:11px;color:#FFD700;">' + t('vipBoostActivated') + '</div>' :
+              '<div onclick="useVIPBoost()" style="background:linear-gradient(135deg,#886600,#FFD700);border-radius:10px;padding:7px 16px;font-size:11px;color:#000;font-weight:700;cursor:pointer;">' + t('vipBoostActivate') + '</div>'
             ) +
           '</div>' +
-          // Energy refill
           '<div style="background:rgba(0,200,255,0.07);border:1px solid rgba(0,200,255,0.22);border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">' +
-            '<div><div style="font-size:12px;font-weight:700;color:#00CCFF;">🔋 شحن الطاقة</div>' +
-            '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;">متبقي: ' + (window.refillData ? window.refillData.count : 6) + ' / 6 اليوم</div></div>' +
-            '<div onclick="useEnergyRefill()" style="background:linear-gradient(135deg,#004466,#0088CC);border-radius:10px;padding:7px 16px;font-size:11px;color:white;font-weight:700;cursor:pointer;">شحن</div>' +
+            '<div><div style="font-size:12px;font-weight:700;color:#00CCFF;">' + t('vipEnergyTitle') + '</div>' +
+            '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;">' + t('vipEnergyRemaining',{n:(window.refillData?window.refillData.count:6),max:6}) + '</div></div>' +
+            '<div onclick="useEnergyRefill()" style="background:linear-gradient(135deg,#004466,#0088CC);border-radius:10px;padding:7px 16px;font-size:11px;color:white;font-weight:700;cursor:pointer;">' + t('vipEnergyBtn') + '</div>' +
           '</div>' +
-          // Withdrawal limit
           '<div style="background:rgba(0,255,100,0.05);border:1px solid rgba(0,255,100,0.18);border-radius:14px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;">' +
-            '<div><div style="font-size:12px;font-weight:700;color:#00CC66;">💰 حد السحب اليومي</div>' +
-            '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;">حتى 20,000 REC / يوم</div></div>' +
-            '<div style="font-size:11px;color:rgba(0,255,136,0.5);">قريباً 🔒</div>' +
+            '<div><div style="font-size:12px;font-weight:700;color:#00CC66;">' + t('vipWithdrawTitle') + '</div>' +
+            '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;">' + t('vipWithdrawDesc') + '</div></div>' +
+            '<div style="font-size:11px;color:rgba(0,255,136,0.5);">' + t('vipSoonLock') + '</div>' +
           '</div>' +
         '</div>' : '') +
 
-      // Buy button
+      // Membership status
       (hasVIP ?
         '<div style="background:rgba(0,255,100,0.1);border:1px solid rgba(0,255,100,0.3);border-radius:14px;padding:14px;text-align:center;">' +
-          '<div style="font-size:14px;font-weight:700;color:#00FF88;">✅ عضويتك فعالة</div>' +
-          '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px;">تنتهي: ' + new Date(vipData.expiry).toLocaleDateString() + '</div>' +
+          '<div style="font-size:14px;font-weight:700;color:#00FF88;">' + t('vipActiveMembership') + '</div>' +
+          '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px;">' + t('vipExpiryDate') + ' ' + new Date(vipData.expiry).toLocaleDateString() + '</div>' +
         '</div>' :
         '<div onclick="buyVIP(1)" style="background:linear-gradient(135deg,#cc0000,#ff3333);border:none;border-radius:14px;padding:16px;text-align:center;cursor:pointer;box-shadow:0 4px 20px rgba(255,0,0,0.4);">' +
-          '<div style="font-size:16px;font-weight:900;color:#FFD700;">👑 اشتراك VIP I</div>' +
-          '<div style="font-size:12px;color:rgba(255,255,255,0.8);margin-top:4px;">1 TON / شهر</div>' +
+          '<div style="font-size:16px;font-weight:900;color:#FFD700;">' + t('vipSubscribeBtn') + '</div>' +
+          '<div style="font-size:12px;color:rgba(255,255,255,0.8);margin-top:4px;">' + t('vipPriceLabel') + '</div>' +
         '</div>'
       );
   } else {
