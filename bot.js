@@ -8,7 +8,22 @@ app.use(express.json());
 
 // ====== MONGODB ======
 mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('MongoDB connected ✅'))
+  .then(async () => {
+    console.log('MongoDB connected ✅');
+    // Check for missed weekly distribution on startup
+    setTimeout(async function() {
+      try {
+        var weekId = getWeekId();
+        var weekStart = getWeekStart();
+        var hoursSinceStart = (Date.now() - weekStart) / 3600000;
+        var existing = await WeeklyChallenge.findOne({ weekId });
+        if((!existing || !existing.distributed) && hoursSinceStart >= 0 && hoursSinceStart < 48) {
+          console.log('Missed weekly distribution detected, running now...');
+          await distributeWeeklyRewards();
+        }
+      } catch(e) { console.log('Startup weekly check error:', e.message); }
+    }, 5000);
+  })
   .catch(err => console.log('MongoDB error:', err));
 
 // ====== SECURITY SYSTEM ======
@@ -226,10 +241,19 @@ async function distributeWeeklyRewards() {
 
 // Check every hour if weekly distribution needed
 setInterval(async function() {
-  var now = new Date();
-  if (now.getDay() === 1 && now.getHours() === 0) { // Monday midnight
-    await distributeWeeklyRewards();
-  }
+  try {
+    var now = new Date();
+    var weekId = getWeekId();
+    var weekStart = getWeekStart();
+    var hoursSinceStart = (now - weekStart) / 3600000;
+    // Distribute in first 6 hours of Monday if not done yet
+    if(now.getDay() === 1 && hoursSinceStart < 6) {
+      var existing = await WeeklyChallenge.findOne({ weekId });
+      if(!existing || !existing.distributed) {
+        await distributeWeeklyRewards();
+      }
+    }
+  } catch(e) { console.log('Weekly check error:', e.message); }
 }, 3600000);
 
 // ====== TON TRANSFER ======
@@ -1205,19 +1229,6 @@ app.get('/api/combo/today/:telegramId', async (req, res) => {
     var allDone = combo.cards.every(function(c){ return progress.indexOf(c.key) !== -1; });
     var rewardClaimed = user && user.comboProgress && user.comboProgress.date === today && user.comboProgress.claimed;
     res.json({ exists: true, cards, reward: combo.reward, allDone, rewardClaimed: !!rewardClaimed });
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
-
-// ====== VIP II SPIN ======
-app.post('/api/vip2/spin', async (req, res) => {
-  try {
-    const { telegramId, prize } = req.body;
-    if(!telegramId || !prize) return res.status(400).json({ error: 'Missing data' });
-    const user = await User.findOne({ telegramId: parseInt(telegramId) });
-    if(!user) return res.status(404).json({ error: 'User not found' });
-    if(prize.type === 'rec')    await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, { $inc: { rec: parseFloat(prize.value) } });
-    if(prize.type === 'record') await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, { $inc: { record: parseFloat(prize.value) } });
-    res.json({ success: true });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
