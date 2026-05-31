@@ -1029,10 +1029,19 @@ function loadAndInit() {
     // Always sync VIP from server (critical for membership status)
     loadFromServer(function(serverData) {
       if(!serverData) return;
-      // Sync VIP status always
+      // Sync VIP tier/expiry only — keep local daily state (boxes, boost, refill)
       if(serverData.vip && parseInt(serverData.vip.tier||0) > 0) {
-        vipData = serverData.vip;
-        vipData.boxes = vipData.boxes || {};
+        vipData.tier = serverData.vip.tier;
+        vipData.expiry = serverData.vip.expiry;
+        // Merge boxes only if local doesn't have today's entry
+        if(serverData.vip.boxes) {
+          var _today = getTodayStr();
+          Object.keys(serverData.vip.boxes).forEach(function(k){
+            if(!vipData.boxes[k] || vipData.boxes[k] !== _today) {
+              vipData.boxes[k] = serverData.vip.boxes[k];
+            }
+          });
+        }
       }
       // Sync record if server has significantly more
       if(serverData.record > record * 1.5) {
