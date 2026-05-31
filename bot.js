@@ -1232,6 +1232,19 @@ app.get('/api/combo/today/:telegramId', async (req, res) => {
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
+// ====== ADMIN: MANUAL WEEKLY DISTRIBUTION ======
+app.post('/api/admin/distribute-weekly', async (req, res) => {
+  try {
+    const { adminId } = req.body;
+    if(String(adminId) !== String(ADMIN_ID)) return res.status(403).json({ error: 'Not admin' });
+    // Force reset distributed flag for current week then distribute
+    var weekId = getWeekId();
+    await WeeklyChallenge.findOneAndUpdate({ weekId }, { distributed: false });
+    await distributeWeeklyRewards();
+    res.json({ success: true, message: 'Weekly rewards distributed for week: ' + weekId });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
 // POST set combo (admin only)
 app.post('/api/combo/set', async (req, res) => {
   try {
