@@ -1095,6 +1095,13 @@ function initApp() {
     updateUI();
     setTimeout(initTonConnect, 800);
     setTimeout(function(){ initNewFeatures(); checkCardMissions(); }, 300);
+    // حمّل بيانات الكومبو عند البداية
+    if(tgUser) setTimeout(function(){
+      fetch('/api/combo/today/' + tgUser.id)
+        .then(function(r){ return r.json(); })
+        .then(function(d){ comboData = d; })
+        .catch(function(){});
+    }, 500);
   } catch(e) {
     console.log('Init error:', e);
     try { buildCards(); updateUI(); } catch(e2) {}
