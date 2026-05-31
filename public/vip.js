@@ -1,6 +1,19 @@
 function openVIP() {
   renderVIPPage();
   showPage('vip', null);
+  // جيب بيانات الكومبو لو ما تحملت بعد
+  if(!comboData && tgUser) {
+    fetch('/api/combo/today/' + tgUser.id)
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        comboData = d;
+        // أعد رسم تاب VIP I لو كان مفتوح
+        var tab1 = document.getElementById('vipTab1');
+        if(tab1 && tab1.style.background && tab1.style.background.indexOf('cc0000') !== -1) {
+          switchVIPTab(1);
+        }
+      }).catch(function(){});
+  }
 }
 function closeVIP() {
   showPage('home', document.getElementById('navHomeBtn'));
