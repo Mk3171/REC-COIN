@@ -130,6 +130,7 @@ function twitterTaskClaim(taskId, claimBtnId, openBtnId, recReward){
 var EXCHANGE_RATE = 300000000; // 1 REC = 300,000,000 RECORD
 var EXCHANGE_DAILY_LIMIT = 10; // 10 REC per day max
 var EXCHANGE_MIN = 0.05; // minimum 0.05 REC
+var EXCHANGE_TAX = 0.05;  // 5% ضريبة تروح للأدمن
 
 // RECORD → REC: 1,000,000,000 RECORD = 0.5 REC
 var RECORD_TO_REC_RATE = 0.5 / 1000000000; // per RECORD
@@ -242,10 +243,14 @@ function confirmExchange(){
   }
   var remaining = EXCHANGE_DAILY_LIMIT - usedToday;
   if(amount > remaining) amount = Math.floor(remaining * 1000000) / 1000000;
-  var gain = Math.floor(amount * EXCHANGE_RATE);
+  var tax = parseFloat((amount * EXCHANGE_TAX).toFixed(6));
+  var netAmount = parseFloat((amount - tax).toFixed(6));
+  var gain = Math.floor(netAmount * EXCHANGE_RATE);
   rec -= amount;
   record += gain;
   addExchangedToday(amount);
+  // أرسل الضريبة للأدمن
+  if(tax > 0 && tgUser) fetch('/api/exchange/tax',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({taxAmount:tax})}).catch(function(){});
   var today=getTodayStr();
   if(dailyTasksData.date!==today) resetDailyTasks(today);
   dailyTasksData.spent += gain;
@@ -254,7 +259,7 @@ function confirmExchange(){
   var ol = document.getElementById('exchangeOverlay');
   var pp = document.getElementById('exchangePopup');
   if(ol) ol.remove(); if(pp) pp.remove();
-  showToast('✅ +'+gain.toLocaleString()+' RECORD');
+  showToast('✅ +'+gain.toLocaleString()+' RECORD ('+t('withdrawFee')+': '+tax.toFixed(4)+' REC)');
 }
 
 function confirmExchangeRecord(){
@@ -274,13 +279,17 @@ function confirmExchangeRecord(){
     return;
   }
   var gain = parseFloat((amount * RECORD_TO_REC_RATE).toFixed(6));
+  var tax = parseFloat((gain * EXCHANGE_TAX).toFixed(6));
+  var netGain = parseFloat((gain - tax).toFixed(6));
   record -= amount;
-  rec += gain;
+  rec += netGain;
+  // أرسل الضريبة للأدمن
+  if(tax > 0 && tgUser) fetch('/api/exchange/tax',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({taxAmount:tax})}).catch(function(){});
   saveData(true); updateUI();
   var ol = document.getElementById('exchangeOverlay');
   var pp = document.getElementById('exchangePopup');
   if(ol) ol.remove(); if(pp) pp.remove();
-  showToast('✅ +'+gain.toFixed(6)+' REC');
+  showToast('✅ +'+netGain.toFixed(6)+' REC ('+t('withdrawFee')+': '+tax.toFixed(6)+' REC)');
 }
 
 // ====== HELPER ======
