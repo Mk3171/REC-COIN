@@ -86,14 +86,14 @@ function renderVIPPage() {
       '<div style="font-family:Impact,sans-serif;font-size:42px;font-weight:900;' +
         'color:#FFD700;text-shadow:3px 3px 0 #aa6600,0 0 20px rgba(255,215,0,0.6);' +
         'letter-spacing:4px;">VIP</div>' +
-      '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px;">Exclusive Membership</div>' +
+      '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px;">'+t('vipExclusiveMembership')+'</div>' +
     '</div>' +
 
     // Tabs
     '<div style="display:flex;gap:8px;padding:0 16px;margin-bottom:16px;">' +
       '<div onclick="switchVIPTab(1)" id="vipTab1" style="flex:1;text-align:center;padding:10px;border-radius:12px;background:linear-gradient(135deg,#cc0000,#ff2222);border:1px solid #ff4444;cursor:pointer;">' +
         '<div style="font-size:13px;font-weight:700;color:#FFD700;">👑 VIP I</div>' +
-        '<div style="font-size:10px;color:rgba(255,255,255,0.7);margin-top:2px;">1 TON / شهر</div>' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.7);margin-top:2px;">'+t('vipPriceLabel')+'</div>' +
       '</div>' +
       '<div onclick="switchVIPTab(2)" id="vipTab2" style="flex:1;text-align:center;padding:10px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);cursor:pointer;">' +
         '<div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.4);">👑 VIP II</div>' +
@@ -101,7 +101,7 @@ function renderVIPPage() {
       '</div>' +
       '<div onclick="switchVIPTab(3)" id="vipTab3" style="flex:1;text-align:center;padding:10px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);cursor:pointer;">' +
         '<div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.4);">👑 VIP III</div>' +
-        '<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px;">قريباً</div>' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px;">'+t('comingSoon')+'</div>' +
       '</div>' +
     '</div>' +
 
@@ -195,8 +195,8 @@ function switchVIPTab(n) {
     content.innerHTML =
       '<div style="text-align:center;padding:40px 20px;">' +
         '<div style="font-size:40px;margin-bottom:12px;">🔒</div>' +
-        '<div style="font-size:16px;font-weight:700;color:rgba(255,255,255,0.4);">قريباً</div>' +
-        '<div style="font-size:12px;color:rgba(255,255,255,0.2);margin-top:6px;">هذا المستوى سيُفتح قريباً</div>' +
+        '<div style="font-size:16px;font-weight:700;color:rgba(255,255,255,0.4);">'+t('comingSoon')+'</div>' +
+        '<div style="font-size:12px;color:rgba(255,255,255,0.2);margin-top:6px;">'+t('vipComingSoon')+'</div>' +
       '</div>';
   }
 }
