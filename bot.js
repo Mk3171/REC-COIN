@@ -1187,9 +1187,8 @@ app.get('/api/combo/today/:telegramId', async (req, res) => {
     var today = new Date().toISOString().split('T')[0];
     var combo = await DailyCombo.findOne({ date: today });
     var isAdmin = parseInt(req.params.telegramId) === ADMIN_ID;
-    if(!combo) return res.json({ exists: false, cards: [], reward: 5 });
+    if(!combo) return res.json({ exists: false, cards: [], reward: 5, setAt: null, expiresAt: null });
 
-    // Check user's completion
     var user = await User.findOne({ telegramId: parseInt(req.params.telegramId) })
       .select('cardLevels comboProgress');
     var progress = (user && user.comboProgress && user.comboProgress.date === today)
@@ -1205,7 +1204,9 @@ app.get('/api/combo/today/:telegramId', async (req, res) => {
     });
     var allDone = combo.cards.every(function(c){ return progress.indexOf(c.key) !== -1; });
     var rewardClaimed = user && user.comboProgress && user.comboProgress.date === today && user.comboProgress.claimed;
-    res.json({ exists: true, cards, reward: combo.reward, allDone, rewardClaimed: !!rewardClaimed });
+    var setAt = combo.setAt || null;
+    var expiresAt = setAt ? setAt + 24*3600*1000 : null;
+    res.json({ exists: true, cards, reward: combo.reward, allDone, rewardClaimed: !!rewardClaimed, setAt, expiresAt, isAdmin });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -1230,7 +1231,7 @@ app.post('/api/combo/set', async (req, res) => {
     var today = new Date().toISOString().split('T')[0];
     await DailyCombo.findOneAndUpdate(
       { date: today },
-      { $set: { cards: cards, reward: 5 } },
+      { $set: { cards: cards, reward: 5, setAt: Date.now() } },
       { upsert: true, new: true }
     );
     res.json({ success: true, date: today });
