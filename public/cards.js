@@ -115,8 +115,8 @@ function getCardRarity(lvl) {
 }
 
 function getCardName(card) {
-  if(currentLang==='en'||currentLang==='uk'||currentLang==='zh') return card.en||card.n;
-  return card.n;
+  if(currentLang === 'ar') return card.n || card.en;
+  return card.en || card.n;
 }
 
 function formatCost(cost) {
