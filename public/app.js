@@ -181,44 +181,7 @@ var T = {
     recordSpend2:'⬆️ رفع مستوى Tap Power للحصول على أكثر',
     recordSpend3:'⚡ توسيع سعة الطاقة لضغطات أكثر',
     recordSpend4:'⭐ شراء بطاقات محدودة من المتجر',
-    yourLevel:'مستواك الحالي', yourBalance:'رصيدك:',
-    vipBoxesTitle:'📦 الصناديق اليومية',
-    vipBoostLabel:'⚡ بوست تعدين ×١.٥ REC',
-    vipActivateBoost:'تفعيل ⚡',
-    vipActivatedToday:'✅ فعّال اليوم',
-    vipRefillLabel:'🔋 شحن الطاقة ٦ مرات',
-    vipActivateRefill:'تفعيل 🔋',
-    vipWithdrawTitle:'💰 حد السحب اليومي',
-    vipComingSoonBadge:'🔒 قريباً',
-    vipComboTitle:'🎯 بطاقات كومبو اليوم',
-    vipComboEmpty:'لم يُحدد كومبو اليوم بعد',
-    vipActiveMembership:'✅ عضويتك فعالة',
-    vipExpires:'تنتهي:',
-    vipSubscribeBtn:'👑 اشتراك VIP I',
-    vipPriceLabel:'1 TON / شهر',
-    vipComingSoonTier:'قريباً',
-    vipComingSoonDesc:'هذا المستوى سيُفتح قريباً',
-    vipThankTitle:'شكراً لدعمك!',
-    vipThankDesc:'أنت الآن عضو VIP I\nدعمك يساعدنا على النمو 🚀',
-    vipGiftLabel:'هدية ترحيبية',
-    vipStartBtn:'🚀 ابدأ الاستمتاع!',
-    vipExclusiveMembership:'عضوية حصرية',
-    vipBoxCommon:'صندوق عادي',
-    vipBoxRare:'صندوق نادر',
-    vipBoxEpic:'صندوق أسطوري',
-    vipBoxOpening:'جاري الفتح...',
-    vipBoxAlreadyOpened:'فتحت هذا الصندوق اليوم!',
-    vipBoxComeBack:'عد غداً للفتح مرة أخرى',
-    vipBoxClose:'إغلاق',
-    vipBoxYouGot:'حصلت على',
-    vipBoxGreat:'🎉 رائع!',
-    vipBoxBoostTitle:'تسريع التعدين',
-    vipBoxBoostValue:'×{n} لمدة ساعة',
-    vipBoxEpicCardTitle:'بطاقة Epic النادرة!',
-    vipBoxEpicCardValue:'تعدين 0.001 REC/ثانية',
-    vipCommon:'عادي',
-    vipRare:'نادر',
-    vipEpic:'أسطوري',
+    yourLevel:'مستواك الحالي', yourBalance:'رصيدك:'
   },
 
   en: {
@@ -364,46 +327,7 @@ var T = {
     recordSpend2:'⬆️ Upgrade Tap Power for more per tap',
     recordSpend3:'⚡ Expand energy capacity for more taps',
     recordSpend4:'⭐ Buy limited cards from the shop',
-
-    withdrawMin:'Minimum {n} REC',
-    yourLevel:'Your Current Level', yourBalance:'Your Balance:',
-    vipBoxesTitle:'📦 Daily Chests',
-    vipBoostLabel:'⚡ Mining Boost ×1.5 REC',
-    vipActivateBoost:'Activate ⚡',
-    vipActivatedToday:'✅ Active Today',
-    vipRefillLabel:'🔋 Energy Refill 6x',
-    vipActivateRefill:'Activate 🔋',
-    vipWithdrawTitle:'💰 Daily Withdrawal Limit',
-    vipComingSoonBadge:'🔒 Soon',
-    vipComboTitle:'🎯 Today\'s Combo Cards',
-    vipComboEmpty:'No combo set for today yet',
-    vipActiveMembership:'✅ Your membership is active',
-    vipExpires:'Expires:',
-    vipSubscribeBtn:'👑 Subscribe VIP I',
-    vipPriceLabel:'1 TON / month',
-    vipComingSoonTier:'Coming Soon',
-    vipComingSoonDesc:'This tier will be unlocked soon',
-    vipThankTitle:'Thank you for your support!',
-    vipThankDesc:'You are now VIP I\nYour support helps us grow 🚀',
-    vipGiftLabel:'Welcome gift',
-    vipStartBtn:'🚀 Start Enjoying!',
-    vipExclusiveMembership:'Exclusive Membership',
-    vipBoxCommon:'Common Box',
-    vipBoxRare:'Rare Box',
-    vipBoxEpic:'Epic Box',
-    vipBoxOpening:'Opening...',
-    vipBoxAlreadyOpened:'You opened this box today!',
-    vipBoxComeBack:'Come back tomorrow to open again',
-    vipBoxClose:'Close',
-    vipBoxYouGot:'You got',
-    vipBoxGreat:'🎉 Amazing!',
-    vipBoxBoostTitle:'Mining Boost',
-    vipBoxBoostValue:'×{n} for 1 hour',
-    vipBoxEpicCardTitle:'Rare Epic Card!',
-    vipBoxEpicCardValue:'Mining 0.001 REC/sec',
-    vipCommon:'Common',
-    vipRare:'Rare',
-    vipEpic:'Epic',
+    yourLevel:'Your Current Level', yourBalance:'Your Balance:'
   },
 
   ru: {
@@ -543,52 +467,7 @@ var T = {
     recordSpend1:'🃏 Улучшение карточек майнинга для увеличения REC',
     recordSpend2:'⬆️ Улучшение Tap Power', recordSpend3:'⚡ Расширение ёмкости энергии',
     recordSpend4:'⭐ Покупка лимитных карточек в магазине',
-
-    withdrawMin:'Минимум {n} REC',
-    toastFailed:'❌ Платёж не выполнен, попробуйте снова',
-    recInfoSub:'Как зарабатывать REC и увеличивать скорость добычи',
-    recReferralsDesc:'Приглашайте друзей и зарабатывайте комиссию от их добычи:',
-    recordInfoSub:'Как зарабатывать RECORD и её роль',
-    recordEnergyRefillSub:'Бесплатно дважды в день',
-    recordSpend3:'⚡ Расширить ёмкость энергии',
-    yourLevel:'Ваш текущий уровень', yourBalance:'Ваш баланс:',
-    vipBoxesTitle:'📦 Ежедневные сундуки',
-    vipBoostLabel:'⚡ Буст добычи ×1.5 REC',
-    vipActivateBoost:'Активировать ⚡',
-    vipActivatedToday:'✅ Активно сегодня',
-    vipRefillLabel:'🔋 Заряд энергии 6 раз',
-    vipActivateRefill:'Активировать 🔋',
-    vipWithdrawTitle:'💰 Суточный лимит вывода',
-    vipComingSoonBadge:'🔒 Скоро',
-    vipComboTitle:'🎯 Карты комбо сегодня',
-    vipComboEmpty:'Комбо на сегодня не установлено',
-    vipActiveMembership:'✅ Ваше членство активно',
-    vipExpires:'Истекает:',
-    vipSubscribeBtn:'👑 Подписаться VIP I',
-    vipPriceLabel:'1 TON / месяц',
-    vipComingSoonTier:'Скоро',
-    vipComingSoonDesc:'Этот уровень скоро откроется',
-    vipThankTitle:'Спасибо за поддержку!',
-    vipThankDesc:'Вы теперь VIP I\nВаша поддержка помогает нам расти 🚀',
-    vipGiftLabel:'Приветственный подарок',
-    vipStartBtn:'🚀 Начать!',
-    vipExclusiveMembership:'Эксклюзивное членство',
-    vipBoxCommon:'Обычный сундук',
-    vipBoxRare:'Редкий сундук',
-    vipBoxEpic:'Эпический сундук',
-    vipBoxOpening:'Открываем...',
-    vipBoxAlreadyOpened:'Вы уже открыли этот сундук сегодня!',
-    vipBoxComeBack:'Возвращайтесь завтра',
-    vipBoxClose:'Закрыть',
-    vipBoxYouGot:'Вы получили',
-    vipBoxGreat:'🎉 Отлично!',
-    vipBoxBoostTitle:'Ускорение добычи',
-    vipBoxBoostValue:'×{n} на 1 час',
-    vipBoxEpicCardTitle:'Редкая карта Epic!',
-    vipBoxEpicCardValue:'Добыча 0.001 REC/сек',
-    vipCommon:'Обычный',
-    vipRare:'Редкий',
-    vipEpic:'Эпический',
+    yourLevel:'Ваш текущий уровень', yourBalance:'Ваш баланс:'
   },
 
   uk: {
@@ -727,53 +606,7 @@ var T = {
     recordSpend1:'🃏 Покращення карточок для збільшення REC',
     recordSpend2:'⬆️ Покращення Tap Power', recordSpend3:'⚡ Розширення ємності енергії',
     recordSpend4:'⭐ Купівля лімітних карточок у магазині',
-
-    shopSubtitle:'Підтримайте проект та отримайте миттєві нагороди!',
-    withdrawMin:'Мінімум {n} REC',
-    toastFailed:'❌ Помилка платежу, спробуйте ще раз',
-    recInfoSub:'Як заробляти REC та збільшувати швидкість видобутку',
-    recReferralsDesc:'Запрошуйте друзів та заробляйте комісію від їхнього видобутку:',
-    recordInfoSub:'Як заробляти RECORD та її роль',
-    recordEnergyRefillSub:'Безкоштовно двічі на день',
-    recordSpend3:'⚡ Розширити ємність енергії',
-    yourLevel:'Ваш поточний рівень', yourBalance:'Ваш баланс:',
-    vipBoxesTitle:'📦 Щоденні скрині',
-    vipBoostLabel:'⚡ Буст видобутку ×1.5 REC',
-    vipActivateBoost:'Активувати ⚡',
-    vipActivatedToday:'✅ Активно сьогодні',
-    vipRefillLabel:'🔋 Заряд енергії 6 разів',
-    vipActivateRefill:'Активувати 🔋',
-    vipWithdrawTitle:'💰 Добовий ліміт виводу',
-    vipComingSoonBadge:'🔒 Незабаром',
-    vipComboTitle:'🎯 Карти комбо сьогодні',
-    vipComboEmpty:'Комбо на сьогодні не встановлено',
-    vipActiveMembership:'✅ Ваше членство активне',
-    vipExpires:'Закінчується:',
-    vipSubscribeBtn:'👑 Підписатися VIP I',
-    vipPriceLabel:'1 TON / місяць',
-    vipComingSoonTier:'Незабаром',
-    vipComingSoonDesc:'Цей рівень скоро відкриється',
-    vipThankTitle:'Дякуємо за підтримку!',
-    vipThankDesc:'Тепер ви VIP I\nВаша підтримка допомагає нам зростати 🚀',
-    vipGiftLabel:'Вітальний подарунок',
-    vipStartBtn:'🚀 Почати!',
-    vipExclusiveMembership:'Ексклюзивне членство',
-    vipBoxCommon:'Звичайна скриня',
-    vipBoxRare:'Рідкісна скриня',
-    vipBoxEpic:'Епічна скриня',
-    vipBoxOpening:'Відкриваємо...',
-    vipBoxAlreadyOpened:'Ви вже відкрили цю скриню сьогодні!',
-    vipBoxComeBack:'Повертайтесь завтра',
-    vipBoxClose:'Закрити',
-    vipBoxYouGot:'Ви отримали',
-    vipBoxGreat:'🎉 Чудово!',
-    vipBoxBoostTitle:'Прискорення видобутку',
-    vipBoxBoostValue:'×{n} на 1 годину',
-    vipBoxEpicCardTitle:'Рідкісна карта Epic!',
-    vipBoxEpicCardValue:'Видобуток 0.001 REC/сек',
-    vipCommon:'Звичайний',
-    vipRare:'Рідкісний',
-    vipEpic:'Епічний',
+    yourLevel:'Ваш поточний рівень', yourBalance:'Ваш баланс:'
   },
 
   pt: {
@@ -910,55 +743,7 @@ var T = {
     recordHowSpend:'💡 Como usar RECORD?',
     recordSpend1:'🃏 Melhorar cartas de mineração', recordSpend2:'⬆️ Melhorar Tap Power',
     recordSpend3:'⚡ Expandir capacidade de energia', recordSpend4:'⭐ Comprar cartas limitadas',
-
-    shopSubtitle:'Apoie o projeto e obtenha recompensas imediatas!',
-    withdrawMin:'Mínimo {n} REC',
-    toastUpgradeDone:'🎉 Upgrade concluído!',
-    toastFailed:'❌ Pagamento falhou, tente novamente',
-    recInfoSub:'Como ganhar REC e aumentar sua velocidade de mineração',
-    recReferralsDesc:'Convide amigos e ganhe comissão da mineração deles:',
-    recordInfoSub:'Como ganhar RECORD e seu papel',
-    recordEnergyRefillSub:'Grátis duas vezes por dia',
-    recordSpend2:'⬆️ Melhorar Tap Power',
-    recordSpend4:'⭐ Comprar cartas limitadas na loja',
-    yourLevel:'Seu Nível Atual', yourBalance:'Seu Saldo:',
-    vipBoxesTitle:'📦 Caixas Diárias',
-    vipBoostLabel:'⚡ Boost de Mineração ×1.5 REC',
-    vipActivateBoost:'Ativar ⚡',
-    vipActivatedToday:'✅ Ativo Hoje',
-    vipRefillLabel:'🔋 Recarga de Energia 6x',
-    vipActivateRefill:'Ativar 🔋',
-    vipWithdrawTitle:'💰 Limite Diário de Saque',
-    vipComingSoonBadge:'🔒 Em Breve',
-    vipComboTitle:'🎯 Cartas Combo de Hoje',
-    vipComboEmpty:'Nenhum combo definido para hoje',
-    vipActiveMembership:'✅ Sua assinatura está ativa',
-    vipExpires:'Expira em:',
-    vipSubscribeBtn:'👑 Assinar VIP I',
-    vipPriceLabel:'1 TON / mês',
-    vipComingSoonTier:'Em Breve',
-    vipComingSoonDesc:'Este nível será desbloqueado em breve',
-    vipThankTitle:'Obrigado pelo seu apoio!',
-    vipThankDesc:'Você agora é VIP I\nSeu apoio nos ajuda a crescer 🚀',
-    vipGiftLabel:'Presente de boas-vindas',
-    vipStartBtn:'🚀 Começar!',
-    vipExclusiveMembership:'Assinatura Exclusiva',
-    vipBoxCommon:'Caixa Comum',
-    vipBoxRare:'Caixa Rara',
-    vipBoxEpic:'Caixa Épica',
-    vipBoxOpening:'Abrindo...',
-    vipBoxAlreadyOpened:'Você já abriu esta caixa hoje!',
-    vipBoxComeBack:'Volte amanhã para abrir novamente',
-    vipBoxClose:'Fechar',
-    vipBoxYouGot:'Você ganhou',
-    vipBoxGreat:'🎉 Incrível!',
-    vipBoxBoostTitle:'Boost de Mineração',
-    vipBoxBoostValue:'×{n} por 1 hora',
-    vipBoxEpicCardTitle:'Carta Epic Rara!',
-    vipBoxEpicCardValue:'Mineração 0.001 REC/seg',
-    vipCommon:'Comum',
-    vipRare:'Raro',
-    vipEpic:'Épico',
+    yourLevel:'Seu Nível Atual', yourBalance:'Seu Saldo:'
   },
 
   es: {
@@ -1095,55 +880,7 @@ var T = {
     recordHowSpend:'💡 ¿Cómo usar RECORD?',
     recordSpend1:'🃏 Mejorar tarjetas de minería', recordSpend2:'⬆️ Mejorar Tap Power',
     recordSpend3:'⚡ Expandir capacidad de energía', recordSpend4:'⭐ Comprar tarjetas limitadas',
-
-    shopSubtitle:'¡Apoya el proyecto y obtén recompensas instantáneas!',
-    withdrawMin:'Mínimo {n} REC',
-    toastUpgradeDone:'🎉 ¡Mejora completada!',
-    toastFailed:'❌ Pago fallido, inténtalo de nuevo',
-    recInfoSub:'Cómo ganar REC y aumentar tu velocidad de minería',
-    recReferralsDesc:'Invita amigos y gana comisión de su minería:',
-    recordInfoSub:'Cómo ganar RECORD y su función',
-    recordEnergyRefillSub:'Gratis dos veces al día',
-    recordSpend2:'⬆️ Mejorar Tap Power',
-    recordSpend4:'⭐ Comprar cartas limitadas en la tienda',
-    yourLevel:'Tu Nivel Actual', yourBalance:'Tu Saldo:',
-    vipBoxesTitle:'📦 Cofres Diarios',
-    vipBoostLabel:'⚡ Boost de Minería ×1.5 REC',
-    vipActivateBoost:'Activar ⚡',
-    vipActivatedToday:'✅ Activo Hoy',
-    vipRefillLabel:'🔋 Recarga de Energía 6x',
-    vipActivateRefill:'Activar 🔋',
-    vipWithdrawTitle:'💰 Límite Diario de Retiro',
-    vipComingSoonBadge:'🔒 Próximamente',
-    vipComboTitle:'🎯 Cartas Combo de Hoy',
-    vipComboEmpty:'No hay combo definido para hoy',
-    vipActiveMembership:'✅ Tu membresía está activa',
-    vipExpires:'Vence:',
-    vipSubscribeBtn:'👑 Suscribirse VIP I',
-    vipPriceLabel:'1 TON / mes',
-    vipComingSoonTier:'Próximamente',
-    vipComingSoonDesc:'Este nivel se desbloqueará pronto',
-    vipThankTitle:'¡Gracias por tu apoyo!',
-    vipThankDesc:'Ahora eres VIP I\nTu apoyo nos ayuda a crecer 🚀',
-    vipGiftLabel:'Regalo de bienvenida',
-    vipStartBtn:'🚀 ¡Empezar!',
-    vipExclusiveMembership:'Membresía Exclusiva',
-    vipBoxCommon:'Cofre Común',
-    vipBoxRare:'Cofre Raro',
-    vipBoxEpic:'Cofre Épico',
-    vipBoxOpening:'Abriendo...',
-    vipBoxAlreadyOpened:'¡Ya abriste este cofre hoy!',
-    vipBoxComeBack:'Vuelve mañana para abrir de nuevo',
-    vipBoxClose:'Cerrar',
-    vipBoxYouGot:'Obtuviste',
-    vipBoxGreat:'🎉 ¡Increíble!',
-    vipBoxBoostTitle:'Boost de Minería',
-    vipBoxBoostValue:'×{n} por 1 hora',
-    vipBoxEpicCardTitle:'¡Carta Epic Rara!',
-    vipBoxEpicCardValue:'Minería 0.001 REC/seg',
-    vipCommon:'Común',
-    vipRare:'Raro',
-    vipEpic:'Épico',
+    yourLevel:'Tu Nivel Actual', yourBalance:'Tu Saldo:'
   },
 
   tr: {
@@ -1281,56 +1018,7 @@ var T = {
     recordHowSpend:'💡 RECORD nasıl kullanılır?',
     recordSpend1:'🃏 Madencilik kartlarını yükselt', recordSpend2:'⬆️ Tap Power yükselt',
     recordSpend3:'⚡ Enerji kapasitesini genişlet', recordSpend4:'⭐ Sınırlı kartlar satın al',
-
-    shopSubtitle:'Projeyi destekle ve anında ödüller kazan!',
-    shopNote:'⭐ Yıldızlar doğrudan Telegram\'dan satın alınır',
-    withdrawMin:'Minimum {n} REC',
-    toastFailed:'❌ Ödeme başarısız, tekrar deneyin',
-    recInfoSub:'REC nasıl kazanılır ve madencilik hızı nasıl artırılır',
-    recReferralsDesc:'Arkadaşlarını davet et ve madencilikten komisyon kazan:',
-    recordInfoSub:'RECORD nasıl kazanılır ve rolü nedir',
-    recordMysteryDesc:'Tasks bölümünden günlük gizem kutusunu ücretsiz açın.',
-    recordEnergyRefillSub:'Günde iki kez ücretsiz',
-    recordSpend2:'⬆️ Tap Power yükselt',
-    recordSpend4:'⭐ Mağazadan sınırlı kart satın al',
-    yourLevel:'Mevcut Seviyeniz', yourBalance:'Bakiyeniz:',
-    vipBoxesTitle:'📦 Günlük Sandıklar',
-    vipBoostLabel:'⚡ Madencilik Boost ×1.5 REC',
-    vipActivateBoost:'Etkinleştir ⚡',
-    vipActivatedToday:'✅ Bugün Aktif',
-    vipRefillLabel:'🔋 Enerji Dolumu 6 Kez',
-    vipActivateRefill:'Etkinleştir 🔋',
-    vipWithdrawTitle:'💰 Günlük Çekim Limiti',
-    vipComingSoonBadge:'🔒 Yakında',
-    vipComboTitle:'🎯 Bugünün Combo Kartları',
-    vipComboEmpty:'Bugün için combo belirlenmedi',
-    vipActiveMembership:'✅ Üyeliğiniz aktif',
-    vipExpires:'Bitiş:',
-    vipSubscribeBtn:'👑 VIP I Aboneliği',
-    vipPriceLabel:'1 TON / ay',
-    vipComingSoonTier:'Yakında',
-    vipComingSoonDesc:'Bu seviye yakında açılacak',
-    vipThankTitle:'Desteğiniz için teşekkürler!',
-    vipThankDesc:'Artık VIP I üyesisiniz\nDesteğiniz büyümemize yardımcı olur 🚀',
-    vipGiftLabel:'Hoş geldin hediyesi',
-    vipStartBtn:'🚀 Başla!',
-    vipExclusiveMembership:'Özel Üyelik',
-    vipBoxCommon:'Normal Sandık',
-    vipBoxRare:'Nadir Sandık',
-    vipBoxEpic:'Epik Sandık',
-    vipBoxOpening:'Açılıyor...',
-    vipBoxAlreadyOpened:'Bu sandığı bugün açtınız!',
-    vipBoxComeBack:'Tekrar açmak için yarın gelin',
-    vipBoxClose:'Kapat',
-    vipBoxYouGot:'Kazandınız',
-    vipBoxGreat:'🎉 Harika!',
-    vipBoxBoostTitle:'Madencilik Boost',
-    vipBoxBoostValue:'1 saat için ×{n}',
-    vipBoxEpicCardTitle:'Nadir Epic Kart!',
-    vipBoxEpicCardValue:'0.001 REC/sn madencilik',
-    vipCommon:'Normal',
-    vipRare:'Nadir',
-    vipEpic:'Epik',
+    yourLevel:'Mevcut Seviyeniz', yourBalance:'Bakiyeniz:'
   },
 
   vi: {
@@ -1468,54 +1156,7 @@ var T = {
     recordHowSpend:'💡 Cách sử dụng RECORD?',
     recordSpend1:'🃏 Nâng cấp thẻ khai thác', recordSpend2:'⬆️ Nâng cấp Tap Power',
     recordSpend3:'⚡ Mở rộng dung lượng năng lượng', recordSpend4:'⭐ Mua thẻ giới hạn',
-
-    shopSubtitle:'Ủng hộ dự án và nhận phần thưởng ngay lập tức!',
-    withdrawMin:'Tối thiểu {n} REC',
-    toastFailed:'❌ Thanh toán thất bại, thử lại',
-    recInfoSub:'Cách kiếm REC và tăng tốc độ khai thác',
-    recReferralsDesc:'Mời bạn bè và kiếm hoa hồng từ khai thác của họ:',
-    recordInfoSub:'Cách kiếm RECORD và vai trò của nó',
-    recordEnergyRefillSub:'Miễn phí hai lần mỗi ngày',
-    recordSpend2:'⬆️ Nâng cấp Tap Power',
-    recordSpend4:'⭐ Mua thẻ giới hạn từ cửa hàng',
-    yourLevel:'Cấp độ hiện tại', yourBalance:'Số dư:',
-    vipBoxesTitle:'📦 Rương Hàng Ngày',
-    vipBoostLabel:'⚡ Tăng Tốc Đào ×1.5 REC',
-    vipActivateBoost:'Kích hoạt ⚡',
-    vipActivatedToday:'✅ Đã kích hoạt hôm nay',
-    vipRefillLabel:'🔋 Nạp năng lượng 6 lần',
-    vipActivateRefill:'Kích hoạt 🔋',
-    vipWithdrawTitle:'💰 Hạn mức rút hàng ngày',
-    vipComingSoonBadge:'🔒 Sắp ra mắt',
-    vipComboTitle:'🎯 Thẻ Combo Hôm Nay',
-    vipComboEmpty:'Chưa có combo hôm nay',
-    vipActiveMembership:'✅ Thành viên của bạn đang hoạt động',
-    vipExpires:'Hết hạn:',
-    vipSubscribeBtn:'👑 Đăng ký VIP I',
-    vipPriceLabel:'1 TON / tháng',
-    vipComingSoonTier:'Sắp ra mắt',
-    vipComingSoonDesc:'Cấp độ này sẽ được mở sớm',
-    vipThankTitle:'Cảm ơn bạn đã ủng hộ!',
-    vipThankDesc:'Bạn đã là VIP I\nSự ủng hộ của bạn giúp chúng tôi phát triển 🚀',
-    vipGiftLabel:'Quà chào mừng',
-    vipStartBtn:'🚀 Bắt đầu!',
-    vipExclusiveMembership:'Thành viên Độc quyền',
-    vipBoxCommon:'Rương Thường',
-    vipBoxRare:'Rương Hiếm',
-    vipBoxEpic:'Rương Sử Thi',
-    vipBoxOpening:'Đang mở...',
-    vipBoxAlreadyOpened:'Bạn đã mở rương này hôm nay!',
-    vipBoxComeBack:'Quay lại ngày mai để mở lại',
-    vipBoxClose:'Đóng',
-    vipBoxYouGot:'Bạn nhận được',
-    vipBoxGreat:'🎉 Tuyệt vời!',
-    vipBoxBoostTitle:'Tăng tốc khai thác',
-    vipBoxBoostValue:'×{n} trong 1 giờ',
-    vipBoxEpicCardTitle:'Thẻ Epic hiếm!',
-    vipBoxEpicCardValue:'Khai thác 0.001 REC/giây',
-    vipCommon:'Thường',
-    vipRare:'Hiếm',
-    vipEpic:'Sử Thi',
+    yourLevel:'Cấp độ hiện tại', yourBalance:'Số dư:'
   },
 
   zh: {
@@ -1652,55 +1293,7 @@ var T = {
     recordHowSpend:'💡 如何使用RECORD?',
     recordSpend1:'🃏 升级挖矿卡片', recordSpend2:'⬆️ 升级点击力量',
     recordSpend3:'⚡ 扩展能量容量', recordSpend4:'⭐ 从商店购买限定卡',
-
-    shopSubtitle:'支持项目并获得即时奖励！',
-    withdrawMin:'最低 {n} REC',
-    toastUpgradeDone:'🎉 升级完成！',
-    toastFailed:'❌ 支付失败，请重试',
-    recInfoSub:'如何赚取REC并提高挖矿速度',
-    recReferralsDesc:'邀请朋友并从他们的挖矿中赚取佣金:',
-    recordInfoSub:'如何赚取RECORD及其作用',
-    recordEnergyRefillSub:'每天两次免费',
-    recordSpend2:'⬆️ 升级Tap Power',
-    recordSpend4:'⭐ 从商店购买限定卡',
-    yourLevel:'您的当前级别', yourBalance:'您的余额:',
-    vipBoxesTitle:'📦 每日宝箱',
-    vipBoostLabel:'⚡ 挖矿加速 ×1.5 REC',
-    vipActivateBoost:'激活 ⚡',
-    vipActivatedToday:'✅ 今日已激活',
-    vipRefillLabel:'🔋 能量补充 6次',
-    vipActivateRefill:'激活 🔋',
-    vipWithdrawTitle:'💰 每日提现限额',
-    vipComingSoonBadge:'🔒 即将推出',
-    vipComboTitle:'🎯 今日连击卡',
-    vipComboEmpty:'今日尚未设置连击',
-    vipActiveMembership:'✅ 您的会员资格有效',
-    vipExpires:'到期：',
-    vipSubscribeBtn:'👑 订阅 VIP I',
-    vipPriceLabel:'1 TON / 月',
-    vipComingSoonTier:'即将推出',
-    vipComingSoonDesc:'此级别即将开放',
-    vipThankTitle:'感谢您的支持！',
-    vipThankDesc:'您现在是 VIP I 会员\n您的支持帮助我们成长 🚀',
-    vipGiftLabel:'欢迎礼物',
-    vipStartBtn:'🚀 开始享受！',
-    vipExclusiveMembership:'专属会员',
-    vipBoxCommon:'普通宝箱',
-    vipBoxRare:'稀有宝箱',
-    vipBoxEpic:'史诗宝箱',
-    vipBoxOpening:'正在开启...',
-    vipBoxAlreadyOpened:'您今天已经开启了这个宝箱！',
-    vipBoxComeBack:'明天再来开启',
-    vipBoxClose:'关闭',
-    vipBoxYouGot:'您获得了',
-    vipBoxGreat:'🎉 太棒了！',
-    vipBoxBoostTitle:'挖矿加速',
-    vipBoxBoostValue:'×{n} 持续1小时',
-    vipBoxEpicCardTitle:'稀有Epic卡！',
-    vipBoxEpicCardValue:'挖矿 0.001 REC/秒',
-    vipCommon:'普通',
-    vipRare:'稀有',
-    vipEpic:'史诗',
+    yourLevel:'您的当前级别', yourBalance:'您的余额:'
   }
 };
 
@@ -1777,11 +1370,6 @@ function calcTotalSpeeds(){
     recordPerSec+=cardRecordSpeed(lvl)*m;
     recPerSec+=cardRECSpeed(lvl)*m;
   });
-  // ×1.5 boost — only when user manually activates it today
-  if(vipData && parseInt(vipData.tier||0)>=1 && parseInt(vipData.expiry||0)>Date.now() &&
-     vipData.boostDate === getTodayStr()) {
-    recPerSec *= 1.5;
-  }
 }
 
 // ====== DATA ======
@@ -2003,7 +1591,7 @@ function showBlockNotification(recAmount, blockNum) {
       '<div style="font-size:10px;color:#555;margin-top:4px;">تمت الإضافة لرصيدك تلقائياً ✅</div>'+
     '</div>'+
     '<div style="font-size:10px;color:#444;margin-bottom:14px;">📢 تم الإعلان في قناة REC Blocks</div>'+
-    '<button onclick="document.getElementById(\'blockPopupOverlay\').remove()" style="background:linear-gradient(135deg,#CC0000,#FF2200);border:none;color:white;padding:13px;border-radius:12px;cursor:pointer;font-size:15px;font-weight:bold;width:100%;">🔴 COLLECT</button>';
+    '<button onclick="var o=document.getElementById(\'blockPopupOverlay\');if(o)o.remove();saveData(true);" style="background:linear-gradient(135deg,#CC0000,#FF2200);border:none;color:white;padding:13px;border-radius:12px;cursor:pointer;font-size:15px;font-weight:bold;width:100%;">🔴 COLLECT</button>';
 
   ol.addEventListener('click', function(e){ if(e.target===ol) ol.remove(); });
   ol.appendChild(pp);
@@ -2197,10 +1785,6 @@ function getEnergyCost(l){return Math.floor(30000*Math.pow(33333,l/99));}
 function openVIP() {
   renderVIPPage();
   showPage('vip', null);
-  loadComboData(function() {
-    var vipPage = document.getElementById('vip');
-    if(vipPage && vipPage.classList.contains('active')) switchVIPTab(1);
-  });
 }
 function closeVIP() {
   showPage('home', document.getElementById('navHomeBtn'));
@@ -2227,12 +1811,12 @@ function openVIPInfo() {
       '<div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1.9;">' +
         '📦 ٣ صناديق يومية (Common, Rare, Epic)<br>' +
         '🦅 فرصة الحصول على بطاقة Epic النادرة (1%)<br>' +
-        '⚡ بوست تعدين ×١.٥ REC يومياً<br>' +
+        '⚡ ×١.٥ سرعة تعدين REC<br>' +
         '🔋 شحن طاقة ٦ مرات يومياً<br>' +
-        '💰 سحب يومي حتى 20,000 REC<br>' +
-        '🎯 كشف بطاقات الكومبو اليومي<br>' +
-        '🎁 +50 REC هدية ترحيبية<br>' +
-        '👑 شارة ذهبية بالليدربورد' +
+        '💰 حد سحب يومي من 1,000 حتى 20,000 REC<br>' +
+        '🎯 تلميح بطاقة واحدة من الكومبو اليومي<br>' +
+        '🎁 مكافأة ترحيبية فورية 1,000,000 RECORD<br>' +
+        '👑 شارة VIP ذهبية بالليدربورد' +
       '</div>' +
     '</div>' +
 
@@ -2277,22 +1861,22 @@ function renderVIPPage() {
       '<div style="font-family:Impact,sans-serif;font-size:42px;font-weight:900;' +
         'color:#FFD700;text-shadow:3px 3px 0 #aa6600,0 0 20px rgba(255,215,0,0.6);' +
         'letter-spacing:4px;">VIP</div>' +
-      '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px;">' + t('vipExclusiveMembership') + '</div>' +
+      '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px;">Exclusive Membership</div>' +
     '</div>' +
 
     // Tabs
     '<div style="display:flex;gap:8px;padding:0 16px;margin-bottom:16px;">' +
       '<div onclick="switchVIPTab(1)" id="vipTab1" style="flex:1;text-align:center;padding:10px;border-radius:12px;background:linear-gradient(135deg,#cc0000,#ff2222);border:1px solid #ff4444;cursor:pointer;">' +
         '<div style="font-size:13px;font-weight:700;color:#FFD700;">👑 VIP I</div>' +
-        '<div style="font-size:10px;color:rgba(255,255,255,0.7);margin-top:2px;">' + t('vipPriceLabel') + '</div>' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.7);margin-top:2px;">1 TON / شهر</div>' +
       '</div>' +
       '<div onclick="switchVIPTab(2)" id="vipTab2" style="flex:1;text-align:center;padding:10px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);cursor:pointer;">' +
         '<div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.4);">👑 VIP II</div>' +
-        '<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px;">' + t('vipComingSoonTier') + '</div>' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px;">قريباً</div>' +
       '</div>' +
       '<div onclick="switchVIPTab(3)" id="vipTab3" style="flex:1;text-align:center;padding:10px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);cursor:pointer;">' +
         '<div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.4);">👑 VIP III</div>' +
-        '<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px;">' + t('vipComingSoonTier') + '</div>' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px;">قريباً</div>' +
       '</div>' +
     '</div>' +
 
@@ -2322,142 +1906,63 @@ function switchVIPTab(n) {
 
   if(n === 1) {
     var hasVIP = vipData && parseInt(vipData.tier||0) >= 1 && parseInt(vipData.expiry||0) > Date.now();
-    var today = getTodayStr();
-    var boostToday  = hasVIP && vipData.boostDate  === today;
-    var refill6Today = hasVIP && vipData.refill6Date === today;
-
-    // --- Combo hint boxes (3 cards) ---
-    var comboBoxesHtml = '';
-    if(hasVIP && comboData && comboData.cards && comboData.cards.length > 0) {
-      var boxesInner = '';
-      comboData.cards.forEach(function(c) {
-        var card = getCardInfo(c.categoryIndex, c.cardIndex);
-        var emoji = card ? (card.e || '🃏') : '🃏';
-        var name  = card ? getCardName(card) : '???';
-        boxesInner +=
-          '<div style="background:rgba(0,0,0,0.3);border:1px solid ' + (c.done ? 'rgba(0,255,136,0.5)' : 'rgba(255,215,0,0.25)') + ';border-radius:12px;padding:10px 4px;text-align:center;">' +
-            '<div style="font-size:26px;line-height:1;">' + (c.done ? '✅' : emoji) + '</div>' +
-            '<div style="font-size:9px;color:' + (c.done ? '#00FF88' : '#FFD700') + ';margin-top:5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;padding:0 2px;">' + name + '</div>' +
-          '</div>';
-      });
-      comboBoxesHtml =
-        '<div style="background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);border-radius:14px;padding:14px;margin-bottom:10px;">' +
-          '<div style="font-size:12px;font-weight:700;color:#FFD700;margin-bottom:10px;">' + t('vipComboTitle') + '</div>' +
-          '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">' + boxesInner + '</div>' +
-        '</div>';
-    } else if(hasVIP) {
-      comboBoxesHtml =
-        '<div style="background:rgba(255,215,0,0.04);border:1px solid rgba(255,215,0,0.12);border-radius:14px;padding:14px;margin-bottom:10px;text-align:center;">' +
-          '<div style="font-size:12px;font-weight:700;color:#FFD700;margin-bottom:6px;">🎯 بطاقات كومبو اليوم</div>' +
-          '<div style="font-size:11px;color:rgba(255,255,255,0.3);">' + t('vipComboEmpty') + '</div>' +
-        '</div>';
-    }
-
-    // --- Boost button ---
-    var boostHtml =
-      '<div onclick="' + (!boostToday ? 'useVIPBoost()' : '') + '" style="' +
-        'background:' + (!boostToday ? 'linear-gradient(135deg,rgba(255,200,0,0.12),rgba(255,140,0,0.08))' : 'rgba(255,255,255,0.03)') + ';' +
-        'border:1px solid ' + (!boostToday ? 'rgba(255,200,0,0.4)' : 'rgba(255,255,255,0.06)') + ';' +
-        'border-radius:14px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;' +
-        'cursor:' + (!boostToday ? 'pointer' : 'default') + ';">' +
-        '<div>' +
-          t('vipBoostLabel') +
-        '</div>' +
-        (!boostToday
-          ? '<div style="background:linear-gradient(135deg,#AA6600,#FFD700);border-radius:8px;padding:7px 14px;font-size:11px;color:#000;font-weight:900;">' + t('vipActivateBoost') + '</div>'
-          : '<div style="font-size:11px;color:rgba(0,255,136,0.7);">' + t('vipActivatedToday') + '</div>'
-        ) +
-      '</div>';
-
-    // --- Refill 6x button ---
-    var refill6Html =
-      '<div onclick="' + (!refill6Today ? 'useVIPRefill6()' : '') + '" style="' +
-        'background:' + (!refill6Today ? 'linear-gradient(135deg,rgba(0,100,255,0.1),rgba(0,150,255,0.06))' : 'rgba(255,255,255,0.03)') + ';' +
-        'border:1px solid ' + (!refill6Today ? 'rgba(0,150,255,0.4)' : 'rgba(255,255,255,0.06)') + ';' +
-        'border-radius:14px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;' +
-        'cursor:' + (!refill6Today ? 'pointer' : 'default') + ';">' +
-        '<div>' +
-          t('vipRefillLabel') +
-        '</div>' +
-        (!refill6Today
-          ? '<div style="background:linear-gradient(135deg,#004499,#0077FF);border-radius:8px;padding:7px 14px;font-size:11px;color:white;font-weight:700;">' + t('vipActivateRefill') + '</div>'
-          : '<div style="font-size:11px;color:rgba(0,255,136,0.7);">' + t('vipActivatedToday') + '</div>'
-        ) +
-      '</div>';
-
-    // --- Withdrawal limit ---
-    var withdrawHtml =
-      '<div style="background:rgba(0,255,136,0.04);border:1px solid rgba(0,255,136,0.15);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;">' +
-        '<div style="font-size:13px;font-weight:700;color:#00CC88;">' + t('vipWithdrawTitle') + '</div>' +
-        '<div style="background:rgba(255,200,0,0.12);border:1px solid rgba(255,200,0,0.3);border-radius:8px;padding:5px 10px;font-size:10px;color:#FFD700;font-weight:700;">' + t('vipComingSoonBadge') + '</div>' +
-      '</div>';
-
     content.innerHTML =
+      // Combo hint for VIP
+      (hasVIP && comboData && comboData.cards && comboData.cards.length > 0 ?
+        '<div style="background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.25);border-radius:14px;padding:12px;margin-bottom:12px;">' +
+          '<div style="font-size:12px;font-weight:700;color:#FFD700;margin-bottom:6px;">🎯 تلميح الكومبو اليومي</div>' +
+          '<div style="font-size:11px;color:rgba(255,255,255,0.6);">إحدى بطاقات الكومبو من فئة: <span style="color:#FFD700;font-weight:700;">' + (comboData.cards[0] ? getCardName(getCardInfo(comboData.cards[0].categoryIndex, comboData.cards[0].cardIndex)) : '???') + '</span></div>' +
+        '</div>' : '') +
+
       // Boxes section
-      t('vipBoxesTitle') +
+      '<div style="font-size:13px;font-weight:700;color:#FFD700;margin-bottom:10px;">📦 الصناديق اليومية</div>' +
       '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:16px;">' +
         _vipBox('common', hasVIP) +
         _vipBox('rare', hasVIP) +
         _vipBox('epic', hasVIP) +
       '</div>' +
 
-      // New sections (only shown for active VIP)
-      (hasVIP ? boostHtml + refill6Html + withdrawHtml + comboBoxesHtml : '') +
+      // Features
+      '<div style="background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);border-radius:14px;padding:14px;margin-bottom:16px;">' +
+        '<div style="font-size:12px;font-weight:700;color:#FFD700;margin-bottom:10px;">✨ مميزات VIP I</div>' +
+        '<div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1.9;">' +
+          '📦 ٣ صناديق يومية (Common, Rare, Epic)<br>' +
+          '🦅 فرصة بطاقة Epic النادرة (1%)<br>' +
+          '⚡ تعدين REC أسرع بـ ×١.٥<br>' +
+          '🔋 شحن طاقة ٦ مرات يومياً<br>' +
+          '💰 سحب يومي حتى 20,000 REC<br>' +
+          '🎯 تلميح بطاقة من الكومبو<br>' +
+          '🎁 +1,000,000 RECORD فورياً<br>' +
+          '👑 شارة ذهبية بالليدربورد' +
+        '</div>' +
+      '</div>' +
 
-      // Buy / Active button
+      // Buy button
       (hasVIP ?
         '<div style="background:rgba(0,255,100,0.1);border:1px solid rgba(0,255,100,0.3);border-radius:14px;padding:14px;text-align:center;">' +
-          '<div style="font-size:14px;font-weight:700;color:#00FF88;">' + t('vipActiveMembership') + '</div>' +
-          '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px;">' + t('vipExpires') + ' ' + new Date(vipData.expiry).toLocaleDateString() + '</div>' +
+          '<div style="font-size:14px;font-weight:700;color:#00FF88;">✅ عضويتك فعالة</div>' +
+          '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px;">تنتهي: ' + new Date(vipData.expiry).toLocaleDateString() + '</div>' +
         '</div>' :
         '<div onclick="buyVIP(1)" style="background:linear-gradient(135deg,#cc0000,#ff3333);border:none;border-radius:14px;padding:16px;text-align:center;cursor:pointer;box-shadow:0 4px 20px rgba(255,0,0,0.4);">' +
-          '<div style="font-size:16px;font-weight:900;color:#FFD700;">' + t('vipSubscribeBtn') + '</div>' +
-          '<div style="font-size:12px;color:rgba(255,255,255,0.8);margin-top:4px;">' + t('vipPriceLabel') + '</div>' +
+          '<div style="font-size:16px;font-weight:900;color:#FFD700;">👑 اشتراك VIP I</div>' +
+          '<div style="font-size:12px;color:rgba(255,255,255,0.8);margin-top:4px;">1 TON / شهر</div>' +
         '</div>'
       );
-  } else if(n === 2) {
-    var today = getTodayStr();
-    var hasVIP2 = vipData && parseInt(vipData.tier||0) >= 2 && parseInt(vipData.expiry||0) > Date.now();
-    var spunToday = hasVIP2 && vipData.wheelDate === today;
-    content.innerHTML =
-      '<div style="background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.25);border-radius:16px;padding:16px;margin-bottom:10px;text-align:center;">' +
-        '<div style="font-size:13px;font-weight:700;color:#FFD700;margin-bottom:14px;">🎰 جرّب حظك</div>' +
-        '<div style="position:relative;display:inline-block;margin-bottom:14px;">' +
-          '<div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:10px solid transparent;border-right:10px solid transparent;border-top:22px solid #FFD700;z-index:6;filter:drop-shadow(0 0 6px rgba(255,215,0,0.8));"></div>' +
-          '<canvas id="vip2Wheel" width="260" height="260" style="border-radius:50%;display:block;"></canvas>' +
-          '<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:36px;height:36px;border-radius:50%;background:radial-gradient(circle,#fff,#ccc);border:3px solid #FFD700;box-shadow:0 0 15px rgba(255,215,0,0.6);z-index:5;"></div>' +
-        '</div>' +
-        (spunToday
-          ? '<div style="font-size:12px;color:rgba(0,255,136,0.7);padding:10px;">✅ تفقد غداً للدوران مجدداً</div>'
-          : hasVIP2
-            ? '<button id="vip2SpinBtn" onclick="spinVIP2Wheel()" style="background:linear-gradient(135deg,#AA6600,#FFD700);border:none;color:#000;padding:12px 30px;border-radius:12px;font-size:14px;font-weight:900;cursor:pointer;font-family:Orbitron,sans-serif;letter-spacing:1px;box-shadow:0 4px 20px rgba(255,215,0,0.4);">🎰 أدر العجلة</button>'
-            : '<div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:12px;padding:12px 28px;font-size:13px;color:rgba(255,255,255,0.3);cursor:not-allowed;">🔒 VIP II فقط</div>'
-        ) +
-      '</div>' +
-      '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:10px;">' +
-        [1,2,3,4,5].map(function(){ return '<div style="background:rgba(255,255,255,0.02);border:1px dashed rgba(255,255,255,0.07);border-radius:12px;padding:14px;text-align:center;"><div style="font-size:11px;color:rgba(255,255,255,0.2);">🔒 قريباً</div></div>'; }).join('') +
-      '</div>' +
-      '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:14px;text-align:center;">' +
-        '<div style="font-size:14px;font-weight:700;color:rgba(255,255,255,0.25);">🔒 الاشتراك قريباً</div>' +
-      '</div>';
-
-    setTimeout(initVIP2Wheel, 60);
-
   } else {
     content.innerHTML =
       '<div style="text-align:center;padding:40px 20px;">' +
         '<div style="font-size:40px;margin-bottom:12px;">🔒</div>' +
-        '<div style="font-size:16px;font-weight:700;color:rgba(255,255,255,0.4);">' + t('vipComingSoonTier') + '</div>' +
-        '<div style="font-size:12px;color:rgba(255,255,255,0.2);margin-top:6px;">' + t('vipComingSoonDesc') + '</div>' +
+        '<div style="font-size:16px;font-weight:700;color:rgba(255,255,255,0.4);">قريباً</div>' +
+        '<div style="font-size:12px;color:rgba(255,255,255,0.2);margin-top:6px;">هذا المستوى سيُفتح قريباً</div>' +
       '</div>';
   }
 }
 
 function _vipBox(type, unlocked) {
   var configs = {
-    common: { label:t('vipCommon'), color:'#cccccc', bg:'rgba(200,200,200,0.08)', border:'rgba(200,200,200,0.25)', icon:'📦' },
-    rare:   { label:t('vipRare'),   color:'#66aaff', bg:'rgba(68,136,255,0.12)', border:'rgba(68,136,255,0.4)',  icon:'💎' },
-    epic:   { label:t('vipEpic'),   color:'#cc66ff', bg:'rgba(170,68,255,0.15)', border:'rgba(170,68,255,0.5)', icon:'🌌' }
+    common: { label:'Common', color:'#cccccc', bg:'rgba(200,200,200,0.08)', border:'rgba(200,200,200,0.25)', icon:'📦' },
+    rare:   { label:'Rare',   color:'#66aaff', bg:'rgba(68,136,255,0.12)', border:'rgba(68,136,255,0.4)',  icon:'💎' },
+    epic:   { label:'Epic',   color:'#cc66ff', bg:'rgba(170,68,255,0.15)', border:'rgba(170,68,255,0.5)', icon:'🌌' }
   };
   var c = configs[type];
   var canOpen = unlocked && !(vipData.boxes && vipData.boxes[type] === getTodayStr());
@@ -2466,6 +1971,9 @@ function _vipBox(type, unlocked) {
     'padding:12px 8px;text-align:center;cursor:' + (unlocked ? 'pointer' : 'default') + ';">' +
     '<div style="font-size:28px;">' + (unlocked ? c.icon : '🔒') + '</div>' +
     '<div style="font-size:10px;font-weight:700;color:' + c.color + ';margin-top:6px;">' + c.label + '</div>' +
+    '<div style="font-size:9px;color:rgba(255,255,255,0.4);margin-top:3px;">' +
+      (unlocked ? (canOpen ? 'افتح' : '✅ تم اليوم') : 'مقفل') +
+    '</div>' +
   '</div>';
 }
 
@@ -2511,9 +2019,9 @@ function openVIPBox(type) {
 
 function showVIPBoxOpening(type, callback) {
   var configs = {
-    common: { icon:'📦', color:'#cccccc', name:t('vipCommon'), bg:'rgba(200,200,200,0.15)' },
-    rare:   { icon:'💎', color:'#66aaff', name:t('vipRare'),   bg:'rgba(68,136,255,0.15)' },
-    epic:   { icon:'🌌', color:'#cc66ff', name:t('vipEpic'),   bg:'rgba(170,68,255,0.15)' }
+    common: { icon:'📦', color:'#cccccc', name:'Common', bg:'rgba(200,200,200,0.15)' },
+    rare:   { icon:'💎', color:'#66aaff', name:'Rare',   bg:'rgba(68,136,255,0.15)' },
+    epic:   { icon:'🌌', color:'#cc66ff', name:'Epic',   bg:'rgba(170,68,255,0.15)' }
   };
   var c = configs[type];
 
@@ -2523,8 +2031,8 @@ function showVIPBoxOpening(type, callback) {
   overlay.innerHTML =
     '<div style="text-align:center;">' +
       '<div id="boxAnim" style="font-size:80px;animation:boxShake 0.5s infinite;margin-bottom:20px;">' + c.icon + '</div>' +
-      '<div style="font-size:22px;font-weight:900;color:' + c.color + ';margin-bottom:8px;">' + t('vipBox'+type.charAt(0).toUpperCase()+type.slice(1)) + '</div>' +
-      '<div style="font-size:14px;color:rgba(255,255,255,0.5);">' + t('vipBoxOpening') + '</div>' +
+      '<div style="font-size:22px;font-weight:900;color:' + c.color + ';margin-bottom:8px;">' + c.name + ' Box</div>' +
+      '<div style="font-size:14px;color:rgba(255,255,255,0.5);">جاري الفتح...</div>' +
     '</div>';
 
   // Add shake animation
@@ -2541,9 +2049,9 @@ function showVIPBoxOpening(type, callback) {
 
 function showVIPBoxResult(type, reward, alreadyOpened) {
   var configs = {
-    common: { color:'#cccccc', name:t('vipCommon'), bg:'linear-gradient(135deg,#1a1a1a,#2a2a2a)', border:'rgba(200,200,200,0.3)' },
-    rare:   { color:'#66aaff', name:t('vipRare'),   bg:'linear-gradient(135deg,#001133,#002266)', border:'rgba(68,136,255,0.5)' },
-    epic:   { color:'#cc66ff', name:t('vipEpic'),   bg:'linear-gradient(135deg,#1a0033,#2d0066)', border:'rgba(170,68,255,0.6)' }
+    common: { color:'#cccccc', name:'Common', bg:'linear-gradient(135deg,#1a1a1a,#2a2a2a)', border:'rgba(200,200,200,0.3)' },
+    rare:   { color:'#66aaff', name:'Rare',   bg:'linear-gradient(135deg,#001133,#002266)', border:'rgba(68,136,255,0.5)' },
+    epic:   { color:'#cc66ff', name:'Epic',   bg:'linear-gradient(135deg,#1a0033,#2d0066)', border:'rgba(170,68,255,0.6)' }
   };
   var c = configs[type];
 
@@ -2555,10 +2063,10 @@ function showVIPBoxResult(type, reward, alreadyOpened) {
     overlay.innerHTML =
       '<div style="background:' + c.bg + ';border:2px solid ' + c.border + ';border-radius:24px;padding:36px 32px;max-width:300px;text-align:center;">' +
         '<div style="font-size:50px;margin-bottom:16px;">🔒</div>' +
-        '<div style="font-size:18px;font-weight:700;color:' + c.color + ';margin-bottom:8px;">' + t('vipBox'+type.charAt(0).toUpperCase()+type.slice(1)) + '</div>' +
-        '<div style="font-size:14px;color:rgba(255,255,255,0.5);margin-bottom:20px;">' + t('vipBoxAlreadyOpened') + '</div>' +
-        '<div style="font-size:12px;color:rgba(255,255,255,0.3);">' + t('vipBoxComeBack') + '</div>' +
-        '<div style="margin-top:20px;background:rgba(255,255,255,0.08);border-radius:12px;padding:12px;cursor:pointer;color:rgba(255,255,255,0.7);font-size:14px;">' + t('vipBoxClose') + '</div>' +
+        '<div style="font-size:18px;font-weight:700;color:' + c.color + ';margin-bottom:8px;">' + c.name + ' Box</div>' +
+        '<div style="font-size:14px;color:rgba(255,255,255,0.5);margin-bottom:20px;">فتحت هذا الصندوق اليوم!</div>' +
+        '<div style="font-size:12px;color:rgba(255,255,255,0.3);">عد غداً للفتح مرة أخرى</div>' +
+        '<div style="margin-top:20px;background:rgba(255,255,255,0.08);border-radius:12px;padding:12px;cursor:pointer;color:rgba(255,255,255,0.7);font-size:14px;">إغلاق</div>' +
       '</div>';
     document.body.appendChild(overlay);
     return;
@@ -2573,21 +2081,21 @@ function showVIPBoxResult(type, reward, alreadyOpened) {
     rewardIcon = '⚡'; rewardTitle = 'REC'; rewardColor = '#00FF88';
     rewardValue = '+' + reward.amount.toFixed(6) + ' REC';
   } else if(reward.type === 'boost') {
-    rewardIcon = '🚀'; rewardTitle = t('vipBoxBoostTitle'); rewardColor = '#FFD700';
-    rewardValue = t('vipBoxBoostValue').replace('{n}', reward.multi);
+    rewardIcon = '🚀'; rewardTitle = 'تسريع التعدين'; rewardColor = '#FFD700';
+    rewardValue = '×' + reward.multi + ' لمدة ساعة';
   } else if(reward.type === 'epicCard') {
-    rewardIcon = '🦅'; rewardTitle = t('vipBoxEpicCardTitle'); rewardColor = '#FFD700';
-    rewardValue = t('vipBoxEpicCardValue');
+    rewardIcon = '🦅'; rewardTitle = 'بطاقة EPIC النادرة!'; rewardColor = '#FFD700';
+    rewardValue = 'تعدين 0.001 REC/ثانية';
   }
 
   overlay.innerHTML =
     '<div style="background:' + c.bg + ';border:2px solid ' + c.border + ';border-radius:24px;padding:36px 32px;max-width:300px;text-align:center;box-shadow:0 0 40px ' + c.border + ';">' +
-      '<div style="font-size:14px;color:' + c.color + ';font-weight:700;margin-bottom:16px;letter-spacing:2px;">' + (t('vipBox'+type.charAt(0).toUpperCase()+type.slice(1))||'').toUpperCase() + '</div>' +
+      '<div style="font-size:14px;color:' + c.color + ';font-weight:700;margin-bottom:16px;letter-spacing:2px;">' + c.name.toUpperCase() + ' BOX</div>' +
       '<div style="font-size:64px;margin-bottom:20px;">' + rewardIcon + '</div>' +
-      '<div style="font-size:16px;color:rgba(255,255,255,0.6);margin-bottom:8px;">' + t('vipBoxYouGot') + '</div>' +
+      '<div style="font-size:16px;color:rgba(255,255,255,0.6);margin-bottom:8px;">حصلت على</div>' +
       '<div style="font-size:24px;font-weight:900;color:' + rewardColor + ';margin-bottom:6px;">' + rewardTitle + '</div>' +
       '<div style="font-size:20px;font-weight:700;color:white;margin-bottom:24px;">' + rewardValue + '</div>' +
-      '<div style="background:' + c.border + ';border-radius:12px;padding:12px;cursor:pointer;color:white;font-size:14px;font-weight:700;">' + t('vipBoxGreat') + '</div>' +
+      '<div style="background:' + c.border + ';border-radius:12px;padding:12px;cursor:pointer;color:white;font-size:14px;font-weight:700;">🎉 رائع!</div>' +
     '</div>';
 
   document.body.appendChild(overlay);
@@ -2686,26 +2194,13 @@ function buyVIP(tier) {
           vipData.tier = data.tier;
           vipData.expiry = data.expiry;
           vipData.boxes = {};
-          // Welcome bonus: 50 REC
+          // Welcome bonus: 1,000,000 RECORD
           if(data.tier === 1) {
-            rec += 50;
-            saveData(true);
-            // Thank you popup
-            var ol = document.createElement('div');
-            ol.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:99999;display:flex;align-items:center;justify-content:center;';
-            ol.innerHTML =
-              '<div style="background:linear-gradient(180deg,#0a0020,#050010);border:2px solid rgba(255,215,0,0.5);border-radius:20px;padding:28px 20px;width:85vw;max-width:320px;text-align:center;box-shadow:0 0 60px rgba(255,215,0,0.3);">' +
-                '<div style="font-size:44px;margin-bottom:10px;">👑</div>' +
-                '<div style="font-family:Orbitron,sans-serif;font-size:18px;font-weight:900;color:#FFD700;margin-bottom:8px;">' + t('vipThankTitle') + '</div>' +
-                '<div style="font-size:13px;color:rgba(255,255,255,0.6);line-height:1.6;margin-bottom:16px;">' + t('vipThankDesc').replace('\\n','<br>') + '</div>' +
-                '<div style="background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);border-radius:12px;padding:12px;margin-bottom:20px;">' +
-                  '<div style="font-size:22px;font-weight:900;color:#00FF88;font-family:Orbitron,sans-serif;">🎁 +50 REC</div>' +
-                  '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:4px;">' + t('vipGiftLabel') + '</div>' +
-                '</div>' +
-                '<div onclick="this.parentElement.parentElement.remove()" style="background:linear-gradient(135deg,#CC0000,#FF3300);border-radius:12px;padding:12px;cursor:pointer;font-size:14px;font-weight:700;color:white;">' + t('vipStartBtn') + '</div>' +
-              '</div>';
-            document.body.appendChild(ol);
-            ol.addEventListener('click', function(e){ if(e.target===ol) ol.remove(); });
+            record += 1000000;
+            showToast('🎁 +1,000,000 RECORD مكافأة ترحيبية!');
+            setTimeout(function(){
+              showToast('👑 تم تفعيل VIP I بنجاح!');
+            }, 2000);
           } else {
             showToast('👑 تم تفعيل VIP ' + (tier===1?'I':tier===2?'II':'III') + ' بنجاح!');
           }
@@ -2739,34 +2234,14 @@ function loadVIPData(callback) {
       vipData.boxes = vipData.boxes || {};
       // Refresh VIP page if open
       var vipPage = document.getElementById('vip');
-      if(vipPage && vipPage.classList.contains('active')) renderVIPPage();
+      if(vipPage && vipPage.classList.contains('open')) renderVIPPage();
     }
     if(callback) callback();
   }).catch(function(){ if(callback) callback(); });
 }
 function openUpgrade(){updateUpgradeUI();document.getElementById('upgradePage').classList.add('open');}
 
-// ====== VIP DAILY ACTIONS ======
-function useVIPBoost() {
-  if(!vipData || parseInt(vipData.tier||0)<1 || parseInt(vipData.expiry||0)<=Date.now()) return;
-  if(vipData.boostDate === getTodayStr()) { showToast('✅ تم استخدام البوست اليوم!'); return; }
-  vipData.boostDate = getTodayStr();
-  calcTotalSpeeds();
-  saveData(true);
-  renderVIPPage();
-  showToast('⚡ تم تفعيل بوست ×١.٥ REC لهذا اليوم!');
-}
-
-function useVIPRefill6() {
-  if(!vipData || parseInt(vipData.tier||0)<1 || parseInt(vipData.expiry||0)<=Date.now()) return;
-  if(vipData.refill6Date === getTodayStr()) { showToast('✅ تم تفعيل ٦ تعبئات اليوم!'); return; }
-  vipData.refill6Date = getTodayStr();
-  window.refillData = { date: getTodayStr(), count: 6 };
-  saveData(true);
-  updateUpgradeUI();
-  renderVIPPage();
-  showToast('🔋 تم تفعيل ٦ تعبئات طاقة لهذا اليوم!');
-}
+// ====== TASK TABS ======
 function showTaskTab(name, btn){
   ['social','daily','missions'].forEach(function(t){
     document.getElementById('taskTab-'+t).style.display = t===name ? 'block' : 'none';
@@ -2971,24 +2446,6 @@ function confirmExchange(){
 
 // ====== HELPER ======
 function getTodayStr(){ return new Date().toISOString().split('T')[0]; }
-function updateAdminDistBtn() {
-  var btn = document.getElementById('adminDistBtn');
-  if(!btn) return;
-  if(localStorage.getItem(getWeekKey())) {
-    btn.textContent = '✅ تم التوزيع هذا الأسبوع';
-    btn.style.background = 'rgba(0,80,40,0.3)';
-    btn.style.color = 'rgba(0,200,100,0.35)';
-    btn.style.cursor = 'not-allowed';
-    btn.onclick = null;
-    btn.style.border = '1px solid rgba(0,150,70,0.2)';
-  }
-}
-
-function getWeekKey(){
-  var d=new Date(); var onejan=new Date(d.getFullYear(),0,1);
-  var w=Math.ceil((((d-onejan)/86400000)+onejan.getDay()+1)/7);
-  return 'adminDistributed_'+d.getFullYear()+'-W'+String(w).padStart(2,'0');
-}
 
 // ====== DAILY LOGIN ======
 var DAILY_REWARDS=[
@@ -3484,23 +2941,11 @@ var adminComboSelection = [null, null, null];
 function openCombo() {
   document.getElementById('comboOverlay').style.display = 'block';
   document.getElementById('comboPopup').style.display = 'block';
-  var isAdmin = tgUser && tgUser.id === ADMIN_TG_ID;
-  if(isAdmin) document.getElementById('comboAdminPanel').style.display = 'block';
-  loadComboData(function() {
-    if(isAdmin) {
-      buildAdminComboSlots();
-      // Update distribute button state
-      var weekKey = getWeekKey();
-      var btn = document.getElementById('adminDistBtn');
-      if(btn && localStorage.getItem(weekKey)) {
-        btn.textContent = '✅ تم التوزيع هذا الأسبوع';
-        btn.style.background = 'rgba(0,100,50,0.2)';
-        btn.style.color = 'rgba(0,255,100,0.4)';
-        btn.style.cursor = 'not-allowed';
-        btn.onclick = null;
-      }
-    }
-  });
+  loadComboData();
+  if(tgUser && tgUser.id === ADMIN_TG_ID) {
+    document.getElementById('comboAdminPanel').style.display = 'block';
+    buildAdminComboSlots();
+  }
 }
 
 function closeCombo() {
@@ -3508,8 +2953,8 @@ function closeCombo() {
   document.getElementById('comboPopup').style.display = 'none';
 }
 
-function loadComboData(callback) {
-  if(!tgUser) { if(callback) callback(); return; }
+function loadComboData() {
+  if(!tgUser) return;
   var slots = document.getElementById('comboCardSlots');
   if(slots) slots.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,0.3);padding:20px;">⏳ Loading...</div>';
 
@@ -3518,12 +2963,10 @@ function loadComboData(callback) {
     .then(function(d){
       comboData = d;
       renderComboSlots(d);
-      if(callback) callback();
     })
     .catch(function(){
       var slots = document.getElementById('comboCardSlots');
       if(slots) slots.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,0.3);padding:20px;">ما في كومبو اليوم بعد</div>';
-      if(callback) callback();
     });
 }
 
@@ -3610,20 +3053,11 @@ function buildAdminComboSlots() {
     });
   });
 
-  // Get saved combo keys if exist
-  var savedKeys = [];
-  if(comboData && comboData.exists && comboData.cards) {
-    savedKeys = comboData.cards.map(function(c){ return c.key || (c.categoryIndex+'_'+c.cardIndex); });
-  }
-
   panel.innerHTML = [0,1,2].map(function(slot) {
-    var savedVal = savedKeys[slot] ? savedKeys[slot]+'|'+savedKeys[slot].split('_')[0]+'|'+savedKeys[slot].split('_')[1] : '';
     return '<select id="adminComboSlot_'+slot+'" style="width:100%;background:rgba(0,0,0,0.5);border:1px solid rgba(255,100,50,0.3);color:white;padding:8px;border-radius:8px;font-size:11px;">' +
       '<option value="">-- بطاقة '+(slot+1)+' --</option>' +
       allCards.map(function(c) {
-        var val = c.key+'|'+c.ci+'|'+c.idx;
-        var selected = savedKeys[slot] === c.key ? ' selected' : '';
-        return '<option value="'+val+'"'+selected+'>'+c.label+'</option>';
+        return '<option value="'+c.key+'|'+c.ci+'|'+c.idx+'">'+c.label+'</option>';
       }).join('') +
       '</select>';
   }).join('');
@@ -3655,204 +3089,7 @@ function saveAdminCombo() {
     else showToast('❌ ' + JSON.stringify(d));
   }).catch(function(e){ showToast('❌ Fetch error: '+e.message); });
 }
-// ====== VIP II WHEEL ======
-var vip2Prizes = [
-  { label:'1 REC',   value:1,           type:'rec',    color:'#FF7744', weight:70   },
-  { label:'5M 🔴',   value:5000000,     type:'record', color:'#FF4444', weight:80   },
-  { label:'5 REC',   value:5,           type:'rec',    color:'#FF9922', weight:50   },
-  { label:'20M 🔴',  value:20000000,    type:'record', color:'#FF2200', weight:60   },
-  { label:'🍀',      value:0,           type:'luck',   color:'#1a2a1a', weight:50   },
-  { label:'10 REC',  value:10,          type:'rec',    color:'#FFCC00', weight:35   },
-  { label:'50M 🔴',  value:50000000,    type:'record', color:'#DD0000', weight:40   },
-  { label:'50 REC',  value:50,          type:'rec',    color:'#00FF88', weight:2    },
-  { label:'100M 🔴', value:100000000,   type:'record', color:'#CC0000', weight:20   },
-  { label:'🍀',      value:0,           type:'luck',   color:'#0d1a0d', weight:50   },
-  { label:'500M 🔴', value:500000000,   type:'record', color:'#AA0000', weight:5    },
-  { label:'500 REC', value:500,         type:'rec',    color:'#00FFAA', weight:0.01 },
-  { label:'1B 🔴',   value:1000000000,  type:'record', color:'#880000', weight:1    },
-  { label:'🍀',      value:0,           type:'luck',   color:'#152015', weight:50   },
-  { label:'5B 🔴',   value:5000000000,  type:'record', color:'#550000', weight:0.5  }
-];
-var vip2WheelAngle = 0;
-var vip2Spinning = false;
-
-function initVIP2Wheel() {
-  var canvas = document.getElementById('vip2Wheel');
-  if(!canvas) return;
-  vip2WheelAngle = 0;
-  drawVIP2Wheel(canvas, 0);
-}
-
-function drawVIP2Wheel(canvas, rotation) {
-  var ctx = canvas.getContext('2d');
-  var W = canvas.width, H = canvas.height;
-  var cx = W/2, cy = H/2, r = W/2 - 3;
-  var n = vip2Prizes.length;
-  var arc = (2*Math.PI) / n;
-  ctx.clearRect(0,0,W,H);
-
-  vip2Prizes.forEach(function(p,i){
-    var start = rotation + i*arc - Math.PI/2;
-    var end   = start + arc;
-    // Draw segment
-    ctx.beginPath(); ctx.moveTo(cx,cy);
-    ctx.arc(cx,cy,r,start,end); ctx.closePath();
-    ctx.fillStyle = p.color; ctx.fill();
-    ctx.strokeStyle='rgba(0,0,0,0.5)'; ctx.lineWidth=1.5; ctx.stroke();
-
-    // Draw text - fix mirroring
-    var midAngle = start + arc/2;
-    var norm = ((midAngle % (2*Math.PI)) + 4*Math.PI) % (2*Math.PI);
-    var isLeft = norm > Math.PI/2 && norm < 3*Math.PI/2;
-    var textR = r * 0.68;
-
-    ctx.save();
-    ctx.translate(cx, cy);
-    ctx.rotate(midAngle);
-    if(isLeft) {
-      ctx.rotate(Math.PI);
-      ctx.textAlign = 'left';
-      ctx.fillStyle = '#fff';
-      ctx.font = 'bold 7.5px Arial, sans-serif';
-      ctx.shadowColor = '#000'; ctx.shadowBlur = 4;
-      ctx.fillText(p.label, -textR, 3);
-    } else {
-      ctx.textAlign = 'right';
-      ctx.fillStyle = '#fff';
-      ctx.font = 'bold 7.5px Arial, sans-serif';
-      ctx.shadowColor = '#000'; ctx.shadowBlur = 4;
-      ctx.fillText(p.label, textR, 3);
-    }
-    ctx.restore();
-  });
-
-  // Outer border
-  ctx.beginPath(); ctx.arc(cx,cy,r,0,2*Math.PI);
-  ctx.strokeStyle='#FFD700'; ctx.lineWidth=3; ctx.stroke();
-}
-
-function spinVIP2Wheel() {
-  if(vip2Spinning) return;
-  if(!vipData || parseInt(vipData.tier||0) < 2 || parseInt(vipData.expiry||0) <= Date.now()) {
-    showToast('🔒 هذه الميزة لـ VIP II فقط'); return;
-  }
-  if(vipData.wheelDate === getTodayStr()) {
-    showToast('✅ دورت العجلة اليوم! تفقد غداً'); return;
-  }
-  vip2Spinning = true;
-  var btn = document.getElementById('vip2SpinBtn');
-  if(btn){ btn.disabled=true; btn.style.opacity='0.5'; }
-
-  // Weighted random
-  var total = vip2Prizes.reduce(function(s,p){ return s+p.weight; },0);
-  var rand = Math.random()*total, cumul=0, selectedIdx=0;
-  for(var i=0;i<vip2Prizes.length;i++){
-    cumul+=vip2Prizes[i].weight;
-    if(rand<=cumul){ selectedIdx=i; break; }
-  }
-
-  // Target angle
-  var arc = (2*Math.PI)/vip2Prizes.length;
-  var targetOffset = -(selectedIdx*arc + arc/2);
-  var extraSpins   = (5+Math.floor(Math.random()*4))*2*Math.PI;
-  var finalAngle   = targetOffset - extraSpins;
-
-  var startAngle = vip2WheelAngle;
-  var startTime  = null;
-  var duration   = 4500;
-  var canvas     = document.getElementById('vip2Wheel');
-
-  function animate(ts){
-    if(!startTime) startTime=ts;
-    var prog = Math.min((ts-startTime)/duration,1);
-    var ease = 1-Math.pow(1-prog,4);
-    vip2WheelAngle = startAngle+(finalAngle-startAngle)*ease;
-    if(canvas) drawVIP2Wheel(canvas, vip2WheelAngle);
-    if(prog<1){ requestAnimationFrame(animate); return; }
-
-    vip2Spinning=false;
-    var prize=vip2Prizes[selectedIdx];
-    if(!vipData) vipData={};
-    vipData.wheelDate=getTodayStr();
-
-    if(prize.type==='rec')    rec    += prize.value;
-    if(prize.type==='record') record += prize.value;
-    saveData(true);
-
-    if(tgUser && prize.type!=='luck'){
-      fetch('/api/vip2/spin',{method:'POST',headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({telegramId:tgUser.id,prize:prize})}).catch(function(){});
-    }
-    showVIP2SpinResult(prize);
-  }
-  requestAnimationFrame(animate);
-}
-
-function showVIP2SpinResult(prize) {
-  var icon  = prize.type==='rec'?'⚡':prize.type==='record'?'🔴':'🍀';
-  var isLuck= prize.type==='luck';
-  var title = isLuck?'حظاً أوفر!':'🎉 مبروك!';
-  var val   = isLuck?'جرب غداً!':'+'+formatPrizeNum(prize.value)+' '+(prize.type==='rec'?'REC':'RECORD');
-  var ol=document.createElement('div');
-  ol.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:99999;display:flex;align-items:center;justify-content:center;';
-  ol.innerHTML=
-    '<div style="background:linear-gradient(180deg,#0e0a22,#080518);border:2px solid rgba(255,215,0,0.4);border-radius:20px;padding:30px 24px;width:80vw;max-width:300px;text-align:center;">' +
-      '<div style="font-size:54px;margin-bottom:10px;">'+icon+'</div>' +
-      '<div style="font-family:Orbitron,sans-serif;font-size:20px;font-weight:900;color:#FFD700;margin-bottom:8px;">'+title+'</div>' +
-      '<div style="font-size:22px;font-weight:700;color:'+(isLuck?'#888':'#00FF88')+';margin-bottom:20px;">'+val+'</div>' +
-      '<div onclick="this.parentElement.parentElement.remove();renderVIPPage();" style="background:linear-gradient(135deg,#AA6600,#FFD700);border-radius:12px;padding:12px;cursor:pointer;font-size:14px;font-weight:700;color:#000;">حسناً 👍</div>' +
-    '</div>';
-  ol.addEventListener('click',function(e){if(e.target===ol){ol.remove();renderVIPPage();}});
-  document.body.appendChild(ol);
-}
-
-function formatPrizeNum(n){
-  if(n>=1000000000) return (n/1000000000).toFixed(n%1000000000===0?0:1)+'B';
-  if(n>=1000000)    return (n/1000000).toFixed(n%1000000===0?0:1)+'M';
-  if(n>=1000)       return (n/1000).toFixed(n%1000===0?0:1)+'K';
-  return n+'';
-}
-// ====== END VIP II WHEEL ======
-
-// ====== ADMIN: UPGRADE LIMITED CARDS ======
-function adminDistributeWeekly() {
-  if(!tgUser || String(tgUser.id) !== String(ADMIN_TG_ID)) return;
-  // Check if already distributed this week
-  var weekKey = getWeekKey();
-  if(localStorage.getItem(weekKey)) {
-    showToast('✅ تم التوزيع هذا الأسبوع بالفعل!'); return;
-  }
-  showToast('⏳ جاري التوزيع...');
-  fetch('/api/admin/distribute-weekly', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ adminId: tgUser.id })
-  })
-  .then(function(r){ return r.json(); })
-  .then(function(d){
-    if(d.success) {
-      localStorage.setItem(getWeekKey(), '1');
-      showToast('✅ تم توزيع جوائز الأسبوع بنجاح!');
-      updateAdminDistBtn();
-    } else {
-      showToast('❌ ' + (d.error || 'خطأ'));
-    }
-  })
-  .catch(function(){ showToast('❌ فشل الاتصال بالسيرفر'); });
-}
-
-function adminUpgradeLimitedCards() {
-  if(!tgUser || String(tgUser.id) !== String(ADMIN_TG_ID)) return;
-  var MAX_LVL = 100;
-  // 4_0 = Dragon Emperor, 4_1 = Crystal Phoenix
-  cardLevels['4_0'] = MAX_LVL;
-  cardLevels['4_1'] = MAX_LVL;
-  calcTotalSpeeds();
-  updateUI();
-  buildCards();
-  saveData(true);
-  showToast('⭐ تم ترقية Dragon Emperor و Crystal Phoenix للمستوى 100!');
-}
+// ====== END DAILY COMBO ======
 
 // ====== WALLET PAGE ======
 function updateWalletPage() {
@@ -5186,7 +4423,6 @@ function initApp() {
     updateUI();
     setTimeout(initTonConnect, 800);
     setTimeout(function(){ initNewFeatures(); checkCardMissions(); }, 300);
-    setTimeout(function(){ if(tgUser && String(tgUser.id)===String(ADMIN_TG_ID)) updateAdminDistBtn(); }, 500);
   } catch(e) {
     console.log('Init error:', e);
     try { buildCards(); updateUI(); } catch(e2) {}
