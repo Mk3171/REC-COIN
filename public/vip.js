@@ -136,11 +136,21 @@ function switchVIPTab(n) {
   if(n === 1) {
     var hasVIP = vipData && parseInt(vipData.tier||0) >= 1 && parseInt(vipData.expiry||0) > Date.now();
     content.innerHTML =
-      // Combo hint for VIP
+      // Combo hint for VIP - كل الثلاث بطاقات مع أيقوناتهن
       (hasVIP && comboData && comboData.cards && comboData.cards.length > 0 ?
         '<div style="background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.25);border-radius:14px;padding:12px;margin-bottom:12px;">' +
-          '<div style="font-size:12px;font-weight:700;color:#FFD700;margin-bottom:6px;">🎯 تلميح الكومبو اليومي</div>' +
-          '<div style="font-size:11px;color:rgba(255,255,255,0.6);">إحدى بطاقات الكومبو من فئة: <span style="color:#FFD700;font-weight:700;">' + (function(){ var ci=getCardInfo(comboData.cards[0].categoryIndex,comboData.cards[0].cardIndex); return ci?ci.name:'???'; })() + '</span></div>' +
+          '<div style="font-size:12px;font-weight:700;color:#FFD700;margin-bottom:10px;">🎯 تلميح الكومبو اليومي</div>' +
+          '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;">' +
+            comboData.cards.map(function(c){
+              var ci = getCardInfo(c.categoryIndex, c.cardIndex);
+              var isDone = c.done;
+              return '<div style="background:rgba(0,0,0,0.3);border:1px solid rgba(255,215,0,' + (isDone?'0.5':'0.2') + ');border-radius:10px;padding:8px 4px;text-align:center;">' +
+                '<div style="font-size:26px;">' + (ci ? ci.e : '🃏') + '</div>' +
+                '<div style="font-size:10px;color:' + (isDone?'#00FF88':'#FFD700') + ';font-weight:700;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (ci ? ci.name : '???') + '</div>' +
+                '<div style="font-size:14px;margin-top:2px;">' + (isDone ? '✅' : '🔒') + '</div>' +
+              '</div>';
+            }).join('') +
+          '</div>' +
         '</div>' : '') +
 
       // Boxes section
