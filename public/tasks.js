@@ -127,7 +127,9 @@ function twitterTaskClaim(taskId, claimBtnId, openBtnId, recReward){
 }
 
 // ====== REC → RECORD EXCHANGE ======
-var EXCHANGE_RATE = 5000000; // 1 REC = 5,000,000 RECORD
+var EXCHANGE_RATE = 300000000; // 1 REC = 300,000,000 RECORD
+var EXCHANGE_DAILY_LIMIT = 10; // 10 REC per day max
+var EXCHANGE_MIN = 0.05; // minimum 0.05 REC
 
 // RECORD → REC: 1,000,000,000 RECORD = 0.5 REC
 var RECORD_TO_REC_RATE = 0.5 / 1000000000; // per RECORD
@@ -153,11 +155,18 @@ function openExchange(){
       // REC → RECORD
       var inputVal = parseFloat(document.getElementById('excInput') ? document.getElementById('excInput').value : 0) || 0;
       body =
-        '<div style="background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.2);border-radius:10px;padding:10px;margin-bottom:10px;display:flex;justify-content:space-between;">'+
-          '<span style="color:#aaa;font-size:12px;">'+t('recInfoTitle').replace('⚡ ','')+':</span>'+
+        '<div style="background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.2);border-radius:10px;padding:10px;margin-bottom:4px;display:flex;justify-content:space-between;">'+
+          '<span style="color:#aaa;font-size:12px;">REC:</span>'+
           '<span style="color:#00FF88;font-size:13px;font-weight:bold;">'+rec.toFixed(6)+'</span>'+
         '</div>'+
-        '<div style="color:#aaa;font-size:11px;text-align:center;margin-bottom:8px;">1 REC = '+EXCHANGE_RATE.toLocaleString()+' RECORD</div>'+
+        '<div style="background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.15);border-radius:10px;padding:7px 10px;margin-bottom:6px;display:flex;justify-content:space-between;">'+
+          '<span style="color:#aaa;font-size:11px;">'+(currentLang==='ar'?'متبقي اليوم:':'Today remaining:')+'</span>'+
+          '<span style="color:#FFD700;font-size:11px;font-weight:bold;">'+(EXCHANGE_DAILY_LIMIT-getExchangedToday()).toFixed(3)+' / '+EXCHANGE_DAILY_LIMIT+' REC</span>'+
+        '</div>'+
+        '<div style="color:#aaa;font-size:11px;text-align:center;margin-bottom:4px;">1 REC = '+EXCHANGE_RATE.toLocaleString()+' RECORD</div>'+
+        '<div style="color:#888;font-size:10px;text-align:center;margin-bottom:8px;">'+
+          (currentLang==='ar'?'حد أدنى: 0.05 REC | أقصى يومي: 10 REC':'Min: 0.05 REC | Daily max: 10 REC')+
+        '</div>'+
         '<input id="excInput" type="number" min="0" step="0.000001" placeholder="'+t('qbSwap')+' REC"'+
           ' style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(0,255,136,0.3);border-radius:10px;padding:10px;color:white;font-size:14px;text-align:center;box-sizing:border-box;outline:none;margin-bottom:8px;"'+
           ' oninput="document.getElementById(\'excPreview\').textContent=\'≈ \'+(Math.floor((parseFloat(this.value)||0)*'+EXCHANGE_RATE+')).toLocaleString()+\' RECORD\'">'+
@@ -208,15 +217,35 @@ function openExchange(){
   renderExchange();
 }
 
+function getExchangedToday(){
+  var key = 'exchRec_' + getTodayStr();
+  try { return parseFloat(localStorage.getItem(key)||'0'); } catch(e){ return 0; }
+}
+function addExchangedToday(amount){
+  var key = 'exchRec_' + getTodayStr();
+  try { localStorage.setItem(key, (getExchangedToday()+amount).toFixed(6)); } catch(e){}
+}
+
 function confirmExchange(){
   var input = document.getElementById('excInput');
   if(!input) return;
   var amount = parseFloat(input.value) || 0;
-  if(amount <= 0){ showToast('❌ '+(currentLang==='ar'?'أدخل كمية صحيحة':'Enter valid amount')); return; }
+  if(amount < EXCHANGE_MIN){
+    showToast('❌ '+(currentLang==='ar'?'الحد الأدنى 0.05 REC':'Min 0.05 REC'));
+    return;
+  }
   if(amount > rec){ showToast('❌ '+(currentLang==='ar'?'رصيد REC غير كافٍ':'Not enough REC')); return; }
+  var usedToday = getExchangedToday();
+  if(usedToday >= EXCHANGE_DAILY_LIMIT){
+    showToast('❌ '+(currentLang==='ar'?'وصلت الحد اليومي (10 REC)':'Daily limit reached (10 REC)'));
+    return;
+  }
+  var remaining = EXCHANGE_DAILY_LIMIT - usedToday;
+  if(amount > remaining) amount = Math.floor(remaining * 1000000) / 1000000;
   var gain = Math.floor(amount * EXCHANGE_RATE);
   rec -= amount;
   record += gain;
+  addExchangedToday(amount);
   var today=getTodayStr();
   if(dailyTasksData.date!==today) resetDailyTasks(today);
   dailyTasksData.spent += gain;
