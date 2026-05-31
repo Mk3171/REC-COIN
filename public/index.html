@@ -270,13 +270,13 @@ function closeSideMenu(){
 
       <!-- SOCIAL TASKS -->
       <div id="taskTab-social">
-        <div style="font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin-bottom:8px;">📢 JOIN OUR CHANNELS — +5 REC EACH</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin-bottom:8px;"><span data-i18n="joinChannelsHeader"></span> — <span data-i18n="perEach"></span></div>
         <div id="blocksChannelTask"></div>
         <div id="chatGroupTask"></div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin:14px 0 8px;">FOLLOW US</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin:14px 0 8px;"><span data-i18n="followUsHeader"></span></div>
         <div id="telegramFollowTask"></div>
         <div id="twitterFollowTask"></div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin:14px 0 8px;">❤️ LIKE TWEETS — +5 REC EACH</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin:14px 0 8px;"><span data-i18n="likeTweetsHeader"></span> — <span data-i18n="perEach"></span></div>
         <div id="likeTasks"></div>
         <div style="font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin:14px 0 8px;">🔁 RETWEET — +5 REC EACH</div>
         <div id="retweetTasks"></div>
@@ -286,18 +286,18 @@ function closeSideMenu(){
       <div id="taskTab-daily" style="display:none;">
         <div style="background:linear-gradient(135deg,#0d0010,#150020);border:1px solid rgba(180,0,255,0.35);border-radius:14px;padding:14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="openMysteryBox()">
           <div>
-            <div style="font-size:15px;color:#CC88FF;font-weight:bold;">📦 Mystery Box</div>
-            <div style="color:#aaa;font-size:11px;margin-top:3px;">Free daily — random RECORD or REC!</div>
+            <div style="font-size:15px;color:#CC88FF;font-weight:bold;"><span data-i18n='mysteryTitle'></span></div>
+            <div style="color:#aaa;font-size:11px;margin-top:3px;"><span data-i18n="mysterySubtitle"></span></div>
           </div>
           <button style="background:linear-gradient(135deg,#4a0080,#8800FF);border:none;color:white;padding:9px 14px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:bold;" onclick="event.stopPropagation();openMysteryBox()">Open 🎲</button>
         </div>
-        <div style="font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin-bottom:8px;">TODAY'S TASKS — resets midnight</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin-bottom:8px;"><span data-i18n="todayTasksHeader"></span> — <span data-i18n="todayTasksReset"></span></div>
         <div id="dailyTasksCont"></div>
       </div>
 
       <!-- CARD MISSIONS -->
       <div id="taskTab-missions" style="display:none;">
-        <div style="font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin-bottom:8px;">CARD MISSIONS — one-time rewards</div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin-bottom:8px;"><span data-i18n="cardMissionsHeader"></span> — <span data-i18n="cardMissionsOnce"></span></div>
         <div id="cardMissionsCont"></div>
       </div>
     </div>
@@ -317,8 +317,8 @@ function closeSideMenu(){
       <!-- INVITE TAB -->
       <div id="inviteTabContent_invite">
         <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px;margin-bottom:12px;">
-          <div style="font-size:13px;font-weight:700;color:white;letter-spacing:1px;margin-bottom:4px;">PARTNER PROGRAM</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:14px;">Invite friends & earn REC from their mining and blocks.</div>
+          <div style="font-size:13px;font-weight:700;color:white;letter-spacing:1px;margin-bottom:4px;"><span data-i18n="partnerProgram"></span></div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:14px;"><span data-i18n="partnerDesc"></span></div>
           <div style="display:flex;gap:8px;margin-bottom:10px;">
             <div id="inviteLinkDisplay" style="flex:1;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 12px;font-size:10px;color:rgba(255,255,255,0.4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Loading...</div>
             <button onclick="copyInvite()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);color:white;padding:10px 14px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:700;font-family:Rajdhani,sans-serif;white-space:nowrap;">Copy</button>
