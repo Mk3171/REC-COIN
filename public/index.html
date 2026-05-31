@@ -17,10 +17,6 @@
   from { transform: translateX(100%); }
   to { transform: translateX(0); }
 }
-#profilePopupOverlay { z-index: 99990 !important; }
-#profilePopup        { z-index: 99991 !important; }
-#sideMenuOverlay     { z-index: 99980 !important; }
-#sideMenu            { z-index: 99985 !important; }
 </style>
 <script>
 function openSideMenu(){
@@ -659,14 +655,14 @@ function closeSideMenu(){
   </div>
   <div id="comboClaimed" style="display:none;text-align:center;padding:10px;color:#00FF88;font-weight:700;font-size:14px;">✅ تم استلام المكافأة اليوم!</div>
 
-  // Admin Panel (only for admin)
+  <!-- Admin Panel (only for admin) -->
   <div id="comboAdminPanel" style="display:none;margin-top:20px;border-top:1px solid rgba(255,255,255,0.08);padding-top:16px;">
     <div style="font-size:12px;color:rgba(255,100,50,0.7);letter-spacing:1px;margin-bottom:10px;">🔧 ADMIN — اختر بطاقات الكومبو</div>
     <div id="comboAdminSlots" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;">
       <!-- 3 selectors -->
     </div>
     <button onclick="saveAdminCombo()" style="width:100%;background:rgba(255,100,50,0.2);border:1px solid rgba(255,100,50,0.4);color:#FF6644;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:Rajdhani,sans-serif;margin-bottom:8px;">💾 حفظ الكومبو اليومي</button>
-    <button onclick="adminUpgradeLimitedCards()" style="width:100%;background:rgba(255,215,0,0.15);border:1px solid rgba(255,215,0,0.4);color:#FFD700;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:Rajdhani,sans-serif;">⭐ ترقية البطاقتين المحدودتين MAX</button>
+    <button onclick="adminDistributeWeekly()" id="adminDistBtn" style="width:100%;background:rgba(0,200,100,0.15);border:1px solid rgba(0,200,100,0.4);color:#00CC66;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:Rajdhani,sans-serif;">🏆 توزيع جوائز الأسبوع</button>
   </div>
 </div>
 
