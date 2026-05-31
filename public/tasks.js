@@ -62,7 +62,7 @@ function channelTaskOpen(taskId, url, openBtnId, claimBtnId){
 }
 
 function channelTaskClaim(taskId, claimBtnId, recReward){
-  if(completedTasks.indexOf(taskId)!==-1){ showToast('✅ Already claimed!'); return; }
+  if(completedTasks.indexOf(taskId)!==-1){ showToast(t('toastAlready')); return; }
   completedTasks.push(taskId);
   if(recReward >= 1000) {
     record += recReward;
@@ -118,7 +118,7 @@ function twitterTaskOpen(taskId, url, openBtnId, claimBtnId){
 }
 
 function twitterTaskClaim(taskId, claimBtnId, openBtnId, recReward){
-  if(completedTasks.indexOf(taskId)!==-1){ showToast('✅ Already claimed!'); return; }
+  if(completedTasks.indexOf(taskId)!==-1){ showToast(t('toastAlready')); return; }
   completedTasks.push(taskId);
   rec += recReward;
   saveData(true); updateUI();
@@ -259,8 +259,8 @@ function openDailyLogin(){
   pp.innerHTML=
     '<div style="text-align:center;margin-bottom:14px;">'+
       '<div style="font-size:30px;margin-bottom:4px;">📅</div>'+
-      '<div style="font-family:Orbitron,sans-serif;font-size:15px;color:#FFD700;">Daily Reward</div>'+
-      '<div style="font-size:11px;color:#666;margin-top:3px;">Day '+(currentDay+1)+' / 30</div>'+
+      '<div style="font-family:Orbitron,sans-serif;font-size:15px;color:#FFD700;">'+t('dailyRewardTitle')+'</div>'+
+      '<div style="font-size:11px;color:#666;margin-top:3px;">'+t('dailyDay',{n:currentDay+1})+'</div>'+
     '</div>'+
     '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin-bottom:14px;">'+grid+'</div>'+
     (!alreadyClaimed?
@@ -270,8 +270,8 @@ function openDailyLogin(){
         (reward.rec>0?'<div style="font-size:15px;color:#00FF88;margin-top:3px;">+ '+reward.rec+' REC 🟢</div>':'')+
       '</div>':
       '<div style="background:rgba(0,100,0,0.12);border:1px solid #1a5c1a;border-radius:12px;padding:12px;margin-bottom:12px;text-align:center;">'+
-        '<div style="color:#4eff4e;font-size:13px;">✅ Already claimed today!</div>'+
-        '<div style="color:#555;font-size:10px;margin-top:3px;">Come back tomorrow</div>'+
+        '<div style="color:#4eff4e;font-size:13px;">'+t('dailyAlreadyClaimed')+'</div>'+
+        '<div style="color:#555;font-size:10px;margin-top:3px;">'+t('dailyComeBackTmr')+'</div>'+
       '</div>')+
     '<div style="display:flex;gap:8px;">'+
       (!alreadyClaimed?
@@ -286,7 +286,7 @@ function openDailyLogin(){
 
 function claimDailyReward(){
   var today=getTodayStr();
-  if(dailyLogin.lastDate===today){showToast('Already claimed today!');return;}
+  if(dailyLogin.lastDate===today){showToast(t('dailyAlreadyClaimed'));return;}
   var currentDay=dailyLogin.day%30;
   var reward=DAILY_REWARDS[currentDay];
   record+=reward.record;
@@ -317,7 +317,7 @@ function openMysteryBox(){
     pp.innerHTML=
       '<div style="font-size:50px;margin-bottom:10px;filter:grayscale(1);">📦</div>'+
       '<div style="font-size:16px;color:#aaa;margin-bottom:6px;">Mystery Box</div>'+
-      '<div style="color:#555;font-size:12px;margin-bottom:16px;">Already opened today.<br>Come back tomorrow!</div>'+
+      '<div style="color:#555;font-size:12px;margin-bottom:16px;">'+t('mysteryAlready')+'</div>'+
       '<button onclick="document.getElementById(\'mysteryOverlay\').remove();" style="background:#1a1a1a;border:1px solid #333;color:#aaa;padding:10px 24px;border-radius:10px;cursor:pointer;">Close</button>';
   } else {
     pp.innerHTML=
@@ -370,15 +370,15 @@ function revealMystery(){
 
 // ====== DAILY TASKS ======
 var DAILY_TASK_POOL=[
-  {id:'tap50',label:'Tap 50 times today',labelAr:'اكبس 50 مرة اليوم',type:'taps',target:50,reward:{record:5000}},
-  {id:'tap100',label:'Tap 100 times today',labelAr:'اكبس 100 مرة اليوم',type:'taps',target:100,reward:{record:12000}},
-  {id:'tap200',label:'Tap 200 times today',labelAr:'اكبس 200 مرة اليوم',type:'taps',target:200,reward:{record:25000}},
-  {id:'tap500',label:'Tap 500 times today',labelAr:'اكبس 500 مرة اليوم',type:'taps',target:500,reward:{record:70000}},
-  {id:'upg1',label:'Upgrade 1 card today',labelAr:'رقّ بطاقة واحدة اليوم',type:'upgrades',target:1,reward:{record:15000}},
-  {id:'upg3',label:'Upgrade 3 cards today',labelAr:'رقّ 3 بطاقات اليوم',type:'upgrades',target:3,reward:{record:50000}},
-  {id:'upg5',label:'Upgrade 5 cards today',labelAr:'رقّ 5 بطاقات اليوم',type:'upgrades',target:5,reward:{record:120000}},
-  {id:'spend50k',label:'Spend 50K RECORD on upgrades',labelAr:'اصرف 50K RECORD على الترقيات',type:'spent',target:50000,reward:{record:30000}},
-  {id:'spend500k',label:'Spend 500K RECORD on upgrades',labelAr:'اصرف 500K RECORD على الترقيات',type:'spent',target:500000,reward:{record:200000}},
+  {id:'tap50',  tKey:'taskTapN',         tParam:{n:50},   type:'taps',    target:50,    reward:{record:5000}},
+  {id:'tap100', tKey:'taskTapN',         tParam:{n:100},  type:'taps',    target:100,   reward:{record:12000}},
+  {id:'tap200', tKey:'taskTapN',         tParam:{n:200},  type:'taps',    target:200,   reward:{record:25000}},
+  {id:'tap500', tKey:'taskTapN',         tParam:{n:500},  type:'taps',    target:500,   reward:{record:70000}},
+  {id:'upg1',   tKey:'taskUpgradeNCards',tParam:{n:1},    type:'upgrades',target:1,     reward:{record:15000}},
+  {id:'upg3',   tKey:'taskUpgradeNCards',tParam:{n:3},    type:'upgrades',target:3,     reward:{record:50000}},
+  {id:'upg5',   tKey:'taskUpgradeNCards',tParam:{n:5},    type:'upgrades',target:5,     reward:{record:120000}},
+  {id:'spend50k', tKey:'taskSpendN',     tParam:{n:'50K'},type:'spent',   target:50000, reward:{record:30000}},
+  {id:'spend500k',tKey:'taskSpendN',     tParam:{n:'500K'},type:'spent',  target:500000,reward:{record:200000}},
 ];
 
 function getTodayTaskIndices(){
@@ -428,7 +428,7 @@ function renderDailyTasksUI(){
     var done=dailyTasksData.done.indexOf(task.id)!==-1;
     var prog=Math.min(dailyTasksData[task.type]||0,task.target);
     var pct=Math.round(prog/task.target*100);
-    var label=currentLang==='ar'?task.labelAr:task.label;
+    var label=t(task.tKey, task.tParam);
     var rewardStr=task.reward.record?formatCost(task.reward.record)+' RECORD':(task.reward.rec+' REC');
     html+=
       '<div style="background:'+(done?'rgba(0,80,0,0.3)':'rgba(10,10,20,0.7)')+';border:1px solid '+(done?'#1a7a1a':'rgba(255,255,255,0.07)')+';border-radius:12px;padding:12px;margin-bottom:8px;">'+
@@ -448,16 +448,16 @@ function renderDailyTasksUI(){
 
 // ====== CARD MISSIONS (in Tasks page) ======
 var CARD_MISSIONS=[
-  {id:'cm_naruto5',label:'Upgrade Naruto to Lv 5',labelAr:'رقّ ناروتو للمستوى 5',cardKey:'0_0',reqLvl:5,reward:{rec:0.005}},
-  {id:'cm_goku10',label:'Upgrade Goku to Lv 10',labelAr:'رقّ غوكو للمستوى 10',cardKey:'0_1',reqLvl:10,reward:{rec:0.01}},
-  {id:'cm_luffy8',label:'Upgrade Luffy to Lv 8',labelAr:'رقّ لوفي للمستوى 8',cardKey:'0_2',reqLvl:8,reward:{rec:0.008}},
-  {id:'cm_gojo20',label:'Upgrade Gojo to Lv 20',labelAr:'رقّ غوجو للمستوى 20',cardKey:'0_24',reqLvl:20,reward:{rec:0.1}},
-  {id:'cm_ferrari5',label:'Upgrade Ferrari SF90 to Lv 5',labelAr:'رقّ Ferrari SF90 للمستوى 5',cardKey:'1_0',reqLvl:5,reward:{rec:0.005}},
-  {id:'cm_lambo10',label:'Upgrade Lamborghini to Lv 10',labelAr:'رقّ لامبورغيني للمستوى 10',cardKey:'1_1',reqLvl:10,reward:{rec:0.015}},
-  {id:'cm_any25',label:'Get any card to Lv 25',labelAr:'وصّل أي بطاقة للمستوى 25',cardKey:'any',reqLvl:25,reward:{rec:0.1}},
-  {id:'cm_any50',label:'Get any card to Lv 50',labelAr:'وصّل أي بطاقة للمستوى 50',cardKey:'any',reqLvl:50,reward:{rec:1}},
-  {id:'cm_any75',label:'Get any card to Lv 75',labelAr:'وصّل أي بطاقة للمستوى 75',cardKey:'any',reqLvl:75,reward:{rec:5}},
-  {id:'cm_any100',label:'Get any card to Lv 100',labelAr:'وصّل أي بطاقة للمستوى 100',cardKey:'any',reqLvl:100,reward:{rec:15}},
+  {id:'cm_naruto5', tKey:'taskUpgradeCard',tParam:{card:'Naruto',n:5},  cardKey:'0_0', reqLvl:5,  reward:{rec:0.005}},
+  {id:'cm_goku10',  tKey:'taskUpgradeCard',tParam:{card:'Goku',n:10},   cardKey:'0_1', reqLvl:10, reward:{rec:0.01}},
+  {id:'cm_luffy8',  tKey:'taskUpgradeCard',tParam:{card:'Luffy',n:8},   cardKey:'0_2', reqLvl:8,  reward:{rec:0.008}},
+  {id:'cm_gojo20',  tKey:'taskUpgradeCard',tParam:{card:'Gojo',n:20},   cardKey:'0_24',reqLvl:20, reward:{rec:0.1}},
+  {id:'cm_ferrari5',tKey:'taskUpgradeCard',tParam:{card:'Ferrari SF90',n:5},cardKey:'1_0',reqLvl:5,reward:{rec:0.005}},
+  {id:'cm_lambo10', tKey:'taskUpgradeCard',tParam:{card:'Lamborghini',n:10},cardKey:'1_1',reqLvl:10,reward:{rec:0.015}},
+  {id:'cm_any25',   tKey:'taskAnyCard',    tParam:{n:25},               cardKey:'any', reqLvl:25, reward:{rec:0.1}},
+  {id:'cm_any50',   tKey:'taskAnyCard',    tParam:{n:50},               cardKey:'any', reqLvl:50, reward:{rec:1}},
+  {id:'cm_any75',   tKey:'taskAnyCard',    tParam:{n:75},               cardKey:'any', reqLvl:75, reward:{rec:5}},
+  {id:'cm_any100',  tKey:'taskAnyCard',    tParam:{n:100},              cardKey:'any', reqLvl:100,reward:{rec:15}},
 ];
 
 function checkCardMissions(){
@@ -487,7 +487,7 @@ function renderCardMissionsUI(){
   var html='';
   CARD_MISSIONS.forEach(function(m){
     var done=cardTasksClaimed.indexOf(m.id)!==-1;
-    var label=currentLang==='ar'?m.labelAr:m.label;
+    var label=t(m.tKey, m.tParam);
     var prog=0,target=m.reqLvl;
     if(m.cardKey==='any'){
       Object.keys(cardLevels).forEach(function(k){prog=Math.max(prog,cardLevels[k]||0);});
