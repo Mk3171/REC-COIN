@@ -8,7 +8,26 @@ app.use(express.json());
 
 // ====== MONGODB ======
 mongoose.connect(process.env.MONGODB_URI)
-  .then(() => console.log('MongoDB connected ✅'))
+  .then(async () => {
+    console.log('MongoDB connected ✅');
+    try {
+      var count = await User.aggregate([{ $group: { _id: null, total: { $sum: '$totalBlocksFound' } } }]);
+      if (count && count[0]) totalBlocksMined = count[0].total || 0;
+      console.log('Total blocks loaded:', totalBlocksMined);
+    } catch(e) { console.log('loadTotalBlocks error:', e.message); }
+    setTimeout(async function() {
+      try {
+        var weekId = getWeekId();
+        var weekStart = getWeekStart();
+        var hoursSinceStart = (Date.now() - weekStart) / 3600000;
+        var existing = await WeeklyChallenge.findOne({ weekId });
+        if((!existing || !existing.distributed) && hoursSinceStart >= 0 && hoursSinceStart < 48) {
+          console.log('Missed weekly distribution detected, running now...');
+          await distributeWeeklyRewards();
+        }
+      } catch(e) { console.log('Startup weekly check error:', e.message); }
+    }, 5000);
+  })
   .catch(err => console.log('MongoDB error:', err));
 
 // ====== SECURITY SYSTEM ======
@@ -120,7 +139,9 @@ const UserSchema = new mongoose.Schema({
   referredByL2:    { type: String, default: '' },
   referredByL3:    { type: String, default: '' },
   totalRefCommission: { type: Number, default: 0 },
-  comboProgress:   { type: Object, default: { date: '', done: [], claimed: false } }
+  comboProgress:   { type: Object, default: { date: '', done: [], claimed: false } },
+  vip:             { type: Object, default: { tier: 0, expiry: 0, boxes: {} } },
+  gameEarnToday:   { type: Object, default: { date: '', earned: 0 } }
 });
 
 const User = mongoose.model('User', UserSchema);
@@ -226,10 +247,16 @@ async function distributeWeeklyRewards() {
 
 // Check every hour if weekly distribution needed
 setInterval(async function() {
-  var now = new Date();
-  if (now.getDay() === 1 && now.getHours() === 0) { // Monday midnight
-    await distributeWeeklyRewards();
-  }
+  try {
+    var now = new Date();
+    var weekId = getWeekId();
+    var weekStart = getWeekStart();
+    var hoursSinceStart = (now - weekStart) / 3600000;
+    if(now.getDay() === 1 && hoursSinceStart < 6) {
+      var existing = await WeeklyChallenge.findOne({ weekId });
+      if(!existing || !existing.distributed) await distributeWeeklyRewards();
+    }
+  } catch(e) { console.log('Weekly check error:', e.message); }
 }, 3600000);
 
 // ====== TON TRANSFER ======
@@ -487,7 +514,7 @@ app.get('/api/leaderboard/friends/:telegramId', async (req, res) => {
   try {
     var userId = req.params.telegramId;
     var friends = await User.find({ referredBy: userId })
-      .sort({ record: -1 }).limit(100)
+      .sort({ rec: -1 }).limit(100)
       .select('telegramId username firstName record rec');
     res.json({ friends: friends.map(function(u, i) {
       return { rank: i+1, telegramId: u.telegramId, name: u.username || u.firstName || 'User', record: u.record, rec: u.rec };
@@ -607,7 +634,7 @@ app.post('/api/vip/verify', async (req, res) => {
       vi: `👑 VIP ${vipTierName} đã được kích hoạt!\n⏳ Hết hạn: ${expiryDate}`,
       zh: `👑 VIP ${vipTierName} 激活成功！\n⏳ 到期：${expiryDate}`
     };
-    const userLang = user.lang || 'en';
+    const userLang = user.language || 'en';
     const msg = vipMsgs[userLang] || vipMsgs.en;
     try { await bot.sendMessage(telegramId, msg); } catch(e) {}
 
@@ -1087,8 +1114,8 @@ app.post('/api/game-earn', async (req, res) => {
 
     // تحقق من الحد اليومي على السيرفر
     const today = new Date().toISOString().split('T')[0];
-    const gameEarnKey = 'gameEarn_' + today;
-    const todayEarned = user.get(gameEarnKey) || 0;
+    const gameEarn = user.gameEarnToday || { date: '', earned: 0 };
+    const todayEarned = gameEarn.date === today ? (gameEarn.earned || 0) : 0;
     const remaining = Math.max(0, 10 - todayEarned);
 
     if(remaining <= 0) return res.json({ success: false, reason: 'daily_limit' });
@@ -1097,7 +1124,7 @@ app.post('/api/game-earn', async (req, res) => {
 
     await User.findOneAndUpdate(
       { telegramId: parseInt(telegramId) },
-      { $inc: { rec: toAdd }, $set: { [gameEarnKey]: todayEarned + toAdd } }
+      { $inc: { rec: toAdd }, gameEarnToday: { date: today, earned: todayEarned + toAdd } }
     );
 
     res.json({ success: true, added: toAdd, remaining: remaining - toAdd });
@@ -1205,6 +1232,31 @@ app.get('/api/combo/today/:telegramId', async (req, res) => {
     var allDone = combo.cards.every(function(c){ return progress.indexOf(c.key) !== -1; });
     var rewardClaimed = user && user.comboProgress && user.comboProgress.date === today && user.comboProgress.claimed;
     res.json({ exists: true, cards, reward: combo.reward, allDone, rewardClaimed: !!rewardClaimed });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// ====== VIP II SPIN ======
+app.post('/api/vip2/spin', async (req, res) => {
+  try {
+    const { telegramId, prize } = req.body;
+    if(!telegramId || !prize) return res.status(400).json({ error: 'Missing data' });
+    const user = await User.findOne({ telegramId: parseInt(telegramId) });
+    if(!user) return res.status(404).json({ error: 'User not found' });
+    if(prize.type === 'rec')    await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, { $inc: { rec: parseFloat(prize.value) } });
+    if(prize.type === 'record') await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, { $inc: { record: parseFloat(prize.value) } });
+    res.json({ success: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// ====== ADMIN: MANUAL WEEKLY DISTRIBUTION ======
+app.post('/api/admin/distribute-weekly', async (req, res) => {
+  try {
+    const { adminId } = req.body;
+    if(String(adminId) !== String(ADMIN_ID)) return res.status(403).json({ error: 'Not admin' });
+    var weekId = getWeekId();
+    await WeeklyChallenge.findOneAndUpdate({ weekId }, { distributed: false });
+    await distributeWeeklyRewards();
+    res.json({ success: true, message: 'Weekly rewards distributed for week: ' + weekId });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
