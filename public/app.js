@@ -2971,6 +2971,24 @@ function confirmExchange(){
 
 // ====== HELPER ======
 function getTodayStr(){ return new Date().toISOString().split('T')[0]; }
+function updateAdminDistBtn() {
+  var btn = document.getElementById('adminDistBtn');
+  if(!btn) return;
+  if(localStorage.getItem(getWeekKey())) {
+    btn.textContent = '✅ تم التوزيع هذا الأسبوع';
+    btn.style.background = 'rgba(0,80,40,0.3)';
+    btn.style.color = 'rgba(0,200,100,0.35)';
+    btn.style.cursor = 'not-allowed';
+    btn.onclick = null;
+    btn.style.border = '1px solid rgba(0,150,70,0.2)';
+  }
+}
+
+function getWeekKey(){
+  var d=new Date(); var onejan=new Date(d.getFullYear(),0,1);
+  var w=Math.ceil((((d-onejan)/86400000)+onejan.getDay()+1)/7);
+  return 'adminDistributed_'+d.getFullYear()+'-W'+String(w).padStart(2,'0');
+}
 
 // ====== DAILY LOGIN ======
 var DAILY_REWARDS=[
@@ -3469,7 +3487,19 @@ function openCombo() {
   var isAdmin = tgUser && tgUser.id === ADMIN_TG_ID;
   if(isAdmin) document.getElementById('comboAdminPanel').style.display = 'block';
   loadComboData(function() {
-    if(isAdmin) buildAdminComboSlots();
+    if(isAdmin) {
+      buildAdminComboSlots();
+      // Update distribute button state
+      var weekKey = getWeekKey();
+      var btn = document.getElementById('adminDistBtn');
+      if(btn && localStorage.getItem(weekKey)) {
+        btn.textContent = '✅ تم التوزيع هذا الأسبوع';
+        btn.style.background = 'rgba(0,100,50,0.2)';
+        btn.style.color = 'rgba(0,255,100,0.4)';
+        btn.style.cursor = 'not-allowed';
+        btn.onclick = null;
+      }
+    }
   });
 }
 
@@ -3785,6 +3815,32 @@ function formatPrizeNum(n){
 // ====== END VIP II WHEEL ======
 
 // ====== ADMIN: UPGRADE LIMITED CARDS ======
+function adminDistributeWeekly() {
+  if(!tgUser || String(tgUser.id) !== String(ADMIN_TG_ID)) return;
+  // Check if already distributed this week
+  var weekKey = getWeekKey();
+  if(localStorage.getItem(weekKey)) {
+    showToast('✅ تم التوزيع هذا الأسبوع بالفعل!'); return;
+  }
+  showToast('⏳ جاري التوزيع...');
+  fetch('/api/admin/distribute-weekly', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ adminId: tgUser.id })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if(d.success) {
+      localStorage.setItem(getWeekKey(), '1');
+      showToast('✅ تم توزيع جوائز الأسبوع بنجاح!');
+      updateAdminDistBtn();
+    } else {
+      showToast('❌ ' + (d.error || 'خطأ'));
+    }
+  })
+  .catch(function(){ showToast('❌ فشل الاتصال بالسيرفر'); });
+}
+
 function adminUpgradeLimitedCards() {
   if(!tgUser || String(tgUser.id) !== String(ADMIN_TG_ID)) return;
   var MAX_LVL = 100;
@@ -5130,6 +5186,7 @@ function initApp() {
     updateUI();
     setTimeout(initTonConnect, 800);
     setTimeout(function(){ initNewFeatures(); checkCardMissions(); }, 300);
+    setTimeout(function(){ if(tgUser && String(tgUser.id)===String(ADMIN_TG_ID)) updateAdminDistBtn(); }, 500);
   } catch(e) {
     console.log('Init error:', e);
     try { buildCards(); updateUI(); } catch(e2) {}
