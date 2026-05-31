@@ -164,21 +164,6 @@ function switchVIPTab(n) {
           '</div>' +
         '</div>' : '') +
 
-      // Features
-      '<div style="background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);border-radius:14px;padding:14px;margin-bottom:16px;">' +
-        '<div style="font-size:12px;font-weight:700;color:#FFD700;margin-bottom:10px;">✨ مميزات VIP I</div>' +
-        '<div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1.9;">' +
-          '📦 ٣ صناديق يومية (Common, Rare, Epic)<br>' +
-          '🦅 فرصة بطاقة Epic النادرة (1%)<br>' +
-          '⚡ تعدين REC أسرع بـ ×١.٥<br>' +
-          '🔋 شحن طاقة ٦ مرات يومياً<br>' +
-          '💰 سحب يومي حتى 20,000 REC<br>' +
-          '🎯 تلميح بطاقة من الكومبو<br>' +
-          '🎁 +1,000,000 RECORD فورياً<br>' +
-          '👑 شارة ذهبية بالليدربورد' +
-        '</div>' +
-      '</div>' +
-
       // Buy button
       (hasVIP ?
         '<div style="background:rgba(0,255,100,0.1);border:1px solid rgba(0,255,100,0.3);border-radius:14px;padding:14px;text-align:center;">' +
@@ -472,11 +457,10 @@ function loadVIPData(callback) {
   .then(function(r) { return r.json(); })
   .then(function(data) {
     if (data.vip && parseInt(data.vip.tier||0) > 0) {
-      vipData = data.vip;
-      vipData.boxes = vipData.boxes || {};
-      // Refresh VIP page if open
-      var vipPage = document.getElementById('vip');
-      if(vipPage && vipPage.classList.contains('open')) renderVIPPage();
+      // فقط نحدّث الـ tier والـ expiry — نحافظ على boxes وboostDate المحلية
+      vipData.tier = data.vip.tier;
+      vipData.expiry = data.vip.expiry;
+      if(!vipData.boxes) vipData.boxes = {};
     }
     if(callback) callback();
   }).catch(function(){ if(callback) callback(); });
