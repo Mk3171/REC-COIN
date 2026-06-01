@@ -255,6 +255,7 @@ function openVIPBox(type) {
 
     saveData(true);
     updateUI();
+    if(typeof addXP==='function') addXP(type==='common'?50:type==='rare'?100:200);
     if(reward) showVIPBoxResult(type, reward, false);
     else showToast('❌ خطأ في فتح الصندوق');
   });
@@ -447,6 +448,7 @@ function buyVIP(tier) {
           } else {
             showToast('👑 تم تفعيل VIP ' + (tier===1?'I':tier===2?'II':'III') + ' بنجاح!');
           }
+          if(typeof addXP==='function') addXP(500);
           saveData(true);
           renderVIPPage();
         } else {
