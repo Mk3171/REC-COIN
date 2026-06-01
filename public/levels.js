@@ -10,6 +10,13 @@ function xpNeededForLevel(lvl) {
   return Math.floor(200 * lvl * Math.sqrt(lvl));
 }
 
+function cumXPForLevel(lvl) {
+  // Total XP needed to REACH level lvl (cumulative)
+  var total = 0;
+  for(var i = 1; i < lvl; i++) total += xpNeededForLevel(i);
+  return total;
+}
+
 function calcPlayerLevel(xp) {
   var lvl = 0, cum = 0;
   while(lvl < 99) {
@@ -21,9 +28,8 @@ function calcPlayerLevel(xp) {
 }
 
 function xpInCurrentLevel(xp) {
-  var lvl = calcPlayerLevel(xp), cum = 0;
-  for(var i = 1; i <= lvl; i++) cum += xpNeededForLevel(i);
-  return xp - cum;
+  var lvl = calcPlayerLevel(xp);
+  return xp - cumXPForLevel(lvl);
 }
 
 function xpForNextLevel(xp) {
@@ -31,7 +37,7 @@ function xpForNextLevel(xp) {
   return lvl >= 99 ? 0 : xpNeededForLevel(lvl + 1);
 }
 
-// ====== XP PER ACTION ======
+// ====== XP PER CARD UPGRADE ======
 function xpForCardUpgrade(fromLevel) {
   if(fromLevel < 10) return 50;
   if(fromLevel < 25) return 100;
@@ -64,187 +70,186 @@ var LEVEL_REWARDS = {
   99: { record:1000000000000,  rec:1000 }
 };
 
-// ====== ADD XP ======
-function addXP(amount) {
-  if(!amount || amount <= 0) return;
-  var oldLvl = calcPlayerLevel(playerXP);
-  playerXP += Math.floor(amount);
-  var newLvl = calcPlayerLevel(playerXP);
-  updateLevelDisplay();
-  if(newLvl > oldLvl) {
-    for(var lvl = oldLvl + 1; lvl <= newLvl; lvl++) {
-      setTimeout((function(l){ return function(){ applyLevelReward(l); }; })(lvl), 500);
-    }
-  }
+function getRewardText(lvl) {
+  if(lvl === 100) return '🔒 ' + (currentLang==='ar'?'قريباً':'Coming Soon');
+  var r = LEVEL_REWARDS[lvl];
+  if(!r) return '—';
+  var parts = [];
+  if(r.record) parts.push('🔴 +'+formatCost(r.record));
+  if(r.rec) parts.push('⚡ +'+r.rec+' REC');
+  if(r.vipDays) parts.push('👑 VIP '+r.vipDays+(currentLang==='ar'?' أيام':'d'));
+  if(r.recordBoost2h) parts.push('×2 RECORD 2h');
+  if(r.recBoost24h) parts.push('×2 REC 24h');
+  return parts.join('  ');
 }
 
-// ====== APPLY LEVEL REWARD ======
-function applyLevelReward(lvl) {
+// ====== ADD XP (no auto-claim) ======
+function addXP(amount) {
+  if(!amount || amount <= 0) return;
+  playerXP += Math.floor(amount);
+  updateLevelDisplay();
+  // Refresh level list if profile popup is open
+  var grid = document.getElementById('ppLevelsGrid');
+  if(grid) renderLevelsList(grid);
+}
+
+// ====== CLAIM LEVEL REWARD ======
+function claimLevelReward(lvl) {
   if(claimedLevels[lvl]) return;
+  if(playerXP < cumXPForLevel(lvl) + xpNeededForLevel(lvl)) return;
   claimedLevels[lvl] = true;
-  var reward = LEVEL_REWARDS[lvl];
-  if(reward) {
-    if(reward.record) record += reward.record;
-    if(reward.rec) rec += reward.rec;
-    if(reward.vipDays) {
+  var r = LEVEL_REWARDS[lvl];
+  if(r) {
+    if(r.record) record += r.record;
+    if(r.rec) rec += r.rec;
+    if(r.vipDays) {
       var now = Date.now();
       if(!vipData) vipData = { tier:0, expiry:0, boxes:{} };
       if(parseInt(vipData.tier||0) < 1 || parseInt(vipData.expiry||0) <= now) {
         vipData.tier = 1;
-        vipData.expiry = now + reward.vipDays * 86400000;
+        vipData.expiry = now + r.vipDays * 86400000;
         vipData.boxes = {};
       } else {
-        vipData.expiry = parseInt(vipData.expiry) + reward.vipDays * 86400000;
+        vipData.expiry = parseInt(vipData.expiry) + r.vipDays * 86400000;
       }
     }
   }
   saveData(true);
   updateUI();
-  showLevelUpPopup(lvl, reward);
+  showLevelUpPopup(lvl, r);
+  // Refresh list
+  var grid = document.getElementById('ppLevelsGrid');
+  if(grid) renderLevelsList(grid);
 }
 
 // ====== LEVEL UP POPUP ======
-function showLevelUpPopup(lvl, reward) {
+function showLevelUpPopup(lvl, r) {
   var old = document.getElementById('lvlUpOverlay');
   if(old) old.remove();
-
   var rewardHtml = '';
-  if(reward) {
-    if(reward.record) rewardHtml +=
-      '<div style="background:rgba(255,100,0,0.1);border:1px solid rgba(255,100,0,0.25);border-radius:10px;padding:9px;margin-bottom:7px;">🔴 +'+formatCost(reward.record)+' RECORD</div>';
-    if(reward.rec) rewardHtml +=
-      '<div style="background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.25);border-radius:10px;padding:9px;margin-bottom:7px;">⚡ +'+reward.rec+' REC</div>';
-    if(reward.vipDays) rewardHtml +=
-      '<div style="background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.3);border-radius:10px;padding:9px;margin-bottom:7px;">👑 VIP I — '+reward.vipDays+' '+(currentLang==='ar'?'أيام':'days')+'!</div>';
-    if(reward.recordBoost2h) rewardHtml +=
-      '<div style="background:rgba(255,150,0,0.1);border:1px solid rgba(255,150,0,0.3);border-radius:10px;padding:9px;margin-bottom:7px;">⚡ ×2 RECORD '+(currentLang==='ar'?'لمدة ساعتين':'for 2 hours')+'</div>';
-    if(reward.recBoost24h) rewardHtml +=
-      '<div style="background:rgba(0,200,255,0.08);border:1px solid rgba(0,200,255,0.25);border-radius:10px;padding:9px;margin-bottom:7px;">🚀 ×2 REC '+(currentLang==='ar'?'ليوم كامل':'for 24 hours')+'</div>';
+  if(r) {
+    if(r.record) rewardHtml += '<div style="background:rgba(255,100,0,0.1);border:1px solid rgba(255,100,0,0.25);border-radius:10px;padding:9px;margin-bottom:7px;">🔴 +'+formatCost(r.record)+' RECORD</div>';
+    if(r.rec) rewardHtml += '<div style="background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.25);border-radius:10px;padding:9px;margin-bottom:7px;">⚡ +'+r.rec+' REC</div>';
+    if(r.vipDays) rewardHtml += '<div style="background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.3);border-radius:10px;padding:9px;margin-bottom:7px;">👑 VIP I — '+r.vipDays+' '+(currentLang==='ar'?'أيام':'days')+'!</div>';
+    if(r.recordBoost2h) rewardHtml += '<div style="background:rgba(255,150,0,0.1);border:1px solid rgba(255,150,0,0.3);border-radius:10px;padding:9px;margin-bottom:7px;">⚡ ×2 RECORD 2h</div>';
+    if(r.recBoost24h) rewardHtml += '<div style="background:rgba(0,200,255,0.08);border:1px solid rgba(0,200,255,0.25);border-radius:10px;padding:9px;margin-bottom:7px;">🚀 ×2 REC 24h</div>';
   }
-
   var ol = document.createElement('div');
   ol.id = 'lvlUpOverlay';
   ol.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:99999;display:flex;align-items:center;justify-content:center;';
   ol.onclick = function(e){ if(e.target===ol) ol.remove(); };
-
   ol.innerHTML =
     '<div style="background:linear-gradient(180deg,#0a0a18,#14141f);border:2px solid #FFD700;border-radius:24px;padding:28px 22px;width:82vw;max-width:300px;text-align:center;box-shadow:0 0 60px rgba(255,215,0,0.4);" onclick="event.stopPropagation()">'+
       '<div style="font-size:50px;margin-bottom:6px;">🏆</div>'+
-      '<div style="font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:3px;margin-bottom:4px;">'+(currentLang==='ar'?'ترقية مستوى!':'LEVEL UP!')+'</div>'+
+      '<div style="font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:3px;margin-bottom:4px;">'+(currentLang==='ar'?'تم تحصيل المكافأة!':'REWARD CLAIMED!')+'</div>'+
       '<div style="font-family:Orbitron,sans-serif;font-size:52px;font-weight:900;color:#FFD700;text-shadow:0 0 30px rgba(255,215,0,0.7);margin-bottom:16px;">'+lvl+'</div>'+
       (rewardHtml?'<div style="text-align:left;margin-bottom:14px;">'+rewardHtml+'</div>':'')+
       '<button onclick="document.getElementById(\'lvlUpOverlay\').remove()" style="background:linear-gradient(135deg,#886600,#FFD700);border:none;color:#000;padding:12px 28px;border-radius:12px;font-size:15px;font-weight:900;cursor:pointer;width:100%;">'+
         (currentLang==='ar'?'🎉 رائع!':'🎉 Awesome!')+
       '</button>'+
     '</div>';
-
   document.body.appendChild(ol);
 }
 
-// ====== UPDATE LEVEL DISPLAY ======
+// ====== UPDATE HEADER DISPLAY ======
 function updateLevelDisplay() {
   var lvl = calcPlayerLevel(playerXP);
   var inLvl = xpInCurrentLevel(playerXP);
   var needed = xpForNextLevel(playerXP);
-  var pct = needed > 0 ? Math.min(100, Math.floor(inLvl / needed * 100)) : 100;
-
+  var pct = needed > 0 ? Math.min(100, Math.floor(inLvl/needed*100)) : 100;
   var lvlEl = document.getElementById('playerLevelNum');
   if(lvlEl) lvlEl.textContent = lvl;
-
   var bar = document.getElementById('xpProgressBar');
-  if(bar) bar.style.width = pct + '%';
-
-  var txt = document.getElementById('xpProgressText');
-  if(txt) txt.textContent = inLvl.toLocaleString() + ' / ' + needed.toLocaleString() + ' XP';
+  if(bar) bar.style.width = pct+'%';
 }
 
-// ====== PROFILE LEVEL SECTION ======
+// ====== RENDER LEVELS LIST ======
+function renderLevelsList(container) {
+  var currentLvl = calcPlayerLevel(playerXP);
+  var html = '';
+  for(var lvl = 1; lvl <= 100; lvl++) {
+    var isClaimed  = !!claimedLevels[lvl];
+    var xpRequired = cumXPForLevel(lvl) + xpNeededForLevel(lvl);
+    var canClaim   = !isClaimed && playerXP >= xpRequired && lvl < 100;
+    var isLocked   = !isClaimed && !canClaim;
+    var rwdText    = getRewardText(lvl);
+    var rowBg      = isClaimed  ? 'rgba(0,150,60,0.15)'  :
+                     canClaim   ? 'rgba(255,215,0,0.12)'  :
+                     'rgba(255,255,255,0.03)';
+    var rowBorder  = isClaimed  ? 'rgba(0,200,80,0.3)'   :
+                     canClaim   ? 'rgba(255,215,0,0.4)'   :
+                     'rgba(255,255,255,0.07)';
+    var lvlColor   = isClaimed  ? '#00CC66' :
+                     canClaim   ? '#FFD700' :
+                     'rgba(255,255,255,0.4)';
+
+    html += '<div style="display:flex;align-items:center;gap:10px;background:'+rowBg+';border:1px solid '+rowBorder+';border-radius:12px;padding:10px 12px;margin-bottom:6px;">'+
+      '<div style="font-family:Orbitron,sans-serif;font-size:12px;font-weight:900;color:'+lvlColor+';min-width:52px;">LVL '+lvl+'</div>';
+
+    if(isClaimed) {
+      html += '<div style="flex:1;font-size:11px;color:rgba(255,255,255,0.4);">'+rwdText+'</div>'+
+              '<div style="font-size:14px;">✅</div>';
+    } else if(canClaim) {
+      html += '<div style="flex:1;font-size:11px;color:#FFD700;">'+rwdText+'</div>'+
+              '<div onclick="claimLevelReward('+lvl+')" style="background:linear-gradient(135deg,#886600,#FFD700);border:none;border-radius:8px;padding:6px 14px;font-size:11px;font-weight:900;color:#000;cursor:pointer;white-space:nowrap;">'+
+                (currentLang==='ar'?'تحصيل':'CLAIM')+
+              '</div>';
+    } else if(lvl === 100) {
+      html += '<div style="flex:1;font-size:11px;color:rgba(255,255,255,0.25);">🔒 '+(currentLang==='ar'?'قريباً':'Coming Soon')+'</div>';
+    } else {
+      html += '<div style="flex:1;text-align:right;font-size:11px;color:rgba(255,255,255,0.2);">'+(currentLang==='ar'?'مقفول':'LOCKED')+'</div>';
+    }
+    html += '</div>';
+  }
+  container.innerHTML = html;
+}
+
+// ====== BUILD SECTION FOR PROFILE POPUP ======
 function buildLevelSection() {
   var lvl = calcPlayerLevel(playerXP);
   var inLvl = xpInCurrentLevel(playerXP);
   var needed = xpForNextLevel(playerXP);
-  var pct = needed > 0 ? Math.min(100, Math.floor(inLvl / needed * 100)) : 100;
-  var reward = LEVEL_REWARDS[lvl + 1];
+  var pct = needed > 0 ? Math.min(100, Math.floor(inLvl/needed*100)) : 100;
 
-  var nextReward = '';
-  if(reward) {
-    var parts = [];
-    if(reward.record) parts.push('🔴 '+formatCost(reward.record));
-    if(reward.rec) parts.push('⚡ '+reward.rec+' REC');
-    if(reward.vipDays) parts.push('👑 VIP '+reward.vipDays+'d');
-    if(reward.recordBoost2h) parts.push('×2 RECORD');
-    if(reward.recBoost24h) parts.push('×2 REC');
-    if(parts.length) nextReward = parts.join(' + ');
-  }
-
-  return '<div style="grid-column:1/-1;background:linear-gradient(135deg,rgba(255,215,0,0.07),rgba(255,215,0,0.02));border:1px solid rgba(255,215,0,0.3);border-radius:16px;padding:16px;margin-bottom:4px;">' +
-    '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">' +
-      '<div style="font-family:Orbitron,sans-serif;font-size:26px;font-weight:900;color:#FFD700;letter-spacing:2px;">' +
-        (currentLang==='ar'?'المستوى ':'LVL ') + lvl +
-      '</div>' +
-      '<div style="font-size:10px;color:rgba(255,255,255,0.3);">' + playerXP.toLocaleString() + ' XP</div>' +
-    '</div>' +
-    '<div style="background:rgba(255,255,255,0.07);border-radius:10px;height:16px;overflow:hidden;margin-bottom:6px;position:relative;">' +
-      '<div style="width:'+pct+'%;height:100%;background:linear-gradient(90deg,#00AA44,#00FF88);border-radius:10px;transition:width 0.6s;"></div>' +
-      '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:white;text-shadow:0 1px 3px rgba(0,0,0,0.8);">' +
-        inLvl.toLocaleString() + ' / ' + needed.toLocaleString() + ' XP' +
-      '</div>' +
-    '</div>' +
-    (lvl < 99 ?
-      '<div style="font-size:10px;color:rgba(255,255,255,0.3);text-align:center;">' +
-        (currentLang==='ar'?'مكافأة المستوى '+(lvl+1)+':':'LVL '+(lvl+1)+' reward: ') +
-        (nextReward || '—') +
-      '</div>' :
-      '<div style="font-size:12px;color:#FFD700;text-align:center;font-weight:700;">⭐ '+(currentLang==='ar'?'المستوى الأعلى!':'MAX LEVEL!')+'</div>'
-    ) +
+  return '<div style="grid-column:1/-1;">'+
+    // Header with level + XP bar
+    '<div style="background:linear-gradient(135deg,rgba(255,215,0,0.08),rgba(255,215,0,0.02));border:1px solid rgba(255,215,0,0.3);border-radius:14px;padding:14px;margin-bottom:12px;">'+
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'+
+        '<div style="font-family:Orbitron,sans-serif;font-size:24px;font-weight:900;color:#FFD700;">LVL '+lvl+'</div>'+
+        '<div style="font-size:11px;color:rgba(255,255,255,0.35);">'+inLvl.toLocaleString()+' / '+needed.toLocaleString()+' XP</div>'+
+      '</div>'+
+      '<div style="background:rgba(255,255,255,0.07);border-radius:8px;height:12px;overflow:hidden;">'+
+        '<div style="width:'+pct+'%;height:100%;background:linear-gradient(90deg,#00AA44,#00FF88);border-radius:8px;transition:width 0.5s;"></div>'+
+      '</div>'+
+    '</div>'+
+    // Level rewards title
+    '<div style="font-size:14px;font-weight:700;color:#FFD700;margin-bottom:8px;">'+(currentLang==='ar'?'مكافآت المستويات':'Level rewards')+'</div>'+
+    // List container
+    '<div id="ppLevelsGrid" style="max-height:320px;overflow-y:auto;padding-right:2px;"></div>'+
   '</div>';
 }
 
-// ====== RETROACTIVE XP CALCULATION ======
+// ====== RETROACTIVE XP ======
 function calcRetroactiveXP() {
   if(xpRetroCalculated || playerXP > 0) { updateLevelDisplay(); return; }
-
   var xp = 0;
-
-  // From card levels
   if(typeof cardLevels !== 'undefined') {
     Object.keys(cardLevels).forEach(function(key) {
-      var lvl = cardLevels[key] || 0;
-      for(var i = 0; i < lvl; i++) xp += xpForCardUpgrade(i);
+      var lvl = cardLevels[key]||0;
+      for(var i=0;i<lvl;i++) xp += xpForCardUpgrade(i);
     });
   }
-
-  // From completed tasks
-  if(typeof completedTasks !== 'undefined') {
-    xp += completedTasks.length * 50;
-  }
-
-  // From invites
-  if(typeof refCount !== 'undefined') {
-    xp += refCount * 100;
-  }
-
-  // From VIP subscription
-  if(typeof vipData !== 'undefined' && parseInt(vipData.tier||0) >= 1) {
-    xp += 500;
-  }
-
-  // From daily login days
-  if(typeof dailyLogin !== 'undefined' && dailyLogin.day > 0) {
-    xp += dailyLogin.day * 30;
-  }
-
-  // From total taps
-  if(typeof totalTaps !== 'undefined') {
-    xp += Math.floor((totalTaps || 0) * 0.5);
-  }
-
+  if(typeof completedTasks !== 'undefined') xp += completedTasks.length * 50;
+  if(typeof refCount !== 'undefined') xp += refCount * 100;
+  if(typeof vipData !== 'undefined' && parseInt(vipData.tier||0)>=1) xp += 500;
+  if(typeof dailyLogin !== 'undefined' && dailyLogin.day > 0) xp += dailyLogin.day * 30;
+  if(typeof totalTaps !== 'undefined') xp += Math.floor((totalTaps||0)*0.5);
   if(xp > 0) {
     playerXP = xp;
+    // Mark all reachable levels as claimed (retroactive — no popup)
     var lvl = calcPlayerLevel(playerXP);
-    for(var i = 1; i <= lvl; i++) claimedLevels[i] = true;
+    for(var i=1;i<=lvl;i++) claimedLevels[i]=true;
   }
-
   xpRetroCalculated = true;
   updateLevelDisplay();
   saveData(true);
