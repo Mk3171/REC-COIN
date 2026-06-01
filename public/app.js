@@ -59,7 +59,7 @@ function applyData(d){
   record=d.record||0; rec=d.rec||0;
   energy=d.energy!==undefined?d.energy:1000; maxEnergy=d.maxEnergy||1000;
   tapLevelVal=d.tapLevelVal||0; energyLevelVal=d.energyLevelVal||0;
-  tapPowerVal=1+(tapLevelVal*5);
+  tapPowerVal=tapLevelVal===0?1:Math.floor(Math.pow(25100000,tapLevelVal/100));
   maxEnergy=energyLevelVal>0?Math.floor(1000*Math.pow(10000,energyLevelVal/99)):d.maxEnergy||1000;
   completedTasks=d.completedTasks||[]; cardLevels=d.cardLevels||{};
   cardUpgrades=d.cardUpgrades||{}; refCount=d.refCount||0;
@@ -363,7 +363,7 @@ function showBlockPopup(blockNum, rewardRecord, rewardRec) {
 
 // ====== HOME - TAP ======
 function tap(){
-  var tapCost = tapPowerVal * (energyLevelVal + 1);
+  var tapCost = Math.max(1, Math.floor(maxEnergy / 1000));
   if(energy < tapCost) return; // طاقة غير كافية — توقف
   record += tapPowerVal;
   energy = Math.max(0, energy - tapCost);
