@@ -228,6 +228,28 @@ function closeSideMenu(){
       </div>
     </div>
 
+    <!-- CARDS PAGE -->
+    <div id="cards" class="page">
+      <div class="page-title" data-i18n="cardsTitle">🃏 Cards</div>
+      <!-- RECORD counter above tabs -->
+      <div style="text-align:center;margin-bottom:12px;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:1px;margin-bottom:2px;">RECORD</div>
+        <div style="font-size:22px;font-weight:900;color:#FF6644;font-family:Orbitron,monospace;"><span id="recordCardsPage">0</span></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:15px;overflow-x:auto;padding-bottom:5px;">
+        <button class="cat-btn active" onclick="showCategory(0,this)" data-i18n="catAnime">🎌 Anime</button>
+        <button class="cat-btn" onclick="showCategory(1,this)" data-i18n="catCars">🚗 Cars</button>
+        <button class="cat-btn" onclick="showCategory(2,this)" data-i18n="catClubs">🌙 Clubs</button>
+        <button class="cat-btn" onclick="showCategory(3,this)" data-i18n="catPalaces">🏰 Palaces</button>
+        <button class="cat-btn" onclick="showCategory(4,this)" data-i18n="catLimited" style="border-color:rgba(255,215,0,0.4);color:#FFD700;background:rgba(255,180,0,0.08);">🔥 Limited</button>
+      </div>
+      <div class="card-grid" id="cat-0"></div>
+      <div class="card-grid" id="cat-1" style="display:none"></div>
+      <div class="card-grid" id="cat-2" style="display:none"></div>
+      <div class="card-grid" id="cat-3" style="display:none"></div>
+      <div class="card-grid" id="cat-4" style="display:none"></div>
+    </div>
+
     <!-- TASKS PAGE -->
     <div id="tasks" class="page">
       <div class="page-title" data-i18n="tasksTitle">✅ Tasks</div>
