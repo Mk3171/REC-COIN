@@ -53,6 +53,7 @@ try{var ls=JSON.parse(localStorage.getItem(saveKey));if(ls)G=Object.assign({},de
 var record,rec,energy,maxEnergy,tapLevelVal,energyLevelVal,tapPowerVal,
     completedTasks,cardLevels,cardUpgrades,refCount,claimedMilest,
     dailyLogin,mysteryLastDate,dailyTasksData,cardTasksClaimed,totalTaps;
+var pendingRec = 0;
 var vipData = {tier:0, expiry:0, boxes:{}, boost:null, hasEpicCard:false, epicExpiry:0};
 
 function applyData(d){
@@ -87,6 +88,7 @@ function applyData(d){
   }
   calcTotalSpeeds();
   // Load XP data
+  if(d.pendingRec !== undefined) pendingRec = d.pendingRec || 0;
   if(d.playerXP !== undefined && typeof playerXP !== 'undefined') {
     playerXP = d.playerXP || 0;
     xpRetroCalculated = playerXP > 0;
@@ -106,6 +108,7 @@ function saveData(immediate){
     dailyLogin,mysteryLastDate,dailyTasksData,cardTasksClaimed,totalTaps,
     refillData:window.refillData,vip:vipData,
     lastSaveTime:Date.now(),
+    pendingRec:(typeof pendingRec!=='undefined'?pendingRec:0),
     playerXP:(typeof playerXP!=='undefined'?playerXP:0),
     claimedLevels:(typeof claimedLevels!=='undefined'?claimedLevels:{}),
     levelsVersion:2});
@@ -362,6 +365,15 @@ function showBlockPopup(blockNum, rewardRecord, rewardRec) {
 }
 
 // ====== HOME - TAP ======
+function claimPendingRec(){
+  if(pendingRec <= 0) return;
+  rec += pendingRec;
+  pendingRec = 0;
+  saveData(true);
+  updateUI();
+  showToast('✅ +' + rec.toFixed(6) + ' REC');
+}
+
 function tap(){
   var tapCost = Math.max(1, Math.floor(maxEnergy / 1000));
   if(energy < tapCost) return; // طاقة غير كافية — توقف
@@ -404,7 +416,7 @@ setInterval(function(){
     if(vipData && parseInt(vipData.tier||0)>=1 && parseInt(vipData.expiry||0)>Date.now() && vipData.boostDate===getTodayStr()){
       _effectiveRec *= 1.5;
     }
-    rec+=_effectiveRec*3;
+    pendingRec+=_effectiveRec*3;
     checkForBlock();
   }
   // شحن الطاقة — مستقل
@@ -472,6 +484,7 @@ function updateUI(){
   s('recordCardsPage',Math.floor(record).toLocaleString());
   s('recCountHome',rec.toFixed(6));
   s('recHomeBig',rec.toFixed(6));
+  s('pendingRecDisplay',pendingRec.toFixed(6));
   s('recMini',rec.toFixed(6));
   s('energyText',Math.floor(energy)+' / '+maxEnergy);
   s('profileRecord',Math.floor(record).toLocaleString());
