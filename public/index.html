@@ -17,9 +17,6 @@
   from { transform: translateX(100%); }
   to { transform: translateX(0); }
 }
-/* Home fills available space */
-#home { height:100% !important; overflow:hidden !important; }
-.home-inner, .home-main-area { display:none !important; }
 </style>
 <script>
 function openSideMenu(){
@@ -138,132 +135,97 @@ function closeSideMenu(){
   <div class="pages-container">
 
     <!-- HOME -->
-    <div id="home" class="page active" style="padding:0;display:flex;flex-direction:column;">
+    <div id="home" class="page active" style="padding:0;">
+      <div class="home-inner">
 
-      <!-- Hidden spans for JS -->
-      <span id="recHomeBig" style="display:none">0.000000</span>
-      <span id="recordCountHome" style="display:none">0</span>
-      <span id="recSpeedShow" style="display:none">0.00000000</span>
-      <span id="recordSpeedShow" style="display:none;">0</span>
-
-      <!-- MAIN AREA: side btns + big circle -->
-      <div style="flex:1;display:flex;align-items:center;justify-content:space-between;padding:4px 6px;min-height:0;">
-
-        <!-- LEFT -->
-        <div style="display:flex;flex-direction:column;gap:8px;width:62px;flex-shrink:0;">
-          <div class="side-action-btn" onclick="openDailyLogin()" style="border-color:rgba(0,200,100,0.25);">
-            <span class="sa-icon">📅</span>
-            <span class="sa-label" style="color:#00CC66;" data-i18n="sideDaily">Daily</span>
-          </div>
-          <div class="side-action-btn" onclick="showPage('rank', document.getElementById('navRankBtn'))" style="border-color:rgba(255,215,0,0.25);">
-            <span class="sa-icon">🏆</span>
-            <span class="sa-label" style="color:#FFD700;" data-i18n="sideRank">Rank</span>
-          </div>
+        <!-- REC BALANCE TOP -->
+        <div style="flex-shrink:0;text-align:center;padding:6px 12px 2px;">
+          <div style="font-size:11px;color:rgba(255,255,255,0.35);letter-spacing:1px;margin-bottom:1px;">⚡ REC</div>
+          <div style="font-size:22px;font-weight:900;color:#00FF88;font-family:Orbitron,monospace;letter-spacing:1px;" id="recHomeBig">0.000000</div>
         </div>
 
-        <!-- CENTER: big circle -->
-        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:0 4px;">
-          <button class="camera-btn" onclick="tap()" style="width:min(62vw,230px);height:min(62vw,230px);">
-            <img src="logo.jpeg" alt="REC" style="width:100%;height:100%;object-fit:cover;border-radius:50%;pointer-events:none;">
-          </button>
-          <div class="tap-label" data-i18n="tapMine">TAP TO MINE</div>
-        </div>
+        <!-- MAIN: 3 columns -->
+        <div style="flex:1;display:flex;align-items:center;justify-content:space-between;padding:0 6px;min-height:0;">
 
-        <!-- RIGHT -->
-        <div style="display:flex;flex-direction:column;gap:8px;width:62px;flex-shrink:0;">
-          <div class="side-action-btn" onclick="openCombo()" style="border-color:rgba(255,200,0,0.4);position:relative;" id="comboBtnWrap">
-            <span class="sa-icon">🎯</span>
-            <span class="sa-label" style="color:#FFD700;" data-i18n="sideCombo">Combo</span>
-            <div id="comboDotBadge" style="display:none;position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:#FF4444;"></div>
-          </div>
-          <div class="side-action-btn" onclick="openUpgrade()" style="border-color:rgba(255,100,50,0.25);">
-            <span class="sa-icon">⬆️</span>
-            <span class="sa-label" style="color:#FF8844;" data-i18n="sideUpgrade">Upgrade</span>
-          </div>
-          <div class="side-action-btn" onclick="openStarsShop()" style="border-color:rgba(255,220,0,0.25);">
-            <span class="sa-icon">⭐</span>
-            <span class="sa-label" style="color:#FFD700;" data-i18n="sideShop">Shop</span>
-          </div>
-          <div class="side-action-btn" onclick="openVIP()" style="border-color:rgba(255,50,50,0.45);background:rgba(120,0,0,0.2);">
-            <span class="sa-icon" style="font-size:13px;font-weight:900;font-family:Impact,sans-serif;color:#FFD700;">VIP</span>
-            <span class="sa-label" style="color:#FF6644;">👑</span>
-          </div>
-        </div>
-
-      </div>
-
-      <!-- BOTTOM SECTION -->
-      <div style="flex-shrink:0;padding:0 10px 6px;">
-
-        <!-- Energy bar -->
-        <div class="energy-wrap" style="margin-bottom:8px;">
-          <div class="energy-header">
-            <span data-i18n="energyLabel" style="color:rgba(255,255,255,0.5);">⚡ Energy</span>
-            <span id="energyText" style="color:rgba(255,255,255,0.4);">1000 / 1000</span>
-          </div>
-          <div class="energy-bar-bg">
-            <div class="energy-bar-fill" id="energyBar" style="width:100%"></div>
-          </div>
-        </div>
-
-        <!-- CLAIM button - big gold bar -->
-        <div onclick="claimPendingRec()" style="background:linear-gradient(135deg,#2a1800,#4a2e00);border:1px solid rgba(255,180,0,0.5);border-radius:16px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;cursor:pointer;box-shadow:0 4px 20px rgba(255,150,0,0.2);-webkit-tap-highlight-color:transparent;">
-          <div style="display:flex;align-items:center;gap:10px;">
-            <span style="font-size:22px;">⚡</span>
-            <div>
-              <div style="font-size:10px;color:rgba(255,200,0,0.5);letter-spacing:1px;">REC</div>
-              <div style="font-size:18px;font-weight:900;color:#FFD700;font-family:Orbitron,monospace;" id="pendingRecDisplay">0.000000</div>
+          <!-- LEFT: Combo, Upgrade, Shop, Exchange -->
+          <div style="display:flex;flex-direction:column;gap:6px;width:62px;flex-shrink:0;">
+            <div class="side-action-btn" onclick="openCombo()" style="border-color:rgba(255,200,0,0.4);position:relative;" id="comboBtnWrap">
+              <span class="sa-icon">🎯</span>
+              <span class="sa-label" style="color:#FFD700;" data-i18n="sideCombo">Combo</span>
+              <div id="comboDotBadge" style="display:none;position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:#FF4444;"></div>
+            </div>
+            <div class="side-action-btn" onclick="openUpgrade()" style="border-color:rgba(255,100,50,0.25);">
+              <span class="sa-icon">⬆️</span>
+              <span class="sa-label" style="color:#FF8844;" data-i18n="sideUpgrade">Upgrade</span>
+            </div>
+            <div class="side-action-btn" onclick="openStarsShop()" style="border-color:rgba(255,220,0,0.25);">
+              <span class="sa-icon">⭐</span>
+              <span class="sa-label" style="color:#FFD700;" data-i18n="sideShop">Shop</span>
+            </div>
+            <div class="side-action-btn" onclick="openExchange()" style="border-color:rgba(0,200,255,0.25);">
+              <span class="sa-icon">🔄</span>
+              <span class="sa-label" style="color:#00CCFF;" data-i18n="qbExchange">Exchange</span>
             </div>
           </div>
-          <div style="background:linear-gradient(135deg,#CC7700,#FFAA00);border-radius:10px;padding:8px 18px;font-size:13px;font-weight:900;color:#000;letter-spacing:1px;">CLAIM</div>
+
+          <!-- CENTER: circle -->
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:0 4px;">
+            <button class="camera-btn" onclick="tap()" style="width:min(58vw,210px);height:min(58vw,210px);">
+              <img src="logo.jpeg" alt="REC" style="width:100%;height:100%;object-fit:cover;border-radius:50%;pointer-events:none;">
+            </button>
+          </div>
+
+          <!-- RIGHT: VIP, Daily, Rank -->
+          <div style="display:flex;flex-direction:column;gap:6px;width:62px;flex-shrink:0;">
+            <div class="side-action-btn" onclick="openVIP()" style="border-color:rgba(255,50,50,0.45);background:rgba(120,0,0,0.2);">
+              <span class="sa-icon" style="font-size:13px;font-weight:900;font-family:Impact,sans-serif;color:#FFD700;">VIP</span>
+              <span class="sa-label" style="color:#FF6644;">👑</span>
+            </div>
+            <div class="side-action-btn" onclick="openDailyLogin()" style="border-color:rgba(0,200,100,0.25);">
+              <span class="sa-icon">📅</span>
+              <span class="sa-label" style="color:#00CC66;" data-i18n="sideDaily">Daily</span>
+            </div>
+            <div class="side-action-btn" onclick="showPage('rank', document.getElementById('navRankBtn'))" style="border-color:rgba(255,215,0,0.25);">
+              <span class="sa-icon">🏆</span>
+              <span class="sa-label" style="color:#FFD700;" data-i18n="sideRank">Rank</span>
+            </div>
+          </div>
+
         </div>
 
-        <!-- Quick actions -->
-        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
-          <div class="quick-btn" onclick="showPage('tasks', document.getElementById('navTasksBtn'))">
-            <span class="qb-icon">✅</span>
-            <span class="qb-label" style="color:rgba(255,255,255,0.7);" data-i18n="navTasks">Tasks</span>
-            <span class="qb-sub" style="color:#FF8800;" id="tasksBadge">Go</span>
+        <!-- BOTTOM -->
+        <div class="home-bottom">
+
+          <!-- Hidden spans -->
+          <span id="recordCountHome" style="display:none">0</span>
+          <span id="recSpeedShow" style="display:none">0.00000000</span>
+          <span id="recordSpeedShow" style="display:none;">0</span>
+
+          <!-- Energy -->
+          <div class="energy-wrap" style="margin-bottom:8px;">
+            <div class="energy-header">
+              <span data-i18n="energyLabel" style="color:rgba(255,255,255,0.5);">⚡ Energy</span>
+              <span id="energyText" style="color:rgba(255,255,255,0.4);">1000 / 1000</span>
+            </div>
+            <div class="energy-bar-bg">
+              <div class="energy-bar-fill" id="energyBar" style="width:100%"></div>
+            </div>
           </div>
-          <div class="quick-btn" onclick="openExchange()">
-            <span class="qb-icon">🔄</span>
-            <span class="qb-label" style="color:rgba(255,255,255,0.7);" data-i18n="qbExchange">Exchange</span>
-            <span class="qb-sub" style="color:#00FF88;" data-i18n="qbSwap">Swap</span>
+
+          <!-- CLAIM full width -->
+          <div onclick="claimPendingRec()" style="background:linear-gradient(135deg,#2a1800,#4a2e00);border:1px solid rgba(255,180,0,0.5);border-radius:14px;padding:11px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;box-shadow:0 4px 20px rgba(255,150,0,0.2);-webkit-tap-highlight-color:transparent;">
+            <div style="display:flex;align-items:center;gap:8px;">
+              <span style="font-size:20px;">⚡</span>
+              <div>
+                <div style="font-size:9px;color:rgba(255,200,0,0.5);letter-spacing:1px;">REC</div>
+                <div style="font-size:16px;font-weight:900;color:#FFD700;font-family:Orbitron,monospace;" id="pendingRecDisplay">0.000000</div>
+              </div>
+            </div>
+            <div style="background:linear-gradient(135deg,#CC7700,#FFAA00);border-radius:10px;padding:8px 22px;font-size:14px;font-weight:900;color:#000;letter-spacing:1px;">CLAIM</div>
           </div>
-          <div class="quick-btn" style="opacity:0.15;pointer-events:none;">
-            <span class="qb-icon">🔒</span>
-            <span class="qb-label" style="color:rgba(255,255,255,0.3);">Soon</span>
-          </div>
-          <div class="quick-btn" style="opacity:0.15;pointer-events:none;">
-            <span class="qb-icon">🔒</span>
-            <span class="qb-label" style="color:rgba(255,255,255,0.3);">Soon</span>
-          </div>
+
         </div>
-
-        </div><!-- end home-bottom -->
-      </div><!-- end home-inner -->
-    </div><!-- end #home -->
-
-    <!-- CARDS PAGE -->
-    <div id="cards" class="page">
-      <div class="page-title" data-i18n="cardsTitle">🃏 Cards</div>
-      <!-- RECORD counter above tabs - no box -->
-      <div style="text-align:center;margin-bottom:12px;">
-        <div style="font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:1px;margin-bottom:2px;">RECORD</div>
-        <div style="font-size:22px;font-weight:900;color:#FF6644;font-family:Orbitron,monospace;"><span id="recordCardsPage">0</span></div>
       </div>
-      <div style="display:flex;gap:8px;margin-bottom:15px;overflow-x:auto;padding-bottom:5px;">
-        <button class="cat-btn active" onclick="showCategory(0,this)" data-i18n="catAnime">🎌 Anime</button>
-        <button class="cat-btn" onclick="showCategory(1,this)" data-i18n="catCars">🚗 Cars</button>
-        <button class="cat-btn" onclick="showCategory(2,this)" data-i18n="catClubs">🌙 Clubs</button>
-        <button class="cat-btn" onclick="showCategory(3,this)" data-i18n="catPalaces">🏰 Palaces</button>
-        <button class="cat-btn" onclick="showCategory(4,this)" data-i18n="catLimited" style="border-color:rgba(255,215,0,0.4);color:#FFD700;background:rgba(255,180,0,0.08);">🔥 Limited</button>
-      </div>
-      <div class="card-grid" id="cat-0"></div>
-      <div class="card-grid" id="cat-1" style="display:none"></div>
-      <div class="card-grid" id="cat-2" style="display:none"></div>
-      <div class="card-grid" id="cat-3" style="display:none"></div>
-      <div class="card-grid" id="cat-4" style="display:none"></div>
     </div>
 
     <!-- TASKS PAGE -->
