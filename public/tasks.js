@@ -64,6 +64,7 @@ function channelTaskOpen(taskId, url, openBtnId, claimBtnId){
 function channelTaskClaim(taskId, claimBtnId, recReward){
   if(completedTasks.indexOf(taskId)!==-1){ showToast(t('toastAlready')); return; }
   completedTasks.push(taskId);
+  if(typeof addXP==='function') addXP(50);
   if(recReward >= 1000) {
     record += recReward;
     showToast('✅ +'+formatCost(recReward)+' RECORD earned!');
@@ -120,6 +121,7 @@ function twitterTaskOpen(taskId, url, openBtnId, claimBtnId){
 function twitterTaskClaim(taskId, claimBtnId, openBtnId, recReward){
   if(completedTasks.indexOf(taskId)!==-1){ showToast(t('toastAlready')); return; }
   completedTasks.push(taskId);
+  if(typeof addXP==='function') addXP(50);
   rec += recReward;
   saveData(true); updateUI();
   showToast('✅ +'+recReward+' REC earned!');
@@ -249,6 +251,7 @@ function confirmExchange(){
   rec -= amount;
   record += gain;
   addExchangedToday(amount);
+  if(typeof addXP==='function') addXP(Math.floor(amount/0.1)*10);
   // أرسل الضريبة للأدمن
   if(tax > 0 && tgUser) fetch('/api/exchange/tax',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({taxAmount:tax})}).catch(function(){});
   var today=getTodayStr();
@@ -283,6 +286,7 @@ function confirmExchangeRecord(){
   var netGain = parseFloat((gain - tax).toFixed(6));
   record -= amount;
   rec += netGain;
+  if(typeof addXP==='function') addXP(Math.floor(amount/1000000000)*20);
   // أرسل الضريبة للأدمن
   if(tax > 0 && tgUser) fetch('/api/exchange/tax',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({taxAmount:tax})}).catch(function(){});
   saveData(true); updateUI();
@@ -384,6 +388,7 @@ function claimDailyReward(){
   record+=reward.record;
   if(reward.rec>0) rec+=reward.rec;
   dailyLogin.day=currentDay+1; dailyLogin.lastDate=today;
+  if(typeof addXP==='function') addXP(30);
   saveData(true); updateUI();
   var ol=document.getElementById('dailyOverlay');
   if(ol)ol.remove();
@@ -440,6 +445,7 @@ function revealMystery(){
   if(reward.type==='record') record+=reward.amount;
   else rec+=reward.amount;
   mysteryLastDate=today;
+  if(typeof addXP==='function') addXP(20);
   saveData(true); updateUI();
 
   var pp=document.querySelector('#mysteryOverlay > div');
