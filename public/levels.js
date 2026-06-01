@@ -165,40 +165,57 @@ function updateLevelDisplay() {
 
 // ====== RENDER LEVELS LIST ======
 function renderLevelsList(container) {
-  var currentLvl = calcPlayerLevel(playerXP);
   var html = '';
   for(var lvl = 1; lvl <= 100; lvl++) {
-    var isClaimed  = !!claimedLevels[lvl];
-    var xpRequired = cumXPForLevel(lvl) + xpNeededForLevel(lvl);
-    var canClaim   = !isClaimed && playerXP >= xpRequired && lvl < 100;
-    var isLocked   = !isClaimed && !canClaim;
-    var rwdText    = getRewardText(lvl);
-    var rowBg      = isClaimed  ? 'rgba(0,150,60,0.15)'  :
-                     canClaim   ? 'rgba(255,215,0,0.12)'  :
-                     'rgba(255,255,255,0.03)';
-    var rowBorder  = isClaimed  ? 'rgba(0,200,80,0.3)'   :
-                     canClaim   ? 'rgba(255,215,0,0.4)'   :
-                     'rgba(255,255,255,0.07)';
-    var lvlColor   = isClaimed  ? '#00CC66' :
-                     canClaim   ? '#FFD700' :
-                     'rgba(255,255,255,0.4)';
+    var lvlStartXP  = cumXPForLevel(lvl);
+    var lvlNeeded   = xpNeededForLevel(lvl);
+    var lvlEndXP    = lvlStartXP + lvlNeeded;
+    var isClaimed   = !!claimedLevels[lvl];
+    var isReached   = playerXP >= lvlEndXP;
+    var canClaim    = isReached && !isClaimed && lvl < 100;
+    var inProgress  = !isReached && playerXP > lvlStartXP;
+    var isLocked    = !isReached && !inProgress;
 
-    html += '<div style="display:flex;align-items:center;gap:10px;background:'+rowBg+';border:1px solid '+rowBorder+';border-radius:12px;padding:10px 12px;margin-bottom:6px;">'+
-      '<div style="font-family:Orbitron,sans-serif;font-size:12px;font-weight:900;color:'+lvlColor+';min-width:52px;">LVL '+lvl+'</div>';
+    // XP in this level
+    var earnedInLvl = Math.max(0, Math.min(playerXP - lvlStartXP, lvlNeeded));
+    var pct = lvlNeeded > 0 ? Math.min(100, Math.floor(earnedInLvl / lvlNeeded * 100)) : 100;
+    var xpLabel = earnedInLvl.toLocaleString() + ' / ' + lvlNeeded.toLocaleString() + ' XP';
 
-    if(isClaimed) {
-      html += '<div style="flex:1;font-size:11px;color:rgba(255,255,255,0.4);">'+rwdText+'</div>'+
-              '<div style="font-size:14px;">✅</div>';
-    } else if(canClaim) {
-      html += '<div style="flex:1;font-size:11px;color:#FFD700;">'+rwdText+'</div>'+
-              '<div onclick="claimLevelReward('+lvl+')" style="background:linear-gradient(135deg,#886600,#FFD700);border:none;border-radius:8px;padding:6px 14px;font-size:11px;font-weight:900;color:#000;cursor:pointer;white-space:nowrap;">'+
-                (currentLang==='ar'?'تحصيل':'CLAIM')+
-              '</div>';
-    } else if(lvl === 100) {
+    var rwdText = getRewardText(lvl);
+    var lvlColor = isClaimed ? '#00CC66' : (canClaim || inProgress) ? '#FFD700' : 'rgba(255,255,255,0.35)';
+    var rowBg    = isClaimed ? 'rgba(0,150,60,0.1)' : canClaim ? 'rgba(255,215,0,0.08)' : 'rgba(255,255,255,0.03)';
+    var rowBrd   = isClaimed ? 'rgba(0,200,80,0.25)' : canClaim ? 'rgba(255,215,0,0.3)' : 'rgba(255,255,255,0.06)';
+    var barColor = isClaimed ? '#00CC66' : '#00FF88';
+
+    html += '<div style="background:'+rowBg+';border:1px solid '+rowBrd+';border-radius:10px;padding:10px 12px;margin-bottom:5px;">';
+
+    // Row top: level number + reward text + button
+    html += '<div style="display:flex;align-items:center;gap:8px;margin-bottom:'+(isLocked&&lvl!==100?'0':'6px')+'">';
+    html += '<div style="font-weight:900;font-size:12px;color:'+lvlColor+';min-width:46px;">LVL '+lvl+'</div>';
+
+    if(lvl === 100) {
       html += '<div style="flex:1;font-size:11px;color:rgba(255,255,255,0.25);">🔒 '+(currentLang==='ar'?'قريباً':'Coming Soon')+'</div>';
+    } else if(isLocked) {
+      html += '<div style="flex:1;text-align:right;font-size:10px;color:rgba(255,255,255,0.2);">'+(currentLang==='ar'?'مقفول':'LOCKED')+'</div>';
+    } else if(isClaimed) {
+      html += '<div style="flex:1;font-size:10px;color:rgba(255,255,255,0.4);">'+rwdText+'</div>';
+      html += '<div style="font-size:13px;">✅</div>';
     } else {
-      html += '<div style="flex:1;text-align:right;font-size:11px;color:rgba(255,255,255,0.2);">'+(currentLang==='ar'?'مقفول':'LOCKED')+'</div>';
+      html += '<div style="flex:1;font-size:10px;color:#FFD700;">'+rwdText+'</div>';
+      html += '<div onclick="claimLevelReward('+lvl+')" style="background:linear-gradient(135deg,#886600,#FFD700);border-radius:8px;padding:5px 12px;font-size:11px;font-weight:900;color:#000;cursor:pointer;white-space:nowrap;">'+(currentLang==='ar'?'تحصيل':'CLAIM')+'</div>';
     }
+    html += '</div>';
+
+    // Progress bar (always show except locked and level 100)
+    if(lvl !== 100 && !isLocked) {
+      html += '<div style="display:flex;align-items:center;gap:6px;">';
+      html += '<div style="flex:1;background:rgba(255,255,255,0.07);border-radius:4px;height:5px;overflow:hidden;">';
+      html += '<div style="width:'+pct+'%;height:100%;background:'+barColor+';border-radius:4px;"></div>';
+      html += '</div>';
+      html += '<div style="font-size:9px;color:rgba(255,255,255,0.3);white-space:nowrap;">'+xpLabel+'</div>';
+      html += '</div>';
+    }
+
     html += '</div>';
   }
   container.innerHTML = html;
@@ -206,24 +223,9 @@ function renderLevelsList(container) {
 
 // ====== BUILD SECTION FOR PROFILE POPUP ======
 function buildLevelSection() {
-  var lvl = calcPlayerLevel(playerXP);
-  var inLvl = xpInCurrentLevel(playerXP);
-  var needed = xpForNextLevel(playerXP);
-  var pct = needed > 0 ? Math.min(100, Math.floor(inLvl/needed*100)) : 100;
-
   return '<div style="grid-column:1/-1;">'+
-    // Thin XP progress bar only
-    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">'+
-      '<div style="font-size:11px;color:rgba(255,255,255,0.4);white-space:nowrap;">LVL '+lvl+'</div>'+
-      '<div style="flex:1;background:rgba(255,255,255,0.08);border-radius:6px;height:8px;overflow:hidden;">'+
-        '<div style="width:'+pct+'%;height:100%;background:linear-gradient(90deg,#00AA44,#00FF88);border-radius:6px;"></div>'+
-      '</div>'+
-      '<div style="font-size:10px;color:rgba(255,255,255,0.3);white-space:nowrap;">'+inLvl.toLocaleString()+' / '+needed.toLocaleString()+'</div>'+
-    '</div>'+
-    // Level rewards title
-    '<div style="font-size:13px;font-weight:700;color:#FFD700;margin-bottom:8px;">'+(currentLang==='ar'?'مكافآت المستويات':'Level rewards')+'</div>'+
-    // List container
-    '<div id="ppLevelsGrid" style="max-height:340px;overflow-y:auto;"></div>'+
+    '<div style="font-size:14px;font-weight:700;color:#FFD700;margin-bottom:10px;">'+(currentLang==='ar'?'مكافآت المستويات':'Level rewards')+'</div>'+
+    '<div id="ppLevelsGrid" style="max-height:360px;overflow-y:auto;"></div>'+
   '</div>';
 }
 
@@ -244,9 +246,7 @@ function calcRetroactiveXP() {
   if(typeof totalTaps !== 'undefined') xp += Math.floor((totalTaps||0)*0.5);
   if(xp > 0) {
     playerXP = xp;
-    // Mark all reachable levels as claimed (retroactive — no popup)
-    var lvl = calcPlayerLevel(playerXP);
-    for(var i=1;i<=lvl;i++) claimedLevels[i]=true;
+    // Don't auto-claim — user claims manually
   }
   xpRetroCalculated = true;
   updateLevelDisplay();
