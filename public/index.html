@@ -123,25 +123,9 @@ function closeSideMenu(){
     </div>
   </div>
 
-  <!-- ===== BALANCE ROW ===== -->
-  <div class="balance-row" dir="ltr" style="direction:ltr!important;">
-    <div class="balance-card" style="pointer-events:none;position:relative;">
-      <div class="balance-card-icon">⚡</div>
-      <div>
-        <div class="balance-card-label">REC</div>
-        <div class="balance-card-value green"><span id="recMini">0.000000</span></div>
-      </div>
-      <div onclick="openRECInfo()" style="pointer-events:auto;position:absolute;top:7px;right:8px;width:20px;height:20px;border-radius:50%;background:rgba(0,255,136,0.15);border:1px solid rgba(0,255,136,0.35);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#00FF88;cursor:pointer;z-index:5;">?</div>
-    </div>
-    <div class="balance-card" style="pointer-events:none;position:relative;">
-      <div class="balance-card-icon">🔴</div>
-      <div>
-        <div class="balance-card-label">RECORD</div>
-        <div class="balance-card-value red"><span id="recordCount">0</span></div>
-      </div>
-      <div onclick="openRECORDInfo()" style="pointer-events:auto;position:absolute;top:7px;right:8px;width:20px;height:20px;border-radius:50%;background:rgba(255,100,50,0.15);border:1px solid rgba(255,100,50,0.35);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#FF6644;cursor:pointer;z-index:5;">?</div>
-    </div>
-  </div>
+  <!-- Balance spans hidden - values updated by JS -->
+  <span id="recMini" style="display:none">0.000000</span>
+  <span id="recordCount" style="display:none">0</span>
 
 
 
@@ -152,6 +136,11 @@ function closeSideMenu(){
 
     <!-- HOME -->
     <div id="home" class="page active">
+      <!-- REC counter - no box -->
+      <div style="text-align:center;padding:8px 0 0 0;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:1px;margin-bottom:2px;">REC</div>
+        <div style="font-size:26px;font-weight:900;color:#00FF88;font-family:Orbitron,monospace;letter-spacing:1px;"><span id="recHomeBig">0.000000</span></div>
+      </div>
       <div class="home-inner">
 
         <!-- MAIN AREA: side btns + circle -->
@@ -203,15 +192,9 @@ function closeSideMenu(){
         <!-- BOTTOM SECTION -->
         <div class="home-bottom">
 
-          <!-- Gold RECORD bar -->
-          <div class="gold-bar">
-            <div class="gold-bar-icon">⛏️</div>
-            <div>
-              <div class="gold-bar-amount" id="recordCountHome">0</div>
-              <div class="gold-bar-speed">RECORD • <span id="recSpeedShow" style="font-size:9px;color:rgba(255,200,0,0.5);">0.00000000</span> REC/s</div>
-            </div>
-            <div class="gold-bar-right">💰</div>
-          </div>
+          <!-- Hidden spans for JS -->
+          <span id="recordCountHome" style="display:none">0</span>
+          <span id="recSpeedShow" style="display:none">0.00000000</span>
 
           <!-- Energy bar -->
           <div class="energy-wrap">
@@ -250,6 +233,11 @@ function closeSideMenu(){
     <!-- CARDS PAGE -->
     <div id="cards" class="page">
       <div class="page-title" data-i18n="cardsTitle">🃏 Cards</div>
+      <!-- RECORD counter above tabs - no box -->
+      <div style="text-align:center;margin-bottom:12px;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:1px;margin-bottom:2px;">RECORD</div>
+        <div style="font-size:22px;font-weight:900;color:#FF6644;font-family:Orbitron,monospace;"><span id="recordCardsPage">0</span></div>
+      </div>
       <div style="display:flex;gap:8px;margin-bottom:15px;overflow-x:auto;padding-bottom:5px;">
         <button class="cat-btn active" onclick="showCategory(0,this)" data-i18n="catAnime">🎌 Anime</button>
         <button class="cat-btn" onclick="showCategory(1,this)" data-i18n="catCars">🚗 Cars</button>
