@@ -59,7 +59,7 @@ function applyData(d){
   record=d.record||0; rec=d.rec||0;
   energy=d.energy!==undefined?d.energy:1000; maxEnergy=d.maxEnergy||1000;
   tapLevelVal=d.tapLevelVal||0; energyLevelVal=d.energyLevelVal||0;
-  tapPowerVal=tapLevelVal>0?(tapLevelVal+1)*2:1;
+  tapPowerVal=1+(tapLevelVal*5);
   maxEnergy=energyLevelVal>0?Math.floor(1000*Math.pow(10000,energyLevelVal/99)):d.maxEnergy||1000;
   completedTasks=d.completedTasks||[]; cardLevels=d.cardLevels||{};
   cardUpgrades=d.cardUpgrades||{}; refCount=d.refCount||0;
@@ -365,7 +365,8 @@ function showBlockPopup(blockNum, rewardRecord, rewardRec) {
 function tap(){
   // كل ضغطة تعطي RECORD وتنقص 10 طاقة — مستقلة عن تعدين البطاقات
   record += tapPowerVal;
-  if(energy >= 10) energy = Math.max(0, energy - 10);
+  var tapCost = tapPowerVal * (energyLevelVal + 1);
+  if(energy >= tapCost) energy = Math.max(0, energy - tapCost);
   totalTaps++;
   var today=getTodayStr();
   if(dailyTasksData.date!==today) resetDailyTasks(today);
@@ -407,7 +408,7 @@ setInterval(function(){
     checkForBlock();
   }
   // شحن الطاقة — مستقل
-  if(energy<maxEnergy) energy=Math.min(maxEnergy,energy+12);
+  if(energy<maxEnergy) energy=Math.min(maxEnergy,energy+(maxEnergy/18000*3));
   saveData(); updateUI(); updateTimerDisplays();
 },3000);
 
