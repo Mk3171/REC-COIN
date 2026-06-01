@@ -199,6 +199,7 @@ function directUpgrade(ci, idx, event) {
   record -= cost;
   var wait = cardWait(lvl);
   cardUpgrades[key] = { endTime: Date.now() + wait*1000, toLevel: lvl+1 };
+  if(typeof addXP==='function') addXP(xpForCardUpgrade ? xpForCardUpgrade(lvl) : 50);
   var today=getTodayStr();
   if(dailyTasksData.date!==today) resetDailyTasks(today);
   dailyTasksData.upgrades++; dailyTasksData.spent+=cost;
@@ -1100,6 +1101,7 @@ function initApp() {
     updateUI();
     setTimeout(initTonConnect, 800);
     setTimeout(function(){ initNewFeatures(); checkCardMissions(); }, 300);
+    setTimeout(function(){ if(typeof calcRetroactiveXP==='function') calcRetroactiveXP(); }, 1000);
     // حمّل بيانات الكومبو عند البداية
     if(tgUser) setTimeout(function(){
       fetch('/api/combo/today/' + tgUser.id)
