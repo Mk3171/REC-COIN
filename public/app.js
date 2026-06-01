@@ -408,7 +408,7 @@ setInterval(function(){
     checkForBlock();
   }
   // شحن الطاقة — مستقل
-  if(energy<maxEnergy) energy=Math.min(maxEnergy,energy+(maxEnergy/18000*3));
+  if(energy<maxEnergy) energy=Math.min(maxEnergy,energy+(maxEnergy/43200*3));
   saveData(); updateUI(); updateTimerDisplays();
 },3000);
 
