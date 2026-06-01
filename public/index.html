@@ -103,9 +103,14 @@ function closeSideMenu(){
       <div class="top-bar-avatar" id="topBarAvatar">M</div>
       <div>
         <div class="top-bar-name" id="topBarName">REC Mining</div>
-        <div class="top-bar-level">LVL <span id="playerLevelNum">0</span></div>
-        <div style="width:90px;background:rgba(255,255,255,0.1);border-radius:4px;height:4px;margin-top:3px;overflow:hidden;">
-          <div id="xpProgressBar" style="width:0%;height:100%;background:linear-gradient(90deg,#00AA44,#00FF88);border-radius:4px;transition:width 0.5s;"></div>
+        <div style="display:flex;align-items:center;gap:4px;">
+          <div class="top-bar-level">LVL <span id="playerLevelNum">0</span></div>
+          <span id="xpHeart1" style="font-size:9px;opacity:0.7;">💚</span>
+          <span id="xpHeart2" style="font-size:9px;opacity:0.7;">💚</span>
+        </div>
+        <div style="width:100px;background:rgba(255,255,255,0.08);border-radius:6px;height:6px;margin-top:3px;overflow:hidden;position:relative;">
+          <div id="xpProgressBar" style="width:0%;height:100%;background:linear-gradient(90deg,#00CC44,#00FF88);border-radius:6px;transition:width 0.8s cubic-bezier(0.4,0,0.2,1);box-shadow:0 0 6px rgba(0,255,136,0.6);"></div>
+          <div id="xpGlowDot" style="display:none;position:absolute;top:-2px;width:10px;height:10px;background:#00FF88;border-radius:50%;box-shadow:0 0 8px #00FF88;transform:translateX(-50%);transition:left 0.8s cubic-bezier(0.4,0,0.2,1);"></div>
         </div>
       </div>
     </div>
