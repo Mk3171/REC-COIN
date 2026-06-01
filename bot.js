@@ -95,6 +95,8 @@ const UserSchema = new mongoose.Schema({
   cardUpgrades:  { type: Object, default: {} },
   refCount:      { type: Number, default: 0 },
   claimedMilest: { type: [Number], default: [] },
+  playerXP:      { type: Number,  default: 0 },
+  claimedLevels: { type: Object,  default: {} },
   referredBy:    { type: String, default: '' },
   walletAddress: { type: String, default: '' },
   language:      { type: String, default: 'ar' },
