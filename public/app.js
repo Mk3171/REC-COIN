@@ -947,9 +947,9 @@ function openProfilePopup() {
 
   // Top cards
   var cardsList = [];
-  categories_list.forEach(function(cat){
+  categories_list.forEach(function(cat, ci){
     cat.cards.forEach(function(card, idx){
-      var key = (cat.nameKey||'cat')+'_'+idx;
+      var key = ci+'_'+idx;
       var lvl = cardLevels[key] || 0;
       if(lvl > 0) cardsList.push({ e:card.e||'🃏', n:card.en||card.n||'Card', lvl:lvl });
     });
@@ -958,10 +958,14 @@ function openProfilePopup() {
 
   var cardsGrid = document.getElementById('ppCardsGrid');
   if(cardsGrid) {
+    // Level section
+    var lvlHtml = (typeof buildLevelSection==='function') ? buildLevelSection() : '';
     if(cardsList.length === 0) {
-      cardsGrid.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,0.25);font-size:12px;padding:10px 0;">No cards upgraded yet</div>';
+      cardsGrid.innerHTML = lvlHtml +
+        '<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,0.25);font-size:12px;padding:10px 0;">'+t('ppNoCards')+'</div>';
     } else {
-      cardsGrid.innerHTML = cardsList.slice(0,12).map(function(c){
+      cardsGrid.innerHTML = lvlHtml +
+        cardsList.slice(0,12).map(function(c){
         return '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:8px 4px;text-align:center;">'+
           '<div style="font-size:22px;">'+c.e+'</div>'+
           '<div style="font-size:9px;color:rgba(255,255,255,0.5);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+c.n+'</div>'+
