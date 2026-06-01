@@ -111,6 +111,7 @@ function saveData(immediate){
     pendingRec:(typeof pendingRec!=='undefined'?pendingRec:0),
     playerXP:(typeof playerXP!=='undefined'?playerXP:0),
     claimedLevels:(typeof claimedLevels!=='undefined'?claimedLevels:{}),
+    levelsVersion:2,
     levelsVersion:2});
   try{localStorage.setItem(saveKey,d);}catch(e){}
   if(CS){try{CS.setItem('gameData',d);}catch(e){}}
@@ -146,6 +147,7 @@ function saveToServer(){
         refillData: window.refillData,
         vip: vipData,
         playerXP: (typeof playerXP!=='undefined'?playerXP:0),
+        pendingRec: (typeof pendingRec!=='undefined'?pendingRec:0),
         claimedLevels: (typeof claimedLevels!=='undefined'?claimedLevels:{})
       })
     }).then(function(r){ return r.json(); })
@@ -309,7 +311,8 @@ function checkForBlock() {
 
   // أضف المكافأة
   record += rewardRecord;
-  rec += rewardRec;
+  if(typeof pendingRec !== 'undefined') pendingRec += rewardRec;
+  else rec += rewardRec;
   saveData(true);
   updateUI();
 
@@ -1131,6 +1134,10 @@ function loadAndInit() {
       if(serverData.record > record * 1.5) {
         applyData(serverData);
         updateUI();
+      }
+      // Sync pendingRec from server
+      if(serverData.pendingRec && serverData.pendingRec > (typeof pendingRec!=='undefined'?pendingRec:0)) {
+        if(typeof pendingRec!=='undefined') pendingRec = serverData.pendingRec;
       }
       // Sync XP from server (higher value wins)
       if(serverData.playerXP && serverData.playerXP > (typeof playerXP!=='undefined'?playerXP:0)) {
