@@ -248,7 +248,7 @@ function confirmExchange(){
   rec -= amount;
   record += gain;
   addExchangedToday(amount);
-  if(typeof addXP==='function') addXP(Math.floor(amount/0.1)*10);
+  if(typeof addXP==='function') addXP(Math.max(0, Math.round(amount/0.1))*10);
   // أرسل الضريبة للأدمن
   if(tax > 0 && tgUser) fetch('/api/exchange/tax',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({taxAmount:tax})}).catch(function(){});
   var today=getTodayStr();
