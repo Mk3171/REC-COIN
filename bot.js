@@ -96,6 +96,7 @@ const UserSchema = new mongoose.Schema({
   refCount:      { type: Number, default: 0 },
   claimedMilest: { type: [Number], default: [] },
   playerXP:      { type: Number,  default: 0 },
+  pendingRec:    { type: Number,  default: 0 },
   claimedLevels: { type: Object,  default: {} },
   referredBy:    { type: String, default: '' },
   walletAddress: { type: String, default: '' },
