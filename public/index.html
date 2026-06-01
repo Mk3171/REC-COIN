@@ -103,7 +103,10 @@ function closeSideMenu(){
       <div class="top-bar-avatar" id="topBarAvatar">M</div>
       <div>
         <div class="top-bar-name" id="topBarName">REC Mining</div>
-        <div class="top-bar-level">LVL 5 ●●●○○</div>
+        <div class="top-bar-level">LVL <span id="playerLevelNum">0</span></div>
+        <div style="width:90px;background:rgba(255,255,255,0.1);border-radius:4px;height:4px;margin-top:3px;overflow:hidden;">
+          <div id="xpProgressBar" style="width:0%;height:100%;background:linear-gradient(90deg,#00AA44,#00FF88);border-radius:4px;transition:width 0.5s;"></div>
+        </div>
       </div>
     </div>
     <div class="top-bar-title">
@@ -935,6 +938,7 @@ function closeSideMenu(){
 <script src="vip.js?v=1"></script>
 <script src="tasks.js?v=1"></script>
 <script src="cards.js?v=1"></script>
-<script src="app.js?v=7"></script>
+<script src="levels.js?v=1"></script>
+<script src="app.js?v=8"></script>
 </body>
 </html>
