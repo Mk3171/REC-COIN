@@ -236,10 +236,14 @@ function updateLevelDisplay() {
   var lvlEl = document.getElementById('playerLevelNum');
   if(lvlEl) lvlEl.textContent = lvl;
 
-  // Show progress toward NEXT level
-  var nextLvl = lvl + 1;
-  var startXP = cumXPForLevel(lvl);
-  var endXP   = cumXPForLevel(nextLvl);
+  // Find next unclaimed level for bar progress
+  var targetLvl = lvl + 1;
+  for(var i = 1; i <= lvl; i++) {
+    if(!claimedLevels[i]) { targetLvl = i; break; }
+  }
+
+  var startXP = cumXPForLevel(targetLvl - 1);
+  var endXP   = cumXPForLevel(targetLvl);
   var span    = endXP - startXP;
   var done    = playerXP - startXP;
   var pct     = lvl >= 99 ? 100 : Math.min(100, Math.max(0, Math.floor(done / span * 100)));
