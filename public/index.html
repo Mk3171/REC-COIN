@@ -17,11 +17,11 @@
   from { transform: translateX(100%); }
   to { transform: translateX(0); }
 }
-/* Fix home layout - everything top, no gaps */
-#home { display:flex; flex-direction:column; justify-content:flex-start !important; padding-top:0 !important; }
-.home-inner { flex:0 0 auto !important; margin:0 !important; padding:0 !important; }
-.home-main-area { margin:0 !important; padding:0 !important; }
-.home-bottom { flex:0 0 auto !important; margin:0 !important; padding-top:4px !important; }
+/* Fix home layout - remove gaps */
+.home-inner { justify-content: flex-start !important; }
+.home-main-area { flex: 0 0 auto !important; align-items: flex-start !important; }
+.home-center-col { justify-content: flex-start !important; padding-top: 8px !important; }
+.home-bottom { margin-top: 0 !important; }
 </style>
 <script>
 function openSideMenu(){
