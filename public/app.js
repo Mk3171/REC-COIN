@@ -939,10 +939,12 @@ function openProfilePopup() {
     { icon:'👥', label:t('friendsLabel'), val: refCount, color:'#44CCFF' },
     { icon:'📈', label:t('ppCardLevels'), val: totalCardLevels, color:'#FF8844' },
     { icon:'⭐', label:'XP', val: (function(){
-      if(typeof playerXP==='undefined') return '0';
-      var inLvl = typeof xpInCurrentLevel==='function' ? xpInCurrentLevel(playerXP) : 0;
-      var needed = typeof xpForNextLevel==='function' ? xpForNextLevel(playerXP) : 0;
-      return inLvl.toLocaleString()+' / '+needed.toLocaleString();
+      if(typeof playerXP==='undefined'||typeof calcPlayerLevel==='undefined') return '0';
+      var lvl = calcPlayerLevel(playerXP);
+      var startXP = typeof cumXPForLevel==='function' ? cumXPForLevel(lvl) : 0;
+      var needed  = typeof xpNeededForLevel==='function' ? xpNeededForLevel(lvl+1) : 0;
+      var done    = Math.max(0, playerXP - startXP);
+      return Math.min(done,needed).toLocaleString()+' / '+needed.toLocaleString();
     })(), color:'#FFD700' },
   ];
 
