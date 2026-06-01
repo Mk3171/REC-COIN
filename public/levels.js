@@ -236,17 +236,18 @@ function updateLevelDisplay() {
   var lvlEl = document.getElementById('playerLevelNum');
   if(lvlEl) lvlEl.textContent = lvl;
 
-  // Find next unclaimed level for bar progress
-  var targetLvl = lvl + 1;
-  for(var i = 1; i <= lvl; i++) {
-    if(!claimedLevels[i]) { targetLvl = i; break; }
+  // Find first level not yet completed by XP (active level)
+  var targetLvl = 1;
+  for(var i = 1; i <= 99; i++) {
+    var lvlEnd = cumXPForLevel(i) + xpNeededForLevel(i);
+    if(playerXP < lvlEnd) { targetLvl = i; break; }
+    if(i === 99) { targetLvl = 99; }
   }
 
-  var startXP = cumXPForLevel(targetLvl - 1);
-  var endXP   = cumXPForLevel(targetLvl);
-  var span    = endXP - startXP;
-  var done    = playerXP - startXP;
-  var pct     = lvl >= 99 ? 100 : Math.min(100, Math.max(0, Math.floor(done / span * 100)));
+  var startXP = cumXPForLevel(targetLvl);
+  var span    = xpNeededForLevel(targetLvl);
+  var done    = Math.max(0, playerXP - startXP);
+  var pct     = span > 0 ? Math.min(100, Math.floor(done / span * 100)) : 100;
 
   var bar = document.getElementById('xpProgressBar');
   if(bar) {
