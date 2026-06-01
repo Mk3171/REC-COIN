@@ -1,1160 +1,936 @@
-// ====== CORE: Formulas + Data + UI + Intervals + Init ======
-// ====== CARD MINING FORMULAS ======
-// RECORD/s per card level (level 1=100, level 100=1,000,000)
-function cardRecordSpeed(lvl){
-  if(lvl<=0)return 0;
-  return 100*Math.pow(10000,(lvl-1)/99);
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>REC Mining</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="tonconnect-ui.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css?v=6">
+<style>
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity:0; }
+  to { transform: translateY(0); opacity:1; }
 }
-// REC/s per card level (level 1=0.0000001, level 100=0.0001) — sustainable 40+ years
-function cardRECSpeed(lvl){
-  if(lvl<=0)return 0;
-  return 0.0000001*Math.pow(1000,(lvl-1)/99);
+@keyframes slideInRight {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
 }
-// RECORD cost to upgrade from current level
-// Level 0→1: 10K | Level 50: 110M | Level 75: 11.5B | Level 99→100: 1T
-function cardCost(lvl, isLimited){
-  if(isLimited) return Math.floor(100000*Math.pow(9e9,lvl/99));
-  return Math.floor(10000*Math.pow(1e10,lvl/99));
+</style>
+<script>
+function openSideMenu(){
+  var m=document.getElementById('sideMenu');
+  var o=document.getElementById('sideMenuOverlay');
+  m.style.display='block';
+  o.style.display='block';
+  m.style.animation='slideInRight 0.25s ease';
 }
-// Wait time to upgrade — Level 0: 1min | Level 50: 3h | Level 75: 2d | Level 99: 30d
-function cardWait(lvl){
-  return Math.floor(60*Math.pow(43200,lvl/99));
+function closeSideMenu(){
+  document.getElementById('sideMenu').style.display='none';
+  document.getElementById('sideMenuOverlay').style.display='none';
 }
-function formatWait(sec){
-  if(sec<60)return sec+'s';
-  if(sec<3600)return Math.floor(sec/60)+'m '+Math.floor(sec%60)+'s';
-  if(sec<86400)return Math.floor(sec/3600)+'h '+Math.floor((sec%3600)/60)+'m';
-  return Math.floor(sec/86400)+'d '+Math.floor((sec%86400)/3600)+'h';
-}
-
-var recordPerSec=0, recPerSec=0;
-var weeklyEndMs = 0;
-function getLimitedMulti(key){ return parseInt(key.split('_')[0])===4 ? 3 : 1; }
-function calcTotalSpeeds(){
-  recordPerSec=0; recPerSec=0;
-  Object.keys(cardLevels).forEach(function(key){
-    var lvl=cardLevels[key]||0;
-    var m=getLimitedMulti(key);
-    recordPerSec+=cardRecordSpeed(lvl)*m;
-    recPerSec+=cardRECSpeed(lvl)*m;
-  });
-}
-
-// ====== DATA ======
-var defaultData={record:0,rec:0,energy:1000,maxEnergy:1000,
-  tapLevelVal:0,energyLevelVal:0,tapPowerVal:1,
-  completedTasks:[],cardLevels:{},cardUpgrades:{},refCount:0,claimedMilest:[],
-  dailyLogin:{day:0,lastDate:''},mysteryLastDate:'',
-  dailyTasksData:{date:'',done:[],taps:0,upgrades:0,spent:0,sideDaily:'每日',sideRank:'排名',sideGames:'游戏',sideCombo:'组合',sideUpgrade:'升级',sideShop:'商店',navGames:'游戏',navWallet:'钱包',qbTasks:'任务',qbExchange:'兑换',qbSwap:'交换',recordLabel:'记录',recLabel:'REC',energyFull:'满能量',walletTitle:'钱包',walletId:'ID',comboTitle:'每日组合',comboSubtitle:'升级3张每日卡片并获得奖励！',comboReward:'每日奖励',comboClaim:'领取 +5 REC 🎉',comboClaimed:'✅ 今天已领取奖励！'},
-  cardTasksClaimed:[],totalTaps:0};
-var G=Object.assign({},defaultData);
-try{var ls=JSON.parse(localStorage.getItem(saveKey));if(ls)G=Object.assign({},defaultData,ls);}catch(e){}
-
-var record,rec,energy,maxEnergy,tapLevelVal,energyLevelVal,tapPowerVal,
-    completedTasks,cardLevels,cardUpgrades,refCount,claimedMilest,
-    dailyLogin,mysteryLastDate,dailyTasksData,cardTasksClaimed,totalTaps;
-var vipData = {tier:0, expiry:0, boxes:{}, boost:null, hasEpicCard:false, epicExpiry:0};
-
-function applyData(d){
-  record=d.record||0; rec=d.rec||0;
-  energy=d.energy!==undefined?d.energy:1000; maxEnergy=d.maxEnergy||1000;
-  tapLevelVal=d.tapLevelVal||0; energyLevelVal=d.energyLevelVal||0;
-  tapPowerVal=tapLevelVal===0?1:Math.floor(Math.pow(25100000,tapLevelVal/100));
-  maxEnergy=energyLevelVal>0?Math.floor(1000*Math.pow(10000,energyLevelVal/99)):d.maxEnergy||1000;
-  completedTasks=d.completedTasks||[]; cardLevels=d.cardLevels||{};
-  cardUpgrades=d.cardUpgrades||{}; refCount=d.refCount||0;
-  claimedMilest=d.claimedMilest||[];
-  dailyLogin=d.dailyLogin||{day:0,lastDate:''};
-  mysteryLastDate=d.mysteryLastDate||'';
-  dailyTasksData=d.dailyTasksData||{date:'',done:[],taps:0,upgrades:0,spent:0};
-  cardTasksClaimed=d.cardTasksClaimed||[];
-  totalTaps=d.totalTaps||0;
-  // vipData
-  if(d.vip && d.vip.tier > 0) {
-    vipData = d.vip;
-    vipData.boxes = vipData.boxes || {};
-  } else if(d.vipData && d.vipData.tier > 0) {
-    vipData = d.vipData;
-    vipData.boxes = vipData.boxes || {};
-  }
-  // refillData — 3 فرص يومية لتعبئة الطاقة
-  var _today=getTodayStr();
-  if(d.refillData && d.refillData.date===_today){
-    window.refillData=d.refillData;
-  } else {
-    var initMax = (vipData && parseInt(vipData.tier||0) >= 1 && parseInt(vipData.expiry||0) > Date.now()) ? 6 : 3;
-    window.refillData={date:_today,count:initMax};
-  }
-  calcTotalSpeeds();
-  // Load XP data
-  if(d.playerXP !== undefined && typeof playerXP !== 'undefined') {
-    playerXP = d.playerXP || 0;
-    xpRetroCalculated = playerXP > 0;
-  }
-  // Only load claimedLevels if levelsVersion matches (v2 = manual claim system)
-  if(d.claimedLevels && d.levelsVersion === 2 && typeof claimedLevels !== 'undefined') {
-    claimedLevels = d.claimedLevels;
-  }
-}
-try { applyData(G); } catch(e) { console.log('applyData error:', e); applyData(defaultData); }
-
-// CloudStorage loaded in loadAndInit()
-
-function saveData(immediate){
-  var d=JSON.stringify({record,rec,energy,maxEnergy,tapLevelVal,energyLevelVal,tapPowerVal,
-    completedTasks,cardLevels,cardUpgrades,refCount,claimedMilest,
-    dailyLogin,mysteryLastDate,dailyTasksData,cardTasksClaimed,totalTaps,
-    refillData:window.refillData,vip:vipData,
-    lastSaveTime:Date.now(),
-    playerXP:(typeof playerXP!=='undefined'?playerXP:0),
-    claimedLevels:(typeof claimedLevels!=='undefined'?claimedLevels:{}),
-    levelsVersion:2});
-  try{localStorage.setItem(saveKey,d);}catch(e){}
-  if(CS){try{CS.setItem('gameData',d);}catch(e){}}
-  if(immediate){
-    // Save to server immediately (for upgrades/purchases)
-    saveToServer();
-  } else {
-    // Debounced save for routine updates (mining)
-    clearTimeout(window._saveTimer);
-    window._saveTimer = setTimeout(function(){ saveToServer(); }, 15000);
-  }
-}
-
-function saveToServer(){
-  if(!tgUser) return;
-  try {
-    var initData = '';
-    try { initData = window.Telegram.WebApp.initData || ''; } catch(e){}
-    fetch('/api/user/save', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({
-        telegramId: tgUser.id,
-        initData: initData,
-        username: tgUser.username || '',
-        firstName: tgUser.first_name || '',
-        record, rec, energy, maxEnergy,
-        tapLevelVal, energyLevelVal, tapPowerVal,
-        completedTasks, cardLevels, cardUpgrades,
-        refCount, claimedMilest,
-        dailyLogin, mysteryLastDate, dailyTasksData, cardTasksClaimed, totalTaps,
-        miningSpeed: recPerSec,
-        refillData: window.refillData,
-        vip: vipData,
-        playerXP: (typeof playerXP!=='undefined'?playerXP:0),
-        claimedLevels: (typeof claimedLevels!=='undefined'?claimedLevels:{})
-      })
-    }).then(function(r){ return r.json(); })
-    .then(function(data){
-      if(data.error === 'banned') {
-        // Auto-unban if admin
-        if(tgUser && String(tgUser.id) === '6995765586'){
-          fetch('/api/admin/self-unban',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({telegramId:tgUser.id})})
-          .then(function(){
-            // Also unban all wrongly banned users
-            fetch('/api/admin/unban-all',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({adminId:tgUser.id})})
-            .then(function(r){return r.json();})
-            .then(function(d){ console.log('Mass unban:', d.unbanned, 'users'); });
-            setTimeout(function(){ window.location.reload(); },1500);
-          });
-          return;
-        }
-        // Show ban message
-        document.body.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;background:#0a0a0a;color:white;text-align:center;padding:20px;">' +
-          '<div style="font-size:60px;margin-bottom:20px;">🚫</div>' +
-          '<div style="font-size:22px;font-weight:bold;color:#FF0000;margin-bottom:10px;">تم حظر حسابك</div>' +
-          '<div style="color:#aaa;font-size:14px;">Account Banned</div>' +
-          '<div style="color:#555;font-size:12px;margin-top:10px;">' + (data.reason||'violation') + '</div>' +
-        '</div>';
-      }
-    }).catch(function(){});
-  } catch(e){}
-}
-
-function loadFromServer(callback){
-  if(!tgUser){ callback(null); return; }
-  fetch('/api/user/' + tgUser.id)
-    .then(function(r){ return r.json(); })
-    .then(function(res){
-      if(res.exists && res.data){
-        // Check if server has more REC than local (block reward received while offline)
-        var localRec = rec || 0;
-        var serverRec = res.data.rec || 0;
-        var recDiff = serverRec - localRec;
-
-        // Merge new fields from localStorage
-        try{
-          var ls=JSON.parse(localStorage.getItem(saveKey));
-          if(ls){
-            if(!res.data.dailyLogin && ls.dailyLogin) res.data.dailyLogin=ls.dailyLogin;
-            if(!res.data.mysteryLastDate && ls.mysteryLastDate) res.data.mysteryLastDate=ls.mysteryLastDate;
-            if(!res.data.dailyTasksData && ls.dailyTasksData) res.data.dailyTasksData=ls.dailyTasksData;
-            if(!res.data.cardTasksClaimed && ls.cardTasksClaimed) res.data.cardTasksClaimed=ls.cardTasksClaimed;
-            if(!res.data.totalTaps && ls.totalTaps) res.data.totalTaps=ls.totalTaps;
-            if(ls.vipData && ls.vipData.tier > 0) res.data.vip=ls.vipData;
-          }
-        }catch(e){}
-
-        // If server REC is significantly more → block reward was given while offline
-        if(recDiff >= 99) {
-          setTimeout(function(){
-            showBlockNotification(recDiff, res.data.totalBlocksFound || 1);
-          }, 2000);
-        }
-
-        callback(res.data);
-      } else { callback(null); }
-    })
-    .catch(function(){ callback(null); });
-}
-
-// ====== TOAST ======
-function showToast(msg){
-  var toast=document.getElementById('toast-msg');
-  if(!toast){toast=document.createElement('div');toast.id='toast-msg';
-    toast.style.cssText='position:fixed;bottom:75px;left:50%;transform:translateX(-50%);background:rgba(20,20,20,0.97);color:white;padding:10px 22px;border-radius:20px;font-size:14px;z-index:9999;border:1px solid #444;pointer-events:none;opacity:0;transition:opacity 0.25s;white-space:nowrap;max-width:90vw;text-align:center;';
-    document.body.appendChild(toast);}
-  toast.textContent=msg; toast.style.opacity='1';
-  clearTimeout(toast._t);
-  toast._t=setTimeout(function(){toast.style.opacity='0';},2500);
-}
-
-// ====== NAV ======
-function openGames(){
-  // افتح اللعبة كـ overlay داخل نفس الـ WebApp
-  var overlay = document.createElement('div');
-  overlay.id = 'gamesOverlay';
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000;';
-  
-  var closeBtn = document.createElement('button');
-  closeBtn.textContent = '✕ Back';
-  closeBtn.style.cssText = 'position:absolute;top:10px;right:10px;z-index:100000;background:rgba(0,0,0,0.8);color:white;border:1px solid #333;padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer;';
-  closeBtn.onclick = function(){ document.body.removeChild(overlay); };
-  
-  var iframe = document.createElement('iframe');
-  iframe.src = '/games.html';
-  iframe.style.cssText = 'width:100%;height:100%;border:none;';
-  
-  overlay.appendChild(closeBtn);
-  overlay.appendChild(iframe);
-  document.body.appendChild(overlay);
-}
-
-function showPage(id,btn){
-  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
-  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});
-  document.getElementById(id).classList.add('active');
-  if(btn) btn.classList.add('active'); closeLangMenu();
-  if(id==='rank') loadLeaderboard('global');
-  if(id==='profile') loadProfilePhoto();
-}
-function openUpgrade(){updateUpgradeUI();document.getElementById('upgradePage').classList.add('open');}
-
-// إشعار البلوك عند فتح البوت (لما البلوك جاء من السيرفر وهو أوفلاين)
-function showBlockNotification(recAmount, blockNum) {
-  var old = document.getElementById('blockPopupOverlay');
-  if(old) return; // ما نظهر مرتين
-
-  var ol = document.createElement('div');
-  ol.id = 'blockPopupOverlay';
-  ol.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:99999;display:flex;align-items:center;justify-content:center;';
-
-  var pp = document.createElement('div');
-  pp.style.cssText = 'background:linear-gradient(180deg,#0a0005,#150008);border:2px solid #FF0000;border-radius:20px;padding:24px;width:85vw;max-width:320px;text-align:center;box-shadow:0 0 80px rgba(255,0,0,0.6);animation:blockAppear 0.5s ease;';
-  pp.addEventListener('click', function(e){ e.stopPropagation(); });
-
-  pp.innerHTML =
-    '<style>@keyframes blockAppear{from{transform:scale(0.3);opacity:0}to{transform:scale(1);opacity:1}}</style>'+
-    '<div style="font-size:52px;margin-bottom:6px;">⛏️</div>'+
-    '<div style="font-family:Orbitron,sans-serif;font-size:16px;color:#FF0000;font-weight:bold;letter-spacing:1px;margin-bottom:4px;">BLOCK FOUND!</div>'+
-    '<div style="font-size:11px;color:#555;margin-bottom:16px;">Block #'+blockNum+' • بينما كنت غائباً</div>'+
-    '<div style="background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.3);border-radius:12px;padding:16px;margin-bottom:14px;">'+
-      '<div style="font-size:11px;color:#aaa;margin-bottom:6px;">🟢 REC Reward</div>'+
-      '<div style="font-size:32px;color:#00FF88;font-family:Orbitron,sans-serif;font-weight:bold;">+'+Math.floor(recAmount)+' REC</div>'+
-      '<div style="font-size:10px;color:#555;margin-top:4px;">تمت الإضافة لرصيدك تلقائياً ✅</div>'+
-    '</div>'+
-    '<div style="font-size:10px;color:#444;margin-bottom:14px;">📢 تم الإعلان في قناة REC Blocks</div>'+
-    '<button onclick="saveData(true);document.getElementById(\'blockPopupOverlay\').remove()" style="background:linear-gradient(135deg,#CC0000,#FF2200);border:none;color:white;padding:13px;border-radius:12px;cursor:pointer;font-size:15px;font-weight:bold;width:100%;">🔴 COLLECT</button>';
-
-  ol.addEventListener('click', function(e){ if(e.target===ol) ol.remove(); });
-  ol.appendChild(pp);
-  document.body.appendChild(ol);
-}
-
-// ====== BLOCK MINING (Passive - based on REC mining speed) ======
-// كل 3 ثواني فيه فرصة 1/2000 إن البطاقات تضرب بلوك
-// يعني بالمعدل كل ~100 دقيقة لو البطاقات شغالة
-var BLOCK_CHANCE = 1/2000;
-var blocksMined = 0;
-
-function checkForBlock() {
-  // فقط لو في سرعة REC حقيقية
-  if(recPerSec <= 0) return;
-  if(Math.random() > BLOCK_CHANCE) return;
-
-  blocksMined++;
-  var blockNum = blocksMined;
-
-  // المكافأة = ساعة كاملة من التعدين
-  var rewardRec = parseFloat((recPerSec * 3600).toFixed(6));
-  var rewardRecord = Math.floor(recordPerSec * 3600);
-
-  // حد أدنى للمكافأة
-  if(rewardRec < 0.0001) rewardRec = 0.0001;
-  if(rewardRecord < 500000) rewardRecord = 500000;
-
-  // أضف المكافأة
-  record += rewardRecord;
-  rec += rewardRec;
-  saveData(true);
-  updateUI();
-
-  // أظهر popup
-  showBlockPopup(blockNum, rewardRecord, rewardRec);
-
-  // أبلغ السيرفر لنشره على القناة والجروع
-  if(tgUser) {
-    fetch('/api/block-found', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({
-        telegramId: tgUser.id,
-        blockReward: { record: rewardRecord, rec: rewardRec },
-        blockNumber: blockNum
-      })
-    }).catch(function(){});
-  }
-}
-
-function showBlockPopup(blockNum, rewardRecord, rewardRec) {
-  // أزل أي popup قديم
-  var old = document.getElementById('blockPopupOverlay');
-  if(old) old.remove();
-
-  var ol = document.createElement('div');
-  ol.id = 'blockPopupOverlay';
-  ol.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:99999;display:flex;align-items:center;justify-content:center;';
-
-  var pp = document.createElement('div');
-  pp.style.cssText = 'background:linear-gradient(180deg,#0a0005,#150008);border:2px solid #FF0000;border-radius:20px;padding:24px;width:85vw;max-width:320px;text-align:center;box-shadow:0 0 80px rgba(255,0,0,0.6);animation:blockAppear 0.4s ease;';
-  pp.addEventListener('click', function(e){ e.stopPropagation(); });
-
-  pp.innerHTML =
-    '<style>@keyframes blockAppear{from{transform:scale(0.3) rotate(-5deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}</style>'+
-    '<div style="font-size:52px;margin-bottom:6px;">⛏️</div>'+
-    '<div style="font-family:Orbitron,sans-serif;font-size:20px;color:#FF0000;font-weight:bold;letter-spacing:2px;margin-bottom:2px;">BLOCK FOUND!</div>'+
-    '<div style="font-size:11px;color:#555;margin-bottom:16px;">Block #'+blockNum+' • REC Mining</div>'+
-    '<div style="background:rgba(255,0,0,0.1);border:1px solid rgba(255,0,0,0.3);border-radius:12px;padding:14px;margin-bottom:8px;">'+
-      '<div style="font-size:11px;color:#aaa;margin-bottom:4px;">⚡ RECORD Reward</div>'+
-      '<div style="font-size:26px;color:#FF4444;font-family:Orbitron,sans-serif;font-weight:bold;">+'+formatCost(rewardRecord)+'</div>'+
-    '</div>'+
-    '<div style="background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.25);border-radius:12px;padding:14px;margin-bottom:14px;">'+
-      '<div style="font-size:11px;color:#aaa;margin-bottom:4px;">🟢 REC Reward</div>'+
-      '<div style="font-size:24px;color:#00FF88;font-family:Orbitron,sans-serif;font-weight:bold;">+'+rewardRec.toFixed(4)+'</div>'+
-    '</div>'+
-    '<div style="font-size:10px;color:#444;margin-bottom:14px;">📢 تم الإعلان في قناة REC Blocks</div>'+
-    '<button onclick="saveData(true);document.getElementById(\'blockPopupOverlay\').remove()" style="background:linear-gradient(135deg,#CC0000,#FF2200);border:none;color:white;padding:13px;border-radius:12px;cursor:pointer;font-size:15px;font-weight:bold;width:100%;letter-spacing:1px;">🔴 COLLECT</button>';
-
-  ol.addEventListener('click', function(e){ if(e.target===ol) ol.remove(); });
-  ol.appendChild(pp);
-  document.body.appendChild(ol);
-}
-
-// ====== HOME - TAP ======
-function tap(){
-  var tapCost = Math.max(1, Math.floor(maxEnergy / 1000));
-  if(energy < tapCost) return; // طاقة غير كافية — توقف
-  record += tapPowerVal;
-  energy = Math.max(0, energy - tapCost);
-  totalTaps++;
-  var today=getTodayStr();
-  if(dailyTasksData.date!==today) resetDailyTasks(today);
-  dailyTasksData.taps++;
-  checkDailyTaskProgress();
-  saveData(); updateUI();
-}
-
-// ====== CHECK UPGRADE TIMERS ======
-function checkUpgradeTimers(){
-  var now=Date.now(), changed=false;
-  Object.keys(cardUpgrades).forEach(function(key){
-    var upg=cardUpgrades[key];
-    if(upg&&upg.endTime<=now){
-      cardLevels[key]=upg.toLevel;
-      delete cardUpgrades[key];
-      changed=true;
-      updateCardGridItem(key);
-      var kp=key.split('_'),kci=parseInt(kp[0]),kidx=parseInt(kp[1]);
-      var kcard=categories[kci]&&categories[kci].cards[kidx];
-      showToast(t('toastUpgradeDone')+(kcard?' — '+getCardName(kcard):''));
-    }
-  });
-  if(changed){calcTotalSpeeds();saveData();}
-}
-
-// ====== MAIN INTERVAL (3s) ======
-setInterval(function(){
-  checkUpgradeTimers();
-  // تعدين RECORD من البطاقات — مستقل
-  if(recordPerSec>0) record+=recordPerSec*3;
-  // تعدين REC — مع بوست VIP لو مفعّل
-  if(recPerSec>0){
-    var _effectiveRec = recPerSec;
-    if(vipData && parseInt(vipData.tier||0)>=1 && parseInt(vipData.expiry||0)>Date.now() && vipData.boostDate===getTodayStr()){
-      _effectiveRec *= 1.5;
-    }
-    rec+=_effectiveRec*3;
-    checkForBlock();
-  }
-  // شحن الطاقة — مستقل
-  if(energy<maxEnergy) energy=Math.min(maxEnergy,energy+(maxEnergy/43200*3));
-  saveData(); updateUI(); updateTimerDisplays();
-},3000);
-
-// 1s interval for timer countdown display
-setInterval(function(){updateTimerDisplays();},1000);
-
-function pad2(n){return n<10?'0'+n:''+n;}
-
-function updateTimerDisplays(){
-  var now=Date.now();
-  Object.keys(cardUpgrades).forEach(function(key){
-    var upg=cardUpgrades[key];
-    var el=document.getElementById('timer_'+key);
-    if(el&&upg){
-      var rem=Math.max(0,Math.ceil((upg.endTime-now)/1000));
-      if(rem<=0){el.textContent=t('upgradeReady');}
-      else{el.textContent='⏳ '+formatWait(rem);}
-    }
-  });
-  // Weekly countdown
-  var wEl=document.getElementById('weeklyCountdown');
-  if(wEl&&typeof weeklyEndMs!=='undefined'&&weeklyEndMs>0){
-    var diff=Math.max(0,weeklyEndMs-now);
-    var dd=Math.floor(diff/86400000);
-    var hh=Math.floor((diff%86400000)/3600000);
-    var mm=Math.floor((diff%3600000)/60000);
-    var ss=Math.floor((diff%60000)/1000);
-    wEl.textContent=pad2(dd)+'d '+pad2(hh)+'h '+pad2(mm)+'m '+pad2(ss)+'s';
-  }
-  // Combo timer countdown
-  var cEl=document.getElementById('comboTimerCount');
-  var cLbl=document.getElementById('comboTimerLabel');
-  if(cEl && window._comboExpiresAt){
-    var rem=Math.max(0, window._comboExpiresAt - now);
-    if(rem<=0){
-      cEl.style.color='#FF4444';
-      cEl.textContent='00:00:00';
-      if(cLbl) cLbl.textContent= window._comboIsAdmin ? t('comboAdminTimerLabel') : t('comboTimerLabel');
-      // لو انتهى وفي بيانات — أعد تحميل لإخفاء الكومبو
-      if(comboData && comboData.exists && !window._comboExpiredReloaded){
-        window._comboExpiredReloaded = true;
-        comboData.exists = false;
-        renderComboSlots(comboData);
-      }
-    } else {
-      window._comboExpiredReloaded = false;
-      cEl.style.color='#FFD700';
-      var h=Math.floor(rem/3600000);
-      var m=Math.floor((rem%3600000)/60000);
-      var s=Math.floor((rem%60000)/1000);
-      cEl.textContent=pad2(h)+':'+pad2(m)+':'+pad2(s);
-      if(cLbl) cLbl.textContent= window._comboIsAdmin ? t('comboAdminTimerLabel') : t('comboTimerLabel');
-    }
-  }
-}
-
-function updateUI(){
-  var s=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
-  s('recordCount',Math.floor(record).toLocaleString());
-  s('recordCountHome',Math.floor(record).toLocaleString());
-  s('recCountHome',rec.toFixed(6));
-  s('recMini',rec.toFixed(6));
-  s('energyText',Math.floor(energy)+' / '+maxEnergy);
-  s('profileRecord',Math.floor(record).toLocaleString());
-  s('recPoolBalance',rec.toFixed(6));
-  var eb=document.getElementById('energyBar');if(eb)eb.style.width=(energy/maxEnergy*100)+'%';
-  // Mining speeds on home
-  var recs=document.getElementById('recSpeedShow');
-  var recs2=document.getElementById('recordSpeedShow');
-  var _displayRec = recPerSec;
-  if(vipData && parseInt(vipData.tier||0)>=1 && parseInt(vipData.expiry||0)>Date.now() && vipData.boostDate===getTodayStr()) _displayRec*=1.5;
-  if(recs)recs.textContent=_displayRec>0?_displayRec.toFixed(8):'0.00000000';
-  if(recs2)recs2.textContent=recordPerSec>0?Math.floor(recordPerSec).toLocaleString():'0';
-  // Rank
-  var m=getMyMedal();
-  var mrn=document.getElementById('myRankName');if(mrn){mrn.textContent=m.name;mrn.style.color=m.color;}
-  s('myRankRecord',Math.floor(record).toLocaleString());
-  s('refCountDisplay',refCount);
-  updateInviteLinkDisplay();
-  updateWalletPage();
-  var commEl = document.getElementById('totalCommissionDisplay');
-  if(commEl) commEl.textContent = rec.toFixed(2);
-}
-
-// ====== UPGRADE OVERLAY (tap power + energy) ======
-// Tap upgrade cost: Level 1=30K, Level 100=1B
-function getTapCost(l){return Math.floor(30000*Math.pow(33333,l/99));}
-// Energy upgrade cost: Level 1=30K, Level 100=1B
-function getEnergyCost(l){return Math.floor(30000*Math.pow(33333,l/99));}
-
-function closeVIP() {
-  showPage('home', document.getElementById('navHomeBtn'));
-}
-
-// ====== TASK TABS ======
-
-
-// ====== ENERGY REFILL ======
-function useEnergyRefill(){
-  var today=getTodayStr();
-  var maxRefillsToday = (vipData && parseInt(vipData.tier||0) >= 1 && parseInt(vipData.expiry||0) > Date.now()) ? 6 : 3;
-  if(!window.refillData || window.refillData.date!==today){
-    window.refillData={date:today,count:maxRefillsToday};
-  }
-  if(window.refillData.count<=0){
-    showToast('❌ انتهت فرصك اليوم! انتظر الغد');
-    return;
-  }
-  energy=maxEnergy;
-  window.refillData.count--;
-  saveData(true); updateUI(); updateUpgradeUI();
-  showToast('⚡ تمت تعبئة الطاقة! '+window.refillData.count+' فرص متبقية');
-}
-
-function loadRefillData(){
-  // البيانات تتحمل من applyData — بس نتأكد من التاريخ
-  var today=getTodayStr();
-  if(!window.refillData || window.refillData.date!==today){
-    window.refillData={date:today,count:3};
-  }
-}
-
-function updateUpgradeUI(){
-  var s=function(id,v){var e=document.getElementById(id);if(e)e.textContent=v;};
-  s('tapLevel',tapLevelVal);s('energyLevel',energyLevelVal);
-  s('tapCost',getTapCost(tapLevelVal).toLocaleString());
-  s('energyCost',getEnergyCost(energyLevelVal).toLocaleString());
-  s('tapPower',tapPowerVal);s('maxEnergyShow',maxEnergy.toLocaleString());
-  var tb=document.getElementById('tapUpgradeBtn');if(tb)tb.disabled=record<getTapCost(tapLevelVal)||tapLevelVal>=100;
-  var eb=document.getElementById('energyUpgradeBtn');if(eb)eb.disabled=record<getEnergyCost(energyLevelVal)||energyLevelVal>=100;
-  // refill button
-  loadRefillData();
-  var rc=document.getElementById('refillCount');if(rc)rc.textContent=window.refillData.count;
-  var rb=document.getElementById('energyRefillBtn');if(rb)rb.disabled=window.refillData.count<=0;
-}
-
-// ====== REC INFO POPUP ======
-function openRECInfo() {
-  var ol = document.getElementById('recInfoOverlay');
-  var pp = document.getElementById('recInfoPopup');
-  if(!ol || !pp) return;
-
-  pp.innerHTML =
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">' +
-      '<div style="font-size:17px;font-weight:900;color:#00FF88;font-family:Orbitron,sans-serif;">' + t('recInfoTitle') + '</div>' +
-      '<div onclick="closeRECInfo()" style="width:30px;height:30px;background:rgba(255,255,255,0.08);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.4);font-size:13px;">✕</div>' +
-    '</div>' +
-    '<div style="font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:20px;">' + t('recInfoSub') + '</div>' +
-
-    _infoCard('#00FF88','⛏️', t('recAutoMining'), t('recAutoMining'),
-      t('recAutoMiningDesc') + '<div style="margin-top:6px;padding:8px;background:rgba(0,0,0,0.3);border-radius:8px;font-family:Orbitron,sans-serif;font-size:10px;color:#00FF88;">' +
-      t('recYourSpeed') + ' ' + (function(){var s=recPerSec;if(vipData&&parseInt(vipData.tier||0)>=1&&parseInt(vipData.expiry||0)>Date.now()&&vipData.boostDate===getTodayStr())s*=1.5;return s.toFixed(8);}()) + ' REC/s</div>') +
-
-    _infoCard('#AA66FF','🃏', t('recCardUpgrade'), t('recCardUpgrade'),
-      t('recCardUpgradeDesc') +
-      '<div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:6px;">' +
-        '<div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:8px;text-align:center;"><div style="font-size:10px;color:rgba(255,255,255,0.3);">' + t('recNormalCard') + '</div><div style="font-size:12px;color:#AA66FF;font-weight:700;">×1</div></div>' +
-        '<div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:8px;text-align:center;"><div style="font-size:10px;color:rgba(255,255,255,0.3);">' + t('recLimitedCard') + '</div><div style="font-size:12px;color:#FFD700;font-weight:700;">×3</div></div>' +
-      '</div>') +
-
-    _infoCard('#FF6644','🏆', t('recBlocks'), '', t('recBlocksDesc')) +
-    _infoCard('#FFD700','🎯', t('recDailyCombo'), '+5 REC', t('recDailyComboDesc')) +
-
-    _infoCard('#44CCFF','👥', t('recReferrals'), '',
-      t('recReferralsDesc') +
-      '<div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;">' +
-        '<div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:8px;text-align:center;"><div style="font-size:9px;color:rgba(255,255,255,0.3);">L1</div><div style="font-size:14px;color:#00FF88;font-weight:700;">8%</div></div>' +
-        '<div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:8px;text-align:center;"><div style="font-size:9px;color:rgba(255,255,255,0.3);">L2</div><div style="font-size:14px;color:#44CCFF;font-weight:700;">2%</div></div>' +
-        '<div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:8px;text-align:center;"><div style="font-size:9px;color:rgba(255,255,255,0.3);">L3</div><div style="font-size:14px;color:#AA66FF;font-weight:700;">1%</div></div>' +
-      '</div>') +
-
-    _infoCard('#FF66AA','✅', t('recTasks'), '', t('recTasksDesc')) +
-
-    '<div style="background:rgba(255,200,0,0.08);border:1px solid rgba(255,200,0,0.25);border-radius:14px;padding:14px;">' +
-      '<div style="font-size:12px;font-weight:700;color:#FFD700;margin-bottom:8px;">' + t('recSpeedTip') + '</div>' +
-      '<div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.7;">١. ' + t('recTip1') + '<br>٢. ' + t('recTip2') + '<br>٣. ' + t('recTip3') + '<br>٤. ' + t('recTip4') + '</div>' +
-    '</div>';
-
-  ol.style.display = 'block';
-  pp.style.display = 'block';
-}
-
-function closeRECInfo() {
-  var ol = document.getElementById('recInfoOverlay');
-  var pp = document.getElementById('recInfoPopup');
-  if(ol) ol.style.display = 'none';
-  if(pp) pp.style.display = 'none';
-}
-
-function openRECORDInfo() {
-  var ol = document.getElementById('recordInfoOverlay');
-  var pp = document.getElementById('recordInfoPopup');
-  if(!ol || !pp) return;
-
-  pp.innerHTML =
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">' +
-      '<div style="font-size:17px;font-weight:900;color:#FF6644;font-family:Orbitron,sans-serif;">' + t('recordInfoTitle') + '</div>' +
-      '<div onclick="closeRECORDInfo()" style="width:30px;height:30px;background:rgba(255,255,255,0.08);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.4);font-size:13px;">✕</div>' +
-    '</div>' +
-    '<div style="font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:20px;">' + t('recordInfoSub') + '</div>' +
-
-    _infoCard('#FF6644','🔴', t('recordWhat'), t('recordWhatSub'),
-      t('recordWhatDesc') +
-      '<div style="margin-top:6px;padding:8px;background:rgba(0,0,0,0.3);border-radius:8px;font-family:Orbitron,sans-serif;font-size:10px;color:#FF6644;">' +
-      Math.floor(record).toLocaleString() + ' RECORD</div>') +
-
-    _infoCard('#FF9933','👆', t('recordTapping'), t('recordTappingSub'),
-      t('recordTappingDesc') +
-      '<div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:6px;">' +
-        '<div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:8px;text-align:center;"><div style="font-size:10px;color:rgba(255,255,255,0.3);">' + t('recordTapPower') + '</div><div style="font-size:12px;color:#FF9933;font-weight:700;">' + t('recordMorePerTap') + '</div></div>' +
-        '<div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:8px;text-align:center;"><div style="font-size:10px;color:rgba(255,255,255,0.3);">' + t('recordEnergyUp') + '</div><div style="font-size:12px;color:#FF9933;font-weight:700;">' + t('recordMoreTaps') + '</div></div>' +
-      '</div>') +
-
-    _infoCard('#FFD700','⚙️', t('recordAutoMining'), t('recordAutoSub'),
-      t('recordAutoDesc') +
-      '<div style="margin-top:6px;padding:8px;background:rgba(0,0,0,0.3);border-radius:8px;font-family:Orbitron,sans-serif;font-size:10px;color:#FFD700;">' +
-      t('recordYourSpeed') + ' ' + recordPerSec.toFixed(8) + ' REC/s</div>') +
-
-    _infoCard('#AA66FF','📦', t('recordMystery'), t('recordMysterySub'), t('recordMysteryDesc')) +
-    _infoCard('#00CC66','⚡', t('recordEnergyRefill'), t('recordEnergyRefillSub'), t('recordEnergyRefillDesc')) +
-
-    '<div style="background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);border-radius:14px;padding:14px;">' +
-      '<div style="font-size:12px;font-weight:700;color:#FFD700;margin-bottom:8px;">' + t('recordHowSpend') + '</div>' +
-      '<div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.7;">' +
-        t('recordSpend1') + '<br>' + t('recordSpend2') + '<br>' + t('recordSpend3') + '<br>' + t('recordSpend4') +
-      '</div>' +
-    '</div>';
-
-  ol.style.display = 'block';
-  pp.style.display = 'block';
-}
-
-function closeRECORDInfo() {
-  var ol = document.getElementById('recordInfoOverlay');
-  var pp = document.getElementById('recordInfoPopup');
-  if(ol) ol.style.display = 'none';
-  if(pp) pp.style.display = 'none';
-}
-
-// Helper: build info card
-function _infoCard(color, icon, title, sub, body) {
-  return '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px;margin-bottom:10px;">' +
-    '<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">' +
-      '<div style="font-size:26px;">' + icon + '</div>' +
-      '<div><div style="font-size:14px;font-weight:700;color:' + color + ';">' + title + '</div>' +
-      (sub ? '<div style="font-size:10px;color:rgba(255,255,255,0.4);">' + sub + '</div>' : '') +
-      '</div></div>' +
-    '<div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.6;">' + body + '</div>' +
-  '</div>';
-}
-// ====== END INFO POPUPS ======
-
-// ====== DAILY COMBO ======
-var comboData = null;
-var ADMIN_TG_ID = 6995765586;
-var adminComboSelection = [null, null, null];
-
-function openCombo() {
-  document.getElementById('comboOverlay').style.display = 'block';
-  document.getElementById('comboPopup').style.display = 'block';
-  loadComboData();
-  if(tgUser && tgUser.id === ADMIN_TG_ID) {
-    document.getElementById('comboAdminPanel').style.display = 'block';
-    buildAdminComboSlots();
-  }
-}
-
-function closeCombo() {
-  document.getElementById('comboOverlay').style.display = 'none';
-  document.getElementById('comboPopup').style.display = 'none';
-}
-
-function loadComboData() {
-  if(!tgUser) return;
-  var slots = document.getElementById('comboCardSlots');
-  if(slots) slots.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,0.3);padding:20px;">⏳ Loading...</div>';
-
-  fetch('/api/combo/today/' + tgUser.id)
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-      comboData = d;
-      renderComboSlots(d);
-    })
-    .catch(function(){
-      var slots = document.getElementById('comboCardSlots');
-      if(slots) slots.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,0.3);padding:20px;">ما في كومبو اليوم بعد</div>';
-    });
-}
-
-function renderComboSlots(d) {
-  var slots = document.getElementById('comboCardSlots');
-  if(!slots) return;
-
-  var isAdmin = tgUser && String(tgUser.id) === '6995765586';
-  var now = Date.now();
-  var expired = d && d.expiresAt && now > d.expiresAt;
-
-  // Admin: show timer always
-  var timerEl = document.getElementById('comboTimerRow');
-  if(timerEl) {
-    if(d && d.expiresAt) {
-      timerEl.style.display = 'block';
-      window._comboExpiresAt = d.expiresAt;
-      window._comboIsAdmin = isAdmin;
-    } else {
-      timerEl.style.display = 'none';
-    }
-  }
-
-  if(!d || !d.exists || expired) {
-    if(isAdmin && expired) {
-      slots.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;"><div style="font-size:32px;margin-bottom:8px;">⏰</div><div style="color:#FFD700;font-size:13px;font-weight:700;">' + t('comboExpiredAdmin') + '</div></div>';
-    } else {
-      slots.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;"><div style="font-size:32px;margin-bottom:8px;">🔒</div></div>';
-    }
-    var claimArea = document.getElementById('comboClaimArea');
-    var claimed = document.getElementById('comboClaimed');
-    if(claimArea) claimArea.style.display = 'none';
-    if(claimed) claimed.style.display = 'none';
-    return;
-  }
-
-  slots.innerHTML = d.cards.map(function(c, i) {
-    var cardInfo = getCardInfo(c.categoryIndex, c.cardIndex);
-    var done = c.done;
-    return '<div style="background:' + (done ? 'rgba(0,255,136,0.1)' : 'rgba(255,255,255,0.04)') + ';border:1px solid ' + (done ? 'rgba(0,255,136,0.4)' : 'rgba(255,255,255,0.08)') + ';border-radius:14px;padding:14px 8px;text-align:center;">' +
-      '<div style="font-size:28px;margin-bottom:6px;">' + (done ? (cardInfo ? cardInfo.e : '✅') : '?') + '</div>' +
-      '<div style="font-size:10px;color:' + (done ? '#00FF88' : 'rgba(255,255,255,0.3)') + ';font-weight:700;">' + (done ? (cardInfo ? cardInfo.name : 'Done') : '???') + '</div>' +
-      '<div style="font-size:18px;margin-top:6px;">' + (done ? '✅' : '🔒') + '</div>' +
-      '</div>';
-  }).join('');
-
-  var claimArea = document.getElementById('comboClaimArea');
-  var claimed = document.getElementById('comboClaimed');
-  if(claimArea) claimArea.style.display = (d.allDone && !d.rewardClaimed) ? 'block' : 'none';
-  if(claimed) claimed.style.display = d.rewardClaimed ? 'block' : 'none';
-
-  var badge = document.getElementById('comboDotBadge');
-  if(badge) badge.style.display = (d.exists && !d.allDone && !expired) ? 'block' : 'none';
-}
-
-function getCardInfo(catIdx, cardIdx) {
-  try {
-    var cats = typeof categories !== 'undefined' ? categories : [];
-    if(cats[catIdx] && cats[catIdx].cards[cardIdx]) {
-      var card = cats[catIdx].cards[cardIdx];
-      return { e: card.e || '🃏', name: card.en || card.n || 'Card' };
-    }
-  } catch(e) {}
-  return null;
-}
-
-function claimCombo() {
-  if(!tgUser || !comboData) return;
-  // Reward is given server-side automatically when all cards done
-  document.getElementById('comboClaimArea').style.display = 'none';
-  document.getElementById('comboClaimed').style.display = 'block';
-  showToast('🎉 حصلت على +5 REC!');
-  rec += 5;
-  if(typeof addXP==='function') addXP(100);
-  saveData(true); updateUI();
-}
-
-// Called when a card is upgraded — checks against combo
-function checkComboOnUpgrade(cardKey) {
-  if(!tgUser || !comboData || !comboData.exists) return;
-  fetch('/api/combo/check', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ telegramId: tgUser.id, cardKey: cardKey })
-  }).then(function(r){ return r.json(); })
-  .then(function(d){
-    if(d.matched) {
-      showToast('🎯 بطاقة كومبو! ' + d.done + '/3');
-      if(d.allDone && d.reward > 0) {
-        rec += d.reward;
-        saveData(true); updateUI();
-        showToast('🎉 أكملت الكومبو! +' + d.reward + ' REC');
-      }
-      loadComboData(); // refresh combo display
-    }
-  }).catch(function(){});
-}
-
-// ====== ADMIN COMBO SETTER ======
-function buildAdminComboSlots() {
-  var panel = document.getElementById('comboAdminSlots');
-  if(!panel) return;
-  var cats = typeof categories !== 'undefined' ? categories : [];
-  var allCards = [];
-  cats.forEach(function(cat, ci) {
-    cat.cards.forEach(function(card, idx) {
-      allCards.push({ key: ci+'_'+idx, label: (card.e||'🃏') + ' ' + (card.en||card.n||'Card'), ci: ci, idx: idx });
-    });
-  });
-
-  panel.innerHTML = [0,1,2].map(function(slot) {
-    return '<select id="adminComboSlot_'+slot+'" style="width:100%;background:rgba(0,0,0,0.5);border:1px solid rgba(255,100,50,0.3);color:white;padding:8px;border-radius:8px;font-size:11px;">' +
-      '<option value="">-- بطاقة '+(slot+1)+' --</option>' +
-      allCards.map(function(c) {
-        return '<option value="'+c.key+'|'+c.ci+'|'+c.idx+'">'+c.label+'</option>';
-      }).join('') +
-      '</select>';
-  }).join('');
-}
-
-function saveAdminCombo() {
-  if(!tgUser) { showToast('❌ No tgUser'); return; }
-  if(String(tgUser.id) !== String(ADMIN_TG_ID)) { showToast('❌ Not admin: '+tgUser.id); return; }
-  var cards = [];
-  for(var i=0;i<3;i++) {
-    var sel = document.getElementById('adminComboSlot_'+i);
-    if(!sel) { showToast('❌ Select '+i+' not found'); return; }
-    if(!sel.value) { showToast('❌ اختر بطاقة '+(i+1)); return; }
-    var parts = sel.value.split('|');
-    if(parts.length < 3) { showToast('❌ قيمة خاطئة: '+sel.value); return; }
-    cards.push({ key: parts[0], categoryIndex: parseInt(parts[1]), cardIndex: parseInt(parts[2]) });
-  }
-  if(cards[0].key===cards[1].key || cards[1].key===cards[2].key || cards[0].key===cards[2].key) {
-    showToast('❌ لا تكرر نفس البطاقة'); return;
-  }
-  showToast('⏳ جاري الحفظ...');
-  fetch('/api/combo/set', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ adminId: parseInt(tgUser.id), cards })
-  }).then(function(r){ return r.json(); })
-  .then(function(d){
-    if(d.success) { showToast('✅ تم حفظ الكومبو! ' + d.date); loadComboData(); }
-    else showToast('❌ ' + JSON.stringify(d));
-  }).catch(function(e){ showToast('❌ Fetch error: '+e.message); });
-}
-// ====== END DAILY COMBO ======
-
-// ====== WALLET PAGE ======
-function updateWalletPage() {
-  var name = tgUser ? (tgUser.first_name || 'Miner') : 'Miner';
-  var id   = tgUser ? tgUser.id : '—';
-  var el;
-
-  el = document.getElementById('walletName'); if(el) el.textContent = name;
-  el = document.getElementById('walletId');   if(el) el.textContent = id;
-  el = document.getElementById('walletAvatar'); if(el) el.textContent = name[0].toUpperCase();
-  el = document.getElementById('walletAssets'); if(el) el.textContent = rec.toFixed(6) + ' REC';
-  el = document.getElementById('walletPool');   if(el) el.textContent = rec.toFixed(6) + ' REC';
-  el = document.getElementById('profileId');    if(el) el.textContent = id;
-  el = document.getElementById('recPoolBalance'); if(el) el.textContent = rec.toFixed(6);
-}
-
-function openWithdrawHistory() {
-  if(!tgUser) return;
-  var overlay = document.getElementById('historyOverlay');
-  if(overlay) { overlay.classList.add('open'); loadWithdrawHistory(); return; }
-
-  // Create overlay
-  var ol = document.createElement('div');
-  ol.id = 'historyOverlay';
-  ol.className = 'overlay-page open';
-  ol.innerHTML =
-    '<button class="back-btn" onclick="document.getElementById(\'historyOverlay\').classList.remove(\'open\')">← Back</button>' +
-    '<h2 style="margin-bottom:16px;color:#FF6644;font-family:Orbitron,sans-serif;font-size:18px;">📄 History</h2>' +
-    '<div id="historyContent" style="color:rgba(255,255,255,0.4);text-align:center;padding:30px;">⏳ Loading...</div>';
-  document.body.appendChild(ol);
-  loadWithdrawHistory();
-}
-
-function loadWithdrawHistory() {
-  if(!tgUser) return;
-  var el = document.getElementById('historyContent');
-  if(!el) return;
-  fetch('/api/withdrawals/'+tgUser.id)
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-      if(!d.withdrawals || d.withdrawals.length === 0) {
-        el.innerHTML = '<div style="text-align:center;padding:40px 20px;"><div style="font-size:40px;margin-bottom:12px;">📭</div><div style="color:rgba(255,255,255,0.3);font-size:14px;">No withdrawals yet</div></div>';
-        return;
-      }
-      el.innerHTML = d.withdrawals.map(function(w){
-        var date = new Date(w.createdAt).toLocaleDateString();
-        var statusColor = w.status==='sent' ? '#00FF88' : w.status==='pending' ? '#FFD700' : '#FF4444';
-        return '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:14px;margin-bottom:8px;">'+
-          '<div style="display:flex;justify-content:space-between;align-items:center;">'+
-          '<div><div style="font-size:15px;font-weight:700;color:#00FF88;">'+w.netAmount+' REC</div>'+
-          '<div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:2px;">'+date+'</div></div>'+
-          '<div style="font-size:11px;font-weight:700;color:'+statusColor+';text-transform:uppercase;">'+w.status+'</div>'+
-          '</div></div>';
-      }).join('');
-    })
-    .catch(function(){
-      el.innerHTML = '<div style="text-align:center;color:rgba(255,255,255,0.3);padding:20px;">Could not load history</div>';
-    });
-}
-// ====== END WALLET PAGE ======
-
-// ====== PROFILE POPUP ======
-function openProfilePopup() {
-  var popup = document.getElementById('profilePopup');
-  var overlay = document.getElementById('profilePopupOverlay');
-  if(!popup) return;
-
-  var name = tgUser ? (tgUser.first_name || 'Miner') : 'Miner';
-  var username = tgUser ? (tgUser.username ? '@'+tgUser.username : 'ID: '+tgUser.id) : '';
-  document.getElementById('ppName').textContent = name;
-  document.getElementById('ppUsername').textContent = username;
-
-  var avatarEl = document.getElementById('ppAvatar');
-  avatarEl.textContent = name[0].toUpperCase();
-
-  // Count cards
-  var totalCards = 0, upgradedCards = 0, totalCardLevels = 0;
-  var categories_list = typeof categories !== 'undefined' ? categories : [];
-  categories_list.forEach(function(cat){ totalCards += cat.cards.length; });
-  Object.keys(cardLevels).forEach(function(k){
-    var lvl = cardLevels[k] || 0;
-    if(lvl > 0) upgradedCards++;
-    totalCardLevels += lvl;
-  });
-
-  var tasksDone = completedTasks.length;
-  var speed = recPerSec > 0 ? recPerSec.toFixed(8) : '0.00000000';
-
-  var stats = [
-    { icon:'⛏️', label:t('ppCardsUpgraded'), val: upgradedCards+' / '+totalCards, color:'#AA66FF' },
-    { icon:'⚡', label:t('ppRecSpeed'), val: speed+'/s', color:'#00FF88' },
-    { icon:'🔴', label:t('ppRecord'), val: Math.floor(record).toLocaleString(), color:'#FF6644' },
-    { icon:'💚', label:t('ppRecBalance'), val: rec.toFixed(4), color:'#00FF88' },
-    { icon:'👆', label:t('ppTotalTaps'), val: (totalTaps||0).toLocaleString(), color:'#FFD700' },
-    { icon:'✅', label:t('ppTasksDone'), val: tasksDone, color:'#44FFAA' },
-    { icon:'👥', label:t('friendsLabel'), val: refCount, color:'#44CCFF' },
-    { icon:'📈', label:t('ppCardLevels'), val: totalCardLevels, color:'#FF8844' },
-    { icon:'⭐', label:'XP', val: (function(){
-      if(typeof playerXP==='undefined'||typeof calcPlayerLevel==='undefined') return '0';
-      var lvl = calcPlayerLevel(playerXP);
-      var startXP = typeof cumXPForLevel==='function' ? cumXPForLevel(lvl) : 0;
-      var needed  = typeof xpNeededForLevel==='function' ? xpNeededForLevel(lvl+1) : 0;
-      var done    = Math.max(0, playerXP - startXP);
-      return Math.min(done,needed).toLocaleString()+' / '+needed.toLocaleString();
-    })(), color:'#FFD700' },
-  ];
-
-  var grid = document.getElementById('ppStatsGrid');
-  if(grid) grid.innerHTML = stats.map(function(s){
-    return '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:12px 10px;text-align:center;">'+
-      '<div style="font-size:22px;margin-bottom:4px;">'+s.icon+'</div>'+
-      '<div style="font-size:12px;font-weight:700;color:'+s.color+';font-family:Orbitron,sans-serif;line-height:1.2;word-break:break-all;">'+s.val+'</div>'+
-      '<div style="font-size:9px;color:rgba(255,255,255,0.3);margin-top:4px;letter-spacing:1px;">'+s.label+'</div>'+
-      '</div>';
-  }).join('');
-
-  // Top cards
-  var cardsList = [];
-  categories_list.forEach(function(cat, ci){
-    cat.cards.forEach(function(card, idx){
-      var key = ci+'_'+idx;
-      var lvl = cardLevels[key] || 0;
-      if(lvl > 0) cardsList.push({ e:card.e||'🃏', n:card.en||card.n||'Card', lvl:lvl });
-    });
-  });
-  cardsList.sort(function(a,b){ return b.lvl-a.lvl; });
-
-  var cardsGrid = document.getElementById('ppCardsGrid');
-  if(cardsGrid) {
-    // Level section only - no cards grid
-    var lvlHtml = (typeof buildLevelSection==='function') ? buildLevelSection() : '';
-    cardsGrid.innerHTML = lvlHtml;
-    var lvlGrid = document.getElementById('ppLevelsGrid');
-    if(lvlGrid && typeof renderLevelsList==='function') renderLevelsList(lvlGrid);
-  }
-
-  overlay.style.display = 'block';
-  popup.style.display = 'block';
-  popup.style.animation = 'slideUp 0.3s ease';
-}
-
-function closeProfilePopup() {
-  var p = document.getElementById('profilePopup');
-  var o = document.getElementById('profilePopupOverlay');
-  if(p) p.style.display = 'none';
-  if(o) o.style.display = 'none';
-}
-// ====== END PROFILE POPUP ======
-
-// ====== INVITE PAGE FUNCTIONS ======
-var refData = { l1:[], l2:[], l3:[] };
-var currentRefLevel = 1;
-
-function switchInviteTab(tab, btn) {
-  document.getElementById('inviteTabContent_invite').style.display = tab==='invite' ? 'block' : 'none';
-  document.getElementById('inviteTabContent_referrals').style.display = tab==='referrals' ? 'block' : 'none';
-  ['invite','referrals'].forEach(function(t){
-    var b = document.getElementById('inviteTab_'+t);
-    if(b) {
-      if(t===tab) {
-        b.style.background='rgba(255,100,50,0.15)';
-        b.style.borderColor='rgba(255,100,50,0.5)';
-        b.style.color='#FF6644';
-      } else {
-        b.style.background='rgba(255,255,255,0.04)';
-        b.style.borderColor='rgba(255,255,255,0.08)';
-        b.style.color='rgba(255,255,255,0.4)';
-      }
-    }
-  });
-  if(tab==='referrals') loadRefList();
-}
-
-function switchRefLevel(lvl) {
-  currentRefLevel = lvl;
-  [1,2,3].forEach(function(l){
-    var b = document.getElementById('refLvlBtn_'+l);
-    if(!b) return;
-    if(l===lvl) {
-      b.style.background='rgba(255,100,50,0.15)';
-      b.style.borderColor='rgba(255,100,50,0.5)';
-      b.style.color='#FF6644';
-    } else {
-      b.style.background='rgba(255,255,255,0.04)';
-      b.style.borderColor='rgba(255,255,255,0.08)';
-      b.style.color='rgba(255,255,255,0.3)';
-    }
-  });
-  renderRefList();
-}
-
-function loadRefList() {
-  if(!tgUser) return;
-  var el = document.getElementById('refListContent');
-  if(el) el.innerHTML = '<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.2);font-size:13px;">⏳ Loading...</div>';
-  fetch('/api/referrals/'+tgUser.id)
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-      refData = d;
-      renderRefList();
-    })
-    .catch(function(){
-      var el = document.getElementById('refListContent');
-      if(el) el.innerHTML = '<div style="text-align:center;padding:20px;color:rgba(255,255,255,0.2);">Could not load</div>';
-    });
-}
-
-function renderRefList() {
-  var el = document.getElementById('refListContent');
-  if(!el) return;
-  var list = currentRefLevel===1 ? refData.l1 : currentRefLevel===2 ? refData.l2 : refData.l3;
-  if(!list || list.length === 0) {
-    el.innerHTML = '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:24px;text-align:center;"><div style="font-size:32px;margin-bottom:8px;">👥</div><div style="font-size:13px;color:rgba(255,255,255,0.25);">No referrals yet</div></div>';
-    return;
-  }
-  el.innerHTML = list.map(function(u){
-    var name = u.username ? '@'+u.username : (u.firstName||'User');
-    var speed = (u.miningSpeed||0).toFixed(6);
-    var earned = (u.rec||0).toFixed(3);
-    return '<div style="display:grid;grid-template-columns:1fr 80px 80px;gap:4px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:10px 12px;margin-bottom:6px;align-items:center;">'+
-      '<div style="font-size:13px;color:white;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+name+'</div>'+
-      '<div style="font-size:10px;color:rgba(0,255,136,0.7);text-align:center;">'+speed+'</div>'+
-      '<div style="font-size:11px;color:#00FF88;text-align:right;font-weight:700;">'+earned+'</div>'+
-      '</div>';
-  }).join('');
-}
-
-// Update invite link display when page loads
-function updateInviteLinkDisplay() {
-  var el = document.getElementById('inviteLinkDisplay');
-  if(!el || !tgUser) return;
-  var botUsername = 'RecMiningGame_bot';
-  el.textContent = 'https://t.me/'+botUsername+'?start='+tgUser.id;
-}
-
-// ====== END INVITE PAGE ======
-
-// ====== CARDS ======
-
-function loadAndInit() {
-  // If local data exists, use it first (prevents overwrite after upgrade)
-  var hasLocalData = false;
-  try {
-    var lsRaw = localStorage.getItem(saveKey);
-    if(lsRaw) {
-      var lsParsed = JSON.parse(lsRaw);
-      if(lsParsed && lsParsed.record >= 0) hasLocalData = true;
-    }
-  } catch(e) {}
-
-  if(hasLocalData) {
-    // Local data exists - use it immediately
-    initApp();
-    // Always sync VIP from server (critical for membership status)
-    loadFromServer(function(serverData) {
-      if(!serverData) return;
-      // Sync VIP tier/expiry only — keep local daily state (boxes, boost, refill)
-      if(serverData.vip && parseInt(serverData.vip.tier||0) > 0) {
-        vipData.tier = serverData.vip.tier;
-        vipData.expiry = serverData.vip.expiry;
-        // Merge boxes only if local doesn't have today's entry
-        if(serverData.vip.boxes) {
-          var _today = getTodayStr();
-          Object.keys(serverData.vip.boxes).forEach(function(k){
-            if(!vipData.boxes[k] || vipData.boxes[k] !== _today) {
-              vipData.boxes[k] = serverData.vip.boxes[k];
-            }
-          });
-        }
-      }
-      // Sync record if server has significantly more
-      if(serverData.record > record * 1.5) {
-        applyData(serverData);
-        updateUI();
-      }
-      // Sync XP from server (higher value wins)
-      if(serverData.playerXP && serverData.playerXP > (typeof playerXP!=='undefined'?playerXP:0)) {
-        if(typeof playerXP!=='undefined') playerXP = serverData.playerXP;
-        if(typeof xpRetroCalculated!=='undefined') xpRetroCalculated = true;
-        if(typeof claimedLevels!=='undefined' && serverData.claimedLevels) {
-          Object.assign(claimedLevels, serverData.claimedLevels);
-        }
-        if(typeof updateLevelDisplay==='function') updateLevelDisplay();
-      }
-    });
-    return;
-  }
-
-  // No local data - load from server
-  loadFromServer(function(serverData) {
-    if(serverData && (serverData.record > 0 || serverData.rec > 0 ||
-       Object.keys(serverData.cardLevels||{}).length > 0)) {
-      applyData(serverData);
-      if(serverData.language && T[serverData.language]) currentLang = serverData.language;
-      initApp();
-      return;
-    }
-    // Fallback: CloudStorage
-    if(CS) {
-      try {
-        CS.getItems(['gameData','userLang'], function(err, vals) {
-          try {
-            if(!err && vals && vals.gameData) {
-              var cd = JSON.parse(vals.gameData);
-              if(cd && (cd.record > 0 || cd.rec > 0)) applyData(cd);
-            }
-            if(!err && vals && vals.userLang && T[vals.userLang]) currentLang = vals.userLang;
-          } catch(e) {}
-          initApp();
-        });
-      } catch(e) { initApp(); }
-    } else { initApp(); }
-  });
-}
-
-document.addEventListener('DOMContentLoaded', loadAndInit);
+</script>
+</head>
+<body>
+
+<!-- Lang Dropdown -->
+<div id="langOverlay" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,0.75);" onclick="closeLangMenu()"></div>
+<div id="langDropdown" style="display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:9999;width:88%;max-width:340px;background:linear-gradient(180deg,#0e0a22,#080518);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:20px 16px 24px;box-shadow:0 20px 60px rgba(0,0,0,0.7);">
+
+  <!-- Header -->
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+    <div style="font-size:17px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;">Choose language</div>
+    <div onclick="closeLangMenu()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:rgba(255,255,255,0.5);">✕</div>
+  </div>
+
+  <!-- Language buttons -->
+  <div style="display:flex;flex-direction:column;gap:8px;">
+
+    <button onclick="applyLang('en')" style="display:flex;align-items:center;gap:14px;width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:13px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent;font-family:Rajdhani,sans-serif;">
+      <span style="font-size:28px;line-height:1;flex-shrink:0;">🇬🇧</span>
+      <span style="font-size:16px;font-weight:700;color:white;">English</span>
+    </button>
+
+    <button onclick="applyLang('ar')" style="display:flex;align-items:center;gap:14px;width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:13px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent;font-family:Rajdhani,sans-serif;">
+      <span style="font-size:28px;line-height:1;flex-shrink:0;">🇸🇦</span>
+      <span style="font-size:16px;font-weight:700;color:white;">العربية</span>
+    </button>
+
+    <button onclick="applyLang('ru')" style="display:flex;align-items:center;gap:14px;width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:13px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent;font-family:Rajdhani,sans-serif;">
+      <span style="font-size:28px;line-height:1;flex-shrink:0;">🇷🇺</span>
+      <span style="font-size:16px;font-weight:700;color:white;">Русский</span>
+    </button>
+
+    <button onclick="applyLang('uk')" style="display:flex;align-items:center;gap:14px;width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:13px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent;font-family:Rajdhani,sans-serif;">
+      <span style="font-size:28px;line-height:1;flex-shrink:0;">🇺🇦</span>
+      <span style="font-size:16px;font-weight:700;color:white;">Українська</span>
+    </button>
+
+    <button onclick="applyLang('pt')" style="display:flex;align-items:center;gap:14px;width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:13px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent;font-family:Rajdhani,sans-serif;">
+      <span style="font-size:28px;line-height:1;flex-shrink:0;">🇧🇷</span>
+      <span style="font-size:16px;font-weight:700;color:white;">Português (Brasil)</span>
+    </button>
+
+    <button onclick="applyLang('es')" style="display:flex;align-items:center;gap:14px;width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:13px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent;font-family:Rajdhani,sans-serif;">
+      <span style="font-size:28px;line-height:1;flex-shrink:0;">🇪🇸</span>
+      <span style="font-size:16px;font-weight:700;color:white;">Español</span>
+    </button>
+
+    <button onclick="applyLang('tr')" style="display:flex;align-items:center;gap:14px;width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:13px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent;font-family:Rajdhani,sans-serif;">
+      <span style="font-size:28px;line-height:1;flex-shrink:0;">🇹🇷</span>
+      <span style="font-size:16px;font-weight:700;color:white;">Türkçe</span>
+    </button>
+
+    <button onclick="applyLang('vi')" style="display:flex;align-items:center;gap:14px;width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:13px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent;font-family:Rajdhani,sans-serif;">
+      <span style="font-size:28px;line-height:1;flex-shrink:0;">🇻🇳</span>
+      <span style="font-size:16px;font-weight:700;color:white;">Tiếng Việt</span>
+    </button>
+
+    <button onclick="applyLang('zh')" style="display:flex;align-items:center;gap:14px;width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:13px 16px;cursor:pointer;-webkit-tap-highlight-color:transparent;font-family:Rajdhani,sans-serif;">
+      <span style="font-size:28px;line-height:1;flex-shrink:0;">🇨🇳</span>
+      <span style="font-size:16px;font-weight:700;color:white;">中文</span>
+    </button>
+
+  </div>
+</div>
+
+<div class="app-wrapper" id="appWrapper">
+
+  <!-- ===== TOP BAR ===== -->
+  <div class="top-bar">
+    <div class="top-bar-profile" onclick="openProfilePopup()" style="cursor:pointer;-webkit-tap-highlight-color:transparent;">
+      <div class="top-bar-avatar" id="topBarAvatar">M</div>
+      <div style="flex:1;min-width:0;max-width:130px;">
+        <div class="top-bar-name" id="topBarName">REC Mining</div>
+        <div style="display:flex;align-items:center;gap:3px;margin-bottom:2px;">
+          <div class="top-bar-level">LVL <span id="playerLevelNum">0</span></div>
+          <span id="xpHeart1" style="font-size:8px;opacity:0.7;line-height:1;">💚</span>
+          <span id="xpHeart2" style="font-size:8px;opacity:0.7;line-height:1;">💚</span>
+        </div>
+        <div style="width:80px;background:rgba(255,255,255,0.1);border-radius:4px;height:4px;overflow:hidden;">
+          <div id="xpProgressBar" style="width:0%;height:100%;background:linear-gradient(90deg,#00CC44,#00FF88);border-radius:4px;transition:width 0.8s cubic-bezier(0.4,0,0.2,1);"></div>
+        </div>
+      </div>
+    </div>
+    <div class="top-bar-title">
+      <div class="top-bar-title-rec">REC</div>
+      <div class="top-bar-title-mining">MINING</div>
+    </div>
+    <div class="top-bar-actions">
+      <div class="top-bar-btn" onclick="toggleLangMenu()">🌍</div>
+      <div class="top-bar-btn" onclick="openSideMenu()">☰</div>
+    </div>
+  </div>
+
+  <!-- Balance spans hidden - values updated by JS -->
+  <span id="recMini" style="display:none">0.000000</span>
+  <span id="recordCount" style="display:none">0</span>
+
+
+
+
+
+  <!-- ===== PAGES ===== -->
+  <div class="pages-container">
+
+    <!-- HOME -->
+    <div id="home" class="page active">
+      <!-- REC counter - no box -->
+      <div style="text-align:center;padding:8px 0 0 0;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:1px;margin-bottom:2px;">REC</div>
+        <div style="font-size:26px;font-weight:900;color:#00FF88;font-family:Orbitron,monospace;letter-spacing:1px;"><span id="recHomeBig">0.000000</span></div>
+      </div>
+      <div class="home-inner">
+
+        <!-- MAIN AREA: side btns + circle -->
+        <div class="home-main-area">
+
+          <!-- LEFT SIDE BUTTONS -->
+          <div class="side-col">
+            <div class="side-action-btn" onclick="openDailyLogin()" style="border-color:rgba(0,200,100,0.25);">
+              <span class="sa-icon">📅</span>
+              <span class="sa-label" style="color:#00CC66;" data-i18n="sideDaily">Daily</span>
+            </div>
+            <div class="side-action-btn" onclick="showPage('rank', document.getElementById('navRankBtn'))" style="border-color:rgba(255,215,0,0.25);">
+              <span class="sa-icon">🏆</span>
+              <span class="sa-label" style="color:#FFD700;" data-i18n="sideRank">Rank</span>
+            </div>
+          </div>
+
+          <!-- CENTER -->
+          <div class="home-center-col">
+            <button class="camera-btn" onclick="tap()">
+              <img src="logo.jpeg" alt="REC" style="width:100%;height:100%;object-fit:cover;border-radius:50%;pointer-events:none;">
+            </button>
+            <div class="tap-label" data-i18n="tapMine">TAP TO MINE</div>
+          </div>
+
+          <!-- RIGHT SIDE BUTTONS -->
+          <div class="side-col">
+            <div class="side-action-btn" onclick="openCombo()" style="border-color:rgba(255,200,0,0.4);position:relative;" id="comboBtnWrap">
+              <span class="sa-icon">🎯</span>
+              <span class="sa-label" style="color:#FFD700;" data-i18n="sideCombo">Combo</span>
+              <div id="comboDotBadge" style="display:none;position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:#FF4444;"></div>
+            </div>
+            <div class="side-action-btn" onclick="openUpgrade()" style="border-color:rgba(255,100,50,0.25);">
+              <span class="sa-icon">⬆️</span>
+              <span class="sa-label" style="color:#FF8844;" data-i18n="sideUpgrade">Upgrade</span>
+            </div>
+            <div class="side-action-btn" onclick="openStarsShop()" style="border-color:rgba(255,220,0,0.25);">
+              <span class="sa-icon">⭐</span>
+              <span class="sa-label" style="color:#FFD700;" data-i18n="sideShop">Shop</span>
+            </div>
+            <div class="side-action-btn" onclick="openVIP()" style="border-color:rgba(255,50,50,0.45);background:rgba(120,0,0,0.2);">
+              <span class="sa-icon" style="font-size:13px;font-weight:900;font-family:Impact,sans-serif;color:#FFD700;text-shadow:0 0 8px rgba(255,215,0,0.7);letter-spacing:1px;">VIP</span>
+              <span class="sa-label" style="color:#FF6644;">👑</span>
+            </div>
+          </div>
+
+        </div><!-- end home-main-area -->
+
+        <!-- BOTTOM SECTION -->
+        <div class="home-bottom">
+
+          <!-- Hidden spans for JS -->
+          <span id="recordCountHome" style="display:none">0</span>
+          <span id="recSpeedShow" style="display:none">0.00000000</span>
+
+          <!-- Energy bar -->
+          <div class="energy-wrap">
+            <div class="energy-header">
+              <span data-i18n="energyLabel" style="color:rgba(255,255,255,0.5);">⚡ Energy</span>
+              <span id="energyText" style="color:rgba(255,255,255,0.4);">1000 / 1000</span>
+            </div>
+            <div class="energy-bar-bg">
+              <div class="energy-bar-fill" id="energyBar" style="width:100%"></div>
+            </div>
+          </div>
+
+          <!-- Quick actions -->
+          <div class="quick-grid">
+            <div class="quick-btn" onclick="showPage('tasks', document.getElementById('navTasksBtn'))">
+              <span class="qb-icon">✅</span>
+              <span class="qb-label" style="color:rgba(255,255,255,0.7);" data-i18n="navTasks">Tasks</span>
+              <span class="qb-sub" style="color:#FF8800;" id="tasksBadge">Go</span>
+            </div>
+            <div class="quick-btn" style="opacity:0;pointer-events:none;"></div>
+            <div class="quick-btn" onclick="openExchange()">
+              <span class="qb-icon">🔄</span>
+              <span class="qb-label" style="color:rgba(255,255,255,0.7);" data-i18n="qbExchange">Exchange</span>
+              <span class="qb-sub" style="color:#00FF88;" data-i18n="qbSwap">SWAP</span>
+            </div>
+            <div class="quick-btn" style="opacity:0;pointer-events:none;"></div>
+          </div>
+
+          <!-- Hidden speed spans for app.js compatibility -->
+          <span id="recordSpeedShow" style="display:none;">0</span>
+
+        </div><!-- end home-bottom -->
+      </div><!-- end home-inner -->
+    </div><!-- end #home -->
+
+    <!-- CARDS PAGE -->
+    <div id="cards" class="page">
+      <div class="page-title" data-i18n="cardsTitle">🃏 Cards</div>
+      <!-- RECORD counter above tabs - no box -->
+      <div style="text-align:center;margin-bottom:12px;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:1px;margin-bottom:2px;">RECORD</div>
+        <div style="font-size:22px;font-weight:900;color:#FF6644;font-family:Orbitron,monospace;"><span id="recordCardsPage">0</span></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:15px;overflow-x:auto;padding-bottom:5px;">
+        <button class="cat-btn active" onclick="showCategory(0,this)" data-i18n="catAnime">🎌 Anime</button>
+        <button class="cat-btn" onclick="showCategory(1,this)" data-i18n="catCars">🚗 Cars</button>
+        <button class="cat-btn" onclick="showCategory(2,this)" data-i18n="catClubs">🌙 Clubs</button>
+        <button class="cat-btn" onclick="showCategory(3,this)" data-i18n="catPalaces">🏰 Palaces</button>
+        <button class="cat-btn" onclick="showCategory(4,this)" data-i18n="catLimited" style="border-color:rgba(255,215,0,0.4);color:#FFD700;background:rgba(255,180,0,0.08);">🔥 Limited</button>
+      </div>
+      <div class="card-grid" id="cat-0"></div>
+      <div class="card-grid" id="cat-1" style="display:none"></div>
+      <div class="card-grid" id="cat-2" style="display:none"></div>
+      <div class="card-grid" id="cat-3" style="display:none"></div>
+      <div class="card-grid" id="cat-4" style="display:none"></div>
+    </div>
+
+    <!-- TASKS PAGE -->
+    <div id="tasks" class="page">
+      <div class="page-title" data-i18n="tasksTitle">✅ Tasks</div>
+
+      <!-- Tabs -->
+      <div style="display:flex;gap:6px;margin-bottom:14px;">
+        <button class="lb-tab active" id="ttab_social" onclick="showTaskTab('social',this)">📢 Social</button>
+        <button class="lb-tab" id="ttab_daily" onclick="showTaskTab('daily',this)">⚡ Daily</button>
+        <button class="lb-tab" id="ttab_missions" onclick="showTaskTab('missions',this)">🎯 Missions</button>
+      </div>
+
+      <!-- SOCIAL TASKS -->
+      <div id="taskTab-social">
+        <div style="font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin-bottom:8px;"><span data-i18n="joinChannelsHeader"></span> — <span data-i18n="perEach"></span></div>
+        <div id="blocksChannelTask"></div>
+        <div id="chatGroupTask"></div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin:14px 0 8px;"><span data-i18n="followUsHeader"></span></div>
+        <div id="telegramFollowTask"></div>
+        <div id="twitterFollowTask"></div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin:14px 0 8px;"><span data-i18n="likeTweetsHeader"></span> — <span data-i18n="perEach"></span></div>
+        <div id="likeTasks"></div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin:14px 0 8px;">🔁 RETWEET — +5 REC EACH</div>
+        <div id="retweetTasks"></div>
+      </div>
+
+      <!-- DAILY TASKS -->
+      <div id="taskTab-daily" style="display:none;">
+        <div style="background:linear-gradient(135deg,#0d0010,#150020);border:1px solid rgba(180,0,255,0.35);border-radius:14px;padding:14px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="openMysteryBox()">
+          <div>
+            <div style="font-size:15px;color:#CC88FF;font-weight:bold;"><span data-i18n='mysteryTitle'></span></div>
+            <div style="color:#aaa;font-size:11px;margin-top:3px;"><span data-i18n="mysterySubtitle"></span></div>
+          </div>
+          <button style="background:linear-gradient(135deg,#4a0080,#8800FF);border:none;color:white;padding:9px 14px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:bold;" onclick="event.stopPropagation();openMysteryBox()">Open 🎲</button>
+        </div>
+        <div style="font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin-bottom:8px;"><span data-i18n="todayTasksHeader"></span> — <span data-i18n="todayTasksReset"></span></div>
+        <div id="dailyTasksCont"></div>
+      </div>
+
+      <!-- CARD MISSIONS -->
+      <div id="taskTab-missions" style="display:none;">
+        <div style="font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin-bottom:8px;"><span data-i18n="cardMissionsHeader"></span> — <span data-i18n="cardMissionsOnce"></span></div>
+        <div id="cardMissionsCont"></div>
+      </div>
+    </div>
+
+    <!-- INVITE PAGE -->
+    <div id="invite" class="page">
+      <div class="page-title" data-i18n="inviteTitle">👥 Friends</div>
+
+      <!-- Tabs -->
+      <div style="display:flex;gap:8px;margin-bottom:16px;">
+        <button id="inviteTab_invite" onclick="switchInviteTab('invite',this)"
+          style="flex:1;padding:10px;border-radius:12px;background:rgba(255,100,50,0.15);border:1px solid rgba(255,100,50,0.5);color:#FF6644;font-size:14px;font-weight:700;cursor:pointer;font-family:Rajdhani,sans-serif;">Invite</button>
+        <button id="inviteTab_referrals" onclick="switchInviteTab('referrals',this)"
+          style="flex:1;padding:10px;border-radius:12px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.4);font-size:14px;font-weight:700;cursor:pointer;font-family:Rajdhani,sans-serif;">Referrals</button>
+      </div>
+
+      <!-- INVITE TAB -->
+      <div id="inviteTabContent_invite">
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px;margin-bottom:12px;">
+          <div style="font-size:13px;font-weight:700;color:white;letter-spacing:1px;margin-bottom:4px;"><span data-i18n="partnerProgram"></span></div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:14px;"><span data-i18n="partnerDesc"></span></div>
+          <div style="display:flex;gap:8px;margin-bottom:10px;">
+            <div id="inviteLinkDisplay" style="flex:1;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px 12px;font-size:10px;color:rgba(255,255,255,0.4);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">Loading...</div>
+            <button onclick="copyInvite()" style="background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.15);color:white;padding:10px 14px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:700;font-family:Rajdhani,sans-serif;white-space:nowrap;">Copy</button>
+          </div>
+          <button onclick="shareInvite()" style="width:100%;background:linear-gradient(135deg,#CC0000,#FF4400);border:none;color:white;padding:12px;border-radius:12px;font-size:14px;font-weight:700;cursor:pointer;font-family:Rajdhani,sans-serif;letter-spacing:1px;">📤 Share</button>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px;margin-bottom:12px;">
+          <div style="font-size:13px;font-weight:700;color:white;letter-spacing:1px;margin-bottom:12px;">COMMISSION RATES</div>
+          <div style="display:grid;grid-template-columns:1fr 72px 72px 72px;gap:4px;margin-bottom:8px;">
+            <div style="font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:1px;">TYPE</div>
+            <div style="font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:1px;text-align:center;">LVL 1</div>
+            <div style="font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:1px;text-align:center;">LVL 2</div>
+            <div style="font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:1px;text-align:center;">LVL 3</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 72px 72px 72px;gap:4px;background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.15);border-radius:10px;padding:10px;margin-bottom:6px;">
+            <div style="font-size:12px;color:white;">⛏️ Mining</div>
+            <div style="font-size:13px;color:#00FF88;font-weight:700;text-align:center;">8%</div>
+            <div style="font-size:13px;color:#00FF88;font-weight:700;text-align:center;">2%</div>
+            <div style="font-size:13px;color:#00FF88;font-weight:700;text-align:center;">1%</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 72px 72px 72px;gap:4px;background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.15);border-radius:10px;padding:10px;">
+            <div style="font-size:12px;color:white;">🏆 Block</div>
+            <div style="font-size:13px;color:#FFD700;font-weight:700;text-align:center;">8%</div>
+            <div style="font-size:13px;color:#FFD700;font-weight:700;text-align:center;">2%</div>
+            <div style="font-size:13px;color:#FFD700;font-weight:700;text-align:center;">1%</div>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:14px;text-align:center;">
+            <div style="font-size:26px;color:#FF6644;font-family:Orbitron,sans-serif;font-weight:700;" id="refCountDisplay">0</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:4px;letter-spacing:1px;">FRIENDS</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:14px;text-align:center;">
+            <div style="font-size:18px;color:#00FF88;font-family:Orbitron,sans-serif;font-weight:700;" id="totalCommissionDisplay">0.00</div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:4px;letter-spacing:1px;">REC EARNED</div>
+          </div>
+        </div>
+
+        <div style="font-size:11px;color:rgba(255,255,255,0.3);letter-spacing:1px;margin-bottom:8px;">🎯 REWARD MILESTONES</div>
+        <div id="milestonesContainer"></div>
+      </div>
+
+      <!-- REFERRALS TAB -->
+      <div id="inviteTabContent_referrals" style="display:none;">
+        <div style="display:flex;gap:6px;margin-bottom:14px;">
+          <button id="refLvlBtn_1" onclick="switchRefLevel(1)" style="flex:1;padding:9px;border-radius:10px;background:rgba(255,100,50,0.15);border:1px solid rgba(255,100,50,0.5);color:#FF6644;font-size:12px;font-weight:700;cursor:pointer;font-family:Rajdhani,sans-serif;">Lvl 1</button>
+          <button id="refLvlBtn_2" onclick="switchRefLevel(2)" style="flex:1;padding:9px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.3);font-size:12px;font-weight:700;cursor:pointer;font-family:Rajdhani,sans-serif;">Lvl 2</button>
+          <button id="refLvlBtn_3" onclick="switchRefLevel(3)" style="flex:1;padding:9px;border-radius:10px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);color:rgba(255,255,255,0.3);font-size:12px;font-weight:700;cursor:pointer;font-family:Rajdhani,sans-serif;">Lvl 3</button>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 80px 80px;gap:4px;padding:0 4px;margin-bottom:8px;">
+          <div style="font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:1px;">USER</div>
+          <div style="font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:1px;text-align:center;">REC/s</div>
+          <div style="font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:1px;text-align:right;">REC</div>
+        </div>
+        <div id="refListContent">
+          <div style="text-align:center;padding:30px;color:rgba(255,255,255,0.2);font-size:13px;">⏳ Loading...</div>
+        </div>
+      </div>
+    </div>
+
+
+
+    <!-- RANK PAGE -->
+    <div id="rank" class="page">
+      <div class="page-title" data-i18n="rankTitle">🏆 LEADERBOARD</div>
+      <div id="lbContent">
+        <div style="text-align:center;padding:30px;color:#555;" data-i18n="loadingLeader">⏳ Loading...</div>
+      </div>
+    </div>
+
+    <!-- WALLET PAGE -->
+    <div id="wallet" class="page">
+
+      <!-- Top row: ID left, Connect Wallet right -->
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:10px;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#FF4444,#CC0000);border:2px solid rgba(255,68,68,0.4);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:bold;color:white;flex-shrink:0;" id="walletAvatar">M</div>
+          <div>
+            <div style="font-size:13px;font-weight:700;color:white;" id="walletName">REC Miner</div>
+            <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:1px;">ID: <span id="walletId">—</span></div>
+          </div>
+        </div>
+        <button onclick="connectWallet()" id="walletBtn"
+          style="background:linear-gradient(135deg,#1144AA,#4B9EFF);border:none;color:white;padding:8px 14px;border-radius:20px;cursor:pointer;font-size:12px;font-weight:700;font-family:Rajdhani,sans-serif;white-space:nowrap;flex-shrink:0;"
+          data-i18n="connectWallet">Connect Wallet</button>
+      </div>
+
+      <!-- Assets -->
+      <div style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px;margin-bottom:10px;">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,215,0,0.1);border:1px solid rgba(255,215,0,0.2);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">💰</div>
+        <div style="flex:1;">
+          <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;" data-i18n="walletAssets">Assets</div>
+          <div style="font-size:18px;color:#00FF88;font-weight:700;margin-top:2px;font-family:Orbitron,sans-serif;" id="walletAssets">0.000000 REC</div>
+        </div>
+      </div>
+
+      <!-- Pool Wallet -->
+      <div style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px;margin-bottom:18px;">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgba(75,158,255,0.1);border:1px solid rgba(75,158,255,0.2);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🏛️</div>
+        <div style="flex:1;">
+          <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;" data-i18n="poolWallet">Pool Wallet</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:1px;" data-i18n="withdrawable" data-i18n="withdrawable">Withdrawable balance</div>
+          <div style="font-size:18px;color:#4B9EFF;font-weight:700;margin-top:4px;font-family:Orbitron,sans-serif;" id="walletPool">0.000000 REC</div>
+        </div>
+      </div>
+
+      <!-- Controls header -->
+      <div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.5);letter-spacing:2px;text-align:center;margin-bottom:10px;" data-i18n="walletControls">CONTROLS</div>
+
+      <!-- Withdraw Pool — Locked -->
+      <div style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.05);border-radius:16px;padding:16px;margin-bottom:10px;opacity:0.5;">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">🏦</div>
+        <div style="flex:1;">
+          <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;" data-i18n="withdrawPool" data-i18n="withdrawPool">Withdraw Pool</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:1px;" data-i18n="transferPool" data-i18n="transferPool">Transfer Pool to Wallet</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:7px 14px;font-size:11px;color:rgba(255,255,255,0.3);font-weight:700;font-family:Rajdhani,sans-serif;letter-spacing:1px;flex-shrink:0;" data-i18n="walletSoon">🔒 SOON</div>
+      </div>
+
+      <!-- History — Open -->
+      <div style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px;margin-bottom:10px;cursor:pointer;" onclick="openWithdrawHistory()">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.15);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">📄</div>
+        <div style="flex:1;">
+          <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;" data-i18n="history">History</div>
+          <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:1px;" data-i18n="yourWithdrawals" data-i18n="yourWithdrawals">Your withdrawals</div>
+        </div>
+        <div style="background:linear-gradient(135deg,#006633,#00AA55);border:none;border-radius:10px;padding:7px 16px;font-size:12px;color:white;font-weight:700;font-family:Rajdhani,sans-serif;letter-spacing:1px;flex-shrink:0;" data-i18n="walletOpen">Open →</div>
+      </div>
+
+      <!-- Support -->
+      <div style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:14px;cursor:pointer;" onclick="openSupport()">
+        <div style="width:44px;height:44px;border-radius:12px;background:rgba(255,100,50,0.08);border:1px solid rgba(255,100,50,0.15);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;">💬</div>
+        <div>
+          <div style="font-size:14px;color:white;font-family:Rajdhani,sans-serif;" data-i18n="support">Support @Momokhli</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- VIP PAGE -->
+    <div id="vip" class="page" style="background:linear-gradient(180deg,#1a0000 0%,#0d0000 40%,#0a0010 100%)!important;">
+      <div id="vipPageContent"></div>
+    </div>
+
+    <!-- PROFILE PAGE -->
+    <div id="profile" class="page">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;gap:8px;">
+        <button onclick="connectWallet()" id="walletBtn"
+          style="background:linear-gradient(135deg,#1144AA,#4B9EFF);border:none;color:white;padding:8px 14px;border-radius:20px;cursor:pointer;font-size:13px;max-width:55%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:Rajdhani,sans-serif;font-weight:700;"
+          data-i18n="connectWallet">Connect Wallet</button>
+        <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:20px;padding:6px 12px;font-size:12px;color:#aaa;white-space:nowrap;">ID: <span id="profileId">-</span></div>
+      </div>
+      <div class="info-card" style="text-align:center;padding:20px;margin-bottom:12px;">
+        <div style="width:65px;height:65px;border-radius:50%;background:rgba(255,0,0,0.1);border:2px solid rgba(255,0,0,0.4);margin:0 auto 10px;display:flex;align-items:center;justify-content:center;font-size:32px;">👤</div>
+        <div style="font-size:17px;font-weight:bold;" id="profileName">-</div>
+        <div style="font-size:13px;color:#FF6644;margin-top:4px;">RECORD <span id="profileRecord">0</span></div>
+      </div>
+      <div class="info-card" style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="color:#00FF88;font-size:14px;font-weight:bold;">REC <span id="recPoolBalance">0.000000</span></div>
+          <div data-i18n="poolWallet" style="color:#aaa;font-size:11px;">Pool Wallet</div>
+          <div data-i18n="withdrawable" style="color:#aaa;font-size:10px;">Withdrawable balance</div>
+        </div>
+        <div style="font-size:28px;">🏛️</div>
+      </div>
+      <div data-i18n="controls" style="color:#aaa;font-size:12px;text-align:right;margin-bottom:8px;padding-right:4px;">Controls</div>
+      <div class="info-card" style="display:flex;justify-content:space-between;align-items:center;opacity:0.6;">
+        <div style="background:rgba(255,255,255,0.06);color:#aaa;border:1px solid rgba(255,255,255,0.1);padding:4px 10px;border-radius:8px;font-size:12px;white-space:nowrap;" data-i18n="comingSoon" data-i18n="comingSoon">Coming Soon</div>
+        <div style="text-align:right;flex:1;margin:0 10px;">
+          <div data-i18n="withdrawPool" style="font-size:14px;">Withdraw Pool</div>
+          <div style="color:#aaa;font-size:11px;" data-i18n="transferPool">Transfer Pool to Wallet</div>
+        </div>
+        <div style="font-size:24px;">🏦</div>
+      </div>
+      <div class="info-card" style="display:flex;justify-content:space-between;align-items:center;">
+        <span style="background:rgba(255,255,255,0.06);color:#aaa;border:1px solid rgba(255,255,255,0.1);padding:4px 10px;border-radius:8px;font-size:12px;white-space:nowrap;" data-i18n="locked">Locked</span>
+        <div style="text-align:right;flex:1;margin:0 10px;">
+          <div data-i18n="history" style="font-size:14px;">History</div>
+          <div data-i18n="yourWithdrawals" style="color:#aaa;font-size:11px;">Your withdrawals</div>
+        </div>
+        <div style="font-size:24px;">📄</div>
+      </div>
+      <div class="info-card" style="text-align:center;cursor:pointer;" onclick="openSupport()">
+        <span data-i18n="support" style="font-size:14px;">💬 Support @Momokhli</span>
+      </div>
+    </div>
+
+  </div><!-- end pages-container -->
+
+  <!-- ===== NAV BAR ===== -->
+  <nav class="nav">
+    <button class="nav-btn" id="navCardsBtn" onclick="showPage('cards',this)"><span>🃏</span><span data-i18n="navCards">Cards</span></button>
+    <button class="nav-btn" style="display:none;" id="navProfileBtn" onclick="showPage('profile',this)"></button>
+    <button class="nav-btn" style="display:none;" id="navRankBtn"></button>
+    <button class="nav-btn" style="display:none;" id="navTasksBtn" onclick="showPage('tasks',this)"></button>
+    <button class="nav-btn" id="navGamesBtn" onclick="openGames()"><span>🎮</span><span data-i18n="navGames">Games</span></button>
+    <button class="nav-btn active" id="navHomeBtn" onclick="showPage('home',this)"><span>🏠</span><span data-i18n="navHome">Home</span></button>
+    <button class="nav-btn" id="navInviteBtn" onclick="showPage('invite',this)"><span>👥</span><span data-i18n="navInvite">Invite</span></button>
+    <button class="nav-btn" id="navWalletBtn" onclick="showPage('wallet',this)"><span>💳</span><span data-i18n="navWallet">Wallet</span></button>
+  </nav>
+
+</div><!-- end app-wrapper -->
+
+<!-- UPGRADE OVERLAY -->
+<div class="overlay-page" id="upgradePage">
+  <button class="back-btn" data-i18n="backBtn" onclick="document.getElementById('upgradePage').classList.remove('open')">← Back</button>
+  <h2 style="margin-bottom:20px;color:#FF6644;font-family:Orbitron,sans-serif;" data-i18n="upgradesTitle">Upgrades</h2>
+  <div class="upg-card">
+    <div style="font-size:16px;" data-i18n="tapUpgradeTitle">⚡ Tap Upgrade</div>
+    <div style="color:#FF6644;font-size:13px;margin:5px 0;"><span data-i18n="levelLabel">Level:</span> <span id="tapLevel">0</span> / 100</div>
+    <div style="color:#aaa;font-size:12px;"><span data-i18n="costLabel">Cost:</span> <span id="tapCost">50</span> RECORD</div>
+    <div style="color:#aaa;font-size:12px;margin-top:4px;"><span data-i18n="tapsPerClick">Taps per click:</span> <span id="tapPower">1</span></div>
+    <button class="do-btn" id="tapUpgradeBtn" onclick="upgradeTap()" data-i18n="upgradeBtn">Upgrade</button>
+  </div>
+  <div class="upg-card">
+    <div style="font-size:16px;" data-i18n="energyUpgradeTitle">🔋 Energy Upgrade</div>
+    <div style="color:#FF6644;font-size:13px;margin:5px 0;"><span data-i18n="levelLabel">Level:</span> <span id="energyLevel">0</span> / 100</div>
+    <div style="color:#aaa;font-size:12px;"><span data-i18n="costLabel">Cost:</span> <span id="energyCost">50</span> RECORD</div>
+    <div style="color:#aaa;font-size:12px;margin-top:4px;"><span data-i18n="totalEnergy">Total Energy:</span> <span id="maxEnergyShow">1000</span></div>
+    <button class="do-btn" id="energyUpgradeBtn" onclick="upgradeEnergy()" data-i18n="upgradeBtn">Upgrade</button>
+  </div>
+  <div class="upg-card">
+    <div style="font-size:16px;">⚡ Energy Refill</div>
+    <div style="color:#aaa;font-size:12px;margin:5px 0;">Instantly refill your energy</div>
+    <div style="color:#FF6644;font-size:13px;margin:5px 0;">Remaining today: <span id="refillCount">3</span> / 3</div>
+    <button class="do-btn" id="energyRefillBtn" onclick="useEnergyRefill()">⚡ Refill Energy</button>
+  </div>
+</div>
+
+<!-- CARD MODAL -->
+<div class="overlay-page" id="cardModal">
+  <button class="back-btn" data-i18n="backBtn" onclick="document.getElementById('cardModal').classList.remove('open')">← Back</button>
+  <div id="cardDetail"></div>
+</div>
+
+<!-- SIDE MENU -->
+<div id="sideMenuOverlay" style="display:none;position:fixed;inset:0;z-index:9980;background:rgba(0,0,0,0.6);" onclick="closeSideMenu()"></div>
+<div id="sideMenu" style="display:none;position:fixed;top:0;right:0;bottom:0;z-index:9981;width:75%;max-width:280px;background:linear-gradient(180deg,#0e0a22,#080518);border-left:1px solid rgba(255,255,255,0.08);padding:50px 16px 30px;overflow-y:auto;">
+
+  <!-- Close -->
+  <div onclick="closeSideMenu()" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:rgba(255,255,255,0.5);">✕</div>
+
+  <!-- Title -->
+  <div style="font-family:Orbitron,sans-serif;font-size:16px;font-weight:900;background:linear-gradient(180deg,#FF7744,#FF2200);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:24px;letter-spacing:2px;">REC MINING</div>
+
+  <!-- Menu Items -->
+  <div style="display:flex;flex-direction:column;gap:10px;">
+
+    <!-- Support -->
+    <a href="https://t.me/Momokhli" target="_blank" onclick="closeSideMenu()"
+      style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px 16px;text-decoration:none;transition:all 0.2s;-webkit-tap-highlight-color:transparent;">
+      <span style="font-size:22px;">🎧</span>
+      <div>
+        <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;" data-i18n="menuSupport">Support</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:1px;">@Momokhli</div>
+      </div>
+      <span style="margin-left:auto;color:rgba(255,255,255,0.2);font-size:16px;">›</span>
+    </a>
+
+    <!-- News -->
+    <a href="https://t.me/Momokh1" target="_blank" onclick="closeSideMenu()"
+      style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px 16px;text-decoration:none;transition:all 0.2s;-webkit-tap-highlight-color:transparent;">
+      <span style="font-size:22px;">📢</span>
+      <div>
+        <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;" data-i18n="menuNews">News</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:1px;" data-i18n="menuNewsDesc">Updates & Announcements</div>
+      </div>
+      <span style="margin-left:auto;color:rgba(255,255,255,0.2);font-size:16px;">›</span>
+    </a>
+
+    <!-- Chat -->
+    <a href="https://t.me/REC_Mining_Chat" target="_blank" onclick="closeSideMenu()"
+      style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px 16px;text-decoration:none;transition:all 0.2s;-webkit-tap-highlight-color:transparent;">
+      <span style="font-size:22px;">💬</span>
+      <div>
+        <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;" data-i18n="menuChat">Chat</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:1px;" data-i18n="menuChatDesc">Community Chat</div>
+      </div>
+      <span style="margin-left:auto;color:rgba(255,255,255,0.2);font-size:16px;">›</span>
+    </a>
+
+    <!-- Payouts — Locked -->
+    <div style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);border-radius:14px;padding:14px 16px;opacity:0.4;cursor:not-allowed;">
+      <span style="font-size:22px;">💸</span>
+      <div>
+        <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;" data-i18n="menuPayouts">Payouts</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:1px;">Coming Soon</div>
+      </div>
+      <span style="margin-left:auto;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.3);font-size:9px;padding:3px 8px;border-radius:6px;font-family:Rajdhani,sans-serif;font-weight:700;letter-spacing:1px;">SOON</span>
+    </div>
+
+    <!-- FAQ / Terms -->
+    <a href="https://rec-mining.onrender.com/" target="_blank" onclick="closeSideMenu()"
+      style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px 16px;text-decoration:none;transition:all 0.2s;-webkit-tap-highlight-color:transparent;">
+      <span style="font-size:22px;">📋</span>
+      <div>
+        <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;" data-i18n="menuFaq">FAQ & Terms</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:1px;" data-i18n="menuFaqDesc">Rules & Conditions</div>
+      </div>
+      <span style="margin-left:auto;color:rgba(255,255,255,0.2);font-size:16px;">›</span>
+    </a>
+
+  </div>
+</div>
+
+<!-- PROFILE STATS POPUP -->
+<!-- COMBO OVERLAY -->
+<div id="comboOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9995;" onclick="closeCombo()"></div>
+<div id="comboPopup" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9996;background:linear-gradient(180deg,#0e0a22,#080518);border-radius:24px 24px 0 0;border-top:1px solid rgba(255,200,0,0.4);padding:20px 16px 36px;max-height:90vh;overflow-y:auto;">
+
+  <!-- Header -->
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">
+    <div style="font-size:18px;font-weight:900;color:#FFD700;font-family:Orbitron,sans-serif;">🎯 DAILY COMBO</div>
+    <div onclick="closeCombo()" style="width:30px;height:30px;background:rgba(255,255,255,0.08);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.5);font-size:13px;">✕</div>
+  </div>
+  <div style="font-size:11px;color:rgba(255,255,255,0.35);margin-bottom:16px;" data-i18n="comboSubtitle">رقّ الثلاث بطاقات اليومية واحصل على مكافأة!</div>
+
+  <!-- Timer row -->
+  <div id="comboTimerRow" style="display:none;background:rgba(255,200,0,0.06);border:1px solid rgba(255,200,0,0.2);border-radius:10px;padding:8px 12px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;">
+    <span id="comboTimerLabel" style="font-size:11px;color:rgba(255,255,255,0.5);">⏱</span>
+    <span id="comboTimerCount" style="font-size:13px;font-weight:700;color:#FFD700;font-family:Orbitron,sans-serif;">--:--:--</span>
+  </div>
+
+  <!-- Reward -->
+  <div style="background:rgba(255,200,0,0.08);border:1px solid rgba(255,200,0,0.25);border-radius:12px;padding:10px 14px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:center;">
+    <span style="font-size:13px;color:rgba(255,255,255,0.6);">المكافأة اليومية</span>
+    <span style="font-size:16px;font-weight:700;color:#FFD700;">+5 REC ⚡</span>
+  </div>
+
+  <!-- 3 Card Slots -->
+  <div id="comboCardSlots" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px;">
+    <!-- filled by JS -->
+  </div>
+
+  <!-- Claim button -->
+  <div id="comboClaimArea" style="display:none;">
+    <button onclick="claimCombo()" style="width:100%;background:linear-gradient(135deg,#CC8800,#FFD700);border:none;color:#000;padding:13px;border-radius:14px;font-size:15px;font-weight:900;cursor:pointer;font-family:Orbitron,sans-serif;letter-spacing:1px;">🎉 CLAIM +5 REC</button>
+  </div>
+  <div id="comboClaimed" style="display:none;text-align:center;padding:10px;color:#00FF88;font-weight:700;font-size:14px;">✅ تم استلام المكافأة اليوم!</div>
+
+  <!-- Admin Panel (only for admin) -->
+  <div id="comboAdminPanel" style="display:none;margin-top:20px;border-top:1px solid rgba(255,255,255,0.08);padding-top:16px;">
+    <div style="font-size:12px;color:rgba(255,100,50,0.7);letter-spacing:1px;margin-bottom:10px;">🔧 ADMIN — اختر بطاقات الكومبو</div>
+    <div id="comboAdminSlots" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;">
+      <!-- 3 selectors -->
+    </div>
+    <button onclick="saveAdminCombo()" style="width:100%;background:rgba(255,100,50,0.2);border:1px solid rgba(255,100,50,0.4);color:#FF6644;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:Rajdhani,sans-serif;margin-bottom:8px;">💾 حفظ الكومبو اليومي</button>
+    <button id="adminDistBtn" onclick="adminDistributeWeekly()" style="width:100%;background:rgba(0,200,100,0.15);border:1px solid rgba(0,200,100,0.4);color:#00CC66;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:Rajdhani,sans-serif;">🏆 توزيع جوائز الأسبوع</button>
+  </div>
+</div>
+
+<!-- REC INFO POPUP -->
+<!-- RECORD INFO POPUP -->
+<div id="recordInfoOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9993;" onclick="closeRECORDInfo()"></div>
+<div id="recordInfoPopup" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9994;background:linear-gradient(180deg,#1a0800,#0d0400);border-radius:24px 24px 0 0;border-top:2px solid rgba(255,100,50,0.4);padding:20px 16px 36px;max-height:88vh;overflow-y:auto;">
+
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+    <div style="font-size:17px;font-weight:900;color:#FF6644;font-family:Orbitron,sans-serif;">🔴 عملة RECORD</div>
+    <div onclick="closeRECORDInfo()" style="width:30px;height:30px;background:rgba(255,255,255,0.08);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.4);font-size:13px;">✕</div>
+  </div>
+  <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:20px;">كيف تجمع RECORD وما هو دورها</div>
+
+  <!-- What is RECORD -->
+  <div style="background:rgba(255,100,50,0.08);border:1px solid rgba(255,100,50,0.25);border-radius:14px;padding:14px;margin-bottom:10px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <div style="font-size:26px;">🔴</div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#FF6644;">ما هي عملة RECORD؟</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);">عملة التعدين الأساسية</div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.6;">
+      RECORD هي العملة الرئيسية في اللعبة. تُستخدم لترقية البطاقات وشراء العناصر. رصيدك الحالي:
+      <div style="margin-top:6px;padding:8px;background:rgba(0,0,0,0.3);border-radius:8px;font-family:Orbitron,sans-serif;font-size:10px;color:#FF6644;">
+        <span id="infoRecordBalance">0</span> RECORD
+      </div>
+    </div>
+  </div>
+
+  <!-- Method 1: Tapping -->
+  <div style="background:rgba(255,150,50,0.06);border:1px solid rgba(255,150,50,0.2);border-radius:14px;padding:14px;margin-bottom:10px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <div style="font-size:26px;">👆</div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#FF9933;">الضغط على الدائرة</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);">الطريقة الأسرع</div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.6;">
+      كل ضغطة على الدائرة الحمراء تعطيك RECORD. كلما زادت قوة الضغط (Tap Power) كلما حصلت على أكثر في كل ضغطة.
+    </div>
+    <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+      <div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:8px;text-align:center;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.3);">ترقية Tap Power</div>
+        <div style="font-size:12px;color:#FF9933;font-weight:700;">↑ RECORD/ضغطة</div>
+      </div>
+      <div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:8px;text-align:center;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.3);">ترقية Energy</div>
+        <div style="font-size:12px;color:#FF9933;font-weight:700;">↑ ضغطات أكثر</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Method 2: Auto mining -->
+  <div style="background:rgba(255,200,50,0.06);border:1px solid rgba(255,200,50,0.2);border-radius:14px;padding:14px;margin-bottom:10px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <div style="font-size:26px;">⚙️</div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#FFD700;">التعدين التلقائي</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);">مستمر 24/7</div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.6;">
+      البطاقات تعدّن RECORD تلقائياً حتى وأنت غير متصل. رصيدك يزيد كل ثانية حسب سرعة تعدينك.
+      <div style="margin-top:6px;padding:8px;background:rgba(0,0,0,0.3);border-radius:8px;font-family:Orbitron,sans-serif;font-size:10px;color:#FFD700;">
+        سرعتك: <span id="infoRecordSpeed">0.00000000</span> REC/s
+      </div>
+    </div>
+  </div>
+
+  <!-- Method 3: Mystery Box -->
+  <div style="background:rgba(170,100,255,0.06);border:1px solid rgba(170,100,255,0.2);border-radius:14px;padding:14px;margin-bottom:10px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <div style="font-size:26px;">📦</div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#AA66FF;">Mystery Box</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);">مجاناً كل يوم</div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.6;">
+      افتح صندوق المفاجآت اليومي مجاناً من قسم Tasks. قد تحصل على كمية كبيرة من RECORD أو REC!
+    </div>
+  </div>
+
+  <!-- Method 4: Energy Refill -->
+  <div style="background:rgba(0,200,100,0.06);border:1px solid rgba(0,200,100,0.2);border-radius:14px;padding:14px;margin-bottom:10px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <div style="font-size:26px;">⚡</div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#00CC66;">إعادة شحن الطاقة</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);">مرتان يومياً مجاناً</div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.6;">
+      عندما تنتهي طاقتك يمكنك إعادة شحنها مرتين يومياً مجاناً لمواصلة الضغط وجمع المزيد من RECORD.
+    </div>
+  </div>
+
+  <!-- How to spend -->
+  <div style="background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);border-radius:14px;padding:14px;">
+    <div style="font-size:12px;font-weight:700;color:#FFD700;margin-bottom:8px;">💡 كيف تستخدم RECORD؟</div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.7;">
+      ١. 🃏 ترقية بطاقات التعدين لزيادة سرعة REC<br>
+      ٢. ⬆️ رفع مستوى Tap Power للحصول على أكثر لكل ضغطة<br>
+      ٣. ⚡ توسيع سعة الطاقة لضغطات أكثر<br>
+      ٤. ⭐ شراء بطاقات محدودة من المتجر
+    </div>
+  </div>
+
+</div>
+
+<div id="recInfoOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9993;" onclick="closeRECInfo()"></div>
+<div id="recInfoPopup" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9994;background:linear-gradient(180deg,#0a1a0e,#040d08);border-radius:24px 24px 0 0;border-top:2px solid rgba(0,255,136,0.4);padding:20px 16px 36px;max-height:88vh;overflow-y:auto;">
+
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+    <div style="font-size:17px;font-weight:900;color:#00FF88;font-family:Orbitron,sans-serif;">⚡ عملة REC</div>
+    <div onclick="closeRECInfo()" style="width:30px;height:30px;background:rgba(255,255,255,0.08);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.4);font-size:13px;">✕</div>
+  </div>
+  <div style="font-size:11px;color:rgba(255,255,255,0.3);margin-bottom:20px;">كيف تجمع REC وكيف تزيد سرعة تعدينك</div>
+
+  <!-- Method 1 -->
+  <div style="background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.2);border-radius:14px;padding:14px;margin-bottom:10px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <div style="font-size:26px;">⛏️</div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#00FF88;">التعدين التلقائي</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);">الطريقة الأساسية</div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.6;">
+      بطاقات التعدين تعطيك REC تلقائياً كل ثانية. كلما رقيت بطاقة أكثر كلما زادت سرعة التعدين.
+      <div style="margin-top:6px;padding:8px;background:rgba(0,0,0,0.3);border-radius:8px;font-family:Orbitron,sans-serif;font-size:10px;color:#00FF88;">
+        سرعتك الحالية: <span id="infoRecSpeed">0.00000000</span> REC/s
+      </div>
+    </div>
+  </div>
+
+  <!-- Method 2 -->
+  <div style="background:rgba(170,100,255,0.06);border:1px solid rgba(170,100,255,0.2);border-radius:14px;padding:14px;margin-bottom:10px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <div style="font-size:26px;">🃏</div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#AA66FF;">ترقية البطاقات</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);">زيادة سرعة التعدين</div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.6;">
+      كل ترقية بطاقة تزيد سرعة تعدين REC. البطاقات المحدودة (⭐) تعطي <b style="color:#AA66FF;">×3</b> سرعة.
+    </div>
+    <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+      <div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:8px;text-align:center;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.3);">بطاقة عادية</div>
+        <div style="font-size:12px;color:#AA66FF;font-weight:700;">×1 سرعة</div>
+      </div>
+      <div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:8px;text-align:center;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.3);">بطاقة محدودة ⭐</div>
+        <div style="font-size:12px;color:#FFD700;font-weight:700;">×3 سرعة</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Method 3 -->
+  <div style="background:rgba(255,100,50,0.06);border:1px solid rgba(255,100,50,0.2);border-radius:14px;padding:14px;margin-bottom:10px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <div style="font-size:26px;">🏆</div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#FF6644;">البلوكات</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);">مكافأة عشوائية</div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.6;">
+      كل ضغطة على الدائرة لديك فرصة للحصول على بلوك يعطيك مكافأة كبيرة من REC فجأة!
+    </div>
+  </div>
+
+  <!-- Method 4 -->
+  <div style="background:rgba(255,215,0,0.06);border:1px solid rgba(255,215,0,0.2);border-radius:14px;padding:14px;margin-bottom:10px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <div style="font-size:26px;">🎯</div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#FFD700;">الكومبو اليومي</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);">+5 REC يومياً</div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.6;">
+      رقّ الثلاث بطاقات السرية اليومية واحصل على مكافأة +5 REC. الكومبو يتجدد كل يوم.
+    </div>
+  </div>
+
+  <!-- Method 5 -->
+  <div style="background:rgba(68,204,255,0.06);border:1px solid rgba(68,204,255,0.2);border-radius:14px;padding:14px;margin-bottom:10px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <div style="font-size:26px;">👥</div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#44CCFF;">الإحالات</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);">عمولة مستمرة</div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.6;">
+      ادعُ أصدقاءك واكسب عمولة من تعدينهم:
+    </div>
+    <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:4px;">
+      <div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:8px;text-align:center;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.3);">L1 (مباشر)</div>
+        <div style="font-size:14px;color:#00FF88;font-weight:700;">8%</div>
+      </div>
+      <div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:8px;text-align:center;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.3);">L2</div>
+        <div style="font-size:14px;color:#44CCFF;font-weight:700;">2%</div>
+      </div>
+      <div style="background:rgba(0,0,0,0.3);border-radius:8px;padding:8px;text-align:center;">
+        <div style="font-size:10px;color:rgba(255,255,255,0.3);">L3</div>
+        <div style="font-size:14px;color:#AA66FF;font-weight:700;">1%</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Method 6 -->
+  <div style="background:rgba(255,100,180,0.06);border:1px solid rgba(255,100,180,0.2);border-radius:14px;padding:14px;margin-bottom:10px;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;">
+      <div style="font-size:26px;">✅</div>
+      <div>
+        <div style="font-size:14px;font-weight:700;color:#FF66AA;">المهام</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);">مكافآت ثابتة</div>
+      </div>
+    </div>
+    <div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:1.6;">
+      أكمل مهام التواصل الاجتماعي والمهام اليومية للحصول على REC إضافية.
+    </div>
+  </div>
+
+  <!-- Speed tip -->
+  <div style="background:rgba(255,200,0,0.08);border:1px solid rgba(255,200,0,0.25);border-radius:14px;padding:14px;">
+    <div style="font-size:12px;font-weight:700;color:#FFD700;margin-bottom:8px;">💡 نصيحة لزيادة السرعة</div>
+    <div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.7;">
+      ١. رقّ البطاقات المحدودة أولاً (×3 سرعة)<br>
+      ٢. ارفع مستوى البطاقات العالية باستمرار<br>
+      ٣. أكمل الكومبو اليومي كل يوم<br>
+      ٤. ادعُ أصدقاء للحصول على عمولة مستمرة
+    </div>
+  </div>
+
+</div>
+
+<div id="profilePopupOverlay" style="display:none;position:fixed;inset:0;z-index:9990;background:rgba(0,0,0,0.75);" onclick="closeProfilePopup()"></div>
+<div id="profilePopup" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9991;background:linear-gradient(180deg,#0e0a22,#080518);border-radius:24px 24px 0 0;border-top:1px solid rgba(255,100,50,0.3);padding:20px 16px 36px;max-height:85vh;overflow-y:auto;">
+  <div style="width:40px;height:4px;background:rgba(255,255,255,0.15);border-radius:2px;margin:0 auto 16px;"></div>
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+    <div id="ppAvatar" style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#FF4444,#CC0000);border:3px solid rgba(255,68,68,0.5);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:bold;color:white;flex-shrink:0;overflow:hidden;"></div>
+    <div style="flex:1;">
+      <div id="ppName" style="font-size:18px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;"></div>
+      <div id="ppUsername" style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:2px;"></div>
+    </div>
+    <div onclick="closeProfilePopup()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:rgba(255,255,255,0.5);flex-shrink:0;">✕</div>
+  </div>
+  <div id="ppStatsGrid" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px;"></div>
+  <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,0.35);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">🃏 TOP CARDS</div>
+  <div id="ppCardsGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;"></div>
+</div>
+
+<script src="translations.js?v=1"></script>
+<script src="vip.js?v=1"></script>
+<script src="tasks.js?v=1"></script>
+<script src="cards.js?v=1"></script>
+<script src="levels.js?v=1"></script>
+<script src="app.js?v=8"></script>
+</body>
+</html>
