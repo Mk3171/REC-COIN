@@ -147,7 +147,7 @@ function openExchange(){
   popup.addEventListener('click', function(e){ e.stopPropagation(); });
   popup.addEventListener('touchend', function(e){ e.stopPropagation(); });
 
-  var activeTab = 'rec'; // 'rec' or 'record'
+  var activeTab = 'rec'; // REC→RECORD only
 
   function renderExchange(){
     var tabRecStyle    = activeTab==='rec'    ? 'background:rgba(0,255,136,0.15);border-bottom:2px solid #00FF88;color:#00FF88;' : 'color:#555;border-bottom:2px solid transparent;';
@@ -200,10 +200,7 @@ function openExchange(){
     }
 
     popup.innerHTML =
-      '<div style="display:flex;margin-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.08);">'+
-        '<div onclick="window._exchTab(\'rec\')" style="flex:1;text-align:center;padding:8px 4px;font-size:12px;font-weight:700;cursor:pointer;'+tabRecStyle+'">REC → RECORD</div>'+
-        '<div onclick="window._exchTab(\'record\')" style="flex:1;text-align:center;padding:8px 4px;font-size:12px;font-weight:700;cursor:pointer;'+tabRecordStyle+'">RECORD → REC</div>'+
-      '</div>'+
+      '<div style="padding:8px 4px;margin-bottom:14px;border-bottom:1px solid rgba(255,255,255,0.08);text-align:center;font-size:13px;font-weight:700;color:#00FF88;">REC → RECORD</div>'+
       body;
 
     window._exchTab = function(tab){ activeTab = tab; renderExchange(); };
