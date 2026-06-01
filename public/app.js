@@ -139,7 +139,9 @@ function saveToServer(){
         dailyLogin, mysteryLastDate, dailyTasksData, cardTasksClaimed, totalTaps,
         miningSpeed: recPerSec,
         refillData: window.refillData,
-        vip: vipData
+        vip: vipData,
+        playerXP: (typeof playerXP!=='undefined'?playerXP:0),
+        claimedLevels: (typeof claimedLevels!=='undefined'?claimedLevels:{})
       })
     }).then(function(r){ return r.json(); })
     .then(function(data){
@@ -960,12 +962,14 @@ function openProfilePopup() {
   if(cardsGrid) {
     // Level section
     var lvlHtml = (typeof buildLevelSection==='function') ? buildLevelSection() : '';
+    cardsGrid.innerHTML = lvlHtml;
+    // Render levels list into ppLevelsGrid
+    var lvlGrid = document.getElementById('ppLevelsGrid');
+    if(lvlGrid && typeof renderLevelsList==='function') renderLevelsList(lvlGrid);
     if(cardsList.length === 0) {
-      cardsGrid.innerHTML = lvlHtml +
-        '<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,0.25);font-size:12px;padding:10px 0;">'+t('ppNoCards')+'</div>';
+      cardsGrid.innerHTML += '<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,0.25);font-size:12px;padding:10px 0;">'+t('ppNoCards')+'</div>';
     } else {
-      cardsGrid.innerHTML = lvlHtml +
-        cardsList.slice(0,12).map(function(c){
+      cardsGrid.innerHTML += cardsList.slice(0,12).map(function(c){
         return '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:8px 4px;text-align:center;">'+
           '<div style="font-size:22px;">'+c.e+'</div>'+
           '<div style="font-size:9px;color:rgba(255,255,255,0.5);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+c.n+'</div>'+
@@ -1113,6 +1117,15 @@ function loadAndInit() {
       if(serverData.record > record * 1.5) {
         applyData(serverData);
         updateUI();
+      }
+      // Sync XP from server (higher value wins)
+      if(serverData.playerXP && serverData.playerXP > (typeof playerXP!=='undefined'?playerXP:0)) {
+        if(typeof playerXP!=='undefined') playerXP = serverData.playerXP;
+        if(typeof xpRetroCalculated!=='undefined') xpRetroCalculated = true;
+        if(typeof claimedLevels!=='undefined' && serverData.claimedLevels) {
+          Object.assign(claimedLevels, serverData.claimedLevels);
+        }
+        if(typeof updateLevelDisplay==='function') updateLevelDisplay();
       }
     });
     return;
