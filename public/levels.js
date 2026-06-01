@@ -245,15 +245,6 @@ function updateLevelDisplay() {
     var oldPct = parseFloat(bar.style.width)||0;
     bar.style.width = pct+'%';
 
-    // Animate glow dot
-    var dot = document.getElementById('xpGlowDot');
-    if(dot) {
-      dot.style.display = 'block';
-      dot.style.left = pct+'%';
-      // Hide dot at 0% or 100%
-      if(pct <= 0 || pct >= 100) dot.style.display = 'none';
-    }
-
     // Pulse hearts on XP gain
     if(pct > oldPct || pct < oldPct) {
       pulseHearts();
@@ -293,9 +284,9 @@ function renderLevelsList(container) {
     var isLocked    = !isReached && !inProgress;
 
     // XP in this level
-    var earnedInLvl = Math.max(0, Math.min(playerXP - lvlStartXP, lvlNeeded));
+    var earnedInLvl = isReached ? lvlNeeded : Math.max(0, playerXP - lvlStartXP);
     var pct = lvlNeeded > 0 ? Math.min(100, Math.floor(earnedInLvl / lvlNeeded * 100)) : 100;
-    var xpLabel = earnedInLvl.toLocaleString() + ' / ' + lvlNeeded.toLocaleString() + ' XP';
+    var xpLabel = Math.min(earnedInLvl, lvlNeeded).toLocaleString() + ' / ' + lvlNeeded.toLocaleString() + ' XP';
 
     var rwdText = getRewardText(lvl);
     var lvlColor = isClaimed ? '#00CC66' : (canClaim || inProgress) ? '#FFD700' : 'rgba(255,255,255,0.35)';
