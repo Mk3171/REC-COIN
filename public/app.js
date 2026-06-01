@@ -86,6 +86,14 @@ function applyData(d){
     window.refillData={date:_today,count:initMax};
   }
   calcTotalSpeeds();
+  // Load XP data
+  if(d.playerXP !== undefined && typeof playerXP !== 'undefined') {
+    playerXP = d.playerXP || 0;
+    xpRetroCalculated = playerXP > 0;
+  }
+  if(d.claimedLevels && typeof claimedLevels !== 'undefined') {
+    claimedLevels = d.claimedLevels;
+  }
 }
 try { applyData(G); } catch(e) { console.log('applyData error:', e); applyData(defaultData); }
 
@@ -96,7 +104,9 @@ function saveData(immediate){
     completedTasks,cardLevels,cardUpgrades,refCount,claimedMilest,
     dailyLogin,mysteryLastDate,dailyTasksData,cardTasksClaimed,totalTaps,
     refillData:window.refillData,vip:vipData,
-    lastSaveTime:Date.now()});
+    lastSaveTime:Date.now(),
+    playerXP:(typeof playerXP!=='undefined'?playerXP:0),
+    claimedLevels:(typeof claimedLevels!=='undefined'?claimedLevels:{})});
   try{localStorage.setItem(saveKey,d);}catch(e){}
   if(CS){try{CS.setItem('gameData',d);}catch(e){}}
   if(immediate){
@@ -753,6 +763,7 @@ function claimCombo() {
   document.getElementById('comboClaimed').style.display = 'block';
   showToast('🎉 حصلت على +5 REC!');
   rec += 5;
+  if(typeof addXP==='function') addXP(100);
   saveData(true); updateUI();
 }
 
