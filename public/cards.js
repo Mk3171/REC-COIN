@@ -1032,8 +1032,9 @@ function calcOfflineEarnings() {
     }
     var earnedRec = _offRec * seconds;
 
-    // Energy recharge offline: +12 كل 3 ثواني
-    var energyGained = Math.floor(seconds / 3) * 12;
+    // Energy recharge offline: 12h full recharge
+    var regenPerSec = maxEnergy / 43200;
+    var energyGained = Math.floor(regenPerSec * seconds);
     var newEnergy = Math.min(maxEnergy, energy + energyGained);
     energy = newEnergy;
 
@@ -1041,7 +1042,10 @@ function calcOfflineEarnings() {
 
     // Apply earnings
     record += earnedRecord;
-    if(earnedRec > 0) rec += earnedRec;
+    if(earnedRec > 0) {
+      if(typeof pendingRec !== 'undefined') pendingRec += earnedRec;
+      else rec += earnedRec;
+    }
 
     saveData(true);
 
