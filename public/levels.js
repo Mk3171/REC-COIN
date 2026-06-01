@@ -236,10 +236,47 @@ function updateLevelDisplay() {
   var inLvl = xpInCurrentLevel(playerXP);
   var needed = xpForNextLevel(playerXP);
   var pct = needed > 0 ? Math.min(100, Math.floor(inLvl/needed*100)) : 100;
+
   var lvlEl = document.getElementById('playerLevelNum');
   if(lvlEl) lvlEl.textContent = lvl;
+
   var bar = document.getElementById('xpProgressBar');
-  if(bar) bar.style.width = pct+'%';
+  if(bar) {
+    var oldPct = parseFloat(bar.style.width)||0;
+    bar.style.width = pct+'%';
+
+    // Animate glow dot
+    var dot = document.getElementById('xpGlowDot');
+    if(dot) {
+      dot.style.display = 'block';
+      dot.style.left = pct+'%';
+      // Hide dot at 0% or 100%
+      if(pct <= 0 || pct >= 100) dot.style.display = 'none';
+    }
+
+    // Pulse hearts on XP gain
+    if(pct > oldPct || pct < oldPct) {
+      pulseHearts();
+    }
+  }
+}
+
+function pulseHearts() {
+  var h1 = document.getElementById('xpHeart1');
+  var h2 = document.getElementById('xpHeart2');
+  if(!h1||!h2) return;
+  // Animate heart 1
+  h1.style.transition = 'transform 0.2s, opacity 0.2s';
+  h1.style.transform = 'scale(1.6)';
+  h1.style.opacity = '1';
+  setTimeout(function(){ h1.style.transform='scale(1)'; h1.style.opacity='0.7'; }, 200);
+  // Animate heart 2 slightly delayed
+  setTimeout(function(){
+    h2.style.transition = 'transform 0.2s, opacity 0.2s';
+    h2.style.transform = 'scale(1.6)';
+    h2.style.opacity = '1';
+    setTimeout(function(){ h2.style.transform='scale(1)'; h2.style.opacity='0.7'; }, 200);
+  }, 120);
 }
 
 // ====== RENDER LEVELS LIST ======
