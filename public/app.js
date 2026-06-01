@@ -936,6 +936,12 @@ function openProfilePopup() {
     { icon:'✅', label:t('ppTasksDone'), val: tasksDone, color:'#44FFAA' },
     { icon:'👥', label:t('friendsLabel'), val: refCount, color:'#44CCFF' },
     { icon:'📈', label:t('ppCardLevels'), val: totalCardLevels, color:'#FF8844' },
+    { icon:'⭐', label:'XP', val: (function(){
+      if(typeof playerXP==='undefined') return '0';
+      var inLvl = typeof xpInCurrentLevel==='function' ? xpInCurrentLevel(playerXP) : 0;
+      var needed = typeof xpForNextLevel==='function' ? xpForNextLevel(playerXP) : 0;
+      return inLvl.toLocaleString()+' / '+needed.toLocaleString();
+    })(), color:'#FFD700' },
   ];
 
   var grid = document.getElementById('ppStatsGrid');
