@@ -91,7 +91,8 @@ function applyData(d){
     playerXP = d.playerXP || 0;
     xpRetroCalculated = playerXP > 0;
   }
-  if(d.claimedLevels && typeof claimedLevels !== 'undefined') {
+  // Only load claimedLevels if levelsVersion matches (v2 = manual claim system)
+  if(d.claimedLevels && d.levelsVersion === 2 && typeof claimedLevels !== 'undefined') {
     claimedLevels = d.claimedLevels;
   }
 }
@@ -106,7 +107,8 @@ function saveData(immediate){
     refillData:window.refillData,vip:vipData,
     lastSaveTime:Date.now(),
     playerXP:(typeof playerXP!=='undefined'?playerXP:0),
-    claimedLevels:(typeof claimedLevels!=='undefined'?claimedLevels:{})});
+    claimedLevels:(typeof claimedLevels!=='undefined'?claimedLevels:{}),
+    levelsVersion:2});
   try{localStorage.setItem(saveKey,d);}catch(e){}
   if(CS){try{CS.setItem('gameData',d);}catch(e){}}
   if(immediate){
@@ -966,23 +968,11 @@ function openProfilePopup() {
 
   var cardsGrid = document.getElementById('ppCardsGrid');
   if(cardsGrid) {
-    // Level section
+    // Level section only - no cards grid
     var lvlHtml = (typeof buildLevelSection==='function') ? buildLevelSection() : '';
     cardsGrid.innerHTML = lvlHtml;
-    // Render levels list into ppLevelsGrid
     var lvlGrid = document.getElementById('ppLevelsGrid');
     if(lvlGrid && typeof renderLevelsList==='function') renderLevelsList(lvlGrid);
-    if(cardsList.length === 0) {
-      cardsGrid.innerHTML += '<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,0.25);font-size:12px;padding:10px 0;">'+t('ppNoCards')+'</div>';
-    } else {
-      cardsGrid.innerHTML += cardsList.slice(0,12).map(function(c){
-        return '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:10px;padding:8px 4px;text-align:center;">'+
-          '<div style="font-size:22px;">'+c.e+'</div>'+
-          '<div style="font-size:9px;color:rgba(255,255,255,0.5);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">'+c.n+'</div>'+
-          '<div style="font-size:10px;color:#FF6644;font-weight:700;margin-top:1px;">LVL '+c.lvl+'</div>'+
-          '</div>';
-      }).join('');
-    }
   }
 
   overlay.style.display = 'block';
