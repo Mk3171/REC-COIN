@@ -363,10 +363,10 @@ function showBlockPopup(blockNum, rewardRecord, rewardRec) {
 
 // ====== HOME - TAP ======
 function tap(){
-  // كل ضغطة تعطي RECORD وتنقص 10 طاقة — مستقلة عن تعدين البطاقات
-  record += tapPowerVal;
   var tapCost = tapPowerVal * (energyLevelVal + 1);
-  if(energy >= tapCost) energy = Math.max(0, energy - tapCost);
+  if(energy < tapCost) return; // طاقة غير كافية — توقف
+  record += tapPowerVal;
+  energy = Math.max(0, energy - tapCost);
   totalTaps++;
   var today=getTodayStr();
   if(dailyTasksData.date!==today) resetDailyTasks(today);
