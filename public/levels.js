@@ -233,22 +233,22 @@ function showLevelUpPopup(lvl, r) {
 // ====== UPDATE HEADER DISPLAY ======
 function updateLevelDisplay() {
   var lvl = calcPlayerLevel(playerXP);
-  var inLvl = xpInCurrentLevel(playerXP);
-  var needed = xpForNextLevel(playerXP);
-  var pct = needed > 0 ? Math.min(100, Math.floor(inLvl/needed*100)) : 100;
-
   var lvlEl = document.getElementById('playerLevelNum');
   if(lvlEl) lvlEl.textContent = lvl;
 
+  // Show progress toward NEXT level
+  var nextLvl = lvl + 1;
+  var startXP = cumXPForLevel(lvl);
+  var endXP   = cumXPForLevel(nextLvl);
+  var span    = endXP - startXP;
+  var done    = playerXP - startXP;
+  var pct     = lvl >= 99 ? 100 : Math.min(100, Math.max(0, Math.floor(done / span * 100)));
+
   var bar = document.getElementById('xpProgressBar');
   if(bar) {
-    var oldPct = parseFloat(bar.style.width)||0;
-    bar.style.width = pct+'%';
-
-    // Pulse hearts on XP gain
-    if(pct > oldPct || pct < oldPct) {
-      pulseHearts();
-    }
+    var oldPct = parseFloat(bar.style.width) || 0;
+    bar.style.width = pct + '%';
+    if(pct > oldPct) pulseHearts();
   }
 }
 
