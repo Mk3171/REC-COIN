@@ -212,20 +212,18 @@ function buildLevelSection() {
   var pct = needed > 0 ? Math.min(100, Math.floor(inLvl/needed*100)) : 100;
 
   return '<div style="grid-column:1/-1;">'+
-    // Header with level + XP bar
-    '<div style="background:linear-gradient(135deg,rgba(255,215,0,0.08),rgba(255,215,0,0.02));border:1px solid rgba(255,215,0,0.3);border-radius:14px;padding:14px;margin-bottom:12px;">'+
-      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">'+
-        '<div style="font-family:Orbitron,sans-serif;font-size:24px;font-weight:900;color:#FFD700;">LVL '+lvl+'</div>'+
-        '<div style="font-size:11px;color:rgba(255,255,255,0.35);">'+inLvl.toLocaleString()+' / '+needed.toLocaleString()+' XP</div>'+
+    // Thin XP progress bar only
+    '<div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">'+
+      '<div style="font-size:11px;color:rgba(255,255,255,0.4);white-space:nowrap;">LVL '+lvl+'</div>'+
+      '<div style="flex:1;background:rgba(255,255,255,0.08);border-radius:6px;height:8px;overflow:hidden;">'+
+        '<div style="width:'+pct+'%;height:100%;background:linear-gradient(90deg,#00AA44,#00FF88);border-radius:6px;"></div>'+
       '</div>'+
-      '<div style="background:rgba(255,255,255,0.07);border-radius:8px;height:12px;overflow:hidden;">'+
-        '<div style="width:'+pct+'%;height:100%;background:linear-gradient(90deg,#00AA44,#00FF88);border-radius:8px;transition:width 0.5s;"></div>'+
-      '</div>'+
+      '<div style="font-size:10px;color:rgba(255,255,255,0.3);white-space:nowrap;">'+inLvl.toLocaleString()+' / '+needed.toLocaleString()+'</div>'+
     '</div>'+
     // Level rewards title
-    '<div style="font-size:14px;font-weight:700;color:#FFD700;margin-bottom:8px;">'+(currentLang==='ar'?'مكافآت المستويات':'Level rewards')+'</div>'+
+    '<div style="font-size:13px;font-weight:700;color:#FFD700;margin-bottom:8px;">'+(currentLang==='ar'?'مكافآت المستويات':'Level rewards')+'</div>'+
     // List container
-    '<div id="ppLevelsGrid" style="max-height:320px;overflow-y:auto;padding-right:2px;"></div>'+
+    '<div id="ppLevelsGrid" style="max-height:340px;overflow-y:auto;"></div>'+
   '</div>';
 }
 
