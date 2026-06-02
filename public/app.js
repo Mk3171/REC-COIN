@@ -428,6 +428,16 @@ function checkUpgradeTimers(){
   if(changed){calcTotalSpeeds();saveData();}
 }
 
+// Save when app is hidden/closed
+document.addEventListener('visibilitychange', function() {
+  if(document.visibilityState === 'hidden') {
+    try { saveData(true); } catch(e){}
+  }
+});
+window.addEventListener('pagehide', function() {
+  try { saveData(true); } catch(e){}
+});
+
 // Heartbeat every 45 seconds - online status
 setInterval(function(){
   if(tgUser) fetch('/api/user/heartbeat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({telegramId:tgUser.id})}).catch(function(){});
