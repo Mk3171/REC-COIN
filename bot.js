@@ -1226,15 +1226,15 @@ app.post('/api/admin/distribute-weekly', async (req, res) => {
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-// Heartbeat - user online status
+// Heartbeat - user online status + save mining speed
 app.post('/api/user/heartbeat', async (req, res) => {
   try {
-    const { telegramId } = req.body;
+    const { telegramId, miningSpeed, recordMiningSpeed } = req.body;
     if(!telegramId) return res.json({ ok: false });
-    await User.findOneAndUpdate(
-      { telegramId: parseInt(telegramId) },
-      { lastSeen: new Date() }
-    );
+    var update = { lastSeen: new Date() };
+    if(miningSpeed !== undefined) update.miningSpeed = miningSpeed;
+    if(recordMiningSpeed !== undefined) update.recordMiningSpeed = recordMiningSpeed;
+    await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, update);
     res.json({ ok: true });
   } catch(e) { res.json({ ok: false }); }
 });
