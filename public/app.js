@@ -444,6 +444,23 @@ setInterval(function(){
   if(tgUser) fetch('/api/user/heartbeat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({telegramId:tgUser.id})}).catch(function(){});
 }, 45000);
 
+// Save miningSpeed to server every 60 seconds
+var _speedSaveTimer = 0;
+setInterval(function(){
+  _speedSaveTimer++;
+  if(_speedSaveTimer >= 20 && tgUser) { // every 60s (20 × 3s)
+    _speedSaveTimer = 0;
+    fetch('/api/user/heartbeat', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        telegramId: tgUser.id,
+        miningSpeed: recPerSec,
+        recordMiningSpeed: recordPerSec
+      })
+    }).catch(function(){});
+  }
+}, 3000);
+
 // ====== MAIN INTERVAL (3s) ======
 setInterval(function(){
   checkUpgradeTimers();
