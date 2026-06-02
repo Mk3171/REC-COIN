@@ -781,9 +781,10 @@ function renderGlobal(top100, myRankData, weekly) {
     var border = isMe ? 'rgba(255,100,50,0.5)' : (rankColors[p.rank] ? rCol+'40' : 'rgba(255,255,255,0.07)');
     var avBg   = avatarBgs[p.rank] || (isMe ? 'linear-gradient(135deg,#FF4444,#CC0000)' : 'linear-gradient(135deg,#2a2a3a,#3a3a4a)');
 
+    var onlineDot = '<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:' + (p.online ? '#00FF88' : '#FF4444') + ';margin-left:6px;flex-shrink:0;box-shadow:0 0 4px ' + (p.online ? 'rgba(0,255,136,0.6)' : 'rgba(255,68,68,0.4)') + ';"></span>';
     html += '<div style="display:flex;align-items:center;gap:12px;background:' + bg + ';border:1px solid ' + border + ';border-radius:14px;padding:12px 14px;margin-bottom:8px;">' +
       '<div style="font-family:Orbitron,sans-serif;font-size:15px;font-weight:900;color:' + rCol + ';min-width:36px;text-align:center;">#' + p.rank + '</div>' +
-      '<div data-uid="' + p.telegramId + '" style="width:42px;height:42px;border-radius:50%;background:' + avBg + ';display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:bold;color:white;flex-shrink:0;">' + (p.name||'?')[0].toUpperCase() + '</div>' +
+      '<div data-uid="' + p.telegramId + '" style="width:42px;height:42px;border-radius:50%;background:' + avBg + ';display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:bold;color:white;flex-shrink:0;position:relative;">' + (p.name||'?')[0].toUpperCase() + '<span style="position:absolute;bottom:0;right:0;width:10px;height:10px;border-radius:50%;background:' + (p.online ? '#00FF88' : '#FF4444') + ';border:2px solid #0a0a14;"></span></div>' +
       '<div style="flex:1;min-width:0;">' +
         '<div style="font-size:14px;font-weight:700;color:' + (isMe?'#FF6644':'white') + ';overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' + (p.vip ? '<span style="color:#FFD700;font-size:11px;">👑</span> ' : '') + (p.name||'User') + (isMe?' 👈':'') + '</div>' +
         '<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px;">⚡ ' + speedStr + (speed > 0 ? ' REC/s' : '') + '</div>' +
