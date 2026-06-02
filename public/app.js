@@ -253,11 +253,11 @@ function openGames(){
 
   var overlay = document.createElement('div');
   overlay.id = 'gamesHubOverlay';
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#06030F;overflow-y:auto;';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000 url(games-bg.jpeg) center/cover no-repeat;overflow-y:auto;';
 
   overlay.innerHTML =
-    '<div style="display:flex;align-items:center;gap:12px;padding:14px 16px 10px;background:rgba(6,3,15,0.95);position:sticky;top:0;z-index:10;border-bottom:1px solid rgba(255,255,255,0.07);">'+
-      '<button onclick="document.getElementById(\'gamesHubOverlay\').remove()" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:white;padding:7px 14px;border-radius:10px;font-size:13px;cursor:pointer;">← Back</button>'+
+    '<div style="display:flex;align-items:center;gap:12px;padding:14px 16px 10px;background:rgba(0,0,0,0.7);position:sticky;top:0;z-index:10;border-bottom:1px solid rgba(255,255,255,0.07);">'+
+      '<button onclick="document.getElementById('gamesHubOverlay').remove()" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:white;padding:7px 14px;border-radius:10px;font-size:13px;cursor:pointer;">← Back</button>'+
       '<div style="flex:1;text-align:center;font-family:Orbitron,sans-serif;font-size:16px;font-weight:900;background:linear-gradient(135deg,#FF4444,#FF8800);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">🎮 GAMES</div>'+
       '<div style="width:60px;"></div>'+
     '</div>'+
@@ -267,10 +267,9 @@ function openGames(){
         '<span class="games-cat-title">🕹️ Classic Game</span>'+
       '</div>'+
       '<div class="games-grid">'+
-        '<div class="game-card" onclick="openGameFromHub(\'rec-catch\')">'+
-          '<div class="game-card-thumb">'+
-            '<img src="rec-catch-thumb.jpeg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">'+
-            '
+        '<div class="game-card" onclick="openGameFromHub('rec-catch')">'+
+          '<div class="game-card-thumb" style="overflow:hidden;padding:0;">'+
+            '<img src="rec-catch-thumb.jpeg" style="width:100%;height:100%;object-fit:cover;">'+
             '<div class="game-card-badge">Daily 10 REC</div>'+
           '</div>'+
           '<div class="game-card-name">REC Catch</div>'+
@@ -315,7 +314,6 @@ function openGameFromHub(gameId){
   overlay.appendChild(iframe);
   document.body.appendChild(overlay);
 }
-
 
 function showPage(id,btn){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
