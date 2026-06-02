@@ -718,7 +718,18 @@ function loadLeaderboard(tab) {
 
   var uid = tgUser ? tgUser.id : 0;
 
-  // Fetch each independently so one failure doesn't break all
+  // Friends tab - separate fetch
+  if(tab === 'friends') {
+    fetch('/api/leaderboard/friends/' + uid)
+      .then(function(r){ return r.json(); })
+      .then(function(d){ renderFriends(d.friends || []); })
+      .catch(function(){
+        cont.innerHTML = '<div style="text-align:center;padding:30px;color:rgba(255,255,255,0.4);">Connection failed<br><button onclick="loadLeaderboard(\'friends\')" style="margin-top:10px;background:#CC0000;border:none;color:white;padding:8px 20px;border-radius:8px;cursor:pointer;">🔄 Retry</button></div>';
+      });
+    return;
+  }
+
+  // Global / Weekly / My Level tabs
   var p1 = fetch('/api/leaderboard/global').then(function(r){return r.json();}).catch(function(){return {top100:[]};});
   var p2 = fetch('/api/leaderboard/myrank/'+uid).then(function(r){return r.json();}).catch(function(){return {myRank:'-',neighbors:[]};});
   var p3 = fetch('/api/leaderboard/weekly').then(function(r){return r.json();}).catch(function(){return {daysLeft:7};});
