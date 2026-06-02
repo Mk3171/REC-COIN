@@ -253,7 +253,7 @@ function openGames(){
 
   var overlay = document.createElement('div');
   overlay.id = 'gamesHubOverlay';
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000 url(games-bg.jpeg) center/cover no-repeat;overflow-y:auto;';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#06030F;overflow-y:auto;';
 
   overlay.innerHTML =
     '<div style="display:flex;align-items:center;gap:12px;padding:14px 16px 10px;background:rgba(6,3,15,0.95);position:sticky;top:0;z-index:10;border-bottom:1px solid rgba(255,255,255,0.07);">'+
@@ -269,7 +269,8 @@ function openGames(){
       '<div class="games-grid">'+
         '<div class="game-card" onclick="openGameFromHub(\'rec-catch\')">'+
           '<div class="game-card-thumb">'+
-            '<span style="font-size:42px;">⛏️</span>'+
+            '<img src="rec-catch-thumb.jpeg" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;">'+
+            '
             '<div class="game-card-badge">Daily 10 REC</div>'+
           '</div>'+
           '<div class="game-card-name">REC Catch</div>'+
