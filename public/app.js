@@ -291,7 +291,7 @@ function openGames(){
   var card1 = document.createElement('div');
   card1.className = 'game-card';
   card1.onclick = function(){ openGameFromHub('rec-catch'); };
-  card1.innerHTML = '<div class="game-card-thumb" style="overflow:hidden;padding:0;"><img src="rec-catch-thumb.jpeg" style="width:100%;height:100%;object-fit:cover;"><div class="game-card-badge">Daily 10 REC</div></div><div class="game-card-name">REC Catch</div>';
+  card1.innerHTML = '<div class="game-card-thumb" style="overflow:hidden;padding:0;"><img src="rec-catch-thumb.jpeg" style="width:100%;height:100%;object-fit:cover;"></div><div class="game-card-name">REC Catch</div>';
   grid.appendChild(card1);
 
   // Coming soon cards
