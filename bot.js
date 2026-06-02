@@ -462,11 +462,11 @@ app.get('/api/leaderboard/global', async (req, res) => {
   try {
     var allUsers = await User.find({ banned: false })
       .sort({ rec: -1 }).limit(100)
-      .select('telegramId username firstName rec miningSpeed cardLevels vip')
+      .select('telegramId username firstName rec miningSpeed cardLevels vip lastSeen')
       .lean();
     res.json({ top100: allUsers.map(function(u, i) {
       var speed = u.miningSpeed > 0 ? u.miningSpeed : calcMiningSpeed(u.cardLevels);
-      return { rank: i+1, telegramId: u.telegramId, name: u.username||u.firstName||'User', rec: u.rec, miningSpeed: speed, vip: u.vip && u.vip.tier > 0 && u.vip.expiry > Date.now() ? u.vip.tier : 0 };
+      return { rank: i+1, telegramId: u.telegramId, name: u.username||u.firstName||'User', rec: u.rec, miningSpeed: speed, vip: u.vip && u.vip.tier > 0 && u.vip.expiry > Date.now() ? u.vip.tier : 0, online: u.lastSeen && (Date.now() - new Date(u.lastSeen).getTime() < 120000) };
     })});
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
@@ -475,14 +475,14 @@ app.get('/api/leaderboard/myrank/:telegramId', async (req, res) => {
   try {
     var userId = parseInt(req.params.telegramId);
     var allUsers = await User.find({ banned: false }).sort({ rec: -1 }).limit(500)
-      .select('telegramId username firstName rec miningSpeed cardLevels').lean();
+      .select('telegramId username firstName rec miningSpeed cardLevels lastSeen').lean();
     var myIndex = allUsers.findIndex(function(u) { return u.telegramId === userId; });
     var myRank = myIndex < 0 ? 999 : myIndex + 1;
     var start = Math.max(0, myIndex - 2);
     var end = Math.min(allUsers.length, myIndex + 3);
     var neighbors = myIndex < 0 ? [] : allUsers.slice(start, end).map(function(u, i) {
       var speed = u.miningSpeed > 0 ? u.miningSpeed : calcMiningSpeed(u.cardLevels);
-      return { rank: start+i+1, telegramId: u.telegramId, name: u.username||u.firstName||'User', rec: u.rec, miningSpeed: speed, isMe: u.telegramId===userId, vip: u.vip && u.vip.tier > 0 && u.vip.expiry > Date.now() ? u.vip.tier : 0 };
+      return { rank: start+i+1, telegramId: u.telegramId, name: u.username||u.firstName||'User', rec: u.rec, miningSpeed: speed, isMe: u.telegramId===userId, vip: u.vip && u.vip.tier > 0 && u.vip.expiry > Date.now() ? u.vip.tier : 0, online: u.lastSeen && (Date.now() - new Date(u.lastSeen).getTime() < 120000) };
     });
     res.json({ myRank, total: allUsers.length, neighbors });
   } catch(e) { res.status(500).json({ error: e.message }); }
@@ -1224,6 +1224,19 @@ app.post('/api/admin/distribute-weekly', async (req, res) => {
     await distributeWeeklyRewards();
     res.json({ success: true });
   } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// Heartbeat - user online status
+app.post('/api/user/heartbeat', async (req, res) => {
+  try {
+    const { telegramId } = req.body;
+    if(!telegramId) return res.json({ ok: false });
+    await User.findOneAndUpdate(
+      { telegramId: parseInt(telegramId) },
+      { lastSeen: new Date() }
+    );
+    res.json({ ok: true });
+  } catch(e) { res.json({ ok: false }); }
 });
 
 // Airdrop score update
