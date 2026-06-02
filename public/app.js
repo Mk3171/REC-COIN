@@ -164,6 +164,7 @@ function saveToServer(){
         refCount, claimedMilest,
         dailyLogin, mysteryLastDate, dailyTasksData, cardTasksClaimed, totalTaps,
         miningSpeed: recPerSec,
+        recordMiningSpeed: recordPerSec,
         refillData: window.refillData,
         vip: vipData,
         playerXP: (typeof playerXP!=='undefined'?playerXP:0),
