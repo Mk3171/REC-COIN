@@ -41,6 +41,9 @@ function calcTotalSpeeds(){
 }
 
 // ====== DATA ======
+var tgUser = null;
+try { var _tgWA = window.Telegram && window.Telegram.WebApp; tgUser = _tgWA && _tgWA.initDataUnsafe && _tgWA.initDataUnsafe.user ? _tgWA.initDataUnsafe.user : null; } catch(e){}
+var saveKey = 'recmining_' + (tgUser ? tgUser.id : 'guest');
 var defaultData={record:0,rec:0,energy:1000,maxEnergy:1000,
   tapLevelVal:0,energyLevelVal:0,tapPowerVal:1,
   completedTasks:[],cardLevels:{},cardUpgrades:{},refCount:0,claimedMilest:[],
@@ -111,7 +114,6 @@ function saveData(immediate){
     pendingRec:(typeof pendingRec!=='undefined'?pendingRec:0),
     playerXP:(typeof playerXP!=='undefined'?playerXP:0),
     claimedLevels:(typeof claimedLevels!=='undefined'?claimedLevels:{}),
-    levelsVersion:2,
     levelsVersion:2});
   try{localStorage.setItem(saveKey,d);}catch(e){}
   if(CS){try{CS.setItem('gameData',d);}catch(e){}}
