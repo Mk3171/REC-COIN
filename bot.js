@@ -97,6 +97,7 @@ const UserSchema = new mongoose.Schema({
   claimedMilest: { type: [Number], default: [] },
   playerXP:      { type: Number,  default: 0 },
   pendingRec:    { type: Number,  default: 0 },
+  airdropScore:  { type: Number,  default: 0 },
   claimedLevels: { type: Object,  default: {} },
   referredBy:    { type: String, default: '' },
   walletAddress: { type: String, default: '' },
@@ -1221,6 +1222,19 @@ app.post('/api/admin/distribute-weekly', async (req, res) => {
     const weekId = getWeekId();
     await WeeklyChallenge.findOneAndUpdate({ weekId }, { distributed: false });
     await distributeWeeklyRewards();
+    res.json({ success: true });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// Airdrop score update
+app.post('/api/user/airdrop-score', async (req, res) => {
+  try {
+    const { telegramId, airdropScore } = req.body;
+    if(!telegramId || !airdropScore) return res.json({ success: false });
+    await User.findOneAndUpdate(
+      { telegramId: parseInt(telegramId) },
+      { airdropScore: Math.floor(airdropScore) }
+    );
     res.json({ success: true });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
