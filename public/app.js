@@ -248,24 +248,73 @@ function showToast(msg){
 
 // ====== NAV ======
 function openGames(){
-  // افتح اللعبة كـ overlay داخل نفس الـ WebApp
+  var old = document.getElementById('gamesHubOverlay');
+  if(old) old.remove();
+
   var overlay = document.createElement('div');
-  overlay.id = 'gamesOverlay';
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000;';
-  
+  overlay.id = 'gamesHubOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#06030F;overflow-y:auto;';
+
+  overlay.innerHTML =
+    '<div style="display:flex;align-items:center;gap:12px;padding:14px 16px 10px;background:rgba(6,3,15,0.95);position:sticky;top:0;z-index:10;border-bottom:1px solid rgba(255,255,255,0.07);">'+
+      '<button onclick="document.getElementById(\'gamesHubOverlay\').remove()" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:white;padding:7px 14px;border-radius:10px;font-size:13px;cursor:pointer;">← Back</button>'+
+      '<div style="flex:1;text-align:center;font-family:Orbitron,sans-serif;font-size:16px;font-weight:900;background:linear-gradient(135deg,#FF4444,#FF8800);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">🎮 GAMES</div>'+
+      '<div style="width:60px;"></div>'+
+    '</div>'+
+    '<div style="padding:16px;">'+
+      '<div class="games-cat-header">'+
+        '<span class="games-cat-dot"></span>'+
+        '<span class="games-cat-title">🕹️ Classic Game</span>'+
+      '</div>'+
+      '<div class="games-grid">'+
+        '<div class="game-card" onclick="openGameFromHub(\'rec-catch\')">'+
+          '<div class="game-card-thumb">'+
+            '<span style="font-size:42px;">⛏️</span>'+
+            '<div class="game-card-badge">Daily 10 REC</div>'+
+          '</div>'+
+          '<div class="game-card-name">REC Catch</div>'+
+        '</div>'+
+        '<div class="game-card coming-soon">'+
+          '<div class="game-card-thumb"><span style="font-size:36px;opacity:0.3;">🔒</span></div>'+
+          '<div class="game-card-name" style="color:rgba(255,255,255,0.2);">Coming Soon</div>'+
+        '</div>'+
+        '<div class="game-card coming-soon">'+
+          '<div class="game-card-thumb"><span style="font-size:36px;opacity:0.3;">🔒</span></div>'+
+          '<div class="game-card-name" style="color:rgba(255,255,255,0.2);">Coming Soon</div>'+
+        '</div>'+
+        '<div class="game-card coming-soon">'+
+          '<div class="game-card-thumb"><span style="font-size:36px;opacity:0.3;">🔒</span></div>'+
+          '<div class="game-card-name" style="color:rgba(255,255,255,0.2);">Coming Soon</div>'+
+        '</div>'+
+      '</div>'+
+    '</div>';
+
+  document.body.appendChild(overlay);
+}
+
+function openGameFromHub(gameId){
+  var games = { 'rec-catch': '/games.html' };
+  var url = games[gameId];
+  if(!url) return;
+
+  var overlay = document.createElement('div');
+  overlay.id = 'gameplayOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:999999;background:#000;';
+
   var closeBtn = document.createElement('button');
   closeBtn.textContent = '✕ Back';
   closeBtn.style.cssText = 'position:absolute;top:10px;right:10px;z-index:100000;background:rgba(0,0,0,0.8);color:white;border:1px solid #333;padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer;';
-  closeBtn.onclick = function(){ document.body.removeChild(overlay); };
-  
+  closeBtn.onclick = function(){ overlay.remove(); };
+
   var iframe = document.createElement('iframe');
-  iframe.src = '/games.html';
+  iframe.src = url;
   iframe.style.cssText = 'width:100%;height:100%;border:none;';
-  
+
   overlay.appendChild(closeBtn);
   overlay.appendChild(iframe);
   document.body.appendChild(overlay);
 }
+
 
 function showPage(id,btn){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
