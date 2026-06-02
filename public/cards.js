@@ -1138,24 +1138,30 @@ function initApp() {
     setTimeout(initTonConnect, 800);
     setTimeout(function(){ initNewFeatures(); checkCardMissions(); }, 300);
     setTimeout(function(){ if(typeof calcRetroactiveXP==='function') calcRetroactiveXP(); }, 1000);
-    // Server-side offline earnings
-    if(tgUser) setTimeout(function(){
-      fetch('/api/user/offline-earnings', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({telegramId:tgUser.id})
-      }).then(function(r){return r.json();}).then(function(d){
-        if(d.earned > 0.000001) {
-          if(typeof pendingRec!=='undefined') pendingRec += d.earned;
-          if(d.earnedRecord > 0) record += d.earnedRecord;
-          updateUI();
-          if(typeof showToast==='function'){
-            var h=Math.floor(d.seconds/3600), m=Math.floor((d.seconds%3600)/60);
-            showToast('⚡ +'+(d.earned).toFixed(4)+' REC ('+(h>0?h+'h ':'')+m+'m offline)');
+    // Server-side offline earnings (with retry)
+    if(tgUser) {
+      function fetchOfflineEarnings(attempt) {
+        fetch('/api/user/offline-earnings', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({telegramId:tgUser.id})
+        }).then(function(r){return r.json();}).then(function(d){
+          if(d.earned > 0.000001) {
+            if(typeof pendingRec!=='undefined') pendingRec += d.earned;
+            if(d.earnedRecord > 0) record += d.earnedRecord;
+            updateUI();
+            if(typeof showToast==='function'){
+              var h=Math.floor((d.seconds||0)/3600), m=Math.floor(((d.seconds||0)%3600)/60);
+              showToast('⚡ +'+(d.earned).toFixed(4)+' REC ('+(h>0?h+'h ':'')+m+'m offline)');
+            }
+            if(typeof saveData==='function') saveData(true);
           }
-          if(typeof saveData==='function') saveData(true);
-        }
-      }).catch(function(){});
-    }, 1500);
+        }).catch(function(){
+          // Retry up to 3 times
+          if(attempt < 3) setTimeout(function(){ fetchOfflineEarnings(attempt+1); }, 3000);
+        });
+      }
+      setTimeout(function(){ fetchOfflineEarnings(1); }, 2000);
+    }
     // حمّل بيانات الكومبو عند البداية
     if(tgUser) setTimeout(function(){
       fetch('/api/combo/today/' + tgUser.id)
