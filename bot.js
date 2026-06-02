@@ -1239,6 +1239,54 @@ app.post('/api/user/heartbeat', async (req, res) => {
   } catch(e) { res.json({ ok: false }); }
 });
 
+// Server-side offline earnings calculation
+app.post('/api/user/offline-earnings', async (req, res) => {
+  try {
+    const { telegramId } = req.body;
+    if(!telegramId) return res.json({ earned: 0 });
+
+    const user = await User.findOne({ telegramId: parseInt(telegramId) });
+    if(!user) return res.json({ earned: 0 });
+
+    const now = Date.now();
+    const lastSeen = user.lastSeen ? new Date(user.lastSeen).getTime() : 0;
+    if(!lastSeen) {
+      // First time - just update lastSeen
+      await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, { lastSeen: new Date() });
+      return res.json({ earned: 0, earnedRecord: 0 });
+    }
+
+    const elapsed = (now - lastSeen) / 1000; // seconds
+    if(elapsed < 30) return res.json({ earned: 0, earnedRecord: 0 });
+
+    // Cap at 24 hours
+    const seconds = Math.min(elapsed, 86400);
+    const speed = user.miningSpeed || 0;
+
+    // Calculate earnings
+    const earnedRec = parseFloat((speed * seconds).toFixed(6));
+    const earnedRecord = Math.floor((user.recordMiningSpeed || 0) * seconds);
+
+    // Add to pendingRec
+    if(earnedRec > 0.000001 || earnedRecord > 0) {
+      await User.findOneAndUpdate(
+        { telegramId: parseInt(telegramId) },
+        {
+          $inc: {
+            pendingRec: earnedRec > 0 ? earnedRec : 0,
+            record: earnedRecord > 0 ? earnedRecord : 0
+          },
+          lastSeen: new Date()
+        }
+      );
+    } else {
+      await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, { lastSeen: new Date() });
+    }
+
+    res.json({ earned: earnedRec, earnedRecord, seconds: Math.floor(seconds) });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
 // Airdrop score update
 app.post('/api/user/airdrop-score', async (req, res) => {
   try {
