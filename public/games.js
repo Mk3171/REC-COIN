@@ -31,7 +31,7 @@ var dailyData = { date: '', rec: 0 };
 
 // ====== BACKGROUND IMAGE ======
 var bgImage = new Image();
-bgImage.src = 'catch-bg.jpg';
+bgImage.src = 'catch-bg.jpeg';
 var bgLoaded = false;
 bgImage.onload = function(){ bgLoaded = true; };
 
