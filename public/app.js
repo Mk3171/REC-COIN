@@ -44,6 +44,24 @@ function calcTotalSpeeds(){
 var tgUser = null;
 try { var _tgWA = window.Telegram && window.Telegram.WebApp; tgUser = _tgWA && _tgWA.initDataUnsafe && _tgWA.initDataUnsafe.user ? _tgWA.initDataUnsafe.user : null; } catch(e){}
 var saveKey = 'recmining_' + (tgUser ? tgUser.id : 'guest');
+
+// Migration: if no data under correct key, check old keys
+(function(){
+  try {
+    if(!localStorage.getItem(saveKey)) {
+      var oldKeys = ['recmining_undefined', 'recmining_guest', 'recmining_null'];
+      for(var i=0; i<oldKeys.length; i++){
+        var old = localStorage.getItem(oldKeys[i]);
+        if(old) {
+          localStorage.setItem(saveKey, old);
+          localStorage.removeItem(oldKeys[i]);
+          break;
+        }
+      }
+    }
+  } catch(e){}
+})();
+
 var defaultData={record:0,rec:0,energy:1000,maxEnergy:1000,
   tapLevelVal:0,energyLevelVal:0,tapPowerVal:1,
   completedTasks:[],cardLevels:{},cardUpgrades:{},refCount:0,claimedMilest:[],
