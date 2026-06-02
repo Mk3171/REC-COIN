@@ -818,10 +818,17 @@ function renderGlobal(top100, myRankData, weekly) {
 
   cont.innerHTML = html;
 
-  // Load avatars async
+  // Load avatars async - safe replacement
   top100.slice(0,15).forEach(function(p) {
     getAvatar(p.telegramId, p.name, 42, function(avatarHtml) {
-      document.querySelectorAll('[data-uid="' + p.telegramId + '"]').forEach(function(el) { el.outerHTML = avatarHtml; });
+      if(!avatarHtml) return;
+      document.querySelectorAll('[data-uid="' + p.telegramId + '"]').forEach(function(el) {
+        if(el && el.parentNode) {
+          var tmp = document.createElement('div');
+          tmp.innerHTML = avatarHtml;
+          if(tmp.firstChild) el.parentNode.replaceChild(tmp.firstChild, el);
+        }
+      });
     });
   });
 }
@@ -1063,6 +1070,14 @@ function calcOfflineEarnings() {
       if(typeof pendingRec !== 'undefined') pendingRec += earnedRec;
       else rec += earnedRec;
     }
+
+    // Show offline earnings popup
+    setTimeout(function(){
+      var h = Math.floor(elapsed/3600);
+      var m = Math.floor((elapsed%3600)/60);
+      var timeStr = (h > 0 ? h+'h ' : '') + m+'m';
+      if(typeof showToast === 'function') showToast('⚡ +'+earnedRec.toFixed(4)+' REC');
+    }, 2000);
 
     saveData(true);
 
