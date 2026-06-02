@@ -253,7 +253,7 @@ function openGames(){
 
   var overlay = document.createElement('div');
   overlay.id = 'gamesHubOverlay';
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#06030F;overflow-y:auto;';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000 url(games-bg.jpg) center/cover no-repeat;overflow-y:auto;';
 
   overlay.innerHTML =
     '<div style="display:flex;align-items:center;gap:12px;padding:14px 16px 10px;background:rgba(6,3,15,0.95);position:sticky;top:0;z-index:10;border-bottom:1px solid rgba(255,255,255,0.07);">'+
