@@ -1,14 +1,9 @@
 // ====== REC CATCH GAME ======
-// Daily limit: 10 REC
-// Without powerups: ~24h to collect 10 REC
-// Each coin = 10 / 50000 = 0.0002 REC (50000 coins per 24h = 1 coin per 1.73s)
-
 const DAILY_MAX = 10;
-const COIN_VALUE = 0.0002; // REC per coin
-const COIN_INTERVAL = 1200; // ms between coins (base)
+const COIN_VALUE = 0.0002;
+const COIN_INTERVAL = 1200;
 const SAVE_KEY = 'recCatchData';
 
-// Game state
 var canvas, ctx, W, H;
 var basket = { x: 0, y: 0, w: 80, h: 18, color: '#FF0000' };
 var coins = [];
@@ -29,12 +24,16 @@ var tgUser = null;
 var animFrame = null;
 var lastSaveTime = 0;
 
-// Touch/mouse tracking
 var touchX = null;
 var isDragging = false;
 
-// Daily data
 var dailyData = { date: '', rec: 0 };
+
+// ====== BACKGROUND IMAGE ======
+var bgImage = new Image();
+bgImage.src = 'catch-bg.jpg';
+var bgLoaded = false;
+bgImage.onload = function(){ bgLoaded = true; };
 
 // ====== INIT ======
 window.onload = function(){
@@ -55,7 +54,6 @@ window.onload = function(){
   loadDailyData();
   updateStartScreen();
 
-  // Touch controls
   canvas.addEventListener('touchstart', onTouchStart, {passive:false});
   canvas.addEventListener('touchmove', onTouchMove, {passive:false});
   canvas.addEventListener('touchend', onTouchEnd, {passive:false});
@@ -96,7 +94,6 @@ function saveDailyData(){
   dailyData.rec = todayRec;
   try{ localStorage.setItem(SAVE_KEY, JSON.stringify(dailyData)); }catch(e){}
 
-  // Save to main game server too
   var now = Date.now();
   if(tgUser && now - lastSaveTime > 10000){
     lastSaveTime = now;
@@ -156,7 +153,6 @@ function showEndScreen(){
 function startGame(){
   document.getElementById('startScreen').classList.add('hidden');
 
-  // Reset
   coins = [];
   particles = [];
   powerupItems = [];
@@ -179,68 +175,46 @@ function startGame(){
 
 function gameLoop(){
   if(!gameRunning) return;
-
   var now = Date.now();
   update(now);
   draw();
-
   animFrame = requestAnimationFrame(gameLoop);
 }
 
 // ====== UPDATE ======
 function update(now){
-  // Spawn coins
   var interval = COIN_INTERVAL;
-  if(activePowerups.x2 > now) interval *= 0.7; // slightly faster with x2
+  if(activePowerups.x2 > now) interval *= 0.7;
 
   if(now - lastCoinTime > interval){
     spawnCoin();
     lastCoinTime = now;
-
-    // Random powerup spawn (1 in 30 chance)
     if(Math.random() < 0.033) spawnPowerupItem();
-
-    // Increase difficulty slightly over time
     if(coinSpeed < 6) coinSpeed += 0.002;
   }
 
-  // Move basket toward touch
   if(touchX !== null){
     var target = touchX - basket.w/2;
     basket.x += (target - basket.x) * 0.2;
     basket.x = Math.max(0, Math.min(W - basket.w, basket.x));
   }
 
-  // Magnet effect
   var magnetActive = activePowerups.magnet > now;
   var x2Active = activePowerups.x2 > now;
 
-  // Update coins
   for(var i = coins.length-1; i >= 0; i--){
     var c = coins[i];
-
     if(magnetActive){
-      // Pull toward basket center
       var bCenter = basket.x + basket.w/2;
       c.x += (bCenter - c.x) * 0.05;
     }
-
     c.y += c.speed;
     c.rot += 0.05;
 
-    // Check catch
     if(c.y + c.r >= basket.y && c.y - c.r <= basket.y + basket.h &&
        c.x >= basket.x - c.r && c.x <= basket.x + basket.w + c.r){
-
-      // Caught!
       var remaining = DAILY_MAX - todayRec;
-      if(remaining <= 0){
-        // Daily limit reached
-        showLimitFlash();
-        endGame();
-        return;
-      }
-
+      if(remaining <= 0){ showLimitFlash(); endGame(); return; }
       var earned = Math.min(c.value * (x2Active ? 2 : 1), remaining);
       sessionRec += earned;
       todayRec += earned;
@@ -248,51 +222,35 @@ function update(now){
       coinsCaught++;
       combo++;
       if(combo > bestCombo) bestCombo = combo;
-
-      // Combo flash
       if(combo >= 5) showComboFlash('x'+combo+' COMBO! 🔥');
       else if(combo >= 3) showComboFlash('x'+combo);
-
-      // Particles
       spawnParticles(c.x, c.y, x2Active ? '#FFD700' : '#00FF88');
-
       coins.splice(i, 1);
       updateHUD();
       saveDailyData();
       continue;
     }
-
-    // Miss
     if(c.y > H + 20){
       combo = 0;
       coins.splice(i, 1);
-
-      // Shield absorbs first miss
-      if(activePowerups.shield > now){
-        activePowerups.shield = 0;
-      }
+      if(activePowerups.shield > now) activePowerups.shield = 0;
     }
   }
 
-  // Update powerup items
   for(var j = powerupItems.length-1; j >= 0; j--){
     var p = powerupItems[j];
     p.y += p.speed;
     p.rot += 0.03;
-
     if(p.y + 20 >= basket.y && p.y - 20 <= basket.y + basket.h &&
        p.x >= basket.x - 20 && p.x <= basket.x + basket.w + 20){
-      // Collected powerup
       activatePowerup(p.type);
       spawnParticles(p.x, p.y, p.color);
       powerupItems.splice(j, 1);
       continue;
     }
-
     if(p.y > H + 20) powerupItems.splice(j, 1);
   }
 
-  // Update particles
   for(var k = particles.length-1; k >= 0; k--){
     var pt = particles[k];
     pt.x += pt.vx;
@@ -302,18 +260,24 @@ function update(now){
     if(pt.life <= 0) particles.splice(k, 1);
   }
 
-  // Update powerup badges
   updatePowerupBadges(now);
 }
 
 // ====== DRAW ======
 function draw(){
-  // Background
-  ctx.fillStyle = '#000510';
-  ctx.fillRect(0, 0, W, H);
+  // Background image or fallback color
+  if(bgLoaded){
+    ctx.drawImage(bgImage, 0, 0, W, H);
+    // Dark overlay for readability
+    ctx.fillStyle = 'rgba(0,0,0,0.45)';
+    ctx.fillRect(0, 0, W, H);
+  } else {
+    ctx.fillStyle = '#000510';
+    ctx.fillRect(0, 0, W, H);
+  }
 
   // Grid lines
-  ctx.strokeStyle = 'rgba(255,0,0,0.04)';
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
   ctx.lineWidth = 1;
   for(var gx = 0; gx < W; gx += 40){
     ctx.beginPath(); ctx.moveTo(gx,0); ctx.lineTo(gx,H); ctx.stroke();
@@ -337,8 +301,6 @@ function draw(){
     ctx.save();
     ctx.translate(c.x, c.y);
     ctx.rotate(c.rot);
-
-    // Glow
     var grad = ctx.createRadialGradient(0,0,0,0,0,c.r*2);
     grad.addColorStop(0, 'rgba(0,255,136,0.15)');
     grad.addColorStop(1, 'rgba(0,255,136,0)');
@@ -346,23 +308,18 @@ function draw(){
     ctx.beginPath();
     ctx.arc(0, 0, c.r*2, 0, Math.PI*2);
     ctx.fill();
-
-    // Coin body
     ctx.fillStyle = c.color;
     ctx.shadowColor = c.color;
     ctx.shadowBlur = 8;
     ctx.beginPath();
     ctx.arc(0, 0, c.r, 0, Math.PI*2);
     ctx.fill();
-
-    // REC text
     ctx.shadowBlur = 0;
     ctx.fillStyle = '#000';
     ctx.font = 'bold '+(c.r*0.7)+'px Orbitron,monospace';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText('R', 0, 0);
-
     ctx.restore();
   });
 
@@ -371,14 +328,12 @@ function draw(){
     ctx.save();
     ctx.translate(p.x, p.y);
     ctx.rotate(p.rot);
-
     ctx.shadowColor = p.color;
     ctx.shadowBlur = 15;
     ctx.font = '24px serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     ctx.fillText(p.emoji, 0, 0);
-
     ctx.restore();
   });
 
@@ -386,26 +341,18 @@ function draw(){
   var bx = basket.x, by = basket.y, bw = basket.w, bh = basket.h;
   var magnetActive = activePowerups.magnet > Date.now();
   var x2Active = activePowerups.x2 > Date.now();
-
-  // Basket glow
   ctx.shadowColor = x2Active ? '#FFD700' : (magnetActive ? '#00AAFF' : '#FF0000');
   ctx.shadowBlur = 20;
-
-  // Basket body
   ctx.strokeStyle = x2Active ? '#FFD700' : (magnetActive ? '#00AAFF' : '#FF4444');
   ctx.lineWidth = 3;
   ctx.strokeRect(bx, by, bw, bh);
-
   ctx.fillStyle = x2Active ? 'rgba(255,215,0,0.15)' : 'rgba(255,0,0,0.1)';
   ctx.fillRect(bx, by, bw, bh);
-
-  // Basket bottom line
   ctx.fillStyle = x2Active ? '#FFD700' : '#FF0000';
   ctx.fillRect(bx, by+bh-3, bw, 3);
-
   ctx.shadowBlur = 0;
 
-  // Progress bar at bottom
+  // Progress bar
   var pct = Math.min(1, todayRec / DAILY_MAX);
   ctx.fillStyle = 'rgba(255,255,255,0.05)';
   ctx.fillRect(0, H-4, W, 4);
@@ -519,20 +466,7 @@ function endGame(){
 }
 
 // ====== CONTROLS ======
-function onTouchStart(e){
-  e.preventDefault();
-  touchX = e.touches[0].clientX;
-}
-
-function onTouchMove(e){
-  e.preventDefault();
-  touchX = e.touches[0].clientX;
-}
-
-function onTouchEnd(e){
-  e.preventDefault();
-}
-
-function onMouseMove(e){
-  touchX = e.clientX;
-}
+function onTouchStart(e){ e.preventDefault(); touchX = e.touches[0].clientX; }
+function onTouchMove(e){ e.preventDefault(); touchX = e.touches[0].clientX; }
+function onTouchEnd(e){ e.preventDefault(); }
+function onMouseMove(e){ touchX = e.clientX; }
