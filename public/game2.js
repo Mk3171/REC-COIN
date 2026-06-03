@@ -80,19 +80,19 @@ function buildLevel(n){
   }
   // platforms
   var pc=6+n*2,sp=(worldW-300)/pc;
-  // Platforms low enough for Mario to jump on
+  // Platforms: low (1.5-2 tiles above ground), all brick, all breakable
   for(var p=0;p<pc;p++){
     var px=200+p*sp+Math.random()*80;
-    var py=GY-TS*2-Math.random()*TS; // 2-3 tiles above ground
+    var py=GY-TS*1.8-Math.random()*TS*0.5; // low: 1.8-2.3 tiles above ground
     var pw=2+Math.floor(Math.random()*3);
-    addP(px,py,pw,Math.random()>0.5?'brick':'solid');
+    addP(px,py,pw,'brick');
   }
-  // Q blocks: float at jump height from ground (Mario hits from BELOW)
-  // Jump height ~ GY - 170 to GY - 210 (reachable with single jump)
-  var qCount=7+n;
+  // Q blocks: float HIGH in air (4-4.8 tiles above ground)
+  // Mario walks under and jumps up to hit from below
+  var qCount=8+n;
   for(var q=0;q<qCount;q++){
-    var qx=200+(worldW-400)/qCount*q+Math.random()*70;
-    var qy=GY-TS*3.2-Math.random()*TS*0.8; // fixed jump height
+    var qx=180+(worldW-400)/qCount*q+Math.random()*60;
+    var qy=GY-TS*4-Math.random()*TS*0.8; // high: reachable by jump, not touching platforms
     addQ(qx,qy);
   }
   // enemies
