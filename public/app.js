@@ -292,7 +292,7 @@ function openGames(){
   var card2 = document.createElement('div');
   card2.className = 'game-card';
   card2.onclick = function(){ openGameFromHub('super-rec'); };
-  card2.innerHTML = '<div class="game-card-thumb" style="background:linear-gradient(135deg,#5C94FC,#1a3a8f);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;"><span style="font-size:44px;">🍄</span><span style="font-size:10px;color:#FFD700;font-weight:700;letter-spacing:1px;">SUPER REC</span></div><div class="game-card-name">Super REC</div>';
+  card2.innerHTML = '<div class="game-card-thumb" style="overflow:hidden;padding:0;"><img src="super-rec-thumb.jpeg" style="width:100%;height:100%;object-fit:cover;"></div><div class="game-card-name">Super REC</div>';
   grid.appendChild(card2);
 
   for(var i=0; i<2; i++){
