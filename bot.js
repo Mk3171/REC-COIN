@@ -789,9 +789,23 @@ app.post('/api/user/save', async (req, res) => {
       }
     }
 
+    // Extract rec separately to use $max (prevents admin credits being overwritten)
+    var saveData = Object.assign({}, data);
+    var recToSave = saveData.rec;
+    delete saveData.rec;
+    delete saveData.pendingRec; // pendingRec managed separately
+
+    var updateOp = {
+      $set: Object.assign({}, saveData, { lastSeen: new Date(), lastSaveTime: Date.now() })
+    };
+    // $max for rec: only update if new value is HIGHER than current
+    if(recToSave !== undefined) {
+      updateOp.$max = { rec: recToSave };
+    }
+
     const updated = await User.findOneAndUpdate(
       { telegramId: parseInt(telegramId) },
-      { ...data, lastSeen: new Date(), lastSaveTime: Date.now() },
+      updateOp,
       { new: true, upsert: true }
     );
     res.json({ success: true, data: updated });
