@@ -255,7 +255,6 @@ function openGames(){
   overlay.id = 'gamesHubOverlay';
   overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000 url(games-bg.jpeg) center/cover no-repeat;overflow-y:auto;';
 
-  // Header
   var header = document.createElement('div');
   header.style.cssText = 'display:flex;align-items:center;gap:12px;padding:14px 16px 10px;background:rgba(0,0,0,0.7);position:sticky;top:0;z-index:10;border-bottom:1px solid rgba(255,255,255,0.07);';
 
@@ -273,42 +272,43 @@ function openGames(){
   header.appendChild(document.createElement('div'));
   overlay.appendChild(header);
 
-  // Content
-  var content = document.createElement('div');
-  content.style.cssText = 'padding:16px;';
+  var cont = document.createElement('div');
+  cont.style.cssText = 'padding:16px;';
 
-  // Category title
   var catHeader = document.createElement('div');
   catHeader.className = 'games-cat-header';
   catHeader.innerHTML = '<span class="games-cat-dot"></span><span class="games-cat-title">🕹️ Classic Game</span>';
-  content.appendChild(catHeader);
+  cont.appendChild(catHeader);
 
-  // Grid
   var grid = document.createElement('div');
   grid.className = 'games-grid';
 
-  // REC Catch card
   var card1 = document.createElement('div');
   card1.className = 'game-card';
   card1.onclick = function(){ openGameFromHub('rec-catch'); };
   card1.innerHTML = '<div class="game-card-thumb" style="overflow:hidden;padding:0;"><img src="rec-catch-thumb.jpeg" style="width:100%;height:100%;object-fit:cover;"></div><div class="game-card-name">REC Catch</div>';
   grid.appendChild(card1);
 
-  // Coming soon cards
-  for(var i=0; i<3; i++){
+  var card2 = document.createElement('div');
+  card2.className = 'game-card';
+  card2.onclick = function(){ openGameFromHub('super-rec'); };
+  card2.innerHTML = '<div class="game-card-thumb" style="background:linear-gradient(135deg,#5C94FC,#1a3a8f);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;"><span style="font-size:44px;">🍄</span><span style="font-size:10px;color:#FFD700;font-weight:700;letter-spacing:1px;">SUPER REC</span></div><div class="game-card-name">Super REC</div>';
+  grid.appendChild(card2);
+
+  for(var i=0; i<2; i++){
     var cs = document.createElement('div');
     cs.className = 'game-card coming-soon';
     cs.innerHTML = '<div class="game-card-thumb"><span style="font-size:36px;opacity:0.3;">🔒</span></div><div class="game-card-name" style="color:rgba(255,255,255,0.2);">Coming Soon</div>';
     grid.appendChild(cs);
   }
 
-  content.appendChild(grid);
-  overlay.appendChild(content);
+  cont.appendChild(grid);
+  overlay.appendChild(cont);
   document.body.appendChild(overlay);
 }
 
 function openGameFromHub(gameId){
-  var games = { 'rec-catch': '/games.html' };
+  var games = { 'rec-catch': '/games.html', 'super-rec': '/game2.html' };
   var url = games[gameId];
   if(!url) return;
 
