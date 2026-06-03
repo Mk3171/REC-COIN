@@ -789,12 +789,9 @@ app.post('/api/user/save', async (req, res) => {
       }
     }
 
-    var sv=Object.assign({},data); var rv=sv.rec; delete sv.rec;
-    var op={$set:Object.assign(sv,{lastSeen:new Date(),lastSaveTime:Date.now()})};
-    if(rv!==undefined) op.$max={rec:rv};
     const updated = await User.findOneAndUpdate(
       { telegramId: parseInt(telegramId) },
-      op,
+      { ...data, lastSeen: new Date(), lastSaveTime: Date.now() },
       { new: true, upsert: true }
     );
     res.json({ success: true, data: updated });
@@ -1262,14 +1259,9 @@ app.post('/api/user/offline-earnings', async (req, res) => {
     const elapsed = (now - lastSeen) / 1000; // seconds
     if(elapsed < 30) return res.json({ earned: 0, earnedRecord: 0 });
 
-    // Cap at 7 days
-    const seconds = Math.min(elapsed, 604800);
-    // Apply VIP mining speed bonus to offline earnings
-    var speed = user.miningSpeed || 0;
-    if(user.vip && user.vip.tier >= 1 && user.vip.expiry > Date.now()) {
-      var vipBoost = user.vip.tier === 1 ? 1.5 : user.vip.tier === 2 ? 2 : 3;
-      speed = speed * vipBoost;
-    }
+    // Cap at 24 hours
+    const seconds = Math.min(elapsed, 86400);
+    const speed = user.miningSpeed || 0;
 
     // Calculate earnings
     const earnedRec = parseFloat((speed * seconds).toFixed(6));
@@ -1377,6 +1369,62 @@ app.post('/api/combo/check', async (req, res) => {
 
     res.json({ matched: true, done: progress.length, allDone, reward: giveReward ? combo.reward : 0 });
   } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+
+// ====== ADSGRAM REWARD ENDPOINT ======
+app.post('/api/adsgram/reward', async (req, res) => {
+  try {
+    var telegramId = req.body.telegramId || req.query.userId;
+    if(!telegramId) return res.status(400).json({ error: 'Missing userId' });
+
+    var today = new Date().toISOString().split('T')[0];
+    var user = await User.findOne({ telegramId: parseInt(telegramId) }).lean();
+    if(!user) return res.status(404).json({ error: 'User not found' });
+
+    // Daily limit: 5 ads per day
+    var adKey = 'adsWatched_' + today;
+    var watched = user[adKey] || 0;
+    if(watched >= 100) return res.json({ success: false, reason: 'daily_limit' });
+
+    var reward = 5; // 5 REC per ad (500/100)
+    await User.collection.updateOne(
+      { telegramId: parseInt(telegramId) },
+      { $inc: { rec: reward }, $set: { [adKey]: watched + 1 } }
+    );
+
+    var updated = await User.findOne({ telegramId: parseInt(telegramId) }).lean();
+    console.log('[Ads] User', telegramId, 'watched ad → +' + reward + ' REC');
+    res.json({ success: true, reward, newBalance: updated.rec, remaining: 99 - watched });
+  } catch(e) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// Adsgram server-to-server callback (GET)
+app.get('/api/adsgram/reward', async (req, res) => {
+  try {
+    var telegramId = req.query.userId;
+    if(!telegramId) return res.status(400).send('Missing userId');
+
+    var today = new Date().toISOString().split('T')[0];
+    var user = await User.findOne({ telegramId: parseInt(telegramId) }).lean();
+    if(!user) return res.status(404).send('User not found');
+
+    var adKey = 'adsWatched_' + today;
+    var watched = user[adKey] || 0;
+    if(watched >= 100) return res.send('daily_limit');
+
+    await User.collection.updateOne(
+      { telegramId: parseInt(telegramId) },
+      { $inc: { rec: 2 }, $set: { [adKey]: watched + 1 } }
+    );
+
+    console.log('[Ads-S2S] User', telegramId, '+2 REC from ad');
+    res.send('OK');
+  } catch(e) {
+    res.status(500).send(e.message);
+  }
 });
 
 app.post('/webhook', (req, res) => { bot.processUpdate(req.body); res.sendStatus(200); });
