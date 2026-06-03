@@ -1075,9 +1075,11 @@ async function runBlockDistribution() {
         `👤 Miner: ${userName}\n` +
         `💰 Reward: +${BLOCK_REC_REWARD} REC\n` +
         `👥 Active Miners: ${activeUsers.length}\n` +
-        `⏰ ${new Date().toUTCString()}\n\n` +
-        `🚀 @RecMiningGame_bot`;
-      await bot.sendMessage(BLOCKS_CHANNEL_ID, channelMsg, { parse_mode: 'Markdown' }).catch(()=>{});
+        `⏰ ${new Date().toUTCString()}`;
+      await bot.sendMessage(BLOCKS_CHANNEL_ID, channelMsg, {
+        parse_mode: 'Markdown',
+        reply_markup: { inline_keyboard: [[{ text: '🚀 Start Mining', web_app: { url: 'https://rec-coin.onrender.com' } }]] }
+      }).catch(()=>{});
 
       // Group announcement (English)
       var groupMsg =
@@ -1085,8 +1087,11 @@ async function runBlockDistribution() {
         `⛏️ Miner: ${userName}\n` +
         `🏆 Reward: +${BLOCK_REC_REWARD} REC\n` +
         `👥 Active Miners: ${activeUsers.length}\n\n` +
-        `💡 @RecMiningGame_bot`;
-      await bot.sendMessage(GROUP_CHAT_ID, groupMsg, { parse_mode: 'Markdown' }).catch(()=>{});
+        `⏰ ${new Date().toUTCString()}`;
+      await bot.sendMessage(GROUP_CHAT_ID, groupMsg, {
+        parse_mode: 'Markdown',
+        reply_markup: { inline_keyboard: [[{ text: '🚀 Start Mining', web_app: { url: 'https://rec-coin.onrender.com' } }]] }
+      }).catch(()=>{});
 
       // Personal message
       var personalMsg =
