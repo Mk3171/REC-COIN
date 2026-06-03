@@ -51,6 +51,11 @@ const ADMIN_ID = 6995765586;
 const GROUP_CHAT_ID = -1003957241357;
 const BLOCKS_CHANNEL_ID = -1004293036864;
 
+// ====== BLOCK MINING SYSTEM ======
+// Every tap has 1/500 chance to find a block
+// Block rewards based on user's mining level
+const BLOCK_CHANCE = 1 / 500;
+var totalBlocksMined = 0; // track globally
 
 function isRealisticIncrease(oldRec, newRec, oldRecord, newRecord, timeDiff, telegramId) {
   // Admin always passes
@@ -784,11 +789,9 @@ app.post('/api/user/save', async (req, res) => {
       }
     }
 
-    // $max protects rec from being overwritten by stale client data
-    var sv = Object.assign({}, data);
-    var rv = sv.rec; delete sv.rec;
-    var op = { $set: Object.assign(sv, {lastSeen:new Date(),lastSaveTime:Date.now()}) };
-    if(rv !== undefined) op.$max = { rec: rv };
+    var sv=Object.assign({},data); var rv=sv.rec; delete sv.rec;
+    var op={$set:Object.assign(sv,{lastSeen:new Date(),lastSaveTime:Date.now()})};
+    if(rv!==undefined) op.$max={rec:rv};
     const updated = await User.findOneAndUpdate(
       { telegramId: parseInt(telegramId) },
       op,
@@ -992,10 +995,11 @@ app.get('/admin', async (req, res) => {
 
 
 // ====== BITCOIN-STYLE BLOCK SYSTEM ======
-const BLOCK_REWARD   = 20;
-const BOT_USERNAME   = '@RecMiningGame_bot';
+// 1 block per hour, winner by mining speed weight
+const BLOCK_REWARD = 20;
+const BOT_USERNAME = '@RecMiningGame_bot';
 var totalBlocksMined = 0;
-var blockRunning     = false;
+var blockRunning = false;
 
 async function runHourlyBlock() {
   if(blockRunning) return;
@@ -1008,49 +1012,45 @@ async function runHourlyBlock() {
       miningSpeed: { $gt: 0 }
     }).select('telegramId username firstName miningSpeed').lean();
 
-    if(!activeUsers.length) { console.log('[Block] No eligible users'); return; }
+    if(!activeUsers.length){ console.log('[Block] No eligible users'); return; }
 
     // Weighted random by miningSpeed
-    var total = activeUsers.reduce(function(s,u){ return s+(u.miningSpeed||0); }, 0);
-    var rand = Math.random() * total, cum = 0, winner = null;
+    var total = activeUsers.reduce(function(s,u){ return s+(u.miningSpeed||0); },0);
+    var rand = Math.random()*total, cum=0, winner=null;
     for(var i=0;i<activeUsers.length;i++){
       cum += activeUsers[i].miningSpeed||0;
       if(rand<=cum){ winner=activeUsers[i]; break; }
     }
-    if(!winner) winner = activeUsers[activeUsers.length-1];
+    if(!winner) winner=activeUsers[activeUsers.length-1];
 
     totalBlocksMined++;
     var today = new Date().toISOString().split('T')[0];
-    var name  = winner.username ? '@'+winner.username : (winner.firstName||'Miner');
+    var name = winner.username ? '@'+winner.username : (winner.firstName||'Miner');
 
-    // Add REC directly - $max in save endpoint protects it
+    // Add REC directly using native MongoDB driver (bypasses Mongoose strict)
     await User.collection.updateOne(
       { telegramId: winner.telegramId },
       { $inc: { rec: BLOCK_REWARD, totalBlocksFound: 1 }, $set: { lastBlockDate: today } }
     );
 
-    var msg = '⛏️ *New Block Found!* ⛏️\n\n' +
-      '🔴 Block #' + totalBlocksMined + '\n' +
-      '👤 Miner: ' + name + '\n' +
-      '💰 Reward: +' + BLOCK_REWARD + ' REC\n' +
-      '👥 Active Miners: ' + activeUsers.length + '\n' +
-      '⏰ ' + new Date().toUTCString() + '\n\n' + BOT_USERNAME;
-
-    await bot.sendMessage(BLOCKS_CHANNEL_ID, msg, {parse_mode:'Markdown'}).catch(function(e){ console.log('[Block] Channel err:',e.message); });
-    await bot.sendMessage(GROUP_CHAT_ID, msg, {parse_mode:'Markdown'}).catch(function(e){ console.log('[Block] Group err:',e.message); });
+    // Notifications
+    var msg = '⛏️ *New Block Found!* ⛏️\n\n🔴 Block #'+totalBlocksMined+'\n👤 Miner: '+name+'\n💰 Reward: +'+BLOCK_REWARD+' REC\n👥 Active: '+activeUsers.length+'\n⏰ '+new Date().toUTCString()+'\n\n'+BOT_USERNAME;
+    await bot.sendMessage(BLOCKS_CHANNEL_ID, msg, {parse_mode:'Markdown'}).catch(function(e){ console.log('[Block] Channel:',e.message); });
+    await bot.sendMessage(GROUP_CHAT_ID, msg, {parse_mode:'Markdown'}).catch(function(e){ console.log('[Block] Group:',e.message); });
     await bot.sendMessage(winner.telegramId,
-      '⛏️ *You Found a Block!*\n\n🎉 Block #' + totalBlocksMined + '\n💰 *+' + BLOCK_REWARD + ' REC* added to your balance!\n\nOpen the bot to see your balance 👇',
-      { parse_mode:'Markdown', reply_markup:{inline_keyboard:[[{text:'🚀 Open Bot',web_app:{url:MINI_APP_URL}}]]} }
+      '⛏️ *You Found a Block!*\n\n🎉 Block #'+totalBlocksMined+'\n💰 *+'+BLOCK_REWARD+' REC* added!\n\nOpen the bot to see your balance 👇',
+      {parse_mode:'Markdown',reply_markup:{inline_keyboard:[[{text:'🚀 Open Bot',web_app:{url:MINI_APP_URL}}]]}}
     ).catch(function(){});
-
-    console.log('[Block] #'+totalBlocksMined+' → '+name+' +'+BLOCK_REWARD+' REC | '+activeUsers.length+' miners');
+    console.log('[Block] #'+totalBlocksMined+' → '+name+' +'+BLOCK_REWARD+' REC | miners:'+activeUsers.length);
   } catch(e){ console.log('[Block] Error:',e.message); }
-  finally { blockRunning = false; }
+  finally{ blockRunning=false; }
 }
 
 setInterval(runHourlyBlock, 3600000);
 setTimeout(runHourlyBlock, 5*60000);
 
+
+// ====== API: BLOCK-FOUND (للإشعار اليدوي من الواجهة) ======
 // ====== API: GAME EARN (REC Catch game) ======
 app.post('/api/game-earn', async (req, res) => {
   try {
@@ -1081,7 +1081,7 @@ app.post('/api/game-earn', async (req, res) => {
   }
 });
 
-// block-found API removed - server-side only now
+// /api/block-found removed
 
 // ====== REFERRAL LIST ======
 app.get('/api/referrals/:telegramId', async (req, res) => {
@@ -1293,20 +1293,14 @@ app.post('/api/combo/check', async (req, res) => {
 
 app.get('/admin/give/:adminId/:userId/:amount', async (req, res) => {
   try {
-    if(String(req.params.adminId) !== String(ADMIN_ID))
-      return res.send('<h2 style="color:red;font-family:monospace">Not admin</h2>');
-    var toAdd = parseFloat(req.params.amount);
-    if(isNaN(toAdd)||toAdd<=0) return res.send('<h2 style="color:red;font-family:monospace">Invalid</h2>');
-    var result = await User.collection.updateOne(
-      { telegramId: parseInt(req.params.userId) },
-      { $inc: { rec: toAdd } }
-    );
-    if(!result.matchedCount) return res.send('<h2 style="color:red;font-family:monospace">User not found</h2>');
-    try { await bot.sendMessage(parseInt(req.params.userId),
-      '🎁 *Admin Gift!*\n\n💰 *+'+toAdd+' REC* added!\n\nOpen the bot to see your balance 👇',
-      {parse_mode:'Markdown',reply_markup:{inline_keyboard:[[{text:'🚀 Open Bot',web_app:{url:MINI_APP_URL}}]]}}); } catch(e){}
+    if(String(req.params.adminId)!==String(ADMIN_ID)) return res.send('<h2 style="color:red">Not admin</h2>');
+    var toAdd=parseFloat(req.params.amount);
+    if(isNaN(toAdd)||toAdd<=0) return res.send('<h2 style="color:red">Invalid</h2>');
+    var r=await User.collection.updateOne({telegramId:parseInt(req.params.userId)},{$inc:{rec:toAdd}});
+    if(!r.matchedCount) return res.send('<h2 style="color:red">User not found</h2>');
+    try{ await bot.sendMessage(parseInt(req.params.userId),'🎁 *+'+toAdd+' REC* added!\n\nOpen bot to see your balance 👇',{parse_mode:'Markdown',reply_markup:{inline_keyboard:[[{text:'🚀 Open Bot',web_app:{url:MINI_APP_URL}}]]}}); }catch(e){}
     res.send('<h2 style="color:green;font-family:monospace">✅ Done! +'+toAdd+' REC added.</h2>');
-  } catch(e){ res.send('<h2 style="color:red;font-family:monospace">'+e.message+'</h2>'); }
+  }catch(e){res.send('<h2 style="color:red">'+e.message+'</h2>');}
 });
 
 app.post('/webhook', (req, res) => { bot.processUpdate(req.body); res.sendStatus(200); });
