@@ -31,6 +31,7 @@ function closeSideMenu(){
   document.getElementById('sideMenuOverlay').style.display='none';
 }
 </script>
+  <script src="https://sad.adsgram.ai/js/sad.min.js"></script>
 </head>
 <body>
 
@@ -164,6 +165,10 @@ function closeSideMenu(){
 
           <!-- LEFT: Combo, Upgrade, Shop, Exchange -->
           <div style="display:flex;flex-direction:column;gap:6px;width:62px;flex-shrink:0;">
+            <div class="side-action-btn" onclick="openAds()" style="border-color:rgba(0,255,136,0.4);position:relative;">
+              <span class="sa-icon">📺</span>
+              <span class="sa-label" style="color:#00FF88;">Ads</span>
+            </div>
             <div class="side-action-btn" onclick="openCombo()" style="border-color:rgba(255,200,0,0.4);position:relative;" id="comboBtnWrap">
               <span class="sa-icon">🎯</span>
               <span class="sa-label" style="color:#FFD700;" data-i18n="sideCombo">Combo</span>
@@ -683,47 +688,7 @@ function closeSideMenu(){
       <!-- 3 selectors -->
     </div>
     <button onclick="saveAdminCombo()" style="width:100%;background:rgba(255,100,50,0.2);border:1px solid rgba(255,100,50,0.4);color:#FF6644;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:Rajdhani,sans-serif;margin-bottom:8px;">💾 حفظ الكومبو اليومي</button>
-    <button id="adminDistBtn" onclick="adminDistributeWeekly()" style="width:100%;background:rgba(0,200,100,0.15);border:1px solid rgba(0,200,100,0.4);color:#00CC66;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:Rajdhani,sans-serif;margin-bottom:8px;">🏆 توزيع جوائز الأسبوع</button>
-    <button onclick="adminFixSpeeds()" style="width:100%;background:rgba(0,150,255,0.15);border:1px solid rgba(0,150,255,0.4);color:#0096FF;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:Rajdhani,sans-serif;">⚡ إصلاح سرعة التعدين لكل المستخدمين</button>
-
-    <!-- ====== USER MANAGEMENT ====== -->
-    <div style="margin-top:14px;border-top:1px solid rgba(255,255,255,0.07);padding-top:14px;">
-      <div style="font-size:12px;color:rgba(100,200,255,0.7);letter-spacing:1px;margin-bottom:10px;">👤 إدارة المستخدمين</div>
-
-      <!-- Search user -->
-      <div style="display:flex;gap:6px;margin-bottom:8px;">
-        <input id="adminUserId" type="number" placeholder="Telegram ID" style="flex:1;background:rgba(0,0,0,0.5);border:1px solid rgba(100,200,255,0.3);color:white;padding:8px 10px;border-radius:8px;font-size:12px;outline:none;">
-        <button onclick="adminSearchUser()" style="background:rgba(100,200,255,0.15);border:1px solid rgba(100,200,255,0.4);color:#64C8FF;padding:8px 12px;border-radius:8px;font-size:12px;cursor:pointer;">🔍</button>
-      </div>
-
-      <!-- User info display -->
-      <div id="adminUserInfo" style="display:none;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px;margin-bottom:8px;font-size:11px;">
-        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
-          <span style="color:rgba(255,255,255,0.5);">الاسم:</span>
-          <span id="adminUserName" style="color:white;font-weight:700;">-</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
-          <span style="color:rgba(255,255,255,0.5);">REC الحالي:</span>
-          <span id="adminUserRec" style="color:#00FF88;font-weight:700;font-family:Orbitron,sans-serif;">-</span>
-        </div>
-        <div style="display:flex;justify-content:space-between;">
-          <span style="color:rgba(255,255,255,0.5);">آخر ظهور:</span>
-          <span id="adminUserSeen" style="color:rgba(255,255,255,0.4);">-</span>
-        </div>
-      </div>
-
-      <!-- Add REC -->
-      <div style="display:flex;gap:6px;margin-bottom:6px;">
-        <input id="adminAddAmount" type="number" placeholder="كمية REC" min="0" step="0.001" style="flex:1;background:rgba(0,0,0,0.5);border:1px solid rgba(0,255,136,0.3);color:white;padding:8px 10px;border-radius:8px;font-size:12px;outline:none;">
-        <input id="adminAddReason" type="text" placeholder="السبب" style="flex:1;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.1);color:white;padding:8px 10px;border-radius:8px;font-size:12px;outline:none;">
-      </div>
-      <button onclick="adminAddRec()" style="width:100%;background:rgba(0,255,136,0.15);border:1px solid rgba(0,255,136,0.4);color:#00FF88;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:Rajdhani,sans-serif;margin-bottom:6px;">💰 إضافة REC للمستخدم</button>
-
-      <!-- Result -->
-      <div id="adminActionResult" style="display:none;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:700;"></div>
-    </div>
-    <!-- ====== END USER MANAGEMENT ====== -->
-
+    <button id="adminDistBtn" onclick="adminDistributeWeekly()" style="width:100%;background:rgba(0,200,100,0.15);border:1px solid rgba(0,200,100,0.4);color:#00CC66;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:Rajdhani,sans-serif;">🏆 توزيع جوائز الأسبوع</button>
   </div>
 </div>
 
@@ -995,5 +960,16 @@ function closeSideMenu(){
 <script src="airdrop.js?v=1"></script>
 <script src="levels.js?v=1"></script>
 <script src="app.js?v=8"></script>
+
+<!-- ADS OVERLAY -->
+<div id="adsOverlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9995;" onclick="closeAds()"></div>
+<div id="adsPopup" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9996;background:linear-gradient(180deg,#0a1a0e,#050d08);border-radius:24px 24px 0 0;border-top:2px solid rgba(0,255,136,0.4);padding:20px 16px 36px;max-height:85vh;overflow-y:auto;">
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+    <div style="font-family:Orbitron,sans-serif;font-size:18px;font-weight:900;color:#00FF88;">📺 ADS</div>
+    <button onclick="closeAds()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);color:white;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;">✕</button>
+  </div>
+  <div id="adsContent"></div>
+</div>
+
 </body>
 </html>
