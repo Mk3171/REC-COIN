@@ -1,8 +1,8 @@
 // ====== ADS SYSTEM (Adsgram) ======
 var AdsController = null;
 var ADSGRAM_BLOCK_ID = '33984';
-var AD_REC_REWARD = 2;
-var AD_DAILY_MAX = 5;
+var AD_REC_REWARD = 5;
+var AD_DAILY_MAX = 100;
 var todayAdsWatched = 0;
 
 function initAdsgram() {
