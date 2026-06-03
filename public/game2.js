@@ -13,7 +13,7 @@ var ctrl={left:false,right:false,jump:false}, jumpWas=false;
 var P={};
 
 function resetP(){
-  P={x:100,y:50,w:28,h:42,vx:0,vy:0,onGround:false,dead:false,deadTimer:0,
+  P={x:100,y:50,w:28,h:42,vx:0,vy:0,onGround:false,dead:false,deadTimer:0,jumps:0,
      facing:1,runFrame:0,runTimer:0,invTimer:0};
 }
 
@@ -82,14 +82,19 @@ function buildLevel(n){
   var pc=6+n*2,sp=(worldW-300)/pc;
   for(var p=0;p<pc;p++){
     var px=200+p*sp+Math.random()*60;
-    var py=GY-110-Math.random()*130;
+    var py=GY-100-Math.random()*100;
     var pw=2+Math.floor(Math.random()*3);
     addP(px,py,pw,Math.random()>0.4?'brick':'solid');
-    if(Math.random()>0.5)addQ(px+pw*TS/2-TS/2,py-TS);
+    // Q block floats HIGH above platform center (2.5 tiles gap so Mario fits under)
+    if(Math.random()>0.4){
+      addQ(px+Math.floor(pw/2)*TS, py-TS*2.8);
+    }
   }
-  // standalone ? blocks
-  for(var q=0;q<5+n;q++){
-    addQ(300+(worldW-400)/(5+n)*q+Math.random()*60, GY-160-Math.random()*80);
+  // Standalone Q blocks: float in air at jump height from ground
+  for(var q=0;q<6+n;q++){
+    var qx=250+(worldW-400)/(6+n)*q+Math.random()*50;
+    var qy=GY-TS*3.2-Math.random()*TS;
+    addQ(qx,qy);
   }
   // enemies
   var ec=3+n*2,es=(worldW-300)/ec,espd=0.9+n*0.3;
@@ -163,10 +168,12 @@ function update(){
     if(ctrl.left){P.vx=-SPD;P.facing=-1;}
     else if(ctrl.right){P.vx=SPD;P.facing=1;}
     else P.vx*=0.65;
-    if(ctrl.jump&&!jumpWas&&P.onGround){P.vy=JUMP;P.onGround=false;}
+    if(ctrl.jump&&!jumpWas&&P.jumps<2){P.vy=(P.jumps===0?JUMP:JUMP*0.75);P.onGround=false;P.jumps++;}
     jumpWas=ctrl.jump;
     P.vy+=GRAV;if(P.vy>16)P.vy=16;
-    P.onGround=moveAndCollide(P,solids);
+    var og2=moveAndCollide(P,solids);
+    if(og2&&!P.onGround)P.jumps=0;
+    P.onGround=og2;
     if(P.x<0)P.x=0;if(P.x+P.w>worldW)P.x=worldW-P.w;
     if(P.invTimer>0)P.invTimer--;
     if(Math.abs(P.vx)>0.4&&P.onGround){P.runTimer++;if(P.runTimer>7){P.runFrame=(P.runFrame+1)%3;P.runTimer=0;}}
@@ -328,12 +335,15 @@ function drawGnd(g){
 
 function drawPlat(p){
   if(p.type==='brick'){
+    ctx.save();
+    ctx.beginPath();ctx.rect(p.x,p.y,p.w,p.h);ctx.clip();
     ctx.fillStyle='#C0392B';ctx.fillRect(p.x,p.y,p.w,p.h);
     ctx.strokeStyle='rgba(0,0,0,0.25)';ctx.lineWidth=2;
-    for(var bx=p.x;bx<p.x+p.w;bx+=TS)for(var by=p.y;by<p.y+p.h;by+=TS/2){
-      var off=(Math.floor((by-p.y)/(TS/2))%2)*TS/2;
-      ctx.strokeRect(bx+off+1,by+1,TS-2,TS/2-2);
+    for(var bx=p.x;bx<p.x+p.w+TS;bx+=TS)for(var by2=p.y;by2<p.y+p.h;by2+=TS/2){
+      var off=(Math.floor((by2-p.y)/(TS/2))%2)*TS/2;
+      ctx.strokeRect(bx+off+1,by2+1,TS-2,TS/2-2);
     }
+    ctx.restore();
   }else{
     ctx.fillStyle='#7D5A3C';ctx.fillRect(p.x,p.y,p.w,p.h);
     ctx.fillStyle='#9E7B5C';ctx.fillRect(p.x,p.y,p.w,5);
@@ -344,8 +354,13 @@ function drawPlat(p){
 function drawQB(q){
   var by=q.y+(q.bt>0?-Math.sin(q.bt/8*Math.PI)*6:0);
   if(q.hit){
-    ctx.fillStyle='#7A5C00';ctx.fillRect(q.x,by,q.w,q.h);
-    ctx.strokeStyle='rgba(0,0,0,0.3)';ctx.lineWidth=2;ctx.strokeRect(q.x+1,by+1,q.w-2,q.h-2);
+    ctx.fillStyle='#6B4C00';ctx.fillRect(q.x,by,q.w,q.h);
+    ctx.fillStyle='rgba(0,0,0,0.15)';ctx.fillRect(q.x,by,q.w,q.h);
+    ctx.strokeStyle='rgba(0,0,0,0.4)';ctx.lineWidth=2;ctx.strokeRect(q.x+1,by+1,q.w-2,q.h-2);
+    // dark X to show used
+    ctx.strokeStyle='rgba(0,0,0,0.3)';ctx.lineWidth=1;
+    ctx.beginPath();ctx.moveTo(q.x+6,by+6);ctx.lineTo(q.x+q.w-6,by+q.h-6);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(q.x+q.w-6,by+6);ctx.lineTo(q.x+6,by+q.h-6);ctx.stroke();
   }else{
     ctx.fillStyle='#F0A000';ctx.fillRect(q.x,by,q.w,q.h);
     ctx.fillStyle='#FFD700';ctx.fillRect(q.x+2,by+2,q.w-4,5);ctx.fillRect(q.x+2,by+2,5,q.h-4);
