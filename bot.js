@@ -714,9 +714,18 @@ app.post('/api/withdraw', async (req, res) => {
 // ====== API: LOAD USER ======
 app.get('/api/user/:telegramId', async (req, res) => {
   try {
-    const user = await User.findOne({ telegramId: parseInt(req.params.telegramId) });
+    var user = await User.findOne({ telegramId: parseInt(req.params.telegramId) }).lean();
     if (!user) return res.json({ exists: false });
-    res.json({ exists: true, data: user });
+    var blockFound = false, blockAmount = 0;
+    if(user.pendingBlockReward > 0) {
+      blockFound = true;
+      blockAmount = user.pendingBlockReward;
+      await User.collection.updateOne(
+        { telegramId: parseInt(req.params.telegramId) },
+        { $set: { pendingBlockReward: 0 } }
+      );
+    }
+    res.json({ exists: true, data: user, blockFound: blockFound, blockAmount: blockAmount });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -789,12 +798,9 @@ app.post('/api/user/save', async (req, res) => {
       }
     }
 
-    var sv=Object.assign({},data); var rv=sv.rec; delete sv.rec;
-    var op={$set:Object.assign(sv,{lastSeen:new Date(),lastSaveTime:Date.now()})};
-    if(rv!==undefined) op.$max={rec:rv};
     const updated = await User.findOneAndUpdate(
       { telegramId: parseInt(telegramId) },
-      op,
+      { ...data, lastSeen: new Date(), lastSaveTime: Date.now() },
       { new: true, upsert: true }
     );
     res.json({ success: true, data: updated });
@@ -994,10 +1000,8 @@ app.get('/admin', async (req, res) => {
 });
 
 
-// ====== BITCOIN-STYLE BLOCK SYSTEM ======
-// 1 block per hour, winner by mining speed weight
+// ====== BLOCK SYSTEM (hourly, bitcoin-style) ======
 const BLOCK_REWARD = 20;
-const BOT_USERNAME = '@RecMiningGame_bot';
 var totalBlocksMined = 0;
 var blockRunning = false;
 
@@ -1006,44 +1010,53 @@ async function runHourlyBlock() {
   blockRunning = true;
   try {
     var oneDayAgo = new Date(Date.now() - 86400000);
-    var activeUsers = await User.find({
+    var users = await User.find({
       banned: false,
       lastSeen: { $gte: oneDayAgo },
       miningSpeed: { $gt: 0 }
     }).select('telegramId username firstName miningSpeed').lean();
 
-    if(!activeUsers.length){ console.log('[Block] No eligible users'); return; }
+    if(!users.length) return;
 
     // Weighted random by miningSpeed
-    var total = activeUsers.reduce(function(s,u){ return s+(u.miningSpeed||0); },0);
-    var rand = Math.random()*total, cum=0, winner=null;
-    for(var i=0;i<activeUsers.length;i++){
-      cum += activeUsers[i].miningSpeed||0;
-      if(rand<=cum){ winner=activeUsers[i]; break; }
+    var total = users.reduce(function(s,u){ return s+(u.miningSpeed||0); }, 0);
+    var rand = Math.random()*total, cum = 0, winner = null;
+    for(var i=0; i<users.length; i++) {
+      cum += users[i].miningSpeed||0;
+      if(rand <= cum) { winner = users[i]; break; }
     }
-    if(!winner) winner=activeUsers[activeUsers.length-1];
+    if(!winner) winner = users[users.length-1];
 
     totalBlocksMined++;
     var today = new Date().toISOString().split('T')[0];
     var name = winner.username ? '@'+winner.username : (winner.firstName||'Miner');
 
-    // Add REC directly using native MongoDB driver (bypasses Mongoose strict)
+    // Add REC + set pendingBlockReward for in-app popup
     await User.collection.updateOne(
       { telegramId: winner.telegramId },
-      { $inc: { rec: BLOCK_REWARD, totalBlocksFound: 1 }, $set: { lastBlockDate: today } }
+      { $inc: { rec: BLOCK_REWARD, totalBlocksFound: 1 },
+        $set: { lastBlockDate: today, pendingBlockReward: BLOCK_REWARD } }
     );
 
-    // Notifications
-    var msg = '⛏️ *New Block Found!* ⛏️\n\n🔴 Block #'+totalBlocksMined+'\n👤 Miner: '+name+'\n💰 Reward: +'+BLOCK_REWARD+' REC\n👥 Active: '+activeUsers.length+'\n⏰ '+new Date().toUTCString()+'\n\n'+BOT_USERNAME;
-    await bot.sendMessage(BLOCKS_CHANNEL_ID, msg, {parse_mode:'Markdown'}).catch(function(e){ console.log('[Block] Channel:',e.message); });
-    await bot.sendMessage(GROUP_CHAT_ID, msg, {parse_mode:'Markdown'}).catch(function(e){ console.log('[Block] Group:',e.message); });
+    var msg = '⛏️ *New Block Found!* ⛏️\n\n' +
+      '🔴 Block #' + totalBlocksMined + '\n' +
+      '👤 Miner: ' + name + '\n' +
+      '💰 Reward: +' + BLOCK_REWARD + ' REC\n' +
+      '👥 Active Miners: ' + users.length + '\n' +
+      '⏰ ' + new Date().toUTCString() + '\n\n@RecMiningGame_bot';
+
+    await bot.sendMessage(BLOCKS_CHANNEL_ID, msg, {parse_mode:'Markdown'})
+      .catch(function(e){ console.log('[Block] Channel err:',e.message); });
+    await bot.sendMessage(GROUP_CHAT_ID, msg, {parse_mode:'Markdown'})
+      .catch(function(e){ console.log('[Block] Group err:',e.message); });
     await bot.sendMessage(winner.telegramId,
-      '⛏️ *You Found a Block!*\n\n🎉 Block #'+totalBlocksMined+'\n💰 *+'+BLOCK_REWARD+' REC* added!\n\nOpen the bot to see your balance 👇',
-      {parse_mode:'Markdown',reply_markup:{inline_keyboard:[[{text:'🚀 Open Bot',web_app:{url:MINI_APP_URL}}]]}}
+      '⛏️ *You Found a Block!*\n\n🎉 Block #'+totalBlocksMined+'\n💰 *+'+BLOCK_REWARD+' REC* added!\n\nOpen the bot to collect it 👇',
+      {parse_mode:'Markdown', reply_markup:{inline_keyboard:[[{text:'🚀 Open Bot',web_app:{url:MINI_APP_URL}}]]}}
     ).catch(function(){});
-    console.log('[Block] #'+totalBlocksMined+' → '+name+' +'+BLOCK_REWARD+' REC | miners:'+activeUsers.length);
-  } catch(e){ console.log('[Block] Error:',e.message); }
-  finally{ blockRunning=false; }
+
+    console.log('[Block] #'+totalBlocksMined+' → '+name+' +'+BLOCK_REWARD+' REC');
+  } catch(e) { console.log('[Block] Error:',e.message); }
+  finally { blockRunning = false; }
 }
 
 setInterval(runHourlyBlock, 3600000);
@@ -1081,7 +1094,58 @@ app.post('/api/game-earn', async (req, res) => {
   }
 });
 
-// /api/block-found removed
+app.post('/api/block-found', async (req, res) => {
+  try {
+    const { telegramId, blockReward, blockNumber } = req.body;
+    if (!telegramId) return res.status(400).json({ error: 'Missing data' });
+
+    const user = await User.findOne({ telegramId: parseInt(telegramId) })
+      .select('username firstName referredBy referredByL2 referredByL3 totalBlocksFound');
+    if (!user) return res.json({ success: true });
+
+    const rewardRec    = blockReward ? (blockReward.rec    || 0) : 0;
+    const rewardRecord = blockReward ? (blockReward.record || 0) : 0;
+    const userName     = user.username ? '@' + user.username : (user.firstName || 'Miner');
+    const today        = new Date().toISOString().split('T')[0];
+
+    totalBlocksMined++;
+
+    // Update user stats
+    await User.findOneAndUpdate(
+      { telegramId: parseInt(telegramId) },
+      { $inc: { totalBlocksFound: 1 }, lastBlockDate: today }
+    );
+
+    // Referral commission on block
+    if (rewardRec > 0) {
+      distributeRefCommission(user, rewardRec).catch(() => {});
+    }
+
+    // 📢 Send to Blocks Channel
+    const channelMsg =
+      `⛏️ *NEW BLOCK MINED* ⛏️\n\n` +
+      `🔴 Block #${totalBlocksMined}\n` +
+      `👤 Miner: ${userName}\n` +
+      `💰 Reward: +${rewardRec.toFixed(4)} REC\n` +
+      `🎯 Block #${totalBlocksMined} found by the community!`;
+
+    await bot.sendMessage(BLOCKS_CHANNEL_ID, channelMsg, { parse_mode: 'Markdown' }).catch(() => {});
+
+    // 📩 Personal message to miner
+    const personalMsg =
+      `⛏️ *YOU FOUND A BLOCK!*\n\n` +
+      `🔴 Block #${totalBlocksMined}\n` +
+      `💰 +${rewardRec.toFixed(6)} REC added!\n` +
+      `📦 +${rewardRecord.toLocaleString()} RECORD added!\n\n` +
+      `Keep mining to find more blocks! 🚀`;
+
+    await bot.sendMessage(parseInt(telegramId), personalMsg, { parse_mode: 'Markdown' }).catch(() => {});
+
+    res.json({ success: true, blockNum: totalBlocksMined });
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+});
 
 // ====== REFERRAL LIST ======
 app.get('/api/referrals/:telegramId', async (req, res) => {
@@ -1288,19 +1352,6 @@ app.post('/api/combo/check', async (req, res) => {
 
     res.json({ matched: true, done: progress.length, allDone, reward: giveReward ? combo.reward : 0 });
   } catch(e) { res.status(500).json({ error: e.message }); }
-});
-
-
-app.get('/admin/give/:adminId/:userId/:amount', async (req, res) => {
-  try {
-    if(String(req.params.adminId)!==String(ADMIN_ID)) return res.send('<h2 style="color:red">Not admin</h2>');
-    var toAdd=parseFloat(req.params.amount);
-    if(isNaN(toAdd)||toAdd<=0) return res.send('<h2 style="color:red">Invalid</h2>');
-    var r=await User.collection.updateOne({telegramId:parseInt(req.params.userId)},{$inc:{rec:toAdd}});
-    if(!r.matchedCount) return res.send('<h2 style="color:red">User not found</h2>');
-    try{ await bot.sendMessage(parseInt(req.params.userId),'🎁 *+'+toAdd+' REC* added!\n\nOpen bot to see your balance 👇',{parse_mode:'Markdown',reply_markup:{inline_keyboard:[[{text:'🚀 Open Bot',web_app:{url:MINI_APP_URL}}]]}}); }catch(e){}
-    res.send('<h2 style="color:green;font-family:monospace">✅ Done! +'+toAdd+' REC added.</h2>');
-  }catch(e){res.send('<h2 style="color:red">'+e.message+'</h2>');}
 });
 
 app.post('/webhook', (req, res) => { bot.processUpdate(req.body); res.sendStatus(200); });
