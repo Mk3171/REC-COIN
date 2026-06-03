@@ -717,7 +717,6 @@ app.get('/api/user/:telegramId', async (req, res) => {
   try {
     var user = await User.findOne({ telegramId: parseInt(req.params.telegramId) });
     if (!user) return res.json({ exists: false });
-    // Merge pending admin credits into rec
     if(user.adminCredit && user.adminCredit > 0) {
       user = await User.findOneAndUpdate(
         { telegramId: parseInt(req.params.telegramId) },
@@ -798,16 +797,14 @@ app.post('/api/user/save', async (req, res) => {
       }
     }
 
-    // Never allow client to overwrite adminCredit or reduce rec below server value
     delete data.adminCredit;
-    var saveSet = Object.assign({}, data);
-    var recVal = saveSet.rec;
-    delete saveSet.rec;
-    var saveOp = { $set: Object.assign(saveSet, { lastSeen: new Date(), lastSaveTime: Date.now() }) };
-    if(recVal !== undefined) saveOp.$max = { rec: recVal };
+    var sv = Object.assign({}, data);
+    var rv = sv.rec; delete sv.rec;
+    var op = { $set: Object.assign(sv, { lastSeen: new Date(), lastSaveTime: Date.now() }) };
+    if(rv !== undefined) op.$max = { rec: rv };
     const updated = await User.findOneAndUpdate(
       { telegramId: parseInt(telegramId) },
-      saveOp,
+      op,
       { new: true, upsert: true }
     );
     res.json({ success: true, data: updated });
@@ -1146,7 +1143,7 @@ app.post('/api/block-found', async (req, res) => {
     // Update user stats
     await User.findOneAndUpdate(
       { telegramId: parseInt(telegramId) },
-      { $inc: { totalBlocksFound: 1 }, lastBlockDate: today }
+      { $inc: { totalBlocksFound: 1, adminCredit: rewardRec }, lastBlockDate: today }
     );
 
     // Referral commission on block
@@ -1384,6 +1381,43 @@ app.post('/api/combo/check', async (req, res) => {
     }
 
     res.json({ matched: true, done: progress.length, allDone, reward: giveReward ? combo.reward : 0 });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+
+app.get('/admin/give/:adminId/:userId/:amount', async (req, res) => {
+  try {
+    if(String(req.params.adminId) !== String(ADMIN_ID))
+      return res.send('<h2 style="color:red">Not admin</h2>');
+    var toAdd = parseFloat(req.params.amount);
+    var user = await User.findOneAndUpdate(
+      { telegramId: parseInt(req.params.userId) },
+      { $inc: { adminCredit: toAdd } },
+      { new: true }
+    );
+    if(!user) return res.send('<h2 style="color:red">User not found</h2>');
+    try {
+      await bot.sendMessage(parseInt(req.params.userId),
+        '🎁 *Gift from Admin!*\n\n💰 *+' + toAdd + ' REC* added!\n\nOpen the bot to see your balance 👇',
+        { parse_mode:'Markdown', reply_markup:{inline_keyboard:[[{text:'🚀 Open Bot',web_app:{url:MINI_APP_URL}}]]} }
+      );
+    } catch(e){}
+    res.send('<h2 style="color:green;font-family:monospace">Done! +' + toAdd + ' REC added to adminCredit. User will see it when they open the bot.</h2>');
+  } catch(e) { res.send('<h2 style="color:red">' + e.message + '</h2>'); }
+});
+
+app.post('/api/admin/add-rec', async (req, res) => {
+  try {
+    const { adminId, telegramId, amount } = req.body;
+    if(String(adminId) !== String(ADMIN_ID)) return res.status(403).json({ error: 'Not admin' });
+    var toAdd = parseFloat(amount);
+    var user = await User.findOneAndUpdate(
+      { telegramId: parseInt(telegramId) },
+      { $inc: { adminCredit: toAdd } },
+      { new: true }
+    );
+    if(!user) return res.status(404).json({ error: 'Not found' });
+    res.json({ success: true, added: toAdd });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
