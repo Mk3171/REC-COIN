@@ -684,6 +684,45 @@ function closeSideMenu(){
     </div>
     <button onclick="saveAdminCombo()" style="width:100%;background:rgba(255,100,50,0.2);border:1px solid rgba(255,100,50,0.4);color:#FF6644;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:Rajdhani,sans-serif;margin-bottom:8px;">💾 حفظ الكومبو اليومي</button>
     <button id="adminDistBtn" onclick="adminDistributeWeekly()" style="width:100%;background:rgba(0,200,100,0.15);border:1px solid rgba(0,200,100,0.4);color:#00CC66;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:Rajdhani,sans-serif;">🏆 توزيع جوائز الأسبوع</button>
+
+    <!-- ====== USER MANAGEMENT ====== -->
+    <div style="margin-top:14px;border-top:1px solid rgba(255,255,255,0.07);padding-top:14px;">
+      <div style="font-size:12px;color:rgba(100,200,255,0.7);letter-spacing:1px;margin-bottom:10px;">👤 إدارة المستخدمين</div>
+
+      <!-- Search user -->
+      <div style="display:flex;gap:6px;margin-bottom:8px;">
+        <input id="adminUserId" type="number" placeholder="Telegram ID" style="flex:1;background:rgba(0,0,0,0.5);border:1px solid rgba(100,200,255,0.3);color:white;padding:8px 10px;border-radius:8px;font-size:12px;outline:none;">
+        <button onclick="adminSearchUser()" style="background:rgba(100,200,255,0.15);border:1px solid rgba(100,200,255,0.4);color:#64C8FF;padding:8px 12px;border-radius:8px;font-size:12px;cursor:pointer;">🔍</button>
+      </div>
+
+      <!-- User info display -->
+      <div id="adminUserInfo" style="display:none;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px;margin-bottom:8px;font-size:11px;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+          <span style="color:rgba(255,255,255,0.5);">الاسم:</span>
+          <span id="adminUserName" style="color:white;font-weight:700;">-</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+          <span style="color:rgba(255,255,255,0.5);">REC الحالي:</span>
+          <span id="adminUserRec" style="color:#00FF88;font-weight:700;font-family:Orbitron,sans-serif;">-</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span style="color:rgba(255,255,255,0.5);">آخر ظهور:</span>
+          <span id="adminUserSeen" style="color:rgba(255,255,255,0.4);">-</span>
+        </div>
+      </div>
+
+      <!-- Add REC -->
+      <div style="display:flex;gap:6px;margin-bottom:6px;">
+        <input id="adminAddAmount" type="number" placeholder="كمية REC" min="0" step="0.001" style="flex:1;background:rgba(0,0,0,0.5);border:1px solid rgba(0,255,136,0.3);color:white;padding:8px 10px;border-radius:8px;font-size:12px;outline:none;">
+        <input id="adminAddReason" type="text" placeholder="السبب" style="flex:1;background:rgba(0,0,0,0.5);border:1px solid rgba(255,255,255,0.1);color:white;padding:8px 10px;border-radius:8px;font-size:12px;outline:none;">
+      </div>
+      <button onclick="adminAddRec()" style="width:100%;background:rgba(0,255,136,0.15);border:1px solid rgba(0,255,136,0.4);color:#00FF88;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:Rajdhani,sans-serif;margin-bottom:6px;">💰 إضافة REC للمستخدم</button>
+
+      <!-- Result -->
+      <div id="adminActionResult" style="display:none;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:700;"></div>
+    </div>
+    <!-- ====== END USER MANAGEMENT ====== -->
+
   </div>
 </div>
 
