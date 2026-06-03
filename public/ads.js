@@ -16,9 +16,27 @@ function initAdsgram() {
 function openAds() {
   var overlay = document.getElementById('adsOverlay');
   var popup = document.getElementById('adsPopup');
-  if(overlay) overlay.style.display = 'block';
-  if(popup) popup.style.display = 'block';
+  if(!overlay || !popup) {
+    // Elements not found - create them dynamically
+    createAdsElements();
+    overlay = document.getElementById('adsOverlay');
+    popup = document.getElementById('adsPopup');
+  }
+  if(overlay) { overlay.style.cssText = 'display:block!important;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:999990;'; }
+  if(popup) { popup.style.cssText = 'display:block!important;position:fixed;bottom:0;left:0;right:0;z-index:999991;background:linear-gradient(180deg,#0a1a0e,#050d08);border-radius:24px 24px 0 0;border-top:2px solid rgba(0,255,136,0.4);padding:20px 16px 36px;max-height:85vh;overflow-y:auto;'; }
   renderAdsUI();
+}
+
+function createAdsElements() {
+  if(document.getElementById('adsOverlay')) return;
+  var ov = document.createElement('div');
+  ov.id = 'adsOverlay';
+  ov.onclick = closeAds;
+  document.body.appendChild(ov);
+  var pp = document.createElement('div');
+  pp.id = 'adsPopup';
+  pp.innerHTML = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;"><div style="font-family:Orbitron,sans-serif;font-size:18px;font-weight:900;color:#00FF88;">📺 ADS</div><button onclick="closeAds()" style="background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.1);color:white;width:32px;height:32px;border-radius:50%;cursor:pointer;font-size:16px;">✕</button></div><div id="adsContent"></div>';
+  document.body.appendChild(pp);
 }
 
 function closeAds() {
