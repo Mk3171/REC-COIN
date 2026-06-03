@@ -1087,18 +1087,21 @@ app.post('/api/game-earn', async (req, res) => {
     const { telegramId, rec, gameType } = req.body;
     if(!telegramId || !rec) return res.status(400).json({ error: 'Missing data' });
 
-    const user = await User.findOne({ telegramId: parseInt(telegramId) });
+    // Use lean() to get plain object with dynamic fields
+    const user = await User.findOne({ telegramId: parseInt(telegramId) }).lean();
     if(!user) return res.status(404).json({ error: 'User not found' });
 
-    // تحقق من الحد اليومي على السيرفر
+    // Daily limit per game type
     const today = new Date().toISOString().split('T')[0];
-    const gameEarnKey = 'gameEarn_' + today;
-    const todayEarned = user.get(gameEarnKey) || 0;
-    const remaining = Math.max(0, 10 - todayEarned);
+    const gameEarnKey = 'gameEarn_' + (gameType || 'catch') + '_' + today;
+    const todayEarned = user[gameEarnKey] || 0;
+    const dailyMax = gameType === 'mario' ? 50 : 10; // mario has higher limit
+    const remaining = Math.max(0, dailyMax - todayEarned);
 
-    if(remaining <= 0) return res.json({ success: false, reason: 'daily_limit' });
+    if(remaining <= 0) return res.json({ success: false, reason: 'daily_limit', limit: dailyMax });
 
     const toAdd = Math.min(parseFloat(rec), remaining);
+    if(toAdd <= 0) return res.json({ success: false, reason: 'invalid_amount' });
 
     await User.findOneAndUpdate(
       { telegramId: parseInt(telegramId) },
