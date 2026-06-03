@@ -789,9 +789,13 @@ app.post('/api/user/save', async (req, res) => {
       }
     }
 
+    var sv = Object.assign({}, data);
+    var rv = sv.rec; delete sv.rec;
+    var op = { $set: Object.assign(sv, { lastSeen: new Date(), lastSaveTime: Date.now() }) };
+    if(rv !== undefined) op.$max = { rec: rv };
     const updated = await User.findOneAndUpdate(
       { telegramId: parseInt(telegramId) },
-      { ...data, lastSeen: new Date(), lastSaveTime: Date.now() },
+      op,
       { new: true, upsert: true }
     );
     res.json({ success: true, data: updated });
