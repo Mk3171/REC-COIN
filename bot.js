@@ -124,7 +124,8 @@ const UserSchema = new mongoose.Schema({
   referredByL2:    { type: String, default: '' },
   referredByL3:    { type: String, default: '' },
   totalRefCommission: { type: Number, default: 0 },
-  comboProgress:   { type: Object, default: { date: '', done: [], claimed: false } }
+  comboProgress:   { type: Object, default: { date: '', done: [], claimed: false } },
+  adminCredit:     { type: Number, default: 0 }
 });
 
 const User = mongoose.model('User', UserSchema);
@@ -714,8 +715,16 @@ app.post('/api/withdraw', async (req, res) => {
 // ====== API: LOAD USER ======
 app.get('/api/user/:telegramId', async (req, res) => {
   try {
-    const user = await User.findOne({ telegramId: parseInt(req.params.telegramId) });
+    var user = await User.findOne({ telegramId: parseInt(req.params.telegramId) });
     if (!user) return res.json({ exists: false });
+    // Merge pending admin credits into rec
+    if(user.adminCredit && user.adminCredit > 0) {
+      user = await User.findOneAndUpdate(
+        { telegramId: parseInt(req.params.telegramId) },
+        { $inc: { rec: user.adminCredit }, $set: { adminCredit: 0 } },
+        { new: true }
+      );
+    }
     res.json({ exists: true, data: user });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
@@ -789,7 +798,8 @@ app.post('/api/user/save', async (req, res) => {
       }
     }
 
-    // Protect rec: use $max so server-side credits can't be overwritten
+    // Never allow client to overwrite adminCredit or reduce rec below server value
+    delete data.adminCredit;
     var saveSet = Object.assign({}, data);
     var recVal = saveSet.rec;
     delete saveSet.rec;
@@ -1136,7 +1146,7 @@ app.post('/api/block-found', async (req, res) => {
     // Update user stats
     await User.findOneAndUpdate(
       { telegramId: parseInt(telegramId) },
-      { $inc: { totalBlocksFound: 1, rec: rewardRec }, lastBlockDate: today }
+      { $inc: { totalBlocksFound: 1 }, lastBlockDate: today }
     );
 
     // Referral commission on block
@@ -1374,51 +1384,6 @@ app.post('/api/combo/check', async (req, res) => {
     }
 
     res.json({ matched: true, done: progress.length, allDone, reward: giveReward ? combo.reward : 0 });
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
-
-
-// ADMIN: Add REC - GET version (open from phone browser)
-app.get('/admin/give/:adminId/:userId/:amount', async (req, res) => {
-  try {
-    if(String(req.params.adminId) !== String(ADMIN_ID))
-      return res.send('<h2 style="color:red">❌ Not admin</h2>');
-    var toAdd = parseFloat(req.params.amount);
-    var user = await User.findOneAndUpdate(
-      { telegramId: parseInt(req.params.userId) },
-      { $inc: { rec: toAdd } },
-      { new: true }
-    );
-    if(!user) return res.send('<h2 style="color:red">❌ User not found</h2>');
-    try {
-      await bot.sendMessage(parseInt(req.params.userId),
-        '🎁 *Admin Gift!*\n\n💰 *+' + toAdd + ' REC* added!\n\nOpen bot to see balance 👇',
-        { parse_mode:'Markdown', reply_markup:{inline_keyboard:[[{text:'🚀 Open Bot',web_app:{url:MINI_APP_URL}}]]} }
-      );
-    } catch(e){}
-    res.send('<h2 style="color:green;font-family:monospace">✅ Done! Added +' + toAdd + ' REC<br>New balance: ' + user.rec.toFixed(4) + ' REC</h2>');
-  } catch(e) { res.send('<h2 style="color:red">❌ Error: ' + e.message + '</h2>'); }
-});
-
-// ADMIN: POST version
-app.post('/api/admin/add-rec', async (req, res) => {
-  try {
-    const { adminId, telegramId, amount } = req.body;
-    if(String(adminId) !== String(ADMIN_ID)) return res.status(403).json({ error: 'Not admin' });
-    var toAdd = parseFloat(amount);
-    var user = await User.findOneAndUpdate(
-      { telegramId: parseInt(telegramId) },
-      { $inc: { rec: toAdd } },
-      { new: true }
-    );
-    if(!user) return res.status(404).json({ error: 'User not found' });
-    try {
-      await bot.sendMessage(parseInt(telegramId),
-        '🎁 *Admin Gift!*\n\n💰 *+' + toAdd + ' REC* added!\n\nOpen bot to see balance 👇',
-        { parse_mode:'Markdown', reply_markup:{inline_keyboard:[[{text:'🚀 Open Bot',web_app:{url:MINI_APP_URL}}]]} }
-      );
-    } catch(e){}
-    res.json({ success: true, added: toAdd, newBalance: user.rec });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
