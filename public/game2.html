@@ -59,12 +59,11 @@ canvas { display:block; position:fixed; top:0; left:0; }
 /* Screens */
 .screen {
   position:fixed; inset:0; z-index:20;
-  display:flex; flex-direction:column;
+  display:none; flex-direction:column;
   align-items:center; justify-content:center;
   background:rgba(0,0,20,0.88);
-  padding:24px; display:none;
+  padding:24px;
 }
-.screen.show { display:flex; }
 .screen-title {
   font-family:'Arial Black',sans-serif;
   font-size:32px; font-weight:900;
@@ -138,7 +137,7 @@ canvas { display:block; position:fixed; top:0; left:0; }
 </div>
 
 <!-- Start Screen -->
-<div class="screen show" id="startScreen">
+<div class="screen" id="startScreen" style="display:flex;">
   <div style="font-size:56px;margin-bottom:8px;">🍄</div>
   <div class="screen-title">SUPER REC</div>
   <div class="screen-sub">Jump, stomp & collect REC coins!</div>
