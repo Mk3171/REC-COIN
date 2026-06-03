@@ -789,10 +789,9 @@ app.post('/api/user/save', async (req, res) => {
       }
     }
 
-    var sv = Object.assign({}, data);
-    var rv = sv.rec; delete sv.rec;
-    var op = { $set: Object.assign(sv, { lastSeen: new Date(), lastSaveTime: Date.now() }) };
-    if(rv !== undefined) op.$max = { rec: rv };
+    var sv=Object.assign({},data); var rv=sv.rec; delete sv.rec;
+    var op={$set:Object.assign(sv,{lastSeen:new Date(),lastSaveTime:Date.now()})};
+    if(rv!==undefined) op.$max={rec:rv};
     const updated = await User.findOneAndUpdate(
       { telegramId: parseInt(telegramId) },
       op,
@@ -1265,7 +1264,12 @@ app.post('/api/user/offline-earnings', async (req, res) => {
 
     // Cap at 7 days
     const seconds = Math.min(elapsed, 604800);
-    const speed = user.miningSpeed || 0;
+    // Apply VIP mining speed bonus to offline earnings
+    var speed = user.miningSpeed || 0;
+    if(user.vip && user.vip.tier >= 1 && user.vip.expiry > Date.now()) {
+      var vipBoost = user.vip.tier === 1 ? 1.5 : user.vip.tier === 2 ? 2 : 3;
+      speed = speed * vipBoost;
+    }
 
     // Calculate earnings
     const earnedRec = parseFloat((speed * seconds).toFixed(6));
