@@ -112,7 +112,7 @@ function getSolids(){
   var b=[];
   grounds.forEach(function(g){b.push(g);});
   platfs.forEach(function(p){b.push(p);});
-  qblocks.forEach(function(q){b.push({x:q.x,y:q.y+(q.bt>0?-Math.sin(q.bt/8*Math.PI)*6:0),w:q.w,h:q.h,isQ:true,qi:qblocks.indexOf(q)});});
+  qblocks.forEach(function(q,i){b.push({x:q.x,y:q.y+(q.bt>0?-Math.sin(q.bt/8*Math.PI)*6:0),w:q.w,h:q.h,isQ:true,qi:i});});
   return b;
 }
 
@@ -135,7 +135,11 @@ function moveAndCollide(obj,solids){
           obj.y+=ol.t;
           if(obj.vy<0){
             obj.vy=0;
-            if(b.isQ){hitQBlock(b.qi);}
+            if(b.isQ){
+              hitQBlock(b.qi);
+            } else if(b.type==='brick' && obj===P && !P.dead){
+              doBrickBreak(b);
+            }
           }
         }
       }
@@ -157,34 +161,25 @@ function hitQBlock(qi){
   spawnPt(q.x+q.w/2,q.y+q.h/2,'#FFD700',5);
 }
 
-function breakBrick(px,py){
-  // Find and break brick platform block at this position
-  for(var i=0;i<platfs.length;i++){
-    var p=platfs[i];
-    if(p.type==='brick'&&Math.abs(p.y-py)<4){
-      // Break only the tile Mario hit
-      var hitTileX=Math.floor((P.x+P.w/2-p.x)/TS)*TS+p.x;
-      if(hitTileX>=p.x&&hitTileX<p.x+p.w){
-        // Spawn brick particles
-        spawnPt(hitTileX+TS/2,p.y+TS/2,'#C0392B',8);
-        spawnPt(hitTileX+TS/2,p.y+TS/2,'#8B2500',6);
-        // Shorten or remove the platform
-        if(p.w<=TS){
-          platfs.splice(i,1);
-        } else if(hitTileX===p.x){
-          p.x+=TS; p.w-=TS;
-        } else if(hitTileX+TS>=p.x+p.w){
-          p.w-=TS;
-        } else {
-          // Split platform
-          var newP={x:hitTileX+TS,y:p.y,w:p.x+p.w-(hitTileX+TS),h:p.h,type:'brick'};
-          p.w=hitTileX-p.x;
-          platfs.push(newP);
-        }
-        score+=50;
-        return;
-      }
-    }
+function doBrickBreak(plat){
+  var idx=platfs.indexOf(plat);
+  if(idx<0)return;
+  var mx=P.x+P.w/2;
+  var ts=Math.floor((mx-plat.x)/TS)*TS+plat.x;
+  ts=Math.max(plat.x,Math.min(plat.x+plat.w-TS,ts));
+  spawnPt(ts+TS/2,plat.y,'#C0392B',8);
+  spawnPt(ts+TS/2,plat.y,'#8B4513',5);
+  score+=50;
+  if(plat.w<=TS){
+    platfs.splice(idx,1);
+  } else if(ts<=plat.x){
+    plat.x+=TS;plat.w-=TS;
+  } else if(ts+TS>=plat.x+plat.w){
+    plat.w-=TS;
+  } else {
+    var rp={x:ts+TS,y:plat.y,w:plat.x+plat.w-(ts+TS),h:plat.h,type:'brick'};
+    plat.w=ts-plat.x;
+    platfs.push(rp);
   }
 }
 
