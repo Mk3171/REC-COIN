@@ -248,108 +248,23 @@ function showToast(msg){
 
 // ====== NAV ======
 function openGames(){
-  var old = document.getElementById('gamesHubOverlay');
-  if(old) old.remove();
-
+  // افتح اللعبة كـ overlay داخل نفس الـ WebApp
   var overlay = document.createElement('div');
-  overlay.id = 'gamesHubOverlay';
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000 url(games-bg.jpeg) center/cover no-repeat;overflow-y:auto;';
-
-  var header = document.createElement('div');
-  header.style.cssText = 'display:flex;align-items:center;gap:12px;padding:14px 16px 10px;background:rgba(0,0,0,0.7);position:sticky;top:0;z-index:10;border-bottom:1px solid rgba(255,255,255,0.07);';
-
-  var backBtn = document.createElement('button');
-  backBtn.textContent = '← Back';
-  backBtn.style.cssText = 'background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:white;padding:7px 14px;border-radius:10px;font-size:13px;cursor:pointer;';
-  backBtn.onclick = function(){ overlay.remove(); };
-
-  var title = document.createElement('div');
-  title.textContent = '🎮 GAMES';
-  title.style.cssText = 'flex:1;text-align:center;font-family:Orbitron,sans-serif;font-size:16px;font-weight:900;color:#FF6644;';
-
-  header.appendChild(backBtn);
-  header.appendChild(title);
-  header.appendChild(document.createElement('div'));
-  overlay.appendChild(header);
-
-  var cont = document.createElement('div');
-  cont.style.cssText = 'padding:16px;';
-
-  var catHeader = document.createElement('div');
-  catHeader.className = 'games-cat-header';
-  catHeader.innerHTML = '<span class="games-cat-dot"></span><span class="games-cat-title">🕹️ Classic Game</span>';
-  cont.appendChild(catHeader);
-
-  var grid = document.createElement('div');
-  grid.className = 'games-grid';
-
-  var card1 = document.createElement('div');
-  card1.className = 'game-card';
-  card1.onclick = function(){ openGameFromHub('rec-catch'); };
-  card1.innerHTML = '<div class="game-card-thumb" style="overflow:hidden;padding:0;"><img src="rec-catch-thumb.jpeg" style="width:100%;height:100%;object-fit:cover;"></div><div class="game-card-name">REC Catch</div>';
-  grid.appendChild(card1);
-
-  var card2 = document.createElement('div');
-  card2.className = 'game-card';
-  card2.onclick = function(){ openGameFromHub('super-rec'); };
-  card2.innerHTML = '<div class="game-card-thumb" style="overflow:hidden;padding:0;"><img src="super-rec-thumb.jpeg" style="width:100%;height:100%;object-fit:cover;"></div><div class="game-card-name">Super REC</div>';
-  grid.appendChild(card2);
-
-  for(var i=0; i<2; i++){
-    var cs = document.createElement('div');
-    cs.className = 'game-card coming-soon';
-    cs.innerHTML = '<div class="game-card-thumb"><span style="font-size:36px;opacity:0.3;">🔒</span></div><div class="game-card-name" style="color:rgba(255,255,255,0.2);">Coming Soon</div>';
-    grid.appendChild(cs);
-  }
-
-  cont.appendChild(grid);
-  overlay.appendChild(cont);
-  document.body.appendChild(overlay);
-}
-
-function openGameFromHub(gameId){
-  var games = { 'rec-catch': '/games.html', 'super-rec': '/game2.html' };
-  var url = games[gameId];
-  if(!url) return;
-
-  var gOverlay = document.createElement('div');
-  gOverlay.id = 'gameplayOverlay';
-  gOverlay.style.cssText = 'position:fixed;inset:0;z-index:999999;background:#000;';
-
+  overlay.id = 'gamesOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;z-index:99999;background:#000;';
+  
   var closeBtn = document.createElement('button');
   closeBtn.textContent = '✕ Back';
   closeBtn.style.cssText = 'position:absolute;top:10px;right:10px;z-index:100000;background:rgba(0,0,0,0.8);color:white;border:1px solid #333;padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer;';
-  closeBtn.onclick = function(){
-    // Save earnings before closing
-    try{
-      var iw = iframe.contentWindow;
-      if(iw && iw.saveRec) iw.saveRec();
-      if(iw && iw.saveDailyData) iw.saveDailyData();
-    }catch(e){}
-    gOverlay.remove();
-    // Refresh balance in main app
-    setTimeout(function(){
-      if(typeof tgUser!=='undefined' && tgUser){
-        fetch('/api/user/'+tgUser.id)
-          .then(function(r){return r.json();})
-          .then(function(d){
-            if(d.exists && d.data){
-              if(typeof rec!=='undefined') rec = d.data.rec || rec;
-              if(typeof pendingRec!=='undefined') pendingRec = d.data.pendingRec || 0;
-              if(typeof updateUI==='function') updateUI();
-            }
-          }).catch(function(){});
-      }
-    }, 800);
-  };
-
+  closeBtn.onclick = function(){ document.body.removeChild(overlay); };
+  
   var iframe = document.createElement('iframe');
-  iframe.src = url;
+  iframe.src = '/games.html';
   iframe.style.cssText = 'width:100%;height:100%;border:none;';
-
-  gOverlay.appendChild(closeBtn);
-  gOverlay.appendChild(iframe);
-  document.body.appendChild(gOverlay);
+  
+  overlay.appendChild(closeBtn);
+  overlay.appendChild(iframe);
+  document.body.appendChild(overlay);
 }
 
 function showPage(id,btn){
@@ -997,6 +912,73 @@ function saveAdminCombo() {
     else showToast('❌ ' + JSON.stringify(d));
   }).catch(function(e){ showToast('❌ Fetch error: '+e.message); });
 }
+
+// ====== ADMIN USER MANAGEMENT ======
+function adminSearchUser() {
+  var userId = document.getElementById('adminUserId').value;
+  if(!userId) { showToast('❌ أدخل Telegram ID'); return; }
+  var infoDiv = document.getElementById('adminUserInfo');
+  var resultDiv = document.getElementById('adminActionResult');
+  infoDiv.style.display = 'none';
+  if(resultDiv) resultDiv.style.display = 'none';
+
+  fetch('/api/user/' + userId)
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(!d.exists || !d.data) {
+        showToast('❌ المستخدم غير موجود');
+        return;
+      }
+      var u = d.data;
+      var name = (u.username ? '@'+u.username : '') + ' ' + (u.firstName||'') + ' ' + (u.lastName||'');
+      document.getElementById('adminUserName').textContent = name.trim() || 'Unknown';
+      document.getElementById('adminUserRec').textContent = parseFloat(u.rec||0).toFixed(4) + ' REC';
+      var seen = u.lastSeen ? new Date(u.lastSeen).toLocaleString() : 'Never';
+      document.getElementById('adminUserSeen').textContent = seen;
+      infoDiv.style.display = 'block';
+      showToast('✅ تم العثور على المستخدم');
+    }).catch(function(){ showToast('❌ خطأ في الاتصال'); });
+}
+
+function adminAddRec() {
+  var userId = document.getElementById('adminUserId').value;
+  var amount = parseFloat(document.getElementById('adminAddAmount').value);
+  var reason = document.getElementById('adminAddReason').value || 'Admin gift';
+  var resultDiv = document.getElementById('adminActionResult');
+
+  if(!userId) { showToast('❌ ابحث عن مستخدم أولاً'); return; }
+  if(!amount || amount <= 0) { showToast('❌ أدخل كمية صحيحة'); return; }
+  if(!tgUser) return;
+
+  showToast('⏳ جاري الإضافة...');
+  fetch('/api/admin/add-rec', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({
+      adminId: tgUser.id,
+      telegramId: parseInt(userId),
+      amount: amount,
+      reason: reason
+    })
+  }).then(function(r){ return r.json(); })
+  .then(function(d){
+    if(d.success) {
+      resultDiv.style.cssText = 'display:block;background:rgba(0,255,136,0.15);border:1px solid rgba(0,255,136,0.3);color:#00FF88;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:700;';
+      resultDiv.textContent = '✅ تمت الإضافة! +' + amount + ' REC | الرصيد الجديد: ' + parseFloat(d.newBalance||0).toFixed(4);
+      // Update displayed balance
+      document.getElementById('adminUserRec').textContent = parseFloat(d.newBalance||0).toFixed(4) + ' REC';
+      document.getElementById('adminAddAmount').value = '';
+      document.getElementById('adminAddReason').value = '';
+      showToast('✅ تمت إضافة ' + amount + ' REC بنجاح!');
+    } else {
+      resultDiv.style.cssText = 'display:block;background:rgba(255,50,50,0.15);border:1px solid rgba(255,50,50,0.3);color:#FF6644;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:700;';
+      resultDiv.textContent = '❌ ' + (d.error || 'فشلت العملية');
+      showToast('❌ ' + (d.error || 'فشلت العملية'));
+    }
+  }).catch(function(e){ showToast('❌ خطأ: ' + e.message); });
+}
+// ====== END ADMIN USER MANAGEMENT ======
+
 // ====== END DAILY COMBO ======
 
 // ====== WALLET PAGE ======
