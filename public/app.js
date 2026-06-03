@@ -222,11 +222,12 @@ function loadFromServer(callback){
           }
         }catch(e){}
 
-        // If server REC is significantly more → block reward was given while offline
-        if(recDiff >= 99) {
+        // Show block notification if server flagged a block OR rec diff is significant
+        if(res.blockFound || recDiff >= 15) {
+          var blockAmt = res.blockAmount || recDiff;
           setTimeout(function(){
-            showBlockNotification(recDiff, res.data.totalBlocksFound || 1);
-          }, 2000);
+            showBlockNotification(blockAmt, res.data.totalBlocksFound || 1);
+          }, 1500);
         }
 
         callback(res.data);
@@ -912,92 +913,6 @@ function saveAdminCombo() {
     else showToast('❌ ' + JSON.stringify(d));
   }).catch(function(e){ showToast('❌ Fetch error: '+e.message); });
 }
-
-// ====== ADMIN USER MANAGEMENT ======
-function adminSearchUser() {
-  var userId = document.getElementById('adminUserId').value;
-  if(!userId) { showToast('❌ أدخل Telegram ID'); return; }
-  var infoDiv = document.getElementById('adminUserInfo');
-  var resultDiv = document.getElementById('adminActionResult');
-  infoDiv.style.display = 'none';
-  if(resultDiv) resultDiv.style.display = 'none';
-
-  fetch('/api/user/' + userId)
-    .then(function(r){ return r.json(); })
-    .then(function(d){
-      if(!d.exists || !d.data) {
-        showToast('❌ المستخدم غير موجود');
-        return;
-      }
-      var u = d.data;
-      var name = (u.username ? '@'+u.username : '') + ' ' + (u.firstName||'') + ' ' + (u.lastName||'');
-      document.getElementById('adminUserName').textContent = name.trim() || 'Unknown';
-      document.getElementById('adminUserRec').textContent = parseFloat(u.rec||0).toFixed(4) + ' REC';
-      var seen = u.lastSeen ? new Date(u.lastSeen).toLocaleString() : 'Never';
-      document.getElementById('adminUserSeen').textContent = seen;
-      infoDiv.style.display = 'block';
-      showToast('✅ تم العثور على المستخدم');
-    }).catch(function(){ showToast('❌ خطأ في الاتصال'); });
-}
-
-function adminAddRec() {
-  var userId = document.getElementById('adminUserId').value;
-  var amount = parseFloat(document.getElementById('adminAddAmount').value);
-  var reason = document.getElementById('adminAddReason').value || 'Admin gift';
-  var resultDiv = document.getElementById('adminActionResult');
-
-  if(!userId) { showToast('❌ ابحث عن مستخدم أولاً'); return; }
-  if(!amount || amount <= 0) { showToast('❌ أدخل كمية صحيحة'); return; }
-  if(!tgUser) return;
-
-  showToast('⏳ جاري الإضافة...');
-  fetch('/api/admin/add-rec', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({
-      adminId: tgUser.id,
-      telegramId: parseInt(userId),
-      amount: amount,
-      reason: reason
-    })
-  }).then(function(r){ return r.json(); })
-  .then(function(d){
-    if(d.success) {
-      resultDiv.style.cssText = 'display:block;background:rgba(0,255,136,0.15);border:1px solid rgba(0,255,136,0.3);color:#00FF88;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:700;';
-      resultDiv.textContent = '✅ تمت الإضافة! +' + amount + ' REC | الرصيد الجديد: ' + parseFloat(d.newBalance||0).toFixed(4);
-      // Update displayed balance
-      document.getElementById('adminUserRec').textContent = parseFloat(d.newBalance||0).toFixed(4) + ' REC';
-      document.getElementById('adminAddAmount').value = '';
-      document.getElementById('adminAddReason').value = '';
-      showToast('✅ تمت إضافة ' + amount + ' REC بنجاح!');
-    } else {
-      resultDiv.style.cssText = 'display:block;background:rgba(255,50,50,0.15);border:1px solid rgba(255,50,50,0.3);color:#FF6644;text-align:center;padding:8px;border-radius:8px;font-size:12px;font-weight:700;';
-      resultDiv.textContent = '❌ ' + (d.error || 'فشلت العملية');
-      showToast('❌ ' + (d.error || 'فشلت العملية'));
-    }
-  }).catch(function(e){ showToast('❌ خطأ: ' + e.message); });
-}
-
-function adminFixSpeeds() {
-  if(!tgUser) return;
-  if(String(tgUser.id) !== String(ADMIN_TG_ID)) { showToast('❌ Not admin'); return; }
-  showToast('⏳ جاري الإصلاح...');
-  fetch('/api/admin/fix-speeds', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ adminId: tgUser.id })
-  }).then(function(r){ return r.json(); })
-  .then(function(d){
-    if(d.success) {
-      showToast('✅ تم إصلاح ' + d.fixed + ' مستخدم من أصل ' + d.total);
-    } else {
-      showToast('❌ ' + (d.error || 'فشل'));
-    }
-  }).catch(function(){ showToast('❌ خطأ في الاتصال'); });
-}
-
-// ====== END ADMIN USER MANAGEMENT ======
-
 // ====== END DAILY COMBO ======
 
 // ====== WALLET PAGE ======
