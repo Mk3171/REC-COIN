@@ -789,6 +789,11 @@ app.post('/api/user/save', async (req, res) => {
       }
     }
 
+    // ✅ Always recalculate miningSpeed from card levels before saving
+    if(data.cardLevels) {
+      data.miningSpeed = calcMiningSpeed(data.cardLevels);
+    }
+
     const updated = await User.findOneAndUpdate(
       { telegramId: parseInt(telegramId) },
       { ...data, lastSeen: new Date(), lastSaveTime: Date.now() },
@@ -1232,11 +1237,29 @@ app.post('/api/user/heartbeat', async (req, res) => {
     const { telegramId, miningSpeed, recordMiningSpeed } = req.body;
     if(!telegramId) return res.json({ ok: false });
     var update = { lastSeen: new Date() };
-    if(miningSpeed !== undefined) update.miningSpeed = miningSpeed;
+    if(miningSpeed !== undefined && miningSpeed > 0) update.miningSpeed = miningSpeed;
     if(recordMiningSpeed !== undefined) update.recordMiningSpeed = recordMiningSpeed;
     await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, update);
     res.json({ ok: true });
   } catch(e) { res.json({ ok: false }); }
+});
+
+// ====== API: FIX MINING SPEEDS (run once to fix all users) ======
+app.post('/api/admin/fix-speeds', async (req, res) => {
+  try {
+    const { adminId } = req.body;
+    if(String(adminId) !== String(ADMIN_ID)) return res.status(403).json({ error: 'Not admin' });
+    const users = await User.find({ cardLevels: { $exists: true } }).lean();
+    var fixed = 0;
+    for(var u of users) {
+      var speed = calcMiningSpeed(u.cardLevels);
+      if(speed > 0 && Math.abs((u.miningSpeed || 0) - speed) > 0.000001) {
+        await User.findOneAndUpdate({ telegramId: u.telegramId }, { miningSpeed: speed });
+        fixed++;
+      }
+    }
+    res.json({ success: true, fixed, total: users.length });
+  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 // Server-side offline earnings calculation
@@ -1245,46 +1268,54 @@ app.post('/api/user/offline-earnings', async (req, res) => {
     const { telegramId } = req.body;
     if(!telegramId) return res.json({ earned: 0 });
 
-    const user = await User.findOne({ telegramId: parseInt(telegramId) });
+    const user = await User.findOne({ telegramId: parseInt(telegramId) }).lean();
     if(!user) return res.json({ earned: 0 });
 
     const now = Date.now();
     const lastSeen = user.lastSeen ? new Date(user.lastSeen).getTime() : 0;
+
+    // First time ever - just set lastSeen and save speed
     if(!lastSeen) {
-      // First time - just update lastSeen
-      await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, { lastSeen: new Date() });
+      const speed = calcMiningSpeed(user.cardLevels);
+      await User.findOneAndUpdate(
+        { telegramId: parseInt(telegramId) },
+        { lastSeen: new Date(), miningSpeed: speed }
+      );
       return res.json({ earned: 0, earnedRecord: 0 });
     }
 
-    const elapsed = (now - lastSeen) / 1000; // seconds
+    const elapsed = (now - lastSeen) / 1000; // seconds offline
     if(elapsed < 30) return res.json({ earned: 0, earnedRecord: 0 });
 
-    // Cap at 24 hours
+    // Cap at 24 hours offline
     const seconds = Math.min(elapsed, 86400);
-    const speed = user.miningSpeed || 0;
 
-    // Calculate earnings
-    const earnedRec = parseFloat((speed * seconds).toFixed(6));
-    const earnedRecord = Math.floor((user.recordMiningSpeed || 0) * seconds);
-
-    // Add to pendingRec
-    if(earnedRec > 0.000001 || earnedRecord > 0) {
-      await User.findOneAndUpdate(
-        { telegramId: parseInt(telegramId) },
-        {
-          $inc: {
-            pendingRec: earnedRec > 0 ? earnedRec : 0,
-            record: earnedRecord > 0 ? earnedRecord : 0
-          },
-          lastSeen: new Date()
-        }
-      );
-    } else {
-      await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, { lastSeen: new Date() });
+    // ✅ Always recalculate speed from cards (never trust stored 0)
+    var speed = user.miningSpeed || 0;
+    if(speed <= 0 && user.cardLevels) {
+      speed = calcMiningSpeed(user.cardLevels);
     }
 
-    res.json({ earned: earnedRec, earnedRecord, seconds: Math.floor(seconds) });
-  } catch(e) { res.status(500).json({ error: e.message }); }
+    // Calculate earnings
+    const earnedRec = parseFloat((speed * seconds).toFixed(8));
+    const earnedRecord = Math.floor((user.recordMiningSpeed || 0) * seconds);
+
+    // Save earnings + update lastSeen + save correct speed
+    var updateOp = { lastSeen: new Date(), miningSpeed: speed };
+    if(earnedRec > 0.000001) updateOp['$inc'] = { pendingRec: earnedRec };
+    if(earnedRecord > 0) {
+      if(!updateOp['$inc']) updateOp['$inc'] = {};
+      updateOp['$inc'].record = earnedRecord;
+    }
+
+    await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, updateOp);
+
+    console.log('[Offline] User', telegramId, '| Speed:', speed, '| Seconds:', Math.floor(seconds), '| Earned:', earnedRec, 'REC');
+    res.json({ earned: earnedRec, earnedRecord, seconds: Math.floor(seconds), speed });
+  } catch(e) {
+    console.log('Offline earnings error:', e.message);
+    res.status(500).json({ error: e.message });
+  }
 });
 
 // Airdrop score update
@@ -1368,36 +1399,6 @@ app.post('/api/combo/check', async (req, res) => {
     }
 
     res.json({ matched: true, done: progress.length, allDone, reward: giveReward ? combo.reward : 0 });
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
-
-
-// ====== ADMIN: ADD REC MANUALLY ======
-app.post('/api/admin/add-rec', async (req, res) => {
-  try {
-    const { adminId, telegramId, amount, reason } = req.body;
-    if(String(adminId) !== String(ADMIN_ID)) return res.status(403).json({ error: 'Not admin' });
-    if(!telegramId || !amount) return res.status(400).json({ error: 'Missing data' });
-    
-    var toAdd = parseFloat(amount);
-    if(isNaN(toAdd) || toAdd <= 0) return res.status(400).json({ error: 'Invalid amount' });
-    
-    var user = await User.findOneAndUpdate(
-      { telegramId: parseInt(telegramId) },
-      { $inc: { rec: toAdd } },
-      { new: true }
-    );
-    if(!user) return res.status(404).json({ error: 'User not found' });
-    
-    // Notify user
-    try {
-      await bot.sendMessage(parseInt(telegramId),
-        `🎁 *Admin Gift!*\n\n💰 *+${toAdd} REC* has been added to your balance!\n${reason ? '📝 ' + reason : ''}\n\nOpen the bot to see your balance 👇`,
-        { parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{ text: '🚀 Open Bot', web_app: { url: MINI_APP_URL } }]] } }
-      );
-    } catch(e) {}
-    
-    res.json({ success: true, added: toAdd, newBalance: user.rec });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
