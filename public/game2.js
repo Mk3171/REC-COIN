@@ -80,20 +80,19 @@ function buildLevel(n){
   }
   // platforms
   var pc=6+n*2,sp=(worldW-300)/pc;
+  // Platforms low enough for Mario to jump on
   for(var p=0;p<pc;p++){
-    var px=200+p*sp+Math.random()*60;
-    var py=GY-100-Math.random()*100;
+    var px=200+p*sp+Math.random()*80;
+    var py=GY-TS*2-Math.random()*TS; // 2-3 tiles above ground
     var pw=2+Math.floor(Math.random()*3);
-    addP(px,py,pw,Math.random()>0.4?'brick':'solid');
-    // Q block floats HIGH above platform center (2.5 tiles gap so Mario fits under)
-    if(Math.random()>0.4){
-      addQ(px+Math.floor(pw/2)*TS, py-TS*2.8);
-    }
+    addP(px,py,pw,Math.random()>0.5?'brick':'solid');
   }
-  // Standalone Q blocks: float in air at jump height from ground
-  for(var q=0;q<6+n;q++){
-    var qx=250+(worldW-400)/(6+n)*q+Math.random()*50;
-    var qy=GY-TS*3.2-Math.random()*TS;
+  // Q blocks: float at jump height from ground (Mario hits from BELOW)
+  // Jump height ~ GY - 170 to GY - 210 (reachable with single jump)
+  var qCount=7+n;
+  for(var q=0;q<qCount;q++){
+    var qx=200+(worldW-400)/qCount*q+Math.random()*70;
+    var qy=GY-TS*3.2-Math.random()*TS*0.8; // fixed jump height
     addQ(qx,qy);
   }
   // enemies
@@ -156,6 +155,37 @@ function hitQBlock(qi){
   levelRec=parseFloat((levelRec+rec).toFixed(6));
   score+=100; updHUD();
   spawnPt(q.x+q.w/2,q.y+q.h/2,'#FFD700',5);
+}
+
+function breakBrick(px,py){
+  // Find and break brick platform block at this position
+  for(var i=0;i<platfs.length;i++){
+    var p=platfs[i];
+    if(p.type==='brick'&&Math.abs(p.y-py)<4){
+      // Break only the tile Mario hit
+      var hitTileX=Math.floor((P.x+P.w/2-p.x)/TS)*TS+p.x;
+      if(hitTileX>=p.x&&hitTileX<p.x+p.w){
+        // Spawn brick particles
+        spawnPt(hitTileX+TS/2,p.y+TS/2,'#C0392B',8);
+        spawnPt(hitTileX+TS/2,p.y+TS/2,'#8B2500',6);
+        // Shorten or remove the platform
+        if(p.w<=TS){
+          platfs.splice(i,1);
+        } else if(hitTileX===p.x){
+          p.x+=TS; p.w-=TS;
+        } else if(hitTileX+TS>=p.x+p.w){
+          p.w-=TS;
+        } else {
+          // Split platform
+          var newP={x:hitTileX+TS,y:p.y,w:p.x+p.w-(hitTileX+TS),h:p.h,type:'brick'};
+          p.w=hitTileX-p.x;
+          platfs.push(newP);
+        }
+        score+=50;
+        return;
+      }
+    }
+  }
 }
 
 // ====== UPDATE ======
