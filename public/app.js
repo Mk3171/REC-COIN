@@ -222,11 +222,13 @@ function loadFromServer(callback){
           }
         }catch(e){}
 
-        // If server REC is significantly more → block reward was given while offline
-        if(recDiff >= 99) {
+        // Show block popup if server flagged a block reward
+        if(res.blockFound && res.blockAmount > 0) {
+          if(typeof rec !== 'undefined') rec = res.data.rec || rec;
+          if(typeof updateUI === 'function') updateUI();
           setTimeout(function(){
-            showBlockNotification(recDiff, res.data.totalBlocksFound || 1);
-          }, 2000);
+            showBlockNotification(res.blockAmount, res.data.totalBlocksFound || 1);
+          }, 1000);
         }
 
         callback(res.data);
@@ -265,11 +267,9 @@ function openGames(){
   cat.innerHTML='<span class="games-cat-dot"></span><span class="games-cat-title">🕹️ Classic Game</span>';
   cnt.appendChild(cat);
   var grid=document.createElement('div');grid.className='games-grid';
-  var c1=document.createElement('div');c1.className='game-card';
-  c1.onclick=function(){openGameFromHub('rec-catch');};
+  var c1=document.createElement('div');c1.className='game-card';c1.onclick=function(){openGameFromHub('rec-catch');};
   c1.innerHTML='<div class="game-card-thumb" style="overflow:hidden;padding:0;"><img src="rec-catch-thumb.jpeg" style="width:100%;height:100%;object-fit:cover;"></div><div class="game-card-name">REC Catch</div>';
-  var c2=document.createElement('div');c2.className='game-card';
-  c2.onclick=function(){openGameFromHub('super-rec');};
+  var c2=document.createElement('div');c2.className='game-card';c2.onclick=function(){openGameFromHub('super-rec');};
   c2.innerHTML='<div class="game-card-thumb" style="overflow:hidden;padding:0;"><img src="super-rec-thumb.jpeg" style="width:100%;height:100%;object-fit:cover;"></div><div class="game-card-name">Super REC</div>';
   grid.appendChild(c1);grid.appendChild(c2);
   for(var i=0;i<2;i++){var cs=document.createElement('div');cs.className='game-card coming-soon';cs.innerHTML='<div class="game-card-thumb"><span style="font-size:36px;opacity:0.3;">🔒</span></div><div class="game-card-name" style="color:rgba(255,255,255,0.2);">Coming Soon</div>';grid.appendChild(cs);}
@@ -1212,12 +1212,6 @@ function loadAndInit() {
       if(serverData.record > record * 1.5) {
         applyData(serverData);
         updateUI();
-      }
-      // Show block popup if server found a block
-      if(res.blockFound && res.blockAmount > 0) {
-        if(typeof rec!=='undefined') rec = serverData.rec || rec;
-        if(typeof updateUI==='function') updateUI();
-        setTimeout(function(){ showBlockNotification(res.blockAmount, serverData.totalBlocksFound||1); }, 1000);
       }
       // Sync pendingRec from server
       if(serverData.pendingRec && serverData.pendingRec > (typeof pendingRec!=='undefined'?pendingRec:0)) {
