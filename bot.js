@@ -789,23 +789,15 @@ app.post('/api/user/save', async (req, res) => {
       }
     }
 
-    // Extract rec separately to use $max (prevents admin credits being overwritten)
-    var saveData = Object.assign({}, data);
-    var recToSave = saveData.rec;
-    delete saveData.rec;
-    delete saveData.pendingRec; // pendingRec managed separately
-
-    var updateOp = {
-      $set: Object.assign({}, saveData, { lastSeen: new Date(), lastSaveTime: Date.now() })
-    };
-    // $max for rec: only update if new value is HIGHER than current
-    if(recToSave !== undefined) {
-      updateOp.$max = { rec: recToSave };
-    }
-
+    // Protect rec: use $max so server-side credits can't be overwritten
+    var saveSet = Object.assign({}, data);
+    var recVal = saveSet.rec;
+    delete saveSet.rec;
+    var saveOp = { $set: Object.assign(saveSet, { lastSeen: new Date(), lastSaveTime: Date.now() }) };
+    if(recVal !== undefined) saveOp.$max = { rec: recVal };
     const updated = await User.findOneAndUpdate(
       { telegramId: parseInt(telegramId) },
-      updateOp,
+      saveOp,
       { new: true, upsert: true }
     );
     res.json({ success: true, data: updated });
@@ -1386,30 +1378,54 @@ app.post('/api/combo/check', async (req, res) => {
 });
 
 
-// ====== ADMIN: ADD REC ======
+// ADMIN: Add REC - GET version (open from phone browser)
+app.get('/admin/give/:adminId/:userId/:amount', async (req, res) => {
+  try {
+    if(String(req.params.adminId) !== String(ADMIN_ID))
+      return res.send('<h2 style="color:red">❌ Not admin</h2>');
+    var toAdd = parseFloat(req.params.amount);
+    var user = await User.findOneAndUpdate(
+      { telegramId: parseInt(req.params.userId) },
+      { $inc: { rec: toAdd } },
+      { new: true }
+    );
+    if(!user) return res.send('<h2 style="color:red">❌ User not found</h2>');
+    try {
+      await bot.sendMessage(parseInt(req.params.userId),
+        '🎁 *Admin Gift!*
+
+💰 *+' + toAdd + ' REC* added!
+
+Open bot to see balance 👇',
+        { parse_mode:'Markdown', reply_markup:{inline_keyboard:[[{text:'🚀 Open Bot',web_app:{url:MINI_APP_URL}}]]} }
+      );
+    } catch(e){}
+    res.send('<h2 style="color:green;font-family:monospace">✅ Done! Added +' + toAdd + ' REC<br>New balance: ' + user.rec.toFixed(4) + ' REC</h2>');
+  } catch(e) { res.send('<h2 style="color:red">❌ Error: ' + e.message + '</h2>'); }
+});
+
+// ADMIN: POST version
 app.post('/api/admin/add-rec', async (req, res) => {
   try {
     const { adminId, telegramId, amount } = req.body;
-    if (String(adminId) !== String(ADMIN_ID)) return res.status(403).json({ error: 'Not admin' });
-    if (!telegramId || !amount) return res.status(400).json({ error: 'Missing data' });
-    const toAdd = parseFloat(amount);
-    if (isNaN(toAdd) || toAdd <= 0) return res.status(400).json({ error: 'Invalid amount' });
-    const user = await User.findOneAndUpdate(
+    if(String(adminId) !== String(ADMIN_ID)) return res.status(403).json({ error: 'Not admin' });
+    var toAdd = parseFloat(amount);
+    var user = await User.findOneAndUpdate(
       { telegramId: parseInt(telegramId) },
       { $inc: { rec: toAdd } },
       { new: true }
     );
-    if (!user) return res.status(404).json({ error: 'User not found' });
+    if(!user) return res.status(404).json({ error: 'User not found' });
     try {
       await bot.sendMessage(parseInt(telegramId),
-        `🎁 *Gift from Admin!*
+        '🎁 *Admin Gift!*
 
-💰 *+${toAdd} REC* added to your balance!
+💰 *+' + toAdd + ' REC* added!
 
-Open the bot to see your balance 👇`,
-        { parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{ text: '🚀 Open Bot', web_app: { url: MINI_APP_URL } }]] } }
+Open bot to see balance 👇',
+        { parse_mode:'Markdown', reply_markup:{inline_keyboard:[[{text:'🚀 Open Bot',web_app:{url:MINI_APP_URL}}]]} }
       );
-    } catch(e) {}
+    } catch(e){}
     res.json({ success: true, added: toAdd, newBalance: user.rec });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
