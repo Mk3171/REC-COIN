@@ -1392,11 +1392,7 @@ app.get('/admin/give/:adminId/:userId/:amount', async (req, res) => {
     if(!user) return res.send('<h2 style="color:red">❌ User not found</h2>');
     try {
       await bot.sendMessage(parseInt(req.params.userId),
-        '🎁 *Admin Gift!*
-
-💰 *+' + toAdd + ' REC* added!
-
-Open bot to see balance 👇',
+        '🎁 *Admin Gift!*\n\n💰 *+' + toAdd + ' REC* added!\n\nOpen bot to see balance 👇',
         { parse_mode:'Markdown', reply_markup:{inline_keyboard:[[{text:'🚀 Open Bot',web_app:{url:MINI_APP_URL}}]]} }
       );
     } catch(e){}
@@ -1418,11 +1414,7 @@ app.post('/api/admin/add-rec', async (req, res) => {
     if(!user) return res.status(404).json({ error: 'User not found' });
     try {
       await bot.sendMessage(parseInt(telegramId),
-        '🎁 *Admin Gift!*
-
-💰 *+' + toAdd + ' REC* added!
-
-Open bot to see balance 👇',
+        '🎁 *Admin Gift!*\n\n💰 *+' + toAdd + ' REC* added!\n\nOpen bot to see balance 👇',
         { parse_mode:'Markdown', reply_markup:{inline_keyboard:[[{text:'🚀 Open Bot',web_app:{url:MINI_APP_URL}}]]} }
       );
     } catch(e){}
