@@ -977,6 +977,25 @@ function adminAddRec() {
     }
   }).catch(function(e){ showToast('❌ خطأ: ' + e.message); });
 }
+
+function adminFixSpeeds() {
+  if(!tgUser) return;
+  if(String(tgUser.id) !== String(ADMIN_TG_ID)) { showToast('❌ Not admin'); return; }
+  showToast('⏳ جاري الإصلاح...');
+  fetch('/api/admin/fix-speeds', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ adminId: tgUser.id })
+  }).then(function(r){ return r.json(); })
+  .then(function(d){
+    if(d.success) {
+      showToast('✅ تم إصلاح ' + d.fixed + ' مستخدم من أصل ' + d.total);
+    } else {
+      showToast('❌ ' + (d.error || 'فشل'));
+    }
+  }).catch(function(){ showToast('❌ خطأ في الاتصال'); });
+}
+
 // ====== END ADMIN USER MANAGEMENT ======
 
 // ====== END DAILY COMBO ======
