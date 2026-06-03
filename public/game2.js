@@ -83,7 +83,7 @@ function buildLevel(n){
   // Platforms: low (1.5-2 tiles above ground), all brick, all breakable
   for(var p=0;p<pc;p++){
     var px=200+p*sp+Math.random()*80;
-    var py=GY-TS*1.8-Math.random()*TS*0.5; // low: 1.8-2.3 tiles above ground
+    var py=GY-TS*2.6-Math.random()*TS*0.5; // raised: 2.6-3.1 tiles above ground
     var pw=2+Math.floor(Math.random()*3);
     addP(px,py,pw,'brick');
   }
