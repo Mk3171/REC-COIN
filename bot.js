@@ -712,15 +712,20 @@ app.get('/api/user/:telegramId', async (req, res) => {
   try {
     var user = await User.findOne({ telegramId: parseInt(req.params.telegramId) });
     if (!user) return res.json({ exists: false });
+    var blockFound = false;
+    var blockAmount = 0;
     // Merge pending admin credits into rec balance
     if(user.adminCredit && user.adminCredit > 0) {
+      blockAmount = user.adminCredit;
+      blockFound = true;
       user = await User.findOneAndUpdate(
         { telegramId: parseInt(req.params.telegramId) },
         { $inc: { rec: user.adminCredit }, $set: { adminCredit: 0 } },
         { new: true }
       );
+      console.log('[BlockCredit] User', req.params.telegramId, 'collected', blockAmount, 'REC');
     }
-    res.json({ exists: true, data: user });
+    res.json({ exists: true, data: user, blockFound, blockAmount });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -1054,7 +1059,7 @@ async function runHourlyBlock() {
       '👥 Active Miners: ' + activeUsers.length + '\n' +
       '⏰ ' + new Date().toUTCString() + '\n\n' +
       BOT_USERNAME;
-    await bot.sendMessage(BLOCKS_CHANNEL_ID, channelMsg, { parse_mode: 'Markdown' }).catch(function(){});
+    await bot.sendMessage(BLOCKS_CHANNEL_ID, channelMsg, { parse_mode: 'Markdown' }).catch(function(e){ console.log('[Block] Channel error:', e.message); });
 
     // Group notification
     var groupMsg =
@@ -1064,7 +1069,7 @@ async function runHourlyBlock() {
       '👥 Active Miners: ' + activeUsers.length + '\n' +
       '⏰ ' + new Date().toUTCString() + '\n\n' +
       BOT_USERNAME;
-    await bot.sendMessage(GROUP_CHAT_ID, groupMsg, { parse_mode: 'Markdown' }).catch(function(){});
+    await bot.sendMessage(GROUP_CHAT_ID, groupMsg, { parse_mode: 'Markdown' }).catch(function(e){ console.log('[Block] Group error:', e.message); });
 
     // Personal notification
     var personalMsg =
