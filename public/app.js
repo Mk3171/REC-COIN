@@ -312,22 +312,44 @@ function openGameFromHub(gameId){
   var url = games[gameId];
   if(!url) return;
 
-  var overlay = document.createElement('div');
-  overlay.id = 'gameplayOverlay';
-  overlay.style.cssText = 'position:fixed;inset:0;z-index:999999;background:#000;';
+  var gOverlay = document.createElement('div');
+  gOverlay.id = 'gameplayOverlay';
+  gOverlay.style.cssText = 'position:fixed;inset:0;z-index:999999;background:#000;';
 
   var closeBtn = document.createElement('button');
   closeBtn.textContent = '✕ Back';
   closeBtn.style.cssText = 'position:absolute;top:10px;right:10px;z-index:100000;background:rgba(0,0,0,0.8);color:white;border:1px solid #333;padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer;';
-  closeBtn.onclick = function(){ overlay.remove(); };
+  closeBtn.onclick = function(){
+    // Save earnings before closing
+    try{
+      var iw = iframe.contentWindow;
+      if(iw && iw.saveRec) iw.saveRec();
+      if(iw && iw.saveDailyData) iw.saveDailyData();
+    }catch(e){}
+    gOverlay.remove();
+    // Refresh balance in main app
+    setTimeout(function(){
+      if(typeof tgUser!=='undefined' && tgUser){
+        fetch('/api/user/'+tgUser.id)
+          .then(function(r){return r.json();})
+          .then(function(d){
+            if(d.exists && d.data){
+              if(typeof rec!=='undefined') rec = d.data.rec || rec;
+              if(typeof pendingRec!=='undefined') pendingRec = d.data.pendingRec || 0;
+              if(typeof updateUI==='function') updateUI();
+            }
+          }).catch(function(){});
+      }
+    }, 800);
+  };
 
   var iframe = document.createElement('iframe');
   iframe.src = url;
   iframe.style.cssText = 'width:100%;height:100%;border:none;';
 
-  overlay.appendChild(closeBtn);
-  overlay.appendChild(iframe);
-  document.body.appendChild(overlay);
+  gOverlay.appendChild(closeBtn);
+  gOverlay.appendChild(iframe);
+  document.body.appendChild(gOverlay);
 }
 
 function showPage(id,btn){
