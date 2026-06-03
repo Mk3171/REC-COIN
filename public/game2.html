@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Super REC</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#5C94FC; overflow:hidden; width:100vw; height:100vh; touch-action:none; }
+canvas { display:block; position:fixed; top:0; left:0; }
+
+#hud {
+  position:fixed; top:0; left:0; right:0;
+  padding:8px 12px;
+  display:flex; justify-content:space-between; align-items:center;
+  background:rgba(0,0,0,0.5);
+  z-index:10; pointer-events:none;
+  font-family:'Arial Black',sans-serif;
+}
+.hud-item { text-align:center; }
+.hud-label { font-size:9px; color:rgba(255,255,255,0.6); letter-spacing:1px; }
+.hud-val { font-size:15px; font-weight:900; color:#fff; text-shadow:1px 1px 0 #000; }
+.hud-val.green { color:#00FF88; }
+.hud-val.yellow { color:#FFD700; }
+.hud-val.red { color:#FF4444; }
+
+/* Controls */
+#controls {
+  position:fixed; bottom:0; left:0; right:0;
+  display:flex; justify-content:space-between; align-items:flex-end;
+  padding:10px 16px 20px; z-index:10;
+  pointer-events:none;
+}
+.ctrl-left { display:flex; gap:8px; pointer-events:all; }
+.ctrl-right { pointer-events:all; }
+
+.ctrl-btn {
+  width:60px; height:60px;
+  background:rgba(255,255,255,0.2);
+  border:3px solid rgba(255,255,255,0.5);
+  border-radius:50%;
+  display:flex; align-items:center; justify-content:center;
+  font-size:24px; cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;
+  box-shadow:0 4px 12px rgba(0,0,0,0.3);
+}
+.ctrl-btn.active { background:rgba(255,255,255,0.4); transform:scale(0.92); }
+.jump-btn {
+  width:72px; height:72px;
+  background:rgba(255,100,50,0.7);
+  border:3px solid rgba(255,150,100,0.8);
+  font-size:28px;
+  box-shadow:0 4px 16px rgba(255,0,0,0.4);
+}
+.jump-btn.active { background:rgba(255,150,100,0.8); }
+
+/* Screens */
+.screen {
+  position:fixed; inset:0; z-index:20;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  background:rgba(0,0,20,0.88);
+  padding:24px; display:none;
+}
+.screen.show { display:flex; }
+.screen-title {
+  font-family:'Arial Black',sans-serif;
+  font-size:32px; font-weight:900;
+  color:#FFD700; text-shadow:2px 2px 0 #000;
+  letter-spacing:3px; margin-bottom:8px;
+}
+.screen-sub { font-size:13px; color:rgba(255,255,255,0.5); margin-bottom:20px; }
+.stat-row {
+  display:flex; justify-content:space-between;
+  width:100%; max-width:280px;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.12);
+  border-radius:10px; padding:10px 16px; margin-bottom:8px;
+}
+.stat-l { color:rgba(255,255,255,0.6); font-size:13px; }
+.stat-r { color:#00FF88; font-weight:700; font-size:13px; font-family:'Arial Black',sans-serif; }
+.stat-r.yellow { color:#FFD700; }
+.play-btn {
+  margin-top:20px;
+  background:linear-gradient(135deg,#E52521,#FF4444);
+  border:none; color:#fff;
+  padding:14px 44px; border-radius:12px;
+  font-family:'Arial Black',sans-serif;
+  font-size:16px; font-weight:900;
+  cursor:pointer; letter-spacing:2px;
+  box-shadow:0 0 30px rgba(255,0,0,0.5);
+  -webkit-tap-highlight-color:transparent;
+}
+.level-info {
+  background:rgba(255,215,0,0.1);
+  border:1px solid rgba(255,215,0,0.3);
+  border-radius:10px; padding:10px 20px;
+  color:#FFD700; font-size:12px; margin-bottom:16px;
+  text-align:center;
+}
+</style>
+</head>
+<body>
+
+<canvas id="gc"></canvas>
+
+<!-- HUD -->
+<div id="hud">
+  <div class="hud-item">
+    <div class="hud-label">LIVES</div>
+    <div class="hud-val red" id="hudLives">❤️❤️❤️</div>
+  </div>
+  <div class="hud-item">
+    <div class="hud-label">LEVEL</div>
+    <div class="hud-val yellow" id="hudLevel">1</div>
+  </div>
+  <div class="hud-item">
+    <div class="hud-label">REC</div>
+    <div class="hud-val green" id="hudRec">0.0000</div>
+  </div>
+  <div class="hud-item">
+    <div class="hud-label">SCORE</div>
+    <div class="hud-val" id="hudScore">0</div>
+  </div>
+</div>
+
+<!-- Controls -->
+<div id="controls">
+  <div class="ctrl-left">
+    <div class="ctrl-btn" id="btnLeft">◀</div>
+    <div class="ctrl-btn" id="btnRight">▶</div>
+  </div>
+  <div class="ctrl-right">
+    <div class="ctrl-btn jump-btn" id="btnJump">🅰</div>
+  </div>
+</div>
+
+<!-- Start Screen -->
+<div class="screen show" id="startScreen">
+  <div style="font-size:56px;margin-bottom:8px;">🍄</div>
+  <div class="screen-title">SUPER REC</div>
+  <div class="screen-sub">Jump, stomp & collect REC coins!</div>
+  <div class="level-info">
+    🪙 Coins earn real REC — harder levels = bigger rewards!<br>
+    ⚠️ Touch enemies from side = die &nbsp;|&nbsp; Jump on top = kill
+  </div>
+  <div class="stat-row">
+    <span class="stat-l">🟢 Level 1-2</span>
+    <span class="stat-r">0.001 REC/coin</span>
+  </div>
+  <div class="stat-row">
+    <span class="stat-l">🟡 Level 3-4</span>
+    <span class="stat-r yellow">0.005 REC/coin</span>
+  </div>
+  <div class="stat-row">
+    <span class="stat-l">🔴 Level 5+</span>
+    <span class="stat-r" style="color:#FF6644;">0.05+ REC/coin</span>
+  </div>
+  <button class="play-btn" onclick="startGame()">▶ START</button>
+</div>
+
+<!-- Dead Screen -->
+<div class="screen" id="deadScreen">
+  <div style="font-size:48px;margin-bottom:8px;">💀</div>
+  <div class="screen-title" style="color:#FF4444;">OOPS!</div>
+  <div class="screen-sub" id="deadMsg">You got hit!</div>
+  <div class="stat-row">
+    <span class="stat-l">Lives Left</span>
+    <span class="stat-r red" id="deadLives">2</span>
+  </div>
+  <div class="stat-row">
+    <span class="stat-l">REC Earned</span>
+    <span class="stat-r" id="deadRec">0.0000</span>
+  </div>
+  <button class="play-btn" id="deadBtn" onclick="respawn()">▶ TRY AGAIN</button>
+</div>
+
+<!-- Level Clear Screen -->
+<div class="screen" id="clearScreen">
+  <div style="font-size:48px;margin-bottom:8px;">🏆</div>
+  <div class="screen-title" style="color:#00FF88;">LEVEL CLEAR!</div>
+  <div class="screen-sub" id="clearSub">Level 1 Complete!</div>
+  <div class="stat-row">
+    <span class="stat-l">Coins Collected</span>
+    <span class="stat-r yellow" id="clearCoins">0</span>
+  </div>
+  <div class="stat-row">
+    <span class="stat-l">REC This Level</span>
+    <span class="stat-r" id="clearRec">0.0000</span>
+  </div>
+  <div class="stat-row">
+    <span class="stat-l">Total REC</span>
+    <span class="stat-r" id="clearTotal">0.0000</span>
+  </div>
+  <div class="level-info" id="nextLevelInfo">Next: Level 2 — 0.002 REC/coin</div>
+  <button class="play-btn" onclick="nextLevel()">▶ NEXT LEVEL</button>
+</div>
+
+<!-- Game Over Screen -->
+<div class="screen" id="overScreen">
+  <div style="font-size:48px;margin-bottom:8px;">🎮</div>
+  <div class="screen-title" style="color:#FF4444;">GAME OVER</div>
+  <div class="screen-sub">Better luck next time!</div>
+  <div class="stat-row">
+    <span class="stat-l">Level Reached</span>
+    <span class="stat-r yellow" id="overLevel">1</span>
+  </div>
+  <div class="stat-row">
+    <span class="stat-l">Total REC Earned</span>
+    <span class="stat-r" id="overRec">0.0000</span>
+  </div>
+  <button class="play-btn" onclick="restartGame()">🔄 PLAY AGAIN</button>
+</div>
+
+<script src="game2.js"></script>
+</body>
+</html>
