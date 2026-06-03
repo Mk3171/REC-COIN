@@ -248,52 +248,48 @@ function showToast(msg){
 
 // ====== NAV ======
 function openGames(){
-  var old=document.getElementById('gamesHubOverlay'); if(old) old.remove();
-  var ov=document.createElement('div');
-  ov.id='gamesHubOverlay';
+  var old=document.getElementById('gamesHubOverlay');if(old)old.remove();
+  var ov=document.createElement('div');ov.id='gamesHubOverlay';
   ov.style.cssText='position:fixed;inset:0;z-index:99999;background:#000 url(games-bg.jpeg) center/cover no-repeat;overflow-y:auto;';
   var hdr=document.createElement('div');
   hdr.style.cssText='display:flex;align-items:center;gap:12px;padding:14px 16px 10px;background:rgba(0,0,0,0.7);position:sticky;top:0;z-index:10;border-bottom:1px solid rgba(255,255,255,0.07);';
-  var bk=document.createElement('button');
-  bk.textContent='← Back';
+  var bk=document.createElement('button');bk.textContent='← Back';
   bk.style.cssText='background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);color:white;padding:7px 14px;border-radius:10px;font-size:13px;cursor:pointer;';
-  bk.onclick=function(){ ov.remove(); };
-  var ttl=document.createElement('div');
-  ttl.textContent='🎮 GAMES';
+  bk.onclick=function(){ov.remove();};
+  var ttl=document.createElement('div');ttl.textContent='🎮 GAMES';
   ttl.style.cssText='flex:1;text-align:center;font-family:Orbitron,sans-serif;font-size:16px;font-weight:900;color:#FF6644;';
-  hdr.appendChild(bk); hdr.appendChild(ttl); hdr.appendChild(document.createElement('div'));
+  hdr.appendChild(bk);hdr.appendChild(ttl);hdr.appendChild(document.createElement('div'));
   ov.appendChild(hdr);
-  var cnt=document.createElement('div'); cnt.style.cssText='padding:16px;';
-  var cat=document.createElement('div'); cat.className='games-cat-header';
+  var cnt=document.createElement('div');cnt.style.cssText='padding:16px;';
+  var cat=document.createElement('div');cat.className='games-cat-header';
   cat.innerHTML='<span class="games-cat-dot"></span><span class="games-cat-title">🕹️ Classic Game</span>';
   cnt.appendChild(cat);
-  var grid=document.createElement('div'); grid.className='games-grid';
-  var c1=document.createElement('div'); c1.className='game-card';
-  c1.onclick=function(){ openGameFromHub('rec-catch'); };
+  var grid=document.createElement('div');grid.className='games-grid';
+  var c1=document.createElement('div');c1.className='game-card';
+  c1.onclick=function(){openGameFromHub('rec-catch');};
   c1.innerHTML='<div class="game-card-thumb" style="overflow:hidden;padding:0;"><img src="rec-catch-thumb.jpeg" style="width:100%;height:100%;object-fit:cover;"></div><div class="game-card-name">REC Catch</div>';
-  var c2=document.createElement('div'); c2.className='game-card';
-  c2.onclick=function(){ openGameFromHub('super-rec'); };
+  var c2=document.createElement('div');c2.className='game-card';
+  c2.onclick=function(){openGameFromHub('super-rec');};
   c2.innerHTML='<div class="game-card-thumb" style="overflow:hidden;padding:0;"><img src="super-rec-thumb.jpeg" style="width:100%;height:100%;object-fit:cover;"></div><div class="game-card-name">Super REC</div>';
-  grid.appendChild(c1); grid.appendChild(c2);
-  for(var i=0;i<2;i++){ var cs=document.createElement('div'); cs.className='game-card coming-soon'; cs.innerHTML='<div class="game-card-thumb"><span style="font-size:36px;opacity:0.3;">🔒</span></div><div class="game-card-name" style="color:rgba(255,255,255,0.2);">Coming Soon</div>'; grid.appendChild(cs); }
-  cnt.appendChild(grid); ov.appendChild(cnt); document.body.appendChild(ov);
+  grid.appendChild(c1);grid.appendChild(c2);
+  for(var i=0;i<2;i++){var cs=document.createElement('div');cs.className='game-card coming-soon';cs.innerHTML='<div class="game-card-thumb"><span style="font-size:36px;opacity:0.3;">🔒</span></div><div class="game-card-name" style="color:rgba(255,255,255,0.2);">Coming Soon</div>';grid.appendChild(cs);}
+  cnt.appendChild(grid);ov.appendChild(cnt);document.body.appendChild(ov);
 }
 
 function openGameFromHub(gameId){
   var games={'rec-catch':'/games.html','super-rec':'/game2.html'};
-  var url=games[gameId]; if(!url) return;
-  var ov=document.createElement('div'); ov.id='gameplayOverlay';
+  var url=games[gameId];if(!url)return;
+  var ov=document.createElement('div');ov.id='gameplayOverlay';
   ov.style.cssText='position:fixed;inset:0;z-index:999999;background:#000;';
-  var cb=document.createElement('button'); cb.textContent='✕ Back';
+  var cb=document.createElement('button');cb.textContent='✕ Back';
   cb.style.cssText='position:absolute;top:10px;right:10px;z-index:100000;background:rgba(0,0,0,0.8);color:white;border:1px solid #333;padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer;';
   cb.onclick=function(){
-    try{ var iw=iframe.contentWindow; if(iw&&iw.saveRec) iw.saveRec(); if(iw&&iw.saveDailyData) iw.saveDailyData(); }catch(e){}
+    try{var iw=iframe.contentWindow;if(iw&&iw.saveRec)iw.saveRec();if(iw&&iw.saveDailyData)iw.saveDailyData();}catch(e){}
     ov.remove();
-    setTimeout(function(){ if(typeof tgUser!=='undefined'&&tgUser){ fetch('/api/user/'+tgUser.id).then(function(r){return r.json();}).then(function(d){ if(d.exists&&d.data){ if(typeof rec!=='undefined') rec=d.data.rec||rec; if(typeof updateUI==='function') updateUI(); }}).catch(function(){}); } },800);
   };
-  var iframe=document.createElement('iframe'); iframe.src=url;
+  var iframe=document.createElement('iframe');iframe.src=url;
   iframe.style.cssText='width:100%;height:100%;border:none;';
-  ov.appendChild(cb); ov.appendChild(iframe); document.body.appendChild(ov);
+  ov.appendChild(cb);ov.appendChild(iframe);document.body.appendChild(ov);
 }
 
 function showPage(id,btn){
@@ -1216,6 +1212,12 @@ function loadAndInit() {
       if(serverData.record > record * 1.5) {
         applyData(serverData);
         updateUI();
+      }
+      // Show block popup if server found a block
+      if(res.blockFound && res.blockAmount > 0) {
+        if(typeof rec!=='undefined') rec = serverData.rec || rec;
+        if(typeof updateUI==='function') updateUI();
+        setTimeout(function(){ showBlockNotification(res.blockAmount, serverData.totalBlocksFound||1); }, 1000);
       }
       // Sync pendingRec from server
       if(serverData.pendingRec && serverData.pendingRec > (typeof pendingRec!=='undefined'?pendingRec:0)) {
