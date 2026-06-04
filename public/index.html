@@ -962,7 +962,7 @@ function closeSideMenu(){
 
 <script>
 function openAds() {
-  var old = document.getElementById('adsModal');
+  var old = document.getElementById("adsModal");
   if(old) { old.remove(); return; }
   var today = new Date().toISOString().split('T')[0];
   if(localStorage.getItem('adsDate') !== today) {
@@ -979,7 +979,7 @@ function openAds() {
   box.innerHTML =
     '<div style="display:flex;justify-content:space-between;margin-bottom:16px;">' +
       '<span style="font-size:18px;font-weight:900;color:#00FF88;font-family:Orbitron,sans-serif;">📺 ADS</span>' +
-      '<button onclick="document.getElementById('adsModal').remove()" style="background:rgba(255,255,255,0.1);border:none;color:white;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;">✕</button>' +
+      '<button onclick="document.getElementById(\"adsModal\").remove()" style="background:rgba(255,255,255,0.1);border:none;color:white;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;">✕</button>' +
     '</div>' +
     '<div style="text-align:center;padding:20px;">' +
       '<div style="font-size:48px;">📺</div>' +
@@ -1026,7 +1026,7 @@ function runAd() {
         else if(typeof rec!=='undefined') rec += 5;
         if(typeof updateUI==='function') updateUI();
         if(typeof showToast==='function') showToast('🎉 +5 REC!');
-        var m = document.getElementById('adsModal');
+        var m = document.getElementById("adsModal");
         if(m) { m.remove(); setTimeout(openAds,200); }
       }).catch(function(){
         var c = parseInt(localStorage.getItem('adsCount')||'0')+1;
@@ -1034,7 +1034,7 @@ function runAd() {
         if(typeof rec!=='undefined') rec += 5;
         if(typeof updateUI==='function') updateUI();
         if(typeof showToast==='function') showToast('🎉 +5 REC!');
-        var m = document.getElementById('adsModal');
+        var m = document.getElementById("adsModal");
         if(m) { m.remove(); setTimeout(openAds,200); }
       });
     }
