@@ -338,81 +338,8 @@ function showBlockNotification(recAmount, blockNum) {
 // ====== BLOCK MINING (Passive - based on REC mining speed) ======
 // كل 3 ثواني فيه فرصة 1/2000 إن البطاقات تضرب بلوك
 // يعني بالمعدل كل ~100 دقيقة لو البطاقات شغالة
-var BLOCK_CHANCE = 1/2000;
-var blocksMined = 0;
 
-function checkForBlock() {
-  // فقط لو في سرعة REC حقيقية
-  if(recPerSec <= 0) return;
-  if(Math.random() > BLOCK_CHANCE) return;
 
-  blocksMined++;
-  var blockNum = blocksMined;
-
-  // المكافأة = ساعة كاملة من التعدين
-  var rewardRec = parseFloat((recPerSec * 3600).toFixed(6));
-  var rewardRecord = Math.floor(recordPerSec * 3600);
-
-  // حد أدنى للمكافأة
-  if(rewardRec < 0.0001) rewardRec = 0.0001;
-  if(rewardRecord < 500000) rewardRecord = 500000;
-
-  // أضف المكافأة مباشرة لـ rec
-  record += rewardRecord;
-  rec += rewardRec;  // ✅ مباشرة بدل pendingRec
-  saveData(true);
-  updateUI();
-
-  // أظهر popup
-  showBlockPopup(blockNum, rewardRecord, rewardRec);
-
-  // أبلغ السيرفر لنشره على القناة والجروع
-  if(tgUser) {
-    fetch('/api/block-found', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({
-        telegramId: tgUser.id,
-        blockReward: { record: rewardRecord, rec: rewardRec },
-        blockNumber: blockNum
-      })
-    }).catch(function(){});
-  }
-}
-
-function showBlockPopup(blockNum, rewardRecord, rewardRec) {
-  // أزل أي popup قديم
-  var old = document.getElementById('blockPopupOverlay');
-  if(old) old.remove();
-
-  var ol = document.createElement('div');
-  ol.id = 'blockPopupOverlay';
-  ol.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:99999;display:flex;align-items:center;justify-content:center;';
-
-  var pp = document.createElement('div');
-  pp.style.cssText = 'background:linear-gradient(180deg,#0a0005,#150008);border:2px solid #FF0000;border-radius:20px;padding:24px;width:85vw;max-width:320px;text-align:center;box-shadow:0 0 80px rgba(255,0,0,0.6);animation:blockAppear 0.4s ease;';
-  pp.addEventListener('click', function(e){ e.stopPropagation(); });
-
-  pp.innerHTML =
-    '<style>@keyframes blockAppear{from{transform:scale(0.3) rotate(-5deg);opacity:0}to{transform:scale(1) rotate(0);opacity:1}}</style>'+
-    '<div style="font-size:52px;margin-bottom:6px;">⛏️</div>'+
-    '<div style="font-family:Orbitron,sans-serif;font-size:20px;color:#FF0000;font-weight:bold;letter-spacing:2px;margin-bottom:2px;">BLOCK FOUND!</div>'+
-    '<div style="font-size:11px;color:#555;margin-bottom:16px;">Block #'+blockNum+' • REC Mining</div>'+
-    '<div style="background:rgba(255,0,0,0.1);border:1px solid rgba(255,0,0,0.3);border-radius:12px;padding:14px;margin-bottom:8px;">'+
-      '<div style="font-size:11px;color:#aaa;margin-bottom:4px;">⚡ RECORD Reward</div>'+
-      '<div style="font-size:26px;color:#FF4444;font-family:Orbitron,sans-serif;font-weight:bold;">+'+formatCost(rewardRecord)+'</div>'+
-    '</div>'+
-    '<div style="background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.25);border-radius:12px;padding:14px;margin-bottom:14px;">'+
-      '<div style="font-size:11px;color:#aaa;margin-bottom:4px;">🟢 REC Reward</div>'+
-      '<div style="font-size:24px;color:#00FF88;font-family:Orbitron,sans-serif;font-weight:bold;">+'+rewardRec.toFixed(4)+'</div>'+
-    '</div>'+
-    '<div style="font-size:10px;color:#444;margin-bottom:14px;">📢 تم الإعلان في قناة REC Blocks</div>'+
-    '<button onclick="saveData(true);document.getElementById(\'blockPopupOverlay\').remove()" style="background:linear-gradient(135deg,#CC0000,#FF2200);border:none;color:white;padding:13px;border-radius:12px;cursor:pointer;font-size:15px;font-weight:bold;width:100%;letter-spacing:1px;">🔴 COLLECT</button>';
-
-  ol.addEventListener('click', function(e){ if(e.target===ol) ol.remove(); });
-  ol.appendChild(pp);
-  document.body.appendChild(ol);
-}
 
 // ====== HOME - TAP ======
 function claimPendingRec(){
@@ -499,7 +426,6 @@ setInterval(function(){
       _effectiveRec *= 1.5;
     }
     rec+=_effectiveRec*3;  // ✅ مباشرة على rec بدل pendingRec
-    checkForBlock();
   }
   // شحن الطاقة — مستقل
   if(energy<maxEnergy) energy=Math.min(maxEnergy,energy+(maxEnergy/43200*3));
