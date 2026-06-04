@@ -2,6 +2,57 @@
 // REC MINING SYSTEM
 // ============================================================
 
+// ====== حفظ وقت الإغلاق فوراً ======
+function saveMiningCloseTime() {
+  try {
+    var closeData = {
+      time: Date.now(),
+      recPerSec:    typeof recPerSec    !== 'undefined' ? recPerSec    : 0,
+      recordPerSec: typeof recordPerSec !== 'undefined' ? recordPerSec : 0
+    };
+    localStorage.setItem('miningCloseData', JSON.stringify(closeData));
+  } catch(e){}
+}
+
+document.addEventListener('visibilitychange', function() {
+  if(document.visibilityState === 'hidden') saveMiningCloseTime();
+});
+window.addEventListener('pagehide', saveMiningCloseTime);
+
+// ====== حساب فوري من localStorage عند الفتح ======
+function instantOfflineCalc() {
+  try {
+    var data = JSON.parse(localStorage.getItem('miningCloseData'));
+    if(!data || !data.time) return;
+
+    var elapsed = Math.min((Date.now() - data.time) / 1000, 86400);
+    if(elapsed < 30) return;
+
+    var earnedRec    = (data.recPerSec    || 0) * elapsed;
+    var earnedRecord = Math.floor((data.recordPerSec || 0) * elapsed);
+
+    if(earnedRec < 0.000001 && earnedRecord < 1) return;
+
+    // أضف فوراً
+    if(typeof rec    !== 'undefined' && earnedRec    > 0) rec    += earnedRec;
+    if(typeof record !== 'undefined' && earnedRecord > 0) record += earnedRecord;
+    if(typeof updateUI  === 'function') updateUI();
+    if(typeof saveData  === 'function') saveData(true);
+
+    // أظهر الشاشة فوراً
+    _offlineResults.rec        = earnedRec;
+    _offlineResults.record     = earnedRecord;
+    _offlineResults.seconds    = Math.floor(elapsed);
+    _offlineResults.recDone    = true;
+    _offlineResults.recordDone = true;
+    _tryShowOfflinePopup();
+
+    // امسح البيانات عشان ما تتحسب مرتين
+    localStorage.removeItem('miningCloseData');
+  } catch(e){}
+}
+
+
 var _recHeartbeatStarted = false;
 
 // ============================================================
@@ -147,6 +198,9 @@ function initRecMining() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+  // ✅ حساب فوري من localStorage (ثانية 0)
+  setTimeout(function() { instantOfflineCalc(); }, 500);
+  // ✅ تحقق من السيرفر بعد 4 ثواني (للتأكد والدقة)
   setTimeout(function() {
     if(window.tgUser) initRecMining();
   }, 4000);
