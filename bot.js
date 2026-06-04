@@ -1460,17 +1460,17 @@ app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'index.
 app.use(express.static(path.join(__dirname, 'public')));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, async () => {
+app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-  // ====== SET WEBHOOK ======
+  // ====== SET WEBHOOK via Telegram API directly ======
   if (process.env.NODE_ENV !== 'development') {
-    try {
-      const webhookUrl = (process.env.APP_URL || 'https://rec-coin.onrender.com') + '/webhook';
-      await bot.setWebhook(webhookUrl);
-      console.log('Telegram webhook set ✅:', webhookUrl);
-    } catch(e) {
-      console.log('Webhook setup error:', e.message);
-    }
+    const webhookUrl = (process.env.APP_URL || 'https://rec-coin.onrender.com') + '/webhook';
+    const apiUrl = `https://api.telegram.org/bot${process.env.BOT_TOKEN}/setWebhook?url=${encodeURIComponent(webhookUrl)}`;
+    https.get(apiUrl, (res) => {
+      let data = '';
+      res.on('data', chunk => data += chunk);
+      res.on('end', () => console.log('Webhook set ✅:', data));
+    }).on('error', e => console.log('Webhook error:', e.message));
   } else {
     bot.startPolling();
     console.log('Bot polling started (dev mode) ✅');
