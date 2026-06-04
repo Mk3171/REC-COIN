@@ -459,13 +459,13 @@ function closeSideMenu(){
       </div>
 
       <!-- Block History -->
-      <div style="display:flex;align-items:center;gap:14px;background:rgba(255,0,0,0.06);border:1px solid rgba(255,0,0,0.2);border-radius:16px;padding:14px;cursor:pointer;" onclick="openBlockHistory()">
+      <div style="display:flex;align-items:center;gap:14px;background:rgba(255,0,0,0.06);border:1px solid rgba(255,0,0,0.2);border-radius:16px;padding:14px;">
         <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#330000,#660000);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">⛏️</div>
-        <div>
-          <div style="font-size:14px;color:white;font-weight:700;">Block History</div>
-          <div style="font-size:11px;color:rgba(255,68,68,0.7);">سجل البلوكات الخاصة بك</div>
+        <div style="flex:1;">
+          <div style="font-size:14px;color:white;font-weight:700;" data-i18n="blockHistory">Block History</div>
+          <div style="font-size:11px;color:rgba(255,68,68,0.7);" data-i18n="blockHistorySub">سجل البلوكات الخاصة بك</div>
         </div>
-        <div style="margin-left:auto;color:rgba(255,255,255,0.3);font-size:18px;">›</div>
+        <button onclick="openBlockHistory()" style="background:linear-gradient(135deg,#CC0000,#FF3300);border:none;color:white;padding:8px 18px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;">Open →</button>
       </div>
 
       <!-- Support -->
@@ -955,6 +955,8 @@ function closeSideMenu(){
 <script src="cards-data.js?v=1"></script>
 <script src="leaderboard.js?v=1"></script>
 <script src="init.js?v=1"></script>
+  <script src="recordMining.js?v=1"></script>
+  <script src="recMining.js?v=1"></script>
   <script src="blocks.js?v=1"></script>
 <script src="airdrop.js?v=1"></script>
 <script src="levels.js?v=1"></script>
