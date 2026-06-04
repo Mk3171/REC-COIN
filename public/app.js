@@ -74,7 +74,6 @@ try{var ls=JSON.parse(localStorage.getItem(saveKey));if(ls)G=Object.assign({},de
 var record,rec,energy,maxEnergy,tapLevelVal,energyLevelVal,tapPowerVal,
     completedTasks,cardLevels,cardUpgrades,refCount,claimedMilest,
     dailyLogin,mysteryLastDate,dailyTasksData,cardTasksClaimed,totalTaps;
-var pendingRec = 0;
 var vipData = {tier:0, expiry:0, boxes:{}, boost:null, hasEpicCard:false, epicExpiry:0};
 
 function applyData(d){
@@ -109,7 +108,6 @@ function applyData(d){
   }
   calcTotalSpeeds();
   // Load XP data
-  if(d.pendingRec !== undefined) pendingRec = d.pendingRec || 0;
   if(d.playerXP !== undefined && typeof playerXP !== 'undefined') {
     playerXP = d.playerXP || 0;
     xpRetroCalculated = playerXP > 0;
@@ -131,7 +129,6 @@ function saveData(immediate){
     miningSpeed: recPerSec,
     recordMiningSpeed: recordPerSec,
     lastSaveTime:Date.now(),
-    pendingRec:(typeof pendingRec!=='undefined'?pendingRec:0),
     playerXP:(typeof playerXP!=='undefined'?playerXP:0),
     claimedLevels:(typeof claimedLevels!=='undefined'?claimedLevels:{}),
     levelsVersion:2});
@@ -170,7 +167,6 @@ function saveToServer(){
         refillData: window.refillData,
         vip: vipData,
         playerXP: (typeof playerXP!=='undefined'?playerXP:0),
-        pendingRec: (typeof pendingRec!=='undefined'?pendingRec:0),
         claimedLevels: (typeof claimedLevels!=='undefined'?claimedLevels:{})
       })
     }).then(function(r){ return r.json(); })
@@ -342,14 +338,6 @@ function showBlockNotification(recAmount, blockNum) {
 
 
 // ====== HOME - TAP ======
-function claimPendingRec(){
-  if(pendingRec <= 0) return;
-  rec += pendingRec;
-  pendingRec = 0;
-  saveData(true);
-  updateUI();
-  showToast('✅ +' + rec.toFixed(6) + ' REC');
-}
 
 function tap(){
   var tapCost = Math.max(1, Math.floor(maxEnergy / 1000));
@@ -392,43 +380,23 @@ window.addEventListener('pagehide', function() {
   try { saveData(true); } catch(e){}
 });
 
-// Heartbeat every 45 seconds - online status
-setInterval(function(){
-  if(tgUser) fetch('/api/user/heartbeat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({telegramId:tgUser.id})}).catch(function(){});
-}, 45000);
-
-// Save miningSpeed to server every 60 seconds
-var _speedSaveTimer = 0;
-setInterval(function(){
-  _speedSaveTimer++;
-  if(_speedSaveTimer >= 20 && tgUser) { // every 60s (20 × 3s)
-    _speedSaveTimer = 0;
-    fetch('/api/user/heartbeat', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        telegramId: tgUser.id,
-        miningSpeed: recPerSec,
-        recordMiningSpeed: recordPerSec
-      })
-    }).catch(function(){});
-  }
-}, 3000);
+// Heartbeat handled by mining.js
 
 // ====== MAIN INTERVAL (3s) ======
 setInterval(function(){
   checkUpgradeTimers();
-  // تعدين RECORD من البطاقات — مستقل
-  if(recordPerSec>0) record+=recordPerSec*3;
-  // تعدين REC — مع بوست VIP لو مفعّل
-  if(recPerSec>0){
+  // ====== RECORD Mining ======
+  if(recordPerSec > 0) record += recordPerSec * 3;
+  // ====== REC Mining ======
+  if(recPerSec > 0){
     var _effectiveRec = recPerSec;
     if(vipData && parseInt(vipData.tier||0)>=1 && parseInt(vipData.expiry||0)>Date.now() && vipData.boostDate===getTodayStr()){
       _effectiveRec *= 1.5;
     }
-    rec+=_effectiveRec*3;  // ✅ مباشرة على rec بدل pendingRec
+    rec += _effectiveRec * 3;
   }
-  // شحن الطاقة — مستقل
-  if(energy<maxEnergy) energy=Math.min(maxEnergy,energy+(maxEnergy/43200*3));
+  // ====== Energy Recharge ======
+  if(energy < maxEnergy) energy = Math.min(maxEnergy, energy + (maxEnergy/43200*3));
   saveData(); updateUI(); updateTimerDisplays();
 },3000);
 
@@ -492,7 +460,6 @@ function updateUI(){
   s('recordCardsPage',Math.floor(record).toLocaleString());
   s('recCountHome',rec.toFixed(6));
   s('recHomeBig',rec.toFixed(6));
-  s('pendingRecDisplay',pendingRec.toFixed(6));
   s('recMini',rec.toFixed(6));
   s('energyText',Math.floor(energy)+' / '+maxEnergy);
   s('profileRecord',Math.floor(record).toLocaleString());
@@ -1146,10 +1113,6 @@ function loadAndInit() {
         applyData(serverData);
         if(rec < _savedRec) rec = _savedRec;
         updateUI();
-      }
-      // Sync pendingRec from server
-      if(serverData.pendingRec && serverData.pendingRec > (typeof pendingRec!=='undefined'?pendingRec:0)) {
-        if(typeof pendingRec!=='undefined') pendingRec = serverData.pendingRec;
       }
       // Sync XP from server (higher value wins)
       if(serverData.playerXP && serverData.playerXP > (typeof playerXP!=='undefined'?playerXP:0)) {
