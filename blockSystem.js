@@ -423,25 +423,33 @@ module.exports = function initBlockSystem(app, bot, User) {
   // SCHEDULED JOBS
   // ============================================================
 
-  // كل يوم الساعة 20:00 UTC — توزيع البلوكات
-  function scheduleDailyBlock() {
-    const now     = new Date();
-    const target  = new Date();
-    target.setUTCHours(20, 0, 0, 0);
-    if(target <= now) target.setUTCDate(target.getUTCDate() + 1);
-    const delay = target - now;
+  // توزيع عشوائي خلال اليوم — بين كل 4-8 ساعات
+  function scheduleNextBlock() {
+    // وقت عشوائي بين 4 و8 ساعات
+    const minMs = 4  * 3600 * 1000;
+    const maxMs = 8  * 3600 * 1000;
+    const delay = Math.floor(Math.random() * (maxMs - minMs + 1)) + minMs;
+    const hours = Math.round(delay / 3600000 * 10) / 10;
 
     setTimeout(async () => {
-      console.log('[Block] Running daily block distribution...');
+      console.log('[Block] Running random block distribution...');
       await runDailyBlockDistribution(bot, User);
       await runDailyActiveReward(bot, User);
-      scheduleDailyBlock(); // جدول اليوم التالي
+      scheduleNextBlock(); // جدول المرة التالية
     }, delay);
 
-    console.log(`[Block] Next distribution in ${Math.round(delay/3600000)}h`);
+    console.log('[Block] Next distribution in ' + hours + 'h');
   }
 
-  scheduleDailyBlock();
+  // أول توزيع بعد 30 دقيقة من بدء السيرفر
+  setTimeout(async () => {
+    console.log('[Block] Running initial block distribution...');
+    await runDailyBlockDistribution(bot, User);
+    await runDailyActiveReward(bot, User);
+    scheduleNextBlock();
+  }, 30 * 60 * 1000);
+
+  console.log('[Block] First distribution in 30 minutes');
 
   console.log('[BlockSystem] ✅ Initialized');
   console.log(`[BlockSystem] Current block reward: ${calcBlockReward().toLocaleString()} REC`);
