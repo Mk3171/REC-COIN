@@ -55,7 +55,6 @@ const BLOCKS_CHANNEL_ID = -1004293036864;
 // ====== BLOCK MINING SYSTEM ======
 // Every tap has 1/500 chance to find a block
 // Block rewards based on user's mining level
-const BLOCK_CHANCE = 1 / 500;
 
 function isRealisticIncrease(oldRec, newRec, oldRecord, newRecord, timeDiff, telegramId) {
   // Admin always passes
@@ -153,30 +152,6 @@ const WeeklySchema = new mongoose.Schema({
   top100:     { type: Array, default: [] }
 });
 const WeeklyChallenge = mongoose.model('WeeklyChallenge', WeeklySchema);
-
-// ====== GLOBAL SETTINGS SCHEMA (block counter etc) ======
-const GlobalSchema = new mongoose.Schema({
-  key:   { type: String, unique: true },
-  value: { type: Number, default: 0 }
-});
-const GlobalSetting = mongoose.model('GlobalSetting', GlobalSchema);
-
-async function getBlockCounter() {
-  const doc = await GlobalSetting.findOneAndUpdate(
-    { key: 'totalBlocksMined' },
-    { $setOnInsert: { value: 0 } },
-    { upsert: true, new: true }
-  );
-  return doc.value || 0;
-}
-async function incBlockCounter() {
-  const doc = await GlobalSetting.findOneAndUpdate(
-    { key: 'totalBlocksMined' },
-    { $inc: { value: 1 } },
-    { upsert: true, new: true }
-  );
-  return doc.value || 1;
-}
 
 // ====== DAILY COMBO SCHEMA ======
 const DailyComboSchema = new mongoose.Schema({
@@ -1041,90 +1016,6 @@ app.get('/admin', async (req, res) => {
 
 
 // كل 10 مستخدمين نشيطين في آخر أسبوعين → واحد يحصل على بلوك
-const BLOCK_REC_REWARD = 100;
-const BLOCK_USERS_RATIO = 10; // بلوك واحد لكل 10 مستخدمين
-const BLOCK_PERIOD_DAYS = 14; // كل أسبوعين
-
-async function runBlockDistribution() {
-  try {
-    var twoWeeksAgo = new Date(Date.now() - BLOCK_PERIOD_DAYS * 86400000);
-    
-    // ✅ FIX: استخدم record > 0 بدل rec > 0 عشان يشمل المستخدمين الجدد
-    var activeUsers = await User.find({
-      banned: false,
-      lastSeen: { $gte: twoWeeksAgo },
-      record: { $gt: 0 }
-    }).select('telegramId username firstName rec record lastBlockDate totalBlocksFound');
-
-    if(activeUsers.length < BLOCK_USERS_RATIO) return;
-
-    var blocksToGive = Math.floor(activeUsers.length / BLOCK_USERS_RATIO);
-    if(blocksToGive < 1) return;
-
-    var today = new Date().toISOString().split('T')[0];
-    var eligible = activeUsers.filter(u => u.lastBlockDate !== today);
-    
-    eligible.sort(() => Math.random() - 0.5);
-    var winners = eligible.slice(0, blocksToGive);
-
-    for(var winner of winners) {
-      await User.findOneAndUpdate(
-        { telegramId: winner.telegramId },
-        { 
-          $inc: { rec: BLOCK_REC_REWARD, totalBlocksFound: 1 },
-          lastBlockDate: today
-        }
-      );
-
-      // ✅ FIX: العداد من MongoDB مو RAM
-      var blockNum = await incBlockCounter();
-      var userName = winner.username ? '@' + winner.username : winner.firstName || 'Miner';
-
-      // إعلان القناة
-      var channelMsg =
-        `⛏️ *NEW BLOCK MINED* ⛏️\n\n` +
-        `🔴 Block #${blockNum}\n` +
-        `👤 Miner: ${userName}\n` +
-        `💰 Reward: +${BLOCK_REC_REWARD} REC\n` +
-        `👥 Active Miners: ${activeUsers.length}\n` +
-        `⏰ ${new Date().toUTCString()}\n\n` +
-        `🚀 @RecMiningGame_bot`;
-
-      await bot.sendMessage(BLOCKS_CHANNEL_ID, channelMsg, { parse_mode: 'Markdown' }).catch(()=>{});
-
-      var groupMsg =
-        `🎉 *تم اكتشاف بلوك جديد!*\n\n` +
-        `⛏️ المعدّن: ${userName}\n` +
-        `🔴 Block #${blockNum}\n` +
-        `🏆 المكافأة: +${BLOCK_REC_REWARD} REC\n` +
-        `👥 عدد المعدنين النشيطين: ${activeUsers.length}\n\n` +
-        `💡 @RecMiningGame_bot`;
-
-      await bot.sendMessage(GROUP_CHAT_ID, groupMsg, { parse_mode: 'Markdown' }).catch(()=>{});
-
-      var personalMsg =
-        `⛏️ *أصبت بلوكاً!*\n\n` +
-        `🎉 مبروك! بطاقاتك اكتشفت بلوك جديد!\n` +
-        `🔴 Block #${blockNum}\n` +
-        `💰 تمت إضافة *${BLOCK_REC_REWARD} REC* لرصيدك\n\n` +
-        `افتح البوت لترى رصيدك المحدث 👇`;
-
-      await bot.sendMessage(winner.telegramId, personalMsg, {
-        parse_mode: 'Markdown',
-        reply_markup: { inline_keyboard: [[{ text: '🚀 افتح البوت', web_app: { url: 'https://rec-coin.onrender.com' } }]] }
-      }).catch(()=>{});
-
-      console.log(`Block #${blockNum} awarded to ${userName} (+${BLOCK_REC_REWARD} REC)`);
-    }
-  } catch(e) {
-    console.log('Block distribution error:', e.message);
-  }
-}
-
-// شغّل توزيع البلوكات كل 6 ساعات
-setInterval(runBlockDistribution, 6 * 3600000);
-// شغّل مرة عند البدء بعد دقيقة
-setTimeout(runBlockDistribution, 60000);
 
 // ====== API: BLOCK-FOUND (للإشعار اليدوي من الواجهة) ======
 // ====== API: GAME EARN (REC Catch game) ======
@@ -1157,72 +1048,7 @@ app.post('/api/game-earn', async (req, res) => {
   }
 });
 
-app.post('/api/block-found', async (req, res) => {
-  try {
-    const { telegramId, blockReward, blockNumber } = req.body;
-    if (!telegramId) return res.status(400).json({ error: 'Missing data' });
 
-    const user = await User.findOne({ telegramId: parseInt(telegramId) })
-      .select('username firstName referredBy referredByL2 referredByL3 totalBlocksFound lastBlockDate');
-    if (!user) return res.json({ success: true });
-
-    // ✅ FIX: منع نفس الشخص يحصل بلوكين في نفس اليوم
-    const today = new Date().toISOString().split('T')[0];
-    if (user.lastBlockDate === today) {
-      return res.json({ success: false, reason: 'already_got_block_today' });
-    }
-
-    const rewardRec    = blockReward ? (blockReward.rec    || 0) : 0;
-    const rewardRecord = blockReward ? (blockReward.record || 0) : 0;
-    const userName     = user.username ? '@' + user.username : (user.firstName || 'Miner');
-
-    // ✅ FIX: العداد من MongoDB
-    const blockNum = await incBlockCounter();
-
-    await User.findOneAndUpdate(
-      { telegramId: parseInt(telegramId) },
-      { $inc: { totalBlocksFound: 1 }, lastBlockDate: today }
-    );
-
-    if (rewardRec > 0) {
-      distributeRefCommission(user, rewardRec).catch(() => {});
-    }
-
-    const channelMsg =
-      `⛏️ *NEW BLOCK MINED* ⛏️\n\n` +
-      `🔴 Block #${blockNum}\n` +
-      `👤 Miner: ${userName}\n` +
-      `💰 Reward: +${rewardRec.toFixed(4)} REC\n` +
-      `🎯 Found by the community!`;
-
-    await bot.sendMessage(BLOCKS_CHANNEL_ID, channelMsg, { parse_mode: 'Markdown' }).catch(() => {});
-
-    // ✅ FIX: أرسل للجروع أيضاً
-    const groupMsg =
-      `🎉 *تم اكتشاف بلوك جديد!*\n\n` +
-      `⛏️ المعدّن: ${userName}\n` +
-      `🔴 Block #${blockNum}\n` +
-      `💰 المكافأة: +${rewardRec.toFixed(4)} REC\n\n` +
-      `💡 @RecMiningGame_bot`;
-
-    await bot.sendMessage(GROUP_CHAT_ID, groupMsg, { parse_mode: 'Markdown' }).catch(() => {});
-
-    const personalMsg =
-      `⛏️ *YOU FOUND A BLOCK!*\n\n` +
-      `🔴 Block #${blockNum}\n` +
-      `💰 +${rewardRec.toFixed(6)} REC added!\n` +
-      `📦 +${rewardRecord.toLocaleString()} RECORD added!\n\n` +
-      `Keep mining to find more blocks! 🚀`;
-
-    await bot.sendMessage(parseInt(telegramId), personalMsg, { parse_mode: 'Markdown' }).catch(() => {});
-
-    res.json({ success: true, blockNum });
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-});
-
-// ====== REFERRAL LIST ======
 app.get('/api/referrals/:telegramId', async (req, res) => {
   try {
     var userId = req.params.telegramId;
@@ -1514,6 +1340,15 @@ app.listen(PORT, () => {
     bot.startPolling();
     console.log('Bot polling started (dev mode) ✅');
   }
+});
+
+// ====== BLOCK SYSTEM ======
+const mongoose = require('mongoose');
+// blockSystem initialized after DB connects
+mongoose.connection.once('open', () => {
+  try {
+    require('./blockSystem')(app, bot, User);
+  } catch(e) { console.log('BlockSystem init error:', e.message); }
 });
 
 // ====== KEEP SERVER ALIVE (works on all Node versions) ======
