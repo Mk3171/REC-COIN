@@ -357,10 +357,9 @@ function checkForBlock() {
   if(rewardRec < 0.0001) rewardRec = 0.0001;
   if(rewardRecord < 500000) rewardRecord = 500000;
 
-  // أضف المكافأة
+  // أضف المكافأة مباشرة لـ rec
   record += rewardRecord;
-  if(typeof pendingRec !== 'undefined') pendingRec += rewardRec;
-  else rec += rewardRec;
+  rec += rewardRec;  // ✅ مباشرة بدل pendingRec
   saveData(true);
   updateUI();
 
@@ -499,7 +498,7 @@ setInterval(function(){
     if(vipData && parseInt(vipData.tier||0)>=1 && parseInt(vipData.expiry||0)>Date.now() && vipData.boostDate===getTodayStr()){
       _effectiveRec *= 1.5;
     }
-    pendingRec+=_effectiveRec*3;
+    rec+=_effectiveRec*3;  // ✅ مباشرة على rec بدل pendingRec
     checkForBlock();
   }
   // شحن الطاقة — مستقل
@@ -1212,13 +1211,10 @@ function loadAndInit() {
       }
       // Sync record if server has significantly more
       if(serverData.record > record * 1.5) {
-        // Save offline earnings calculated locally before overwriting
-        var _savedPendingRec = typeof pendingRec !== 'undefined' ? pendingRec : 0;
+        var _savedRec = rec || 0;
         applyData(serverData);
-        // Restore offline earnings (take the max to not lose locally-calculated earnings)
-        if(typeof pendingRec !== 'undefined' && _savedPendingRec > pendingRec) {
-          pendingRec = _savedPendingRec;
-        }
+        // ✅ Keep local rec if higher (includes offline earnings already applied)
+        if(rec < _savedRec) rec = _savedRec;
         updateUI();
       }
       // Sync pendingRec from server
