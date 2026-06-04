@@ -85,8 +85,8 @@ function showBlockCollectScreen(block) {
       'animation:blockPulse 2s ease-in-out infinite;' +
     '">' +
       '<div style="font-size:64px;animation:blockFloat 3s ease-in-out infinite;margin-bottom:8px;">⛏️</div>' +
-      '<div style="font-family:Orbitron,sans-serif;font-size:22px;font-weight:900;color:#FF0000;margin-bottom:4px;letter-spacing:2px;">BLOCK FOUND!</div>' +
-      '<div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:20px;">لقيت بلوك جديد!</div>' +
+      '<div style="font-family:Orbitron,sans-serif;font-size:22px;font-weight:900;color:#FF0000;margin-bottom:4px;letter-spacing:2px;">'+t('blockFound')+'</div>' +
+      '<div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:20px;">'+t('blockFoundSub')+'</div>' +
 
       '<div style="background:rgba(255,0,0,0.08);border:1px solid rgba(255,0,0,0.3);border-radius:14px;padding:8px 14px;display:inline-block;margin-bottom:20px;">' +
         '<span style="font-size:12px;color:rgba(255,255,255,0.5);">🔴 Block #</span>' +
@@ -94,7 +94,7 @@ function showBlockCollectScreen(block) {
       '</div>' +
 
       '<div style="background:linear-gradient(135deg,rgba(0,255,136,0.08),rgba(0,255,136,0.04));border:1px solid rgba(0,255,136,0.3);border-radius:16px;padding:20px;margin-bottom:24px;">' +
-        '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:8px;">💰 مكافأتك</div>' +
+        '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:8px;">'+t('blockReward')+'</div>' +
         '<div style="font-family:Orbitron,sans-serif;font-size:32px;font-weight:900;color:#00FF88;">+' + rewardFormatted + '</div>' +
         '<div style="font-size:14px;color:rgba(0,255,136,0.7);margin-top:4px;">REC</div>' +
       '</div>' +
@@ -111,9 +111,9 @@ function showBlockCollectScreen(block) {
         'cursor:pointer;' +
         'letter-spacing:1px;' +
         'font-family:Orbitron,sans-serif;' +
-      '">⚡ COLLECT</button>' +
+      '">'+t('blockCollect')+'</button>' +
 
-      '<div style="font-size:11px;color:rgba(255,255,255,0.2);margin-top:12px;">اضغط Collect لإضافة المكافأة لرصيدك</div>' +
+      '<div style="font-size:11px;color:rgba(255,255,255,0.2);margin-top:12px;">'+t('blockCollectHint')+'</div>' +
     '</div>';
 
   document.body.appendChild(overlay);
@@ -126,7 +126,7 @@ function collectBlock() {
   if(!currentPendingBlock || !window.tgUser) return;
 
   var btn = document.getElementById('collectBlockBtn');
-  if(btn) { btn.disabled = true; btn.textContent = '⏳ جاري الاستلام...'; }
+  if(btn) { btn.disabled = true; btn.textContent = t('blockCollecting'); }
 
   fetch('/api/blocks/collect', {
     method: 'POST',
@@ -150,21 +150,21 @@ function collectBlock() {
         overlay.innerHTML =
           '<div style="background:linear-gradient(180deg,#001a00,#000d00);border:2px solid rgba(0,255,136,0.5);border-radius:24px;padding:40px 24px;width:88vw;max-width:340px;text-align:center;">' +
             '<div style="font-size:64px;margin-bottom:12px;">🎉</div>' +
-            '<div style="font-family:Orbitron,sans-serif;font-size:20px;font-weight:900;color:#00FF88;margin-bottom:8px;">تم الاستلام!</div>' +
+            '<div style="font-family:Orbitron,sans-serif;font-size:20px;font-weight:900;color:#00FF88;margin-bottom:8px;">'+t('blockCollected')+'</div>' +
             '<div style="font-size:32px;font-family:Orbitron,sans-serif;color:#00FF88;font-weight:900;margin:16px 0;">+' + currentPendingBlock.reward.toLocaleString() + ' REC</div>' +
-            '<div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:20px;">تمت إضافة المكافأة لرصيدك ✅</div>' +
-            '<button onclick="document.getElementById(\'blockCollectOverlay\').remove()" style="background:rgba(0,255,136,0.15);border:1px solid rgba(0,255,136,0.3);color:#00FF88;padding:12px 32px;border-radius:12px;cursor:pointer;font-size:14px;">إغلاق ✕</button>' +
+            '<div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:20px;">'+t('blockAddedBal')+'</div>' +
+            '<button onclick="document.getElementById(\'blockCollectOverlay\').remove()" style="background:rgba(0,255,136,0.15);border:1px solid rgba(0,255,136,0.3);color:#00FF88;padding:12px 32px;border-radius:12px;cursor:pointer;font-size:14px;">'+t('blockClose')+'</button>' +
           '</div>';
       }
       currentPendingBlock = null;
       if(typeof showToast === 'function') showToast('🎉 Block #' + d.blockNumber + ' collected! +' + d.reward?.toLocaleString() + ' REC');
     } else {
-      if(btn) { btn.disabled = false; btn.textContent = '⚡ COLLECT'; }
-      if(typeof showToast === 'function') showToast('❌ خطأ في الاستلام — حاول مجدداً');
+      if(btn) { btn.disabled = false; btn.textContent = ''+t('blockCollect')+''; }
+      if(typeof showToast === 'function') showToast(t('blockCollectErr'));
     }
   })
   .catch(function() {
-    if(btn) { btn.disabled = false; btn.textContent = '⚡ COLLECT'; }
+    if(btn) { btn.disabled = false; btn.textContent = ''+t('blockCollect')+''; }
   });
 }
 
@@ -184,10 +184,10 @@ function openBlockHistory() {
   modal.innerHTML =
     '<div style="display:flex;align-items:center;gap:12px;padding:16px;border-bottom:1px solid rgba(255,255,255,0.08);">' +
       '<button onclick="document.getElementById(\'blockHistoryModal\').remove()" style="background:rgba(255,255,255,0.1);border:none;color:white;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:18px;">←</button>' +
-      '<span style="font-family:Orbitron,sans-serif;font-size:16px;font-weight:900;color:white;">⛏️ Block History</span>' +
+      '<span style="font-family:Orbitron,sans-serif;font-size:16px;font-weight:900;color:white;">⛏️ '+t('blockHistory')+'</span>' +
     '</div>' +
     '<div id="blockHistoryList" style="flex:1;overflow-y:auto;padding:12px;">' +
-      '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);">⏳ جاري التحميل...</div>' +
+      '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);">'+t('blockLoading')+'</div>' +
     '</div>';
 
   document.body.appendChild(modal);
@@ -200,7 +200,7 @@ function openBlockHistory() {
     if(!list) return;
 
     if(!blocks || blocks.length === 0) {
-      list.innerHTML = '<div style="text-align:center;padding:60px 20px;"><div style="font-size:48px;margin-bottom:12px;">⛏️</div><div style="color:rgba(255,255,255,0.3);font-size:14px;">ما لقيت أي بلوك لحد هلا</div><div style="color:rgba(255,255,255,0.2);font-size:12px;margin-top:8px;">استمر بالتعدين!</div></div>';
+      list.innerHTML = '<div style="text-align:center;padding:60px 20px;"><div style="font-size:48px;margin-bottom:12px;">⛏️</div><div style="color:rgba(255,255,255,0.3);font-size:14px;">'+t('blockEmpty')+'</div><div style="color:rgba(255,255,255,0.2);font-size:12px;margin-top:8px;">'+t('blockEmptySub')+'</div></div>';
       return;
     }
 
@@ -223,7 +223,7 @@ function openBlockHistory() {
   })
   .catch(function() {
     var list = document.getElementById('blockHistoryList');
-    if(list) list.innerHTML = '<div style="text-align:center;padding:40px;color:#FF4444;">خطأ في التحميل</div>';
+    if(list) list.innerHTML = '<div style="text-align:center;padding:40px;color:#FF4444;">'+t('blockLoadErr')+'</div>';
   });
 }
 
