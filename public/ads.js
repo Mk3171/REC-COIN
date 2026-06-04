@@ -50,7 +50,6 @@ function openAds() {
 
   modal.addEventListener('click', function(e){ if(e.target === modal) modal.remove(); });
   document.getElementById('adsCloseBtn').onclick = function(){ modal.remove(); };
-
   var watchBtn = document.getElementById('watchAdBtn');
   if(watchBtn) watchBtn.onclick = function(){ watchAd(modal); };
 }
@@ -59,7 +58,19 @@ function watchAd(modal) {
   var btn = document.getElementById('watchAdBtn');
   if(btn) { btn.disabled = true; btn.textContent = '⏳ جاري التحميل...'; }
 
-  // ✅ Monetag Rewarded Interstitial
+  // ✅ تحقق إن Monetag SDK محمل
+  if(typeof show_11099536 !== 'function') {
+    if(btn) { btn.disabled = false; btn.textContent = '📺 شاهد إعلان ← +' + AD_REC_REWARD + ' REC'; }
+    if(typeof showToast === 'function') showToast('⏳ الإعلانات تُحمَّل... حاول بعد ثانية');
+    // حاول تحميل SDK مجدداً
+    var s = document.createElement('script');
+    s.src = '//libtl.com/sdk.js';
+    s.setAttribute('data-zone', '11099536');
+    s.setAttribute('data-sdk', 'show_11099536');
+    document.head.appendChild(s);
+    return;
+  }
+
   show_11099536().then(function() {
     giveAdReward(modal);
   }).catch(function(e) {
@@ -72,15 +83,16 @@ function watchAd(modal) {
 function giveAdReward(modal) {
   var telegramId = (typeof tgUser !== 'undefined' && tgUser) ? tgUser.id : null;
 
-  // Add reward locally immediately
+  // ✅ أضف المكافأة مباشرة لـ rec
   if(typeof rec !== 'undefined') rec += AD_REC_REWARD;
   var watched = parseInt(localStorage.getItem('adsCount') || '0') + 1;
   localStorage.setItem('adsCount', String(watched));
   if(typeof updateUI === 'function') updateUI();
+  if(typeof saveData === 'function') saveData(true);
   if(typeof showToast === 'function') showToast('🎉 +' + AD_REC_REWARD + ' REC! شكراً على المشاهدة');
   if(modal) modal.remove();
 
-  // Sync with server
+  // مزامنة مع السيرفر
   if(telegramId) {
     fetch('/api/adsgram/reward', {
       method: 'POST',
@@ -89,6 +101,5 @@ function giveAdReward(modal) {
     }).catch(function(){});
   }
 
-  // Reopen for next ad
   setTimeout(openAds, 400);
 }
