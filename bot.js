@@ -1320,6 +1320,82 @@ app.get('/api/adsgram/reward', async (req, res) => {
   }
 });
 
+
+// ============================================================
+// MINING SYSTEM ENDPOINTS
+// ============================================================
+
+// Heartbeat — يحفظ السرعة الحالية وآخر وقت نشاط
+app.post('/api/mining/heartbeat', async (req, res) => {
+  try {
+    const { telegramId, recPerSec, recordPerSec } = req.body;
+    if(!telegramId) return res.json({ ok: false });
+
+    const update = { lastSeen: new Date() };
+    if(recPerSec    !== undefined) update.miningSpeed       = parseFloat(recPerSec)    || 0;
+    if(recordPerSec !== undefined) update.recordMiningSpeed = parseFloat(recordPerSec) || 0;
+
+    await User.findOneAndUpdate(
+      { telegramId: parseInt(telegramId) },
+      update
+    );
+    res.json({ ok: true });
+  } catch(e) { res.json({ ok: false }); }
+});
+
+// REC Offline earnings
+app.post('/api/mining/offline/rec', async (req, res) => {
+  try {
+    const { telegramId } = req.body;
+    if(!telegramId) return res.json({ earnedRec: 0 });
+    const user = await User.findOne({ telegramId: parseInt(telegramId) }).lean();
+    if(!user) return res.json({ earnedRec: 0 });
+    const now = Date.now();
+    const lastSeen = user.lastSeen ? new Date(user.lastSeen).getTime() : 0;
+    if(!lastSeen) {
+      await User.updateOne({ telegramId: parseInt(telegramId) }, { lastSeen: new Date() });
+      return res.json({ earnedRec: 0 });
+    }
+    const elapsed = (now - lastSeen) / 1000;
+    if(elapsed < 30) return res.json({ earnedRec: 0 });
+    const seconds = Math.min(elapsed, 86400);
+    const recSpeed = user.miningSpeed > 0 ? user.miningSpeed : calcMiningSpeed(user.cardLevels || {});
+    const earnedRec = parseFloat((recSpeed * seconds).toFixed(8));
+    console.log('[REC] user ' + telegramId + ' offline +' + earnedRec + ' REC');
+    if(earnedRec > 0.000001) {
+      await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, { $inc: { rec: earnedRec }, lastSeen: new Date() });
+    } else {
+      await User.updateOne({ telegramId: parseInt(telegramId) }, { lastSeen: new Date() });
+    }
+    res.json({ earnedRec: earnedRec > 0.000001 ? earnedRec : 0, seconds: Math.floor(seconds) });
+  } catch(e) { res.json({ earnedRec: 0 }); }
+});
+
+// RECORD Offline earnings
+app.post('/api/mining/offline/record', async (req, res) => {
+  try {
+    const { telegramId } = req.body;
+    if(!telegramId) return res.json({ earnedRecord: 0 });
+    const user = await User.findOne({ telegramId: parseInt(telegramId) }).lean();
+    if(!user) return res.json({ earnedRecord: 0 });
+    const now = Date.now();
+    const lastSeen = user.lastSeen ? new Date(user.lastSeen).getTime() : 0;
+    if(!lastSeen) return res.json({ earnedRecord: 0 });
+    const elapsed = (now - lastSeen) / 1000;
+    if(elapsed < 30) return res.json({ earnedRecord: 0 });
+    const seconds = Math.min(elapsed, 86400);
+    const recordSpeed = user.recordMiningSpeed > 0 ? user.recordMiningSpeed : calcRecordMiningSpeed(user.cardLevels || {}, user.tapLevelVal || 0);
+    const earnedRecord = Math.floor(recordSpeed * seconds);
+    console.log('[RECORD] user ' + telegramId + ' offline +' + earnedRecord + ' RECORD');
+    if(earnedRecord > 0) {
+      await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, { $inc: { record: earnedRecord } });
+    }
+    res.json({ earnedRecord: earnedRecord > 0 ? earnedRecord : 0, seconds: Math.floor(seconds) });
+  } catch(e) { res.json({ earnedRecord: 0 }); }
+});
+
+
+
 app.post('/webhook', (req, res) => { bot.processUpdate(req.body); res.sendStatus(200); });
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'index.html')); });
 app.use(express.static(path.join(__dirname, 'public')));
