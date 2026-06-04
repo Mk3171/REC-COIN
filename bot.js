@@ -831,9 +831,16 @@ app.post('/api/user/save', async (req, res) => {
       }
     }
 
+    // ✅ FIX: خذ MAX(client.rec, server.rec) عشان لا نمسح مكافآت السيرفر (بلوك، اعلانات)
+    const currentUser = await User.findOne({ telegramId: parseInt(telegramId) }).lean();
+    const saveData = { ...data, lastSeen: new Date(), lastSaveTime: Date.now() };
+    if(currentUser && currentUser.rec > (parseFloat(data.rec) || 0)) {
+      saveData.rec = currentUser.rec; // السيرفر عنده أكثر، احتفظ بقيمته
+    }
+
     const updated = await User.findOneAndUpdate(
       { telegramId: parseInt(telegramId) },
-      { ...data, lastSeen: new Date(), lastSaveTime: Date.now() },
+      saveData,
       { new: true, upsert: true }
     );
     res.json({ success: true, data: updated });
@@ -1189,6 +1196,16 @@ app.post('/api/block-found', async (req, res) => {
       `🎯 Found by the community!`;
 
     await bot.sendMessage(BLOCKS_CHANNEL_ID, channelMsg, { parse_mode: 'Markdown' }).catch(() => {});
+
+    // ✅ FIX: أرسل للجروع أيضاً
+    const groupMsg =
+      `🎉 *تم اكتشاف بلوك جديد!*\n\n` +
+      `⛏️ المعدّن: ${userName}\n` +
+      `🔴 Block #${blockNum}\n` +
+      `💰 المكافأة: +${rewardRec.toFixed(4)} REC\n\n` +
+      `💡 @RecMiningGame_bot`;
+
+    await bot.sendMessage(GROUP_CHAT_ID, groupMsg, { parse_mode: 'Markdown' }).catch(() => {});
 
     const personalMsg =
       `⛏️ *YOU FOUND A BLOCK!*\n\n` +
