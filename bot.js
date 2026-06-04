@@ -2,6 +2,7 @@ const express = require('express');
 const TelegramBot = require('node-telegram-bot-api');
 const mongoose = require('mongoose');
 const path = require('path');
+const https = require('https');
 
 const app = express();
 app.use(express.json());
@@ -459,6 +460,23 @@ function calcMiningSpeed(cardLevels) {
   return parseFloat(speed.toFixed(8));
 }
 
+// ✅ NEW: Calculate RECORD mining speed from cardLevels (mirrors app.js formula)
+function calcRecordMiningSpeed(cardLevels, tapLevelVal) {
+  if(!cardLevels || typeof cardLevels !== 'object') return 0;
+  var speed = 0;
+  try {
+    Object.keys(cardLevels).forEach(function(key) {
+      var lvl = cardLevels[key] || 0;
+      if(lvl <= 0) return;
+      // RECORD speed per card: increases with level
+      var cardRecordSpeed = Math.floor(Math.pow(1.5, lvl - 1) * 10);
+      var m = (parseInt(key.split('_')[0]) === 4) ? 3 : 1;
+      speed += cardRecordSpeed * m;
+    });
+  } catch(e) {}
+  return speed;
+}
+
 app.get('/api/leaderboard/global', async (req, res) => {
   try {
     var allUsers = await User.find({ banned: false })
@@ -795,8 +813,6 @@ app.post('/api/user/save', async (req, res) => {
       { ...data, lastSeen: new Date(), lastSaveTime: Date.now() },
       { new: true, upsert: true }
     );
-    // Also update miningSpeed fields if provided in data
-    // (already handled by spread, but ensure they're not stripped)
     res.json({ success: true, data: updated });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
@@ -1254,7 +1270,6 @@ app.post('/api/user/offline-earnings', async (req, res) => {
     const now = Date.now();
     const lastSeen = user.lastSeen ? new Date(user.lastSeen).getTime() : 0;
     if(!lastSeen) {
-      // First time - just update lastSeen
       await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, { lastSeen: new Date() });
       return res.json({ earned: 0, earnedRecord: 0 });
     }
@@ -1264,19 +1279,29 @@ app.post('/api/user/offline-earnings', async (req, res) => {
 
     // Cap at 24 hours
     const seconds = Math.min(elapsed, 86400);
-    const speed = user.miningSpeed || 0;
+
+    // ✅ FIX: Use calcMiningSpeed from cardLevels as fallback when miningSpeed = 0
+    const speed = user.miningSpeed > 0
+      ? user.miningSpeed
+      : calcMiningSpeed(user.cardLevels || {});
+
+    const recordSpeed = user.recordMiningSpeed > 0
+      ? user.recordMiningSpeed
+      : calcRecordMiningSpeed(user.cardLevels || {}, user.tapLevelVal || 0);
 
     // Calculate earnings
     const earnedRec = parseFloat((speed * seconds).toFixed(6));
-    const earnedRecord = Math.floor((user.recordMiningSpeed || 0) * seconds);
+    const earnedRecord = Math.floor(recordSpeed * seconds);
 
-    // Add to pendingRec
+    console.log(`[Offline] User ${telegramId}: ${Math.floor(seconds/3600)}h offline, speed=${speed.toFixed(8)}, earned=${earnedRec} REC`);
+
+    // ✅ Add directly to rec (no claim needed)
     if(earnedRec > 0.000001 || earnedRecord > 0) {
       await User.findOneAndUpdate(
         { telegramId: parseInt(telegramId) },
         {
           $inc: {
-            pendingRec: earnedRec > 0 ? earnedRec : 0,
+            rec: earnedRec > 0 ? earnedRec : 0,
             record: earnedRecord > 0 ? earnedRecord : 0
           },
           lastSeen: new Date()
@@ -1447,10 +1472,17 @@ app.listen(PORT, async () => {
       console.log('Webhook setup error:', e.message);
     }
   } else {
-    // Development: use polling instead
     bot.startPolling();
     console.log('Bot polling started (dev mode) ✅');
   }
 });
-setInterval(() => { fetch('https://rec-coin.onrender.com/').catch(() => {}); }, 840000);
+
+// ====== KEEP SERVER ALIVE (works on all Node versions) ======
+setInterval(() => {
+  const url = process.env.APP_URL || 'https://rec-coin.onrender.com';
+  https.get(url, (res) => {
+    res.resume(); // drain response
+  }).on('error', () => {});
+}, 840000); // every 14 minutes
+
 module.exports = app;
