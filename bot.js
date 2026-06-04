@@ -1343,7 +1343,6 @@ app.listen(PORT, () => {
 });
 
 // ====== BLOCK SYSTEM ======
-const mongoose = require('mongoose');
 // blockSystem initialized after DB connects
 mongoose.connection.once('open', () => {
   try {
