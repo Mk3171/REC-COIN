@@ -1209,11 +1209,15 @@ function loadAndInit() {
           });
         }
       }
+      // ✅ Sync rec from server if server has more (block rewards added server-side)
+      if(serverData.rec && serverData.rec > (typeof rec !== 'undefined' ? rec : 0)) {
+        if(typeof rec !== 'undefined') rec = serverData.rec;
+        if(typeof updateUI === 'function') updateUI();
+      }
       // Sync record if server has significantly more
       if(serverData.record > record * 1.5) {
         var _savedRec = rec || 0;
         applyData(serverData);
-        // ✅ Keep local rec if higher (includes offline earnings already applied)
         if(rec < _savedRec) rec = _savedRec;
         updateUI();
       }
