@@ -1500,6 +1500,32 @@ app.get('/api/admin/run-blocks', async (req, res) => {
   }
 });
 
+
+// ====== ADMIN: إرسال هدية لمستخدم ======
+app.post('/api/admin/gift', async (req, res) => {
+  try {
+    const { adminId, telegramId, amount, message } = req.body;
+    if(String(adminId) !== String(ADMIN_ID)) return res.status(403).json({ error: 'Not admin' });
+    if(!telegramId || !amount) return res.status(400).json({ error: 'Missing data' });
+
+    const user = await User.findOneAndUpdate(
+      { telegramId: parseInt(telegramId) },
+      { $inc: { rec: parseFloat(amount) } },
+      { new: true }
+    );
+    if(!user) return res.status(404).json({ error: 'User not found' });
+
+    const giftMsg = message || ('🎁 You received a gift of ' + amount + ' REC from the admin!');
+    bot.sendMessage(parseInt(telegramId),
+      '🎁 *Gift Received!*\n\n💰 +' + amount + ' REC added to your balance!\n\n' + (message || ''),
+      { parse_mode: 'Markdown' }
+    ).catch(()=>{});
+
+    console.log('[Admin Gift] Sent ' + amount + ' REC to ' + telegramId);
+    res.json({ success: true, newBalance: user.rec });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
 app.post('/webhook', (req, res) => { bot.processUpdate(req.body); res.sendStatus(200); });
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'index.html')); });
 app.use(express.static(path.join(__dirname, 'public')));
