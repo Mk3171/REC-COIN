@@ -73,7 +73,7 @@ async function awardBlock(user, bot) {
 }
 
 // Cloud block check - runs every minute on server
-async function runCloudBlockCheck(User) {
+async function runCloudBlockCheck(bot, User) {
   try {
     const today = getTodayStr();
     const todayStart = new Date(today);
@@ -183,8 +183,8 @@ module.exports = function initBlockSystem(app, bot, User) {
   });
 
   // Cloud block check every minute
-  setInterval(function() { runCloudBlockCheck(User); }, 60000);
-  setTimeout(function() { runCloudBlockCheck(User); }, 5000);
+  setInterval(function() { runCloudBlockCheck(bot, User); }, 60000);
+  setTimeout(function() { runCloudBlockCheck(bot, User); }, 5000);
 
   console.log('[BlockSystem V2] Initialized - difficulty: ' + BLOCK_DIFFICULTY + ' reward: ' + BLOCK_REWARD + ' REC');
 };
