@@ -375,7 +375,7 @@ bot.onText(/\/start(.*)/, async (msg, match) => {
       await new User({ telegramId: from.id, username: from.username || '', firstName: from.first_name || '', lastName: from.last_name || '', language: lang, referredBy: refId || '', referredByL2: l2Id, referredByL3: l3Id }).save();
       if (refId) await User.findOneAndUpdate({ telegramId: parseInt(refId) }, { $inc: { refCount: 1 } });
     } else {
-      // ✅ لو المستخدم موجود بدون إحالة وجاء عبر رابط — احفظ الإحالة
+      // ✅ لو مستخدم موجود بدون إحالة وجاء عبر رابط — احفظ الإحالة
       if (refId && !existing.referredBy && existing.telegramId !== parseInt(refId)) {
         var l2Id = '', l3Id = '';
         var l1User = await User.findOne({ telegramId: parseInt(refId) });
@@ -388,7 +388,8 @@ bot.onText(/\/start(.*)/, async (msg, match) => {
         }
         await User.findOneAndUpdate(
           { telegramId: from.id },
-          { lastSeen: new Date(), username: from.username || existing.username, referredBy: refId, referredByL2: l2Id, referredByL3: l3Id }
+          { lastSeen: new Date(), username: from.username || existing.username,
+            referredBy: refId, referredByL2: l2Id, referredByL3: l3Id }
         );
         await User.findOneAndUpdate({ telegramId: parseInt(refId) }, { $inc: { refCount: 1 } });
       } else {
@@ -1498,45 +1499,6 @@ app.get('/api/admin/run-blocks', async (req, res) => {
   } catch(e) {
     res.json({ message: 'Triggered via blockSystem interval' });
   }
-});
-
-
-// ====== ADMIN: إرسال هدية لمستخدم ======
-app.post('/api/admin/gift', async (req, res) => {
-  try {
-    const { adminId, telegramId, amount, message } = req.body;
-    if(String(adminId) !== String(ADMIN_ID)) return res.status(403).json({ error: 'Not admin' });
-    if(!telegramId || !amount) return res.status(400).json({ error: 'Missing data' });
-
-    const user = await User.findOneAndUpdate(
-      { telegramId: parseInt(telegramId) },
-      { $inc: { rec: parseFloat(amount) } },
-      { new: true }
-    );
-    if(!user) return res.status(404).json({ error: 'User not found' });
-
-    const giftMsg = message || ('🎁 You received a gift of ' + amount + ' REC from the admin!');
-    bot.sendMessage(parseInt(telegramId),
-      '🎁 *Gift Received!*\n\n💰 +' + amount + ' REC added to your balance!\n\n' + (message || ''),
-      { parse_mode: 'Markdown' }
-    ).catch(()=>{});
-
-    console.log('[Admin Gift] Sent ' + amount + ' REC to ' + telegramId);
-    res.json({ success: true, newBalance: user.rec });
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
-
-
-// Admin: البحث عن مستخدم بالـ username
-app.get('/api/admin/find/:username', async (req, res) => {
-  try {
-    const adminId = req.query.adminId || req.headers['x-admin-key'];
-    if(String(adminId) !== String(ADMIN_ID)) return res.status(403).json({ error: 'Forbidden' });
-    const user = await User.findOne({ username: req.params.username.replace('@','') })
-      .select('telegramId username firstName rec record refCount').lean();
-    if(!user) return res.status(404).json({ error: 'User not found' });
-    res.json(user);
-  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 app.post('/webhook', (req, res) => { bot.processUpdate(req.body); res.sendStatus(200); });
