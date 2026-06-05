@@ -748,6 +748,57 @@ function checkComboOnUpgrade(cardKey) {
   }).catch(function(){});
 }
 
+
+// ====== ADMIN PANEL TABS ======
+function adminTab(tab) {
+  ['combo','gift','weekly'].forEach(function(t) {
+    var sec = document.getElementById('adminSection_'+t);
+    var btn = document.getElementById('adminTab_'+t);
+    if(sec) sec.style.display = t===tab ? 'block' : 'none';
+    if(btn) {
+      btn.style.background = t===tab ? 'rgba(255,100,50,0.3)' : 'rgba(0,0,0,0.2)';
+      btn.style.color = t===tab ? '#FF6644' : 'rgba(255,255,255,0.5)';
+      btn.style.border = t===tab ? '1px solid rgba(255,100,50,0.5)' : '1px solid rgba(255,255,255,0.1)';
+    }
+  });
+}
+
+// ====== ADMIN SEND GIFT ======
+function sendAdminGift() {
+  if(!tgUser || tgUser.id !== 6995765586) return;
+  var userId  = document.getElementById('giftUserId')  ? document.getElementById('giftUserId').value.trim()  : '';
+  var amount  = document.getElementById('giftAmount')  ? document.getElementById('giftAmount').value.trim()  : '';
+  var message = document.getElementById('giftMessage') ? document.getElementById('giftMessage').value.trim() : '';
+  var result  = document.getElementById('giftResult');
+
+  if(!userId || !amount) {
+    if(result) { result.style.color='#FF4444'; result.textContent='❌ أدخل ID المستخدم والكمية'; }
+    return;
+  }
+
+  if(result) { result.style.color='#FFD700'; result.textContent='⏳ جاري الإرسال...'; }
+
+  fetch('/api/admin/gift', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ adminId: tgUser.id, telegramId: parseInt(userId), amount: parseFloat(amount), message: message })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(d) {
+    if(d.success) {
+      if(result) { result.style.color='#00FF88'; result.textContent='✅ تم إرسال ' + amount + ' REC بنجاح!'; }
+      document.getElementById('giftUserId').value = '';
+      document.getElementById('giftAmount').value = '';
+      document.getElementById('giftMessage').value = '';
+    } else {
+      if(result) { result.style.color='#FF4444'; result.textContent='❌ ' + (d.error || 'خطأ'); }
+    }
+  })
+  .catch(function() {
+    if(result) { result.style.color='#FF4444'; result.textContent='❌ فشل الاتصال'; }
+  });
+}
+
 // ====== ADMIN COMBO SETTER ======
 function buildAdminComboSlots() {
   var panel = document.getElementById('comboAdminSlots');
