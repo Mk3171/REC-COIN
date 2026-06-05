@@ -1358,7 +1358,7 @@ app.post('/api/mining/offline/rec', async (req, res) => {
     }
     const elapsed = (now - lastSeen) / 1000;
     if(elapsed < 30) return res.json({ earnedRec: 0 });
-    const seconds = Math.min(elapsed, 86400);
+    const seconds = Math.min(elapsed, 7 * 86400); // 7 أيام
     const recSpeed = user.miningSpeed > 0 ? user.miningSpeed : calcMiningSpeed(user.cardLevels || {});
     const earnedRec = parseFloat((recSpeed * seconds).toFixed(8));
     console.log('[REC] user ' + telegramId + ' offline +' + earnedRec + ' REC');
@@ -1383,7 +1383,7 @@ app.post('/api/mining/offline/record', async (req, res) => {
     if(!lastSeen) return res.json({ earnedRecord: 0 });
     const elapsed = (now - lastSeen) / 1000;
     if(elapsed < 30) return res.json({ earnedRecord: 0 });
-    const seconds = Math.min(elapsed, 86400);
+    const seconds = Math.min(elapsed, 7 * 86400); // 7 أيام
     const recordSpeed = user.recordMiningSpeed > 0 ? user.recordMiningSpeed : calcRecordMiningSpeed(user.cardLevels || {}, user.tapLevelVal || 0);
     const earnedRecord = Math.floor(recordSpeed * seconds);
     console.log('[RECORD] user ' + telegramId + ' offline +' + earnedRecord + ' RECORD');
@@ -1395,6 +1395,79 @@ app.post('/api/mining/offline/record', async (req, res) => {
 });
 
 
+
+
+// ============================================================
+// CLOUD MINING — تعدين سحابي 24/7
+// يعدن لكل مستخدم كل دقيقة بغض النظر عن البوت
+// ============================================================
+async function runCloudMining() {
+  try {
+    const now = Date.now();
+    const intervalSeconds = 60; // كل دقيقة
+
+    // جيب كل المستخدمين النشيطين (آخر 30 يوم)
+    const thirtyDaysAgo = new Date(now - 30 * 86400 * 1000);
+    const users = await User.find({
+      banned: false,
+      lastSeen: { $gte: thirtyDaysAgo },
+      $or: [
+        { miningSpeed: { $gt: 0 } },
+        { recordMiningSpeed: { $gt: 0 } }
+      ]
+    }).select('telegramId miningSpeed recordMiningSpeed cardLevels tapLevelVal').lean();
+
+    if(users.length === 0) return;
+
+    let processed = 0;
+    for(const user of users) {
+      try {
+        const recSpeed    = user.miningSpeed       > 0 ? user.miningSpeed       : calcMiningSpeed(user.cardLevels || {});
+        const recordSpeed = user.recordMiningSpeed > 0 ? user.recordMiningSpeed : calcRecordMiningSpeed(user.cardLevels || {}, user.tapLevelVal || 0);
+
+        const earnedRec    = parseFloat((recSpeed    * intervalSeconds).toFixed(8));
+        const earnedRecord = Math.floor(recordSpeed  * intervalSeconds);
+
+        if(earnedRec < 0.000001 && earnedRecord < 1) continue;
+
+        const inc = {};
+        if(earnedRec    > 0.000001) inc.rec    = earnedRec;
+        if(earnedRecord > 0)        inc.record = earnedRecord;
+
+        await User.updateOne(
+          { telegramId: user.telegramId },
+          { $inc: inc }
+        );
+        processed++;
+      } catch(e) {}
+    }
+
+    if(processed > 0) {
+      console.log('[Cloud Mining] Processed ' + processed + '/' + users.length + ' users');
+    }
+  } catch(e) {
+    console.log('[Cloud Mining] Error:', e.message);
+  }
+}
+
+// شغّل كل دقيقة
+setInterval(runCloudMining, 60 * 1000);
+// أول تشغيل بعد دقيقتين من بدء السيرفر
+setTimeout(runCloudMining, 2 * 60 * 1000);
+console.log('[Cloud Mining] ✅ Started — mining every 60 seconds');
+
+
+// Sync — يرجع الرصيد الحالي من السيرفر
+app.post('/api/user/sync', async (req, res) => {
+  try {
+    const { telegramId } = req.body;
+    if(!telegramId) return res.json({ rec: 0, record: 0 });
+    const user = await User.findOne({ telegramId: parseInt(telegramId) })
+      .select('rec record').lean();
+    if(!user) return res.json({ rec: 0, record: 0 });
+    res.json({ rec: user.rec || 0, record: user.record || 0 });
+  } catch(e) { res.json({ rec: 0, record: 0 }); }
+});
 
 app.post('/webhook', (req, res) => { bot.processUpdate(req.body); res.sendStatus(200); });
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'index.html')); });
