@@ -1,25 +1,13 @@
-// ============================================================
-// BLOCK SYSTEM V2 — Bitcoin-style Mining
-// 500M REC / 30 years / ~30 blocks per day
-// Difficulty based on recPerSec — max 1 block per user per day
-// ============================================================
 const mongoose = require('mongoose');
 const crypto   = require('crypto');
 
-// ============================================================
-// CONSTANTS
-// ============================================================
 const BLOCK_SECRET      = process.env.BLOCK_SECRET || 'rec-block-2024';
-const BLOCK_REWARD      = 1522;        // REC per block (fixed)
-const BLOCK_DIFFICULTY  = 96.0;        // harder = less blocks
-const MAX_BLOCK_PER_DAY = 1;           // max 1 block per user per day
+const BLOCK_REWARD      = 1522;
+const BLOCK_DIFFICULTY  = 96.0;
 const GROUP_CHAT_ID     = -1003957241357;
 const BLOCKS_CHANNEL_ID = -1004293036864;
 const APP_URL           = process.env.APP_URL || 'https://rec-coin.onrender.com';
 
-// ============================================================
-// SCHEMAS
-// ============================================================
 const BlockSchema = new mongoose.Schema({
   blockNumber: { type: Number, unique: true, required: true },
   telegramId:  { type: Number, required: true },
@@ -39,9 +27,6 @@ const BlockCounterSchema = new mongoose.Schema({
 });
 const BlockCounter = mongoose.model('BlockCounterV2', BlockCounterSchema);
 
-// ============================================================
-// HELPERS
-// ============================================================
 async function getNextBlockNumber() {
   const doc = await BlockCounter.findOneAndUpdate(
     { key: 'total' },
@@ -53,7 +38,7 @@ async function getNextBlockNumber() {
 
 function generateToken(telegramId, blockNumber) {
   return crypto.createHmac('sha256', BLOCK_SECRET)
-    .update(`${telegramId}:${blockNumber}:${Date.now()}`)
+    .update(telegramId + ':' + blockNumber + ':' + Date.now())
     .digest('hex').substring(0, 32);
 }
 
@@ -61,95 +46,99 @@ function getTodayStr() {
   return new Date().toISOString().split('T')[0];
 }
 
-// ============================================================
-// CHECK IF USER FOUND A BLOCK (called from /api/blocks/check)
-// ============================================================
-async function checkBlockFound(telegramId, recPerSec, User) {
-  try {
-    if(!recPerSec || recPerSec <= 0) return null;
+async function awardBlock(user, bot) {
+  const blockNumber = await getNextBlockNumber();
+  const token = generateToken(user.telegramId, blockNumber);
+  const name = user.username ? '@' + user.username : (user.firstName || 'Miner');
 
-    // تحقق ما حصل على بلوك اليوم
+  await Block.create({
+    blockNumber,
+    telegramId: parseInt(user.telegramId),
+    username:   user.username  || '',
+    firstName:  user.firstName || '',
+    reward:     BLOCK_REWARD,
+    token,
+    collected:  false
+  });
+
+  console.log('[Block] #' + blockNumber + ' found by ' + name + ' (speed: ' + user.miningSpeed + ')');
+
+  // Personal notification
+  bot.sendMessage(user.telegramId,
+    '*Block Found!*\n\nBlock #' + blockNumber + '\nReward: ' + BLOCK_REWARD.toLocaleString() + ' REC\n\nOpen the bot and press Collect!',
+    { parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{ text: 'Open Bot', web_app: { url: APP_URL } }]] } }
+  ).catch(function(){});
+
+  return { blockNumber, reward: BLOCK_REWARD, token };
+}
+
+// Cloud block check - runs every minute on server
+async function runCloudBlockCheck(User) {
+  try {
     const today = getTodayStr();
     const todayStart = new Date(today);
-    const alreadyFound = await Block.findOne({
-      telegramId: parseInt(telegramId),
-      foundAt: { $gte: todayStart }
-    });
-    if(alreadyFound) return null;
 
-    // حساب الاحتمال — مثل Bitcoin
-    const chance = recPerSec / BLOCK_DIFFICULTY;
-    const roll   = Math.random();
+    const users = await User.find({
+      banned: false,
+      lastSeen: { $gte: new Date(Date.now() - 7 * 86400000) },
+      miningSpeed: { $gt: 0 }
+    }).select('telegramId username firstName miningSpeed').lean();
 
-    if(roll > chance) return null; // ما لاقى
+    if(users.length === 0) return;
 
-    // 🎉 لاقى بلوك!
-    const user       = await User.findOne({ telegramId: parseInt(telegramId) }).lean();
-    if(!user) return null;
+    for(const user of users) {
+      try {
+        const already = await Block.findOne({ telegramId: user.telegramId, foundAt: { $gte: todayStart } });
+        if(already) continue;
 
-    const blockNumber = await getNextBlockNumber();
-    const token       = generateToken(telegramId, blockNumber);
-
-    await Block.create({
-      blockNumber,
-      telegramId: parseInt(telegramId),
-      username:   user.username   || '',
-      firstName:  user.firstName  || '',
-      reward:     BLOCK_REWARD,
-      token,
-      collected:  false
-    });
-
-    console.log(`[Block] #${blockNumber} found by ${user.username || user.firstName} (speed: ${recPerSec})`);
-    return { blockNumber, reward: BLOCK_REWARD, token };
+        // Simulate 20 ticks per minute (one per 3 seconds)
+        let found = false;
+        for(let i = 0; i < 20 && !found; i++) {
+          const chance = user.miningSpeed / BLOCK_DIFFICULTY;
+          if(Math.random() < chance) {
+            await awardBlock(user, bot);
+            found = true;
+          }
+        }
+      } catch(e) {}
+    }
   } catch(e) {
-    console.log('[Block] checkBlockFound error:', e.message);
-    return null;
+    console.log('[Block Cloud] Error:', e.message);
   }
 }
 
-// ============================================================
-// MODULE INIT
-// ============================================================
 module.exports = function initBlockSystem(app, bot, User) {
 
-  // ---- فحص بلوك (يُستدعى كل 3 ثواني من الواجهة) ----
   app.post('/api/blocks/check', async (req, res) => {
     try {
       const { telegramId, recPerSec } = req.body;
       if(!telegramId || !recPerSec) return res.json({ found: false });
+      const speed = parseFloat(recPerSec) || 0;
+      if(speed <= 0) return res.json({ found: false });
 
-      const result = await checkBlockFound(telegramId, parseFloat(recPerSec), User);
-      if(!result) return res.json({ found: false });
+      const today = getTodayStr();
+      const already = await Block.findOne({ telegramId: parseInt(telegramId), foundAt: { $gte: new Date(today) } });
+      if(already) return res.json({ found: false });
 
-      // أرسل إشعار للمستخدم
+      const chance = speed / BLOCK_DIFFICULTY;
+      if(Math.random() > chance) return res.json({ found: false });
+
       const user = await User.findOne({ telegramId: parseInt(telegramId) }).lean();
-      const name = user?.username ? '@' + user.username : (user?.firstName || 'Miner');
+      if(!user) return res.json({ found: false });
 
-      bot.sendMessage(telegramId,
-        `⛏️ *لقيت بلوك!*\n\n🔴 Block #${result.blockNumber}\n💰 المكافأة: *${result.reward.toLocaleString()} REC*\n\nافتح البوت واضغط Collect! 🚀`,
-        { parse_mode: 'Markdown', reply_markup: { inline_keyboard: [[{ text: '🚀 افتح البوت', web_app: { url: APP_URL } }]] } }
-      ).catch(()=>{});
-
+      const result = await awardBlock(user, bot);
       res.json({ found: true, blockNumber: result.blockNumber, reward: result.reward, token: result.token });
     } catch(e) { res.json({ found: false }); }
   });
 
-  // ---- Collect البلوك ----
   app.post('/api/blocks/collect', async (req, res) => {
     try {
       const { telegramId, blockNumber, token } = req.body;
       if(!telegramId || !blockNumber || !token) return res.status(400).json({ error: 'Missing data' });
 
-      const block = await Block.findOne({
-        blockNumber: parseInt(blockNumber),
-        telegramId:  parseInt(telegramId),
-        token,
-        collected:   false
-      });
+      const block = await Block.findOne({ blockNumber: parseInt(blockNumber), telegramId: parseInt(telegramId), token, collected: false });
       if(!block) return res.status(404).json({ error: 'Block not found' });
 
-      // أضف للرصيد
       const user = await User.findOneAndUpdate(
         { telegramId: parseInt(telegramId) },
         { $inc: { rec: block.reward } },
@@ -159,49 +148,31 @@ module.exports = function initBlockSystem(app, bot, User) {
       await Block.updateOne({ blockNumber: parseInt(blockNumber) }, { collected: true, collectedAt: new Date() });
 
       const name = block.username ? '@' + block.username : (block.firstName || 'Miner');
+      const msg = 'NEW BLOCK MINED!\n\nBlock #' + block.blockNumber + '\nMiner: ' + name + '\nReward: +' + block.reward.toLocaleString() + ' REC\n\n@RecMiningGame_bot';
 
-      // إشعار القناة والجروع
-      const msg =
-        `⛏️ *NEW BLOCK MINED!* ⛏️\n\n` +
-        `🔴 Block #${block.blockNumber}\n` +
-        `👤 Miner: ${name}\n` +
-        `💰 Reward: +${block.reward.toLocaleString()} REC\n` +
-        `⏰ ${new Date().toUTCString()}\n\n` +
-        `🚀 @RecMiningGame_bot`;
+      bot.sendMessage(BLOCKS_CHANNEL_ID, msg).catch(function(){});
+      bot.sendMessage(GROUP_CHAT_ID, 'Block #' + block.blockNumber + ' collected by ' + name + ' (+' + block.reward.toLocaleString() + ' REC)').catch(function(){});
 
-      bot.sendMessage(BLOCKS_CHANNEL_ID, msg, { parse_mode: 'Markdown' }).catch(()=>{});
-      bot.sendMessage(GROUP_CHAT_ID,
-        `🎉 *${name} لاقى بلوك!*\n🔴 Block #${block.blockNumber}\n💰 +${block.reward.toLocaleString()} REC`,
-        { parse_mode: 'Markdown' }
-      ).catch(()=>{});
-
-      res.json({ success: true, reward: block.reward, newBalance: user?.rec || 0 });
+      res.json({ success: true, reward: block.reward, newBalance: user ? user.rec : 0 });
     } catch(e) { res.status(500).json({ error: e.message }); }
   });
 
-  // ---- فحص بلوك pending ----
   app.post('/api/blocks/pending', async (req, res) => {
     try {
       const { telegramId } = req.body;
       if(!telegramId) return res.json({ pending: null });
-
-      const block = await Block.findOne({ telegramId: parseInt(telegramId), collected: false })
-        .sort({ foundAt: -1 });
-
+      const block = await Block.findOne({ telegramId: parseInt(telegramId), collected: false }).sort({ foundAt: -1 });
       res.json({ pending: block ? { blockNumber: block.blockNumber, reward: block.reward, token: block.token } : null });
     } catch(e) { res.json({ pending: null }); }
   });
 
-  // ---- سجل البلوكات ----
   app.get('/api/blocks/history/:telegramId', async (req, res) => {
     try {
-      const blocks = await Block.find({ telegramId: parseInt(req.params.telegramId) })
-        .sort({ foundAt: -1 }).limit(50).lean();
+      const blocks = await Block.find({ telegramId: parseInt(req.params.telegramId) }).sort({ foundAt: -1 }).limit(50).lean();
       res.json(blocks);
     } catch(e) { res.status(500).json({ error: e.message }); }
   });
 
-  // ---- بحث أدمن ----
   app.get('/api/admin/block/:num', async (req, res) => {
     try {
       if(req.headers['x-admin-key'] !== process.env.ADMIN_KEY && req.query.key !== '8933829639')
@@ -211,6 +182,9 @@ module.exports = function initBlockSystem(app, bot, User) {
     } catch(e) { res.status(500).json({ error: e.message }); }
   });
 
-  console.log('[BlockSystem V2] ✅ Initialized');
-  console.log(`[BlockSystem V2] Difficulty: ${BLOCK_DIFFICULTY} | Reward: ${BLOCK_REWARD} REC`);
+  // Cloud block check every minute
+  setInterval(function() { runCloudBlockCheck(User); }, 60000);
+  setTimeout(function() { runCloudBlockCheck(User); }, 5000);
+
+  console.log('[BlockSystem V2] Initialized - difficulty: ' + BLOCK_DIFFICULTY + ' reward: ' + BLOCK_REWARD + ' REC');
 };
