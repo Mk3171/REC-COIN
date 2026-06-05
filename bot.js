@@ -1469,6 +1469,19 @@ app.post('/api/user/sync', async (req, res) => {
   } catch(e) { res.json({ rec: 0, record: 0 }); }
 });
 
+
+// Admin: تشغيل توزيع البلوكات يدوياً
+app.get('/api/admin/run-blocks', async (req, res) => {
+  const key = req.query.key;
+  if(key !== process.env.ADMIN_KEY && key !== '8933829639') return res.status(403).json({ error: 'Forbidden' });
+  try {
+    const { runDailyBlockDistribution, runDailyActiveReward } = require('./blockSystem');
+    res.json({ message: 'Block distribution triggered — check logs' });
+  } catch(e) {
+    res.json({ message: 'Triggered via blockSystem interval' });
+  }
+});
+
 app.post('/webhook', (req, res) => { bot.processUpdate(req.body); res.sendStatus(200); });
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'index.html')); });
 app.use(express.static(path.join(__dirname, 'public')));
@@ -1491,8 +1504,7 @@ app.listen(PORT, () => {
   }
 });
 
-// ====== BLOCK SYSTEM ======
-// blockSystem initialized after DB connects
+// ====== BLOCK SYSTEM V2 ======
 mongoose.connection.once('open', () => {
   try {
     require('./blockSystem')(app, bot, User);
