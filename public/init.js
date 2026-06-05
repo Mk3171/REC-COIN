@@ -28,7 +28,7 @@ function calcOfflineEarnings() {
     if(elapsed < 30) return;
 
     // Cap at 24 hours
-    var maxSeconds = 24 * 3600;
+    var maxSeconds = 7 * 24 * 3600; // حد أقصى 7 أيام
     var seconds = Math.min(elapsed, maxSeconds);
 
     // Calculate earnings based on current card speeds
@@ -53,47 +53,11 @@ function calcOfflineEarnings() {
     record += earnedRecord;
     if(earnedRec > 0) rec += earnedRec;
 
-    // Show offline earnings popup
-    setTimeout(function(){
-      var h = Math.floor(elapsed/3600);
-      var m = Math.floor((elapsed%3600)/60);
-      var timeStr = (h > 0 ? h+'h ' : '') + m+'m';
-      if(typeof showToast === 'function') showToast('⚡ +'+earnedRec.toFixed(4)+' REC');
-    }, 2000);
-
     saveData(true);
 
-    // Show notification popup
-    var hours = Math.floor(seconds / 3600);
-    var mins = Math.floor((seconds % 3600) / 60);
-    var timeStr = hours > 0 ? hours+'h '+ mins+'m' : mins+'m';
 
-    var ol = document.createElement('div');
-    ol.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;';
-    ol.addEventListener('click', function(e){ if(e.target===ol) ol.remove(); });
 
-    var pp = document.createElement('div');
-    pp.style.cssText = 'background:linear-gradient(180deg,#0d0d14,#111118);border:1px solid rgba(255,140,0,0.4);border-radius:20px;padding:22px;width:82vw;max-width:300px;text-align:center;';
-    pp.addEventListener('click', function(e){ e.stopPropagation(); });
 
-    pp.innerHTML =
-      '<div style="font-size:36px;margin-bottom:8px;">⛏️</div>'+
-      '<div style="font-family:Orbitron,sans-serif;font-size:14px;color:#FF8800;margin-bottom:4px;">Offline Earnings</div>'+
-      '<div style="color:#666;font-size:12px;margin-bottom:14px;">You were away for <span style="color:#aaa;">'+timeStr+'</span></div>'+
-      (earnedRecord > 0 ?
-        '<div style="background:rgba(255,0,0,0.08);border:1px solid rgba(255,0,0,0.2);border-radius:10px;padding:10px;margin-bottom:8px;">'+
-          '<div style="font-size:11px;color:#aaa;margin-bottom:3px;">⚡ RECORD Earned</div>'+
-          '<div style="font-size:18px;color:#FF6644;font-family:Orbitron,sans-serif;font-weight:bold;">+'+formatCost(earnedRecord)+'</div>'+
-        '</div>' : '')+
-      (earnedRec > 0.000001 ?
-        '<div style="background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.2);border-radius:10px;padding:10px;margin-bottom:14px;">'+
-          '<div style="font-size:11px;color:#aaa;margin-bottom:3px;">🟢 REC Earned</div>'+
-          '<div style="font-size:18px;color:#00FF88;font-family:Orbitron,sans-serif;font-weight:bold;">+'+earnedRec.toFixed(6)+'</div>'+
-        '</div>' : '<div style="margin-bottom:14px;"></div>')+
-      '<button onclick="this.closest(\'div\').parentElement.remove()" style="background:linear-gradient(135deg,#FF6600,#FF8800);border:none;color:white;padding:10px 28px;border-radius:10px;cursor:pointer;font-size:13px;font-weight:bold;width:100%;">Collect 🎉</button>';
-
-    ol.appendChild(pp);
-    document.body.appendChild(ol);
   } catch(e) {
     console.log('Offline earnings error:', e);
   }
