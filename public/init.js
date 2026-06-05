@@ -69,6 +69,12 @@ function initApp() {
       var name=tgUser.first_name+(tgUser.last_name?' '+tgUser.last_name:'');
       var el=document.getElementById('profileName');if(el)el.textContent=name;
       var idEl=document.getElementById('profileId');if(idEl)idEl.textContent=tgUser.id;
+      // ✅ تحديث اسم المستخدم في الـ top bar
+      var topBar=document.getElementById('topBarName');
+      if(topBar) topBar.textContent=name;
+      // تحديث الـ avatar بالحرف الأول
+      var avatar=document.getElementById('ppAvatar');
+      if(avatar && name) avatar.textContent=name[0].toUpperCase();
     }
     fixViewport();
     calcTotalSpeeds();
