@@ -1,199 +1,345 @@
-// ====== AIRDROP SYSTEM — airdrop.js ======
+// ====== AIRDROP SYSTEM V2 — Daily Tasks ======
+var AIRDROP_TOTAL = 1000000000;
 
-var AIRDROP_TOTAL = 1000000000; // 1 مليار REC
-
-// ====== DAILY SESSION TRACKING ======
+// ====== Session Tracking ======
 function getAirdropData() {
-  try {
-    var key = 'airdropData_v1';
-    var d = JSON.parse(localStorage.getItem(key) || '{}');
-    return d;
-  } catch(e) { return {}; }
+  try { return JSON.parse(localStorage.getItem('airdropData_v2') || '{}'); } catch(e) { return {}; }
+}
+function saveAirdropData(d) {
+  try { localStorage.setItem('airdropData_v2', JSON.stringify(d)); } catch(e) {}
 }
 
-function saveAirdropData(d) {
-  try {
-    localStorage.setItem('airdropData_v1', JSON.stringify(d));
-  } catch(e) {}
-}
+function getTodayStr() { return new Date().toISOString().split('T')[0]; }
 
 function trackDailySession() {
   var d = getAirdropData();
-  var today = new Date().toISOString().split('T')[0];
+  var today = getTodayStr();
   if(!d.sessions) d.sessions = {};
   if(!d.sessions[today]) d.sessions[today] = 0;
   d.sessions[today]++;
-  // Keep last 30 days only
-  var keys = Object.keys(d.sessions).sort();
-  if(keys.length > 30) delete d.sessions[keys[0]];
   saveAirdropData(d);
 }
-
 function getTotalActiveDays() {
-  var d = getAirdropData();
-  if(!d.sessions) return 0;
-  return Object.keys(d.sessions).length;
+  var d = getAirdropData(); return d.sessions ? Object.keys(d.sessions).length : 0;
 }
-
 function getAvgSessionsPerDay() {
   var d = getAirdropData();
   if(!d.sessions) return 0;
   var days = Object.keys(d.sessions);
   if(!days.length) return 0;
-  var total = days.reduce(function(s,k){ return s + d.sessions[k]; }, 0);
-  return Math.min(10, total / days.length);
+  var total = days.reduce(function(s,k){ return s+d.sessions[k]; },0);
+  return Math.min(10, total/days.length);
 }
 
-// ====== SCORE CALCULATION ======
+// ====== Daily REC Tracking ======
+function getDailyRecStart() {
+  var d = getAirdropData();
+  var today = getTodayStr();
+  if(d.recDay !== today) {
+    d.recDay = today;
+    d.recStart = typeof rec !== 'undefined' ? rec : 0;
+    saveAirdropData(d);
+  }
+  return d.recStart || 0;
+}
+function getDailyRecEarned() {
+  var start = getDailyRecStart();
+  var current = typeof rec !== 'undefined' ? rec : 0;
+  return Math.max(0, current - start);
+}
+
+// ====== Random Card Selection (changes every 3 days) ======
+function getDailyCards() {
+  var allCards = [];
+  if(typeof categories !== 'undefined') {
+    categories.forEach(function(cat, ci) {
+      cat.cards.forEach(function(card, idx) {
+        allCards.push({ key: ci+'_'+idx, name: card.en || card.n, emoji: card.e||'🃏' });
+      });
+    });
+  }
+  if(!allCards.length) return [
+    { key:'0_0', name:'Naruto', emoji:'🍥' },
+    { key:'0_4', name:'Itachi', emoji:'🌸' },
+    { key:'1_0', name:'Ferrari SF90', emoji:'🔴' }
+  ];
+
+  // Seed based on day period (changes every 3 days)
+  var dayNum = Math.floor(Date.now() / (86400000 * 3));
+  var seed = dayNum * 16807 + 1;
+  function seededRand(s) { return ((s * 16807) % 2147483647); }
+
+  seed = seededRand(seed);
+  var i1 = seed % allCards.length;
+  seed = seededRand(seed);
+  var i2 = seed % (allCards.length - 1);
+  if(i2 >= i1) i2++;
+  seed = seededRand(seed);
+  var i3 = seed % (allCards.length - 2);
+  if(i3 >= Math.min(i1,i2)) i3++;
+  if(i3 >= Math.max(i1,i2)) i3++;
+
+  return [allCards[i1], allCards[i2], allCards[i3]];
+}
+
+function getCardLevel(key) {
+  if(typeof cardLevels === 'undefined') return 0;
+  return cardLevels[key] || 0;
+}
+
+// ====== Score Calculation ======
 function calcAirdropScore() {
   var score = 0;
-
-  // Daily logins (max 500 pts)
-  var loginDays = (typeof dailyLogin !== 'undefined' ? (dailyLogin.day || 0) : 0);
+  var loginDays = typeof dailyLogin !== 'undefined' ? (dailyLogin.day||0) : 0;
   score += Math.min(500, loginDays * 10);
-
-  // Active days tracked locally (max 300 pts)
   score += Math.min(300, getTotalActiveDays() * 10);
-
-  // Sessions per day avg (max 100 pts)
   score += Math.min(100, Math.floor(getAvgSessionsPerDay() * 20));
-
-  // REC balance (max 2000 pts) - log scale
-  var recBal = (typeof rec !== 'undefined' ? rec : 0) + (typeof pendingRec !== 'undefined' ? pendingRec : 0);
-  if(recBal > 0) score += Math.min(2000, Math.floor(Math.log10(recBal + 1) * 400));
-
-  // Level (max 1000 pts)
-  var lvl = (typeof calcPlayerLevel === 'function' && typeof playerXP !== 'undefined')
-    ? calcPlayerLevel(playerXP) : 0;
+  var recBal = typeof rec !== 'undefined' ? rec : 0;
+  if(recBal > 0) score += Math.min(2000, Math.floor(Math.log10(recBal+1)*400));
+  var lvl = (typeof calcPlayerLevel==='function' && typeof playerXP!=='undefined') ? calcPlayerLevel(playerXP) : 0;
   score += lvl * 10;
-
-  // Card levels sum (max 1500 pts)
   if(typeof cardLevels !== 'undefined') {
-    var cardSum = Object.values(cardLevels).reduce(function(s,v){ return s+(v||0); }, 0);
+    var cardSum = Object.values(cardLevels).reduce(function(s,v){return s+(v||0);},0);
     score += Math.min(1500, cardSum * 2);
   }
-
-  // Tasks done (max 300 pts)
-  if(typeof completedTasks !== 'undefined') {
-    score += Math.min(300, completedTasks.length * 15);
-  }
-
-  // Referrals (max 500 pts)
-  if(typeof refCount !== 'undefined') {
-    score += Math.min(500, refCount * 50);
-  }
-
-  // VIP membership bonus
-  if(typeof vipData !== 'undefined' && parseInt(vipData.tier||0) >= 1 && parseInt(vipData.expiry||0) > Date.now()) {
-    score += 200;
-  }
-
+  if(typeof completedTasks !== 'undefined') score += Math.min(300, completedTasks.length * 15);
+  if(typeof refCount !== 'undefined') score += Math.min(500, refCount * 50);
+  if(typeof vipData !== 'undefined' && parseInt(vipData.tier||0)>=1 && parseInt(vipData.expiry||0)>Date.now()) score += 200;
+  score += calcDailyTasksScore();
   return Math.floor(score);
 }
 
-// ====== ESTIMATED SHARE ======
-function calcEstimatedREC(score, globalAvg) {
-  // Use global avg score from server, fallback to estimate
-  var avg = globalAvg || 1500;
-  var ratio = score / (avg * 10); // conservative estimate
-  return Math.floor(AIRDROP_TOTAL * ratio);
+function calcDailyTasksScore() {
+  var bonus = 0;
+  var cards = getDailyCards();
+  cards.forEach(function(card) {
+    var lvl = getCardLevel(card.key);
+    if(lvl >= 70) bonus += 1000;
+    else if(lvl >= 40) bonus += 100;
+    else if(lvl >= 20) bonus += 50;
+  });
+  var dailyRec = getDailyRecEarned();
+  if(dailyRec >= 10000) bonus += 5000;
+  else if(dailyRec >= 5000) bonus += 1500;
+  else if(dailyRec >= 2500) bonus += 500;
+  else if(dailyRec >= 1500) bonus += 200;
+  else if(dailyRec >= 500)  bonus += 50;
+  var refs = typeof refCount !== 'undefined' ? refCount : 0;
+  if(refs >= 50)  bonus += 5000;
+  else if(refs >= 20) bonus += 2000;
+  else if(refs >= 10) bonus += 500;
+  return bonus;
 }
 
-// ====== OPEN AIRDROP PAGE ======
+// ====== Open AirDrop ======
+var _airdropTab = 'main';
+
 function openAirdrop() {
   var old = document.getElementById('airdropOverlay');
   if(old) old.remove();
-
+  trackDailySession();
+  getDailyRecStart(); // init today's REC start
   var score = calcAirdropScore();
+  if(tgUser) {
+    fetch('/api/user/airdrop-score',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({telegramId:tgUser.id,airdropScore:score})}).catch(function(){});
+  }
+  _renderAirdrop(score);
+}
 
+function _renderAirdrop(score) {
   var ol = document.createElement('div');
   ol.id = 'airdropOverlay';
-  ol.style.cssText = 'position:fixed;inset:0;background:rgba(6,3,15,0.95);z-index:5000;overflow-y:auto;padding:20px;';
-
-  // Score breakdown
-  var loginDays = (typeof dailyLogin !== 'undefined' ? (dailyLogin.day || 0) : 0);
-  var activeDays = getTotalActiveDays();
-  var lvl = (typeof calcPlayerLevel === 'function' && typeof playerXP !== 'undefined') ? calcPlayerLevel(playerXP) : 0;
-  var cardSum = 0;
-  if(typeof cardLevels !== 'undefined') cardSum = Object.values(cardLevels).reduce(function(s,v){return s+(v||0);},0);
-  var tasksDone = (typeof completedTasks !== 'undefined') ? completedTasks.length : 0;
-  var refs = (typeof refCount !== 'undefined') ? refCount : 0;
-  var recBal = Math.floor((typeof rec !== 'undefined' ? rec : 0) + (typeof pendingRec !== 'undefined' ? pendingRec : 0));
-
-  function row(icon, label, val, pts) {
-    return '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.06);">'+
-      '<span style="font-size:20px;width:28px;text-align:center;">'+icon+'</span>'+
-      '<div style="flex:1;">'+
-        '<div style="font-size:12px;color:rgba(255,255,255,0.7);">'+label+'</div>'+
-        '<div style="font-size:11px;color:rgba(255,255,255,0.35);">'+val+'</div>'+
-      '</div>'+
-      '<div style="font-size:12px;font-weight:700;color:#FFD700;">+'+pts+' pts</div>'+
-    '</div>';
-  }
+  ol.style.cssText = 'position:fixed;inset:0;background:#0a0a12;z-index:9000;display:flex;flex-direction:column;overflow:hidden;';
 
   ol.innerHTML =
-    // Back button
-    '<div onclick="document.getElementById(\'airdropOverlay\').remove()" style="background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:8px 16px;cursor:pointer;font-size:13px;color:rgba(255,255,255,0.6);display:inline-block;margin-bottom:20px;">← '+(currentLang==='ar'?'رجوع':'Back')+'</div>'+
-
     // Header
-    '<div style="text-align:center;margin-bottom:24px;">'+
-      '<div style="font-size:48px;margin-bottom:8px;">🪂</div>'+
-      '<div style="font-family:Orbitron,sans-serif;font-size:22px;font-weight:900;color:#FFD700;margin-bottom:4px;">'+(currentLang==='ar'?'الإنزال المظلي':'AirDrop')+'</div>'+
-      '<div style="font-size:13px;color:rgba(255,255,255,0.4);">'+(currentLang==='ar'?'إجمالي المكافأة:':'Total reward:')+' <span style="color:#FFD700;font-weight:700;">1,000,000,000 REC</span></div>'+
-    '</div>'+
-
-    // Coming Soon banner
-    '<div style="background:linear-gradient(135deg,rgba(255,215,0,0.08),rgba(255,150,0,0.05));border:1px solid rgba(255,215,0,0.3);border-radius:16px;padding:16px;text-align:center;margin-bottom:20px;">'+
-      '<div style="font-size:28px;margin-bottom:6px;">🔒</div>'+
-      '<div style="font-size:16px;font-weight:700;color:#FFD700;">'+(currentLang==='ar'?'قريباً':'Coming Soon')+'</div>'+
-      '<div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:4px;">'+(currentLang==='ar'?'استمر في اللعب لزيادة حصتك':'Keep playing to increase your share')+'</div>'+
-    '</div>'+
-
-    // Your score
-    '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:16px;margin-bottom:16px;">'+
-      '<div style="font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:1px;margin-bottom:8px;">'+(currentLang==='ar'?'نقاطك الحالية':'YOUR CURRENT SCORE')+'</div>'+
-      '<div style="font-family:Orbitron,sans-serif;font-size:36px;font-weight:900;color:#00FF88;">'+score.toLocaleString()+'</div>'+
-      '<div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px;">'+(currentLang==='ar'?'كل نشاط يزيد نقاطك':'Every activity increases your score')+'</div>'+
-    '</div>'+
-
-    // Score breakdown
-    '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:14px;margin-bottom:16px;">'+
-      '<div style="font-size:12px;color:rgba(255,255,255,0.4);letter-spacing:1px;margin-bottom:10px;">'+(currentLang==='ar'?'تفاصيل النقاط':'SCORE BREAKDOWN')+'</div>'+
-      row('📅', currentLang==='ar'?'أيام الدخول اليومي':'Daily Login Days', loginDays+' '+(currentLang==='ar'?'يوم':'days'), Math.min(500,loginDays*10))+
-      row('📱', currentLang==='ar'?'أيام النشاط المسجلة':'Tracked Active Days', activeDays+' '+(currentLang==='ar'?'يوم':'days'), Math.min(300,activeDays*10))+
-      row('⚡', currentLang==='ar'?'رصيد REC':'REC Balance', recBal.toLocaleString()+' REC', Math.min(2000,Math.floor(Math.log10(recBal+1)*400)))+
-      row('🏆', currentLang==='ar'?'المستوى':'Level', 'LVL '+lvl, lvl*10)+
-      row('🃏', currentLang==='ar'?'مجموع مستويات البطاقات':'Card Levels Sum', cardSum.toLocaleString(), Math.min(1500,cardSum*2))+
-      row('✅', currentLang==='ar'?'المهام المنجزة':'Tasks Done', tasksDone, Math.min(300,tasksDone*15))+
-      row('👥', currentLang==='ar'?'الدعوات':'Referrals', refs, Math.min(500,refs*50))+
-    '</div>'+
-
-    // How to increase
-    '<div style="background:rgba(0,255,136,0.04);border:1px solid rgba(0,255,136,0.15);border-radius:14px;padding:14px;">'+
-      '<div style="font-size:12px;color:#00FF88;font-weight:700;margin-bottom:10px;">'+
-        (currentLang==='ar'?'⬆️ كيف تزيد نقاطك؟':'⬆️ How to increase your score?')+
-      '</div>'+
-      '<div style="font-size:11px;color:rgba(255,255,255,0.5);line-height:1.8;">'+
-        (currentLang==='ar'?
-          '• ادخل كل يوم واضغط Daily<br>• ارقِّ بطاقاتك<br>• أنجز المهام<br>• ادعُ أصدقاءك<br>• اجمع أكثر ما يمكن من REC':
-          '• Login daily & claim Daily bonus<br>• Upgrade your cards<br>• Complete tasks<br>• Invite friends<br>• Collect as much REC as possible')+
-      '</div>'+
+    '<div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.07);flex-shrink:0;">' +
+      '<button onclick="document.getElementById(\'airdropOverlay\').remove()" style="background:rgba(255,255,255,0.08);border:none;color:white;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:18px;flex-shrink:0;">←</button>' +
+      '<span style="font-family:Orbitron,sans-serif;font-size:16px;font-weight:900;color:#FFD700;">🪂 AirDrop</span>' +
+    '</div>' +
+    // Tabs
+    '<div style="display:flex;border-bottom:1px solid rgba(255,255,255,0.07);flex-shrink:0;">' +
+      '<button onclick="switchAirdropTab(\'main\')" id="adTab_main" style="flex:1;padding:12px 4px;background:transparent;border:none;border-bottom:2px solid #FFD700;color:#FFD700;font-size:12px;font-weight:700;cursor:pointer;">🪂 AirDrop</button>' +
+      '<button onclick="switchAirdropTab(\'tasks\')" id="adTab_tasks" style="flex:1;padding:12px 4px;background:transparent;border:none;border-bottom:2px solid transparent;color:rgba(255,255,255,0.4);font-size:12px;font-weight:700;cursor:pointer;">📋 Tasks</button>' +
+      '<button onclick="switchAirdropTab(\'faq\')" id="adTab_faq" style="flex:1;padding:12px 4px;background:transparent;border:none;border-bottom:2px solid transparent;color:rgba(255,255,255,0.4);font-size:12px;font-weight:700;cursor:pointer;">❓ FAQ</button>' +
+    '</div>' +
+    '<div id="airdropContent" style="flex:1;overflow-y:auto;padding:16px;">' +
+      _tabMain() + _tabTasks() + _tabFaq(score) +
     '</div>';
 
   document.body.appendChild(ol);
+}
 
-  // Save score to server
-  if(tgUser) {
-    fetch('/api/user/airdrop-score', {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({ telegramId: tgUser.id, airdropScore: score })
-    }).catch(function(){});
+function _tabMain() {
+  return '<div id="adSection_main">' +
+    '<div style="text-align:center;padding:32px 0 20px;">' +
+      '<div style="font-size:56px;margin-bottom:12px;">🪂</div>' +
+      '<div style="font-family:Orbitron,sans-serif;font-size:12px;color:rgba(255,255,255,0.4);letter-spacing:2px;margin-bottom:8px;">TOTAL PRIZE POOL</div>' +
+      '<div style="font-family:Orbitron,sans-serif;font-size:38px;font-weight:900;color:#FFD700;">1,000,000,000</div>' +
+      '<div style="font-size:15px;color:rgba(255,215,0,0.5);margin-bottom:28px;">REC</div>' +
+      '<div style="display:inline-block;background:rgba(0,180,255,0.1);border:1px solid rgba(0,180,255,0.3);border-radius:12px;padding:12px 28px;">' +
+        '<span style="font-size:18px;">🔒 </span><span style="font-size:15px;color:#00AAFF;font-weight:700;">Coming Soon</span>' +
+      '</div>' +
+    '</div>' +
+    '<div style="background:rgba(255,215,0,0.05);border:1px solid rgba(255,215,0,0.12);border-radius:14px;padding:14px 16px;margin-top:8px;">' +
+      '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:8px;letter-spacing:1px;">📢 كيف تزيد حصتك؟</div>' +
+      '<div style="font-size:13px;color:rgba(255,255,255,0.65);line-height:2;">' +
+        '• سجّل دخول يومياً<br>• رقّ بطاقاتك أكثر<br>• أكمل المهام اليومية<br>• ادعُ أصدقاء<br>• اجمع أكبر قدر من REC' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+function _tabTasks() {
+  var cards = getDailyCards();
+  var dailyRec = getDailyRecEarned();
+  var refs = typeof refCount !== 'undefined' ? refCount : 0;
+
+  // Next reset time
+  var now = new Date();
+  var nextReset = new Date(now);
+  nextReset.setDate(nextReset.getDate() + (3 - (Math.floor(Date.now()/86400000) % 3)));
+  nextReset.setHours(0,0,0,0);
+  var diffH = Math.ceil((nextReset - now) / 3600000);
+
+  function progressBar(val, max, color) {
+    var pct = Math.min(100, Math.floor(val/max*100));
+    return '<div style="background:rgba(255,255,255,0.06);border-radius:6px;height:6px;margin-top:8px;">' +
+      '<div style="background:'+color+';width:'+pct+'%;height:6px;border-radius:6px;transition:width 0.3s;"></div></div>';
   }
+
+  function taskCard(icon, title, milestones, currentVal, unit, color, durationLabel) {
+    var html = '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:14px;margin-bottom:12px;">' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px;">' +
+        '<div style="display:flex;align-items:center;gap:8px;">' +
+          '<span style="font-size:26px;">' + icon + '</span>' +
+          '<div><div style="font-size:13px;font-weight:700;color:white;">' + title + '</div>' +
+          '<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px;">' + durationLabel + '</div></div>' +
+        '</div>' +
+      '</div>';
+
+    milestones.forEach(function(m) {
+      var done = currentVal >= m.req;
+      html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:rgba('+(done?'0,255,136':'255,255,255')+',0.04);border:1px solid rgba('+(done?'0,255,136':'255,255,255')+',' + (done?'0.2':'0.06') + ');border-radius:10px;margin-bottom:6px;">' +
+        '<div style="flex:1;">' +
+          '<div style="font-size:12px;color:rgba(255,255,255,0.6);">' + m.label + '</div>' +
+          progressBar(currentVal, m.req, done ? '#00FF88' : color) +
+          '<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:4px;">' + Math.min(currentVal,m.req).toLocaleString() + ' / ' + m.req.toLocaleString() + ' ' + unit + '</div>' +
+        '</div>' +
+        '<div style="margin-left:12px;text-align:right;flex-shrink:0;">' +
+          '<div style="font-size:13px;font-weight:900;color:#FFD700;">+' + m.pts.toLocaleString() + '</div>' +
+          '<div style="font-size:10px;color:rgba(255,255,255,0.3);">pts</div>' +
+          (done ? '<div style="font-size:12px;color:#00FF88;margin-top:2px;">✅</div>' : '') +
+        '</div>' +
+      '</div>';
+    });
+
+    html += '</div>';
+    return html;
+  }
+
+  var html = '<div id="adSection_tasks" style="display:none;">';
+
+  // Timer
+  html += '<div style="text-align:center;background:rgba(255,68,0,0.08);border:1px solid rgba(255,68,0,0.2);border-radius:10px;padding:8px;margin-bottom:14px;font-size:12px;color:rgba(255,255,255,0.5);">🔄 بطاقات جديدة خلال <span style="color:#FF8800;font-weight:700;">' + diffH + ' ساعة</span></div>';
+
+  // 3 Card tasks
+  cards.forEach(function(card) {
+    var lvl = getCardLevel(card.key);
+    html += taskCard(card.emoji, 'Upgrade ' + card.name,
+      [{req:20,label:'Reach Level 20',pts:50},{req:40,label:'Reach Level 40',pts:100},{req:70,label:'Reach Level 70',pts:1000}],
+      lvl, 'LVL', '#00AAFF', '3-day challenge');
+  });
+
+  // REC task
+  html += taskCard('🟢', 'Collect REC Today',
+    [{req:500,label:'Collect 500 REC',pts:50},{req:1500,label:'Collect 1,500 REC',pts:200},{req:2500,label:'Collect 2,500 REC',pts:500},{req:5000,label:'Collect 5,000 REC',pts:1500},{req:10000,label:'Collect 10,000 REC',pts:5000}],
+    Math.floor(dailyRec), 'REC', '#00FF88', 'Resets daily at midnight');
+
+  // Referral tasks
+  html += taskCard('👥', 'Invite Friends',
+    [{req:10,label:'Invite 10 friends',pts:500},{req:20,label:'Invite 20 friends',pts:2000},{req:50,label:'Invite 50 friends',pts:5000}],
+    refs, 'friends', '#FF8800', 'Total referrals');
+
+  // 5 Coming Soon
+  ['🎮','🏆','💎','🌍','🔥'].forEach(function(icon) {
+    html += '<div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;opacity:0.5;">' +
+      '<span style="font-size:28px;">' + icon + '</span>' +
+      '<div><div style="font-size:13px;color:rgba(255,255,255,0.5);">Coming Soon</div>' +
+      '<div style="font-size:11px;color:rgba(255,255,255,0.25);margin-top:2px;">🔒 Stay tuned</div></div>' +
+    '</div>';
+  });
+
+  html += '</div>';
+  return html;
 }
 
-// ====== AUTO TRACK SESSION ======
-// Call this on app start
-function initAirdropTracking() {
-  trackDailySession();
+function _tabFaq(score) {
+  var loginDays = typeof dailyLogin !== 'undefined' ? (dailyLogin.day||0) : 0;
+  var activeDays = getTotalActiveDays();
+  var recBal = typeof rec !== 'undefined' ? rec : 0;
+  var lvl = (typeof calcPlayerLevel==='function' && typeof playerXP!=='undefined') ? calcPlayerLevel(playerXP) : 0;
+  var cardSum = typeof cardLevels !== 'undefined' ? Object.values(cardLevels).reduce(function(s,v){return s+(v||0);},0) : 0;
+  var tasks = typeof completedTasks !== 'undefined' ? completedTasks.length : 0;
+  var refs = typeof refCount !== 'undefined' ? refCount : 0;
+  var tasksBonus = calcDailyTasksScore();
+
+  function row(icon, label, val, pts) {
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);">' +
+      '<div style="display:flex;align-items:center;gap:8px;">' +
+        '<span style="font-size:18px;">' + icon + '</span>' +
+        '<div><div style="font-size:12px;color:rgba(255,255,255,0.8);">' + label + '</div>' +
+        '<div style="font-size:11px;color:rgba(255,255,255,0.35);">' + val + '</div></div>' +
+      '</div>' +
+      '<div style="font-size:13px;font-weight:900;color:#FFD700;">+' + pts.toLocaleString() + '</div>' +
+    '</div>';
+  }
+
+  return '<div id="adSection_faq" style="display:none;">' +
+    '<div style="background:linear-gradient(135deg,rgba(255,215,0,0.1),rgba(255,165,0,0.05));border:1px solid rgba(255,215,0,0.3);border-radius:14px;padding:18px;margin-bottom:16px;text-align:center;">' +
+      '<div style="font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:1px;margin-bottom:6px;">YOUR TOTAL SCORE</div>' +
+      '<div style="font-family:Orbitron,sans-serif;font-size:42px;font-weight:900;color:#FFD700;">' + score.toLocaleString() + '</div>' +
+      '<div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px;">نقطة</div>' +
+    '</div>' +
+    '<div style="background:rgba(255,255,255,0.03);border-radius:12px;padding:12px 14px;margin-bottom:16px;">' +
+      '<div style="font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:1px;margin-bottom:6px;">SCORE BREAKDOWN</div>' +
+      row('📅','Daily Login Days', loginDays+' days', Math.min(500, loginDays*10)) +
+      row('📱','Active Days', activeDays+' days', Math.min(300, activeDays*10)) +
+      row('🟢','REC Balance', recBal.toFixed(2)+' REC', Math.min(2000,Math.floor(Math.log10(recBal+1)*400))) +
+      row('🏆','Level','LVL '+lvl, lvl*10) +
+      row('🃏','Card Levels Sum', cardSum.toLocaleString(), Math.min(1500, cardSum*2)) +
+      row('✅','Tasks Done', tasks+' tasks', Math.min(300, tasks*15)) +
+      row('👥','Referrals', refs+' friends', Math.min(500, refs*50)) +
+      row('🎯','Daily Tasks Bonus','Completed tasks', tasksBonus) +
+    '</div>' +
+    '<div style="background:rgba(255,255,255,0.03);border-radius:12px;padding:14px;">' +
+      '<div style="font-size:13px;font-weight:700;color:#FFD700;margin-bottom:10px;">📜 شروط وقوانين AirDrop</div>' +
+      '<div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:2.2;">' +
+        '• الحد الأدنى للمشاركة: إكمال 5 مهام يومية على الأقل<br>' +
+        '• يجب أن يكون حسابك نشيطاً لمدة 7 أيام أو أكثر<br>' +
+        '• ممنوع استخدام حسابات مزيفة أو بوتات تلقائية<br>' +
+        '• التوزيع يكون حسب النقاط النسبية لكل مستخدم<br>' +
+        '• يحق للإدارة استبعاد أي حساب مشبوه<br>' +
+        '• النتائج النهائية تُعلن عند إطلاق AirDrop<br>' +
+        '• العملات تُرسل على شبكة TON فقط<br>' +
+        '• لا يمكن نقل النقاط بين الحسابات<br>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
 }
+
+function switchAirdropTab(tab) {
+  _airdropTab = tab;
+  ['main','tasks','faq'].forEach(function(t) {
+    var sec = document.getElementById('adSection_'+t);
+    var btn = document.getElementById('adTab_'+t);
+    if(sec) sec.style.display = t===tab ? 'block' : 'none';
+    if(btn) {
+      btn.style.color = t===tab ? '#FFD700' : 'rgba(255,255,255,0.4)';
+      btn.style.borderBottom = t===tab ? '2px solid #FFD700' : '2px solid transparent';
+    }
+  });
+}
+
+setTimeout(function(){ if(typeof trackDailySession==='function') trackDailySession(); }, 2000);
