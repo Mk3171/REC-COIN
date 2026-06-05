@@ -8,19 +8,24 @@ var _miningStarted = false;
 // ============================================================
 // HEARTBEAT — يحفظ السرعة كل 30 ثانية
 // ============================================================
+function _sendHeartbeat() {
+  if(!window.tgUser) return;
+  fetch('/api/mining/heartbeat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      telegramId:   tgUser.id,
+      recPerSec:    typeof recPerSec    !== 'undefined' ? recPerSec    : 0,
+      recordPerSec: typeof recordPerSec !== 'undefined' ? recordPerSec : 0
+    })
+  }).catch(function(){});
+}
+
 function startMiningHeartbeat() {
-  setInterval(function() {
-    if(!window.tgUser) return;
-    fetch('/api/mining/heartbeat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        telegramId:   tgUser.id,
-        recPerSec:    typeof recPerSec    !== 'undefined' ? recPerSec    : 0,
-        recordPerSec: typeof recordPerSec !== 'undefined' ? recordPerSec : 0
-      })
-    }).catch(function(){});
-  }, 30000);
+  // ✅ إرسال فوري عند الفتح
+  setTimeout(_sendHeartbeat, 3000);
+  // ثم كل 30 ثانية
+  setInterval(_sendHeartbeat, 30000);
 }
 
 // ============================================================
@@ -56,10 +61,7 @@ function syncBalanceFromServer() {
     if(typeof updateUI === 'function') updateUI();
     if(typeof saveData === 'function') saveData(true);
 
-    // أظهر popup لو في فرق واضح (يعني عدّن وهو مسكر)
-    if(recDiff > 0.000001 || recordDiff > 0) {
-      _showMiningPopup(recDiff, recordDiff);
-    }
+    // لا popup — التعدين يضاف للرصيد بصمت
   })
   .catch(function(){});
 }
