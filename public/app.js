@@ -996,6 +996,14 @@ function loadRefList() {
     .then(function(r){ return r.json(); })
     .then(function(d){
       refData = d;
+      // ✅ تحديث العداد الحقيقي من السيرفر
+      if(d.l1) {
+        refCount = d.l1.length;
+        var el = document.getElementById('refCountDisplay');
+        if(el) el.textContent = refCount;
+        var el2 = document.getElementById('friendsCountDisplay');
+        if(el2) el2.textContent = refCount;
+      }
       renderRefList();
     })
     .catch(function(){
