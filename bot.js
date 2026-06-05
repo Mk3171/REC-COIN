@@ -1427,13 +1427,10 @@ async function runCloudMining() {
 
     // جيب كل المستخدمين النشيطين (آخر 30 يوم)
     const thirtyDaysAgo = new Date(now - 30 * 86400 * 1000);
+    // جيب كل المستخدمين — حتى اللي ما عندهم miningSpeed محفوظة
     const users = await User.find({
       banned: false,
-      lastSeen: { $gte: thirtyDaysAgo },
-      $or: [
-        { miningSpeed: { $gt: 0 } },
-        { recordMiningSpeed: { $gt: 0 } }
-      ]
+      lastSeen: { $gte: thirtyDaysAgo }
     }).select('telegramId miningSpeed recordMiningSpeed cardLevels tapLevelVal').lean();
 
     if(users.length === 0) return;
@@ -1441,6 +1438,7 @@ async function runCloudMining() {
     let processed = 0;
     for(const user of users) {
       try {
+        // احسب السرعة من البطاقات لو miningSpeed = 0
         const recSpeed    = user.miningSpeed       > 0 ? user.miningSpeed       : calcMiningSpeed(user.cardLevels || {});
         const recordSpeed = user.recordMiningSpeed > 0 ? user.recordMiningSpeed : calcRecordMiningSpeed(user.cardLevels || {}, user.tapLevelVal || 0);
 
