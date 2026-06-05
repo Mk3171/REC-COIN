@@ -1501,6 +1501,40 @@ app.get('/api/admin/run-blocks', async (req, res) => {
   }
 });
 
+
+// ====== ADMIN: إرسال هدية ======
+app.post('/api/admin/gift', async (req, res) => {
+  try {
+    const { adminId, telegramId, amount, message } = req.body;
+    if(String(adminId) !== String(ADMIN_ID)) return res.status(403).json({ error: 'Not admin' });
+    if(!telegramId || !amount) return res.status(400).json({ error: 'Missing data' });
+    const user = await User.findOneAndUpdate(
+      { telegramId: parseInt(telegramId) },
+      { $inc: { rec: parseFloat(amount) } },
+      { new: true }
+    );
+    if(!user) return res.status(404).json({ error: 'User not found' });
+    bot.sendMessage(parseInt(telegramId),
+      '*Gift Received!*\n\n+' + amount + ' REC added to your balance!\n\n' + (message || ''),
+      { parse_mode: 'Markdown' }
+    ).catch(()=>{});
+    console.log('[Admin Gift] Sent ' + amount + ' REC to ' + telegramId);
+    res.json({ success: true, newBalance: user.rec });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// ====== ADMIN: البحث عن مستخدم ======
+app.get('/api/admin/find/:username', async (req, res) => {
+  try {
+    const adminId = req.query.adminId || req.headers['x-admin-key'];
+    if(String(adminId) !== String(ADMIN_ID)) return res.status(403).json({ error: 'Forbidden' });
+    const user = await User.findOne({ username: req.params.username.replace('@','') })
+      .select('telegramId username firstName rec record refCount').lean();
+    if(!user) return res.status(404).json({ error: 'User not found' });
+    res.json(user);
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
 app.post('/webhook', (req, res) => { bot.processUpdate(req.body); res.sendStatus(200); });
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'index.html')); });
 app.use(express.static(path.join(__dirname, 'public')));
