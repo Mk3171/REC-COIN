@@ -375,7 +375,25 @@ bot.onText(/\/start(.*)/, async (msg, match) => {
       await new User({ telegramId: from.id, username: from.username || '', firstName: from.first_name || '', lastName: from.last_name || '', language: lang, referredBy: refId || '', referredByL2: l2Id, referredByL3: l3Id }).save();
       if (refId) await User.findOneAndUpdate({ telegramId: parseInt(refId) }, { $inc: { refCount: 1 } });
     } else {
-      await User.findOneAndUpdate({ telegramId: from.id }, { lastSeen: new Date(), username: from.username || existing.username });
+      // ✅ لو المستخدم موجود بدون إحالة وجاء عبر رابط — احفظ الإحالة
+      if (refId && !existing.referredBy && existing.telegramId !== parseInt(refId)) {
+        var l2Id = '', l3Id = '';
+        var l1User = await User.findOne({ telegramId: parseInt(refId) });
+        if (l1User) {
+          l2Id = l1User.referredBy || '';
+          if (l2Id) {
+            var l2User = await User.findOne({ telegramId: parseInt(l2Id) });
+            if (l2User) l3Id = l2User.referredBy || '';
+          }
+        }
+        await User.findOneAndUpdate(
+          { telegramId: from.id },
+          { lastSeen: new Date(), username: from.username || existing.username, referredBy: refId, referredByL2: l2Id, referredByL3: l3Id }
+        );
+        await User.findOneAndUpdate({ telegramId: parseInt(refId) }, { $inc: { refCount: 1 } });
+      } else {
+        await User.findOneAndUpdate({ telegramId: from.id }, { lastSeen: new Date(), username: from.username || existing.username });
+      }
     }
   } catch(e) { console.log('User save error:', e); }
 
