@@ -401,7 +401,7 @@ bot.onText(/\/start(.*)/, async (msg, match) => {
   const welcomeText = getWelcomeText(from.first_name || from.username, lang, refId);
   const buttonText = getButtonText(lang);
   try {
-    await bot.sendPhoto(chatId, path.join(__dirname, 'public', 'logo.jpeg'), { caption: welcomeText, reply_markup: { inline_keyboard: [[{ text: buttonText, web_app: { url: MINI_APP_URL } }]] } });
+    await bot.sendPhoto(chatId, { source: path.join(__dirname, 'public', 'logo.jpeg'), contentType: 'image/jpeg' }, { caption: welcomeText, reply_markup: { inline_keyboard: [[{ text: buttonText, web_app: { url: MINI_APP_URL } }]] } });
   } catch(e) {
     await bot.sendMessage(chatId, welcomeText, { reply_markup: { inline_keyboard: [[{ text: buttonText, web_app: { url: MINI_APP_URL } }]] } });
   }
@@ -1427,10 +1427,13 @@ async function runCloudMining() {
 
     // جيب كل المستخدمين النشيطين (آخر 30 يوم)
     const thirtyDaysAgo = new Date(now - 30 * 86400 * 1000);
-    // جيب كل المستخدمين — حتى اللي ما عندهم miningSpeed محفوظة
     const users = await User.find({
       banned: false,
-      lastSeen: { $gte: thirtyDaysAgo }
+      lastSeen: { $gte: thirtyDaysAgo },
+      $or: [
+        { miningSpeed: { $gt: 0 } },
+        { recordMiningSpeed: { $gt: 0 } }
+      ]
     }).select('telegramId miningSpeed recordMiningSpeed cardLevels tapLevelVal').lean();
 
     if(users.length === 0) return;
@@ -1438,7 +1441,6 @@ async function runCloudMining() {
     let processed = 0;
     for(const user of users) {
       try {
-        // احسب السرعة من البطاقات لو miningSpeed = 0
         const recSpeed    = user.miningSpeed       > 0 ? user.miningSpeed       : calcMiningSpeed(user.cardLevels || {});
         const recordSpeed = user.recordMiningSpeed > 0 ? user.recordMiningSpeed : calcRecordMiningSpeed(user.cardLevels || {}, user.tapLevelVal || 0);
 
@@ -1497,40 +1499,6 @@ app.get('/api/admin/run-blocks', async (req, res) => {
   } catch(e) {
     res.json({ message: 'Triggered via blockSystem interval' });
   }
-});
-
-
-// ====== ADMIN: إرسال هدية ======
-app.post('/api/admin/gift', async (req, res) => {
-  try {
-    const { adminId, telegramId, amount, message } = req.body;
-    if(String(adminId) !== String(ADMIN_ID)) return res.status(403).json({ error: 'Not admin' });
-    if(!telegramId || !amount) return res.status(400).json({ error: 'Missing data' });
-    const user = await User.findOneAndUpdate(
-      { telegramId: parseInt(telegramId) },
-      { $inc: { rec: parseFloat(amount) } },
-      { new: true }
-    );
-    if(!user) return res.status(404).json({ error: 'User not found' });
-    bot.sendMessage(parseInt(telegramId),
-      '*Gift Received!*\n\n+' + amount + ' REC added to your balance!\n\n' + (message || ''),
-      { parse_mode: 'Markdown' }
-    ).catch(()=>{});
-    console.log('[Admin Gift] Sent ' + amount + ' REC to ' + telegramId);
-    res.json({ success: true, newBalance: user.rec });
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
-
-// ====== ADMIN: البحث عن مستخدم ======
-app.get('/api/admin/find/:username', async (req, res) => {
-  try {
-    const adminId = req.query.adminId || req.headers['x-admin-key'];
-    if(String(adminId) !== String(ADMIN_ID)) return res.status(403).json({ error: 'Forbidden' });
-    const user = await User.findOne({ username: req.params.username.replace('@','') })
-      .select('telegramId username firstName rec record refCount').lean();
-    if(!user) return res.status(404).json({ error: 'User not found' });
-    res.json(user);
-  } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
 app.post('/webhook', (req, res) => { bot.processUpdate(req.body); res.sendStatus(200); });
