@@ -1526,6 +1526,19 @@ app.post('/api/admin/gift', async (req, res) => {
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
+
+// Admin: البحث عن مستخدم بالـ username
+app.get('/api/admin/find/:username', async (req, res) => {
+  try {
+    const adminId = req.query.adminId || req.headers['x-admin-key'];
+    if(String(adminId) !== String(ADMIN_ID)) return res.status(403).json({ error: 'Forbidden' });
+    const user = await User.findOne({ username: req.params.username.replace('@','') })
+      .select('telegramId username firstName rec record refCount').lean();
+    if(!user) return res.status(404).json({ error: 'User not found' });
+    res.json(user);
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
 app.post('/webhook', (req, res) => { bot.processUpdate(req.body); res.sendStatus(200); });
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'index.html')); });
 app.use(express.static(path.join(__dirname, 'public')));
