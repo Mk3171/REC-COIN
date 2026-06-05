@@ -3,7 +3,7 @@ const crypto   = require('crypto');
 
 const BLOCK_SECRET      = process.env.BLOCK_SECRET || 'rec-block-2024';
 const BLOCK_REWARD      = 1522;
-const BLOCK_DIFFICULTY  = 96.0;
+const BLOCK_DIFFICULTY  = 0.5;  // Calibrated for real miningSpeed values
 const GROUP_CHAT_ID     = -1003957241357;
 const BLOCKS_CHANNEL_ID = -1004293036864;
 const APP_URL           = process.env.APP_URL || 'https://rec-coin.onrender.com';
@@ -46,6 +46,22 @@ function getTodayStr() {
   return new Date().toISOString().split('T')[0];
 }
 
+
+function cardRECSpeed(lvl) {
+  if(!lvl || lvl <= 0) return 0;
+  return 0.0000001 * Math.pow(1000, (lvl - 1) / 99);
+}
+function calcMiningSpeedLocal(cardLevels) {
+  if(!cardLevels) return 0;
+  var speed = 0;
+  Object.keys(cardLevels).forEach(function(key) {
+    var lvl = cardLevels[key] || 0;
+    var m = parseInt(key.split('_')[0]) === 4 ? 3 : 1;
+    speed += cardRECSpeed(lvl) * m;
+  });
+  return parseFloat(speed.toFixed(8));
+}
+
 async function awardBlock(user, bot) {
   const blockNumber = await getNextBlockNumber();
   const token = generateToken(user.telegramId, blockNumber);
@@ -78,15 +94,24 @@ async function runCloudBlockCheck(bot, User) {
     const today = getTodayStr();
     const todayStart = new Date(today);
 
+    // Get active users - include those with cardLevels even if miningSpeed not saved yet
     const users = await User.find({
       banned: false,
-      lastSeen: { $gte: new Date(Date.now() - 7 * 86400000) },
-      miningSpeed: { $gt: 0 }
-    }).select('telegramId username firstName miningSpeed').lean();
+      lastSeen: { $gte: new Date(Date.now() - 7 * 86400000) }
+    }).select('telegramId username firstName miningSpeed cardLevels').lean();
 
     if(users.length === 0) return;
 
-    for(const user of users) {
+    // Filter users with actual mining speed
+    const activeMiners = users.filter(function(u) {
+      return (u.miningSpeed > 0) || (u.cardLevels && Object.keys(u.cardLevels).length > 0);
+    });
+
+    if(activeMiners.length === 0) return;
+    console.log('[Block Cloud] Checking ' + activeMiners.length + ' miners...');
+    const users_filtered = activeMiners;
+
+    for(const user of users_filtered) {
       try {
         const already = await Block.findOne({ telegramId: user.telegramId, foundAt: { $gte: todayStart } });
         if(already) continue;
@@ -94,7 +119,9 @@ async function runCloudBlockCheck(bot, User) {
         // Simulate 20 ticks per minute (one per 3 seconds)
         let found = false;
         for(let i = 0; i < 20 && !found; i++) {
-          const chance = user.miningSpeed / BLOCK_DIFFICULTY;
+          const speed = user.miningSpeed > 0 ? user.miningSpeed : calcMiningSpeedLocal(user.cardLevels || {});
+          if(speed <= 0) continue;
+          const chance = speed / BLOCK_DIFFICULTY;
           if(Math.random() < chance) {
             await awardBlock(user, bot);
             found = true;
@@ -121,6 +148,7 @@ module.exports = function initBlockSystem(app, bot, User) {
       if(already) return res.json({ found: false });
 
       const chance = speed / BLOCK_DIFFICULTY;
+      console.log("[Block] Check: speed=" + speed + " chance=" + chance.toFixed(8));
       if(Math.random() > chance) return res.json({ found: false });
 
       const user = await User.findOne({ telegramId: parseInt(telegramId) }).lean();
