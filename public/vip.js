@@ -276,7 +276,7 @@ function showVIPBoxOpening(type, callback) {
     '<div style="text-align:center;">' +
       '<div id="boxAnim" style="font-size:80px;animation:boxShake 0.5s infinite;margin-bottom:20px;">' + c.icon + '</div>' +
       '<div style="font-size:22px;font-weight:900;color:' + c.color + ';margin-bottom:8px;">' + c.name + ' Box</div>' +
-      '<div style="font-size:14px;color:rgba(255,255,255,0.5);">جاري الفتح...</div>' +
+      '<div style="font-size:14px;color:rgba(255,255,255,0.5);">' + t('vipBoxOpening','🎁 Opening...') + '</div>' +
     '</div>';
 
   // Add shake animation
