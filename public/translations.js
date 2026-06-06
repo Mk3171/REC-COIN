@@ -245,7 +245,17 @@ var T = {
     airdropRecBalanceLabel:'رصيد REC', airdropLevelLabel:'المستوى',
     airdropCardLevelsLabel:'مجموع مستويات البطاقات', airdropTasksDoneLabel:'المهام المنجزة',
     airdropReferralsLabel:'الإحالات', airdropDailyBonusLabel:'مكافأة المهام اليومية',
-    airdropCompletedTasks:'مهام مكتملة', airdropDayTimer:'بطاقات جديدة خلال'
+    airdropCompletedTasks:'مهام مكتملة', airdropDayTimer:'بطاقات جديدة خلال',
+    airdropTerm1:'• الحد الأدنى للمشاركة: إكمال 5 مهام يومية على الأقل',
+    airdropTerm2:'• يجب أن يكون حسابك نشيطاً لمدة 7 أيام أو أكثر',
+    airdropTerm3:'• ممنوع استخدام حسابات مزيفة أو بوتات تلقائية',
+    airdropTerm4:'• التوزيع يكون حسب النقاط النسبية لكل مستخدم',
+    airdropTerm5:'• يحق للإدارة استبعاد أي حساب مشبوه',
+    airdropTerm6:'• النتائج النهائية تُعلن عند إطلاق AirDrop',
+    airdropTerm7:'• فقط TON العملات تُرسل على شبكة',
+    airdropTerm8:'• لا يمكن نقل النقاط بين الحسابات',
+    airdropDays:'أيام', airdropTasksUnit:'مهمة', airdropFriendsUnit:'صديق',
+    airdropDailyLoginLabel:'أيام الدخول اليومي'
   },
 
   en: {
@@ -441,7 +451,17 @@ var T = {
     airdropRecBalanceLabel:'REC Balance', airdropLevelLabel:'Level',
     airdropCardLevelsLabel:'Card Levels Sum', airdropTasksDoneLabel:'Tasks Done',
     airdropReferralsLabel:'Referrals', airdropDailyBonusLabel:'Daily Tasks Bonus',
-    airdropCompletedTasks:'Completed tasks', airdropDayTimer:'New cards in'
+    airdropCompletedTasks:'Completed tasks', airdropDayTimer:'New cards in',
+    airdropTerm1:'• Minimum participation: complete at least 5 daily tasks',
+    airdropTerm2:'• Your account must be active for at least 7 days',
+    airdropTerm3:'• Using fake accounts or bots is prohibited',
+    airdropTerm4:'• Distribution is based on relative points per user',
+    airdropTerm5:'• Management reserves the right to exclude suspicious accounts',
+    airdropTerm6:'• Final results announced at AirDrop launch',
+    airdropTerm7:'• Tokens sent on TON network only',
+    airdropTerm8:'• Points cannot be transferred between accounts',
+    airdropDays:'days', airdropTasksUnit:'tasks', airdropFriendsUnit:'friends',
+    airdropDailyLoginLabel:'Daily Login Days'
   },
 
   ru: {
@@ -631,7 +651,17 @@ var T = {
     airdropRecBalanceLabel:'Баланс REC', airdropLevelLabel:'Уровень',
     airdropCardLevelsLabel:'Сумма уровней карт', airdropTasksDoneLabel:'Задания выполнены',
     airdropReferralsLabel:'Рефералы', airdropDailyBonusLabel:'Бонус за задания',
-    airdropCompletedTasks:'Выполненные задания', airdropDayTimer:'Новые карты через'
+    airdropCompletedTasks:'Выполненные задания', airdropDayTimer:'Новые карты через',
+    airdropTerm1:'• Минимальное участие: выполни не менее 5 ежедневных заданий',
+    airdropTerm2:'• Твой аккаунт должен быть активен не менее 7 дней',
+    airdropTerm3:'• Использование фейковых аккаунтов и ботов запрещено',
+    airdropTerm4:'• Раздача основана на относительных очках каждого пользователя',
+    airdropTerm5:'• Администрация вправе исключить подозрительные аккаунты',
+    airdropTerm6:'• Финальные результаты объявляются при запуске AirDrop',
+    airdropTerm7:'• Токены отправляются только в сети TON',
+    airdropTerm8:'• Очки нельзя передавать между аккаунтами',
+    airdropDays:'дней', airdropTasksUnit:'заданий', airdropFriendsUnit:'друзей',
+    airdropDailyLoginLabel:'Дней входа'
   },
 
   uk: {
@@ -820,7 +850,17 @@ var T = {
     airdropRecBalanceLabel:'Баланс REC', airdropLevelLabel:'Рівень',
     airdropCardLevelsLabel:'Сума рівнів карт', airdropTasksDoneLabel:'Завдань виконано',
     airdropReferralsLabel:'Реферали', airdropDailyBonusLabel:'Бонус за завдання',
-    airdropCompletedTasks:'Виконані завдання', airdropDayTimer:'Нові карти через'
+    airdropCompletedTasks:'Виконані завдання', airdropDayTimer:'Нові карти через',
+    airdropTerm1:'• Мінімальна участь: виконай не менше 5 щоденних завдань',
+    airdropTerm2:'• Твій акаунт має бути активним не менше 7 днів',
+    airdropTerm3:'• Використання фейкових акаунтів та ботів заборонено',
+    airdropTerm4:'• Роздача базується на відносних очках кожного користувача',
+    airdropTerm5:'• Адміністрація має право виключити підозрілі акаунти',
+    airdropTerm6:'• Фінальні результати оголошуються при запуску AirDrop',
+    airdropTerm7:'• Токени надсилаються лише в мережі TON',
+    airdropTerm8:'• Очки не можна передавати між акаунтами',
+    airdropDays:'днів', airdropTasksUnit:'завдань', airdropFriendsUnit:'друзів',
+    airdropDailyLoginLabel:'Днів входу'
   },
 
   pt: {
@@ -1007,7 +1047,17 @@ var T = {
     airdropRecBalanceLabel:'Saldo REC', airdropLevelLabel:'Nível',
     airdropCardLevelsLabel:'Soma dos Níveis', airdropTasksDoneLabel:'Tarefas Concluídas',
     airdropReferralsLabel:'Referidos', airdropDailyBonusLabel:'Bônus de Tarefas',
-    airdropCompletedTasks:'Tarefas concluídas', airdropDayTimer:'Novas cartas em'
+    airdropCompletedTasks:'Tarefas concluídas', airdropDayTimer:'Novas cartas em',
+    airdropTerm1:'• Participação mínima: complete pelo menos 5 tarefas diárias',
+    airdropTerm2:'• Sua conta deve estar ativa por pelo menos 7 dias',
+    airdropTerm3:'• Uso de contas falsas ou bots é proibido',
+    airdropTerm4:'• Distribuição baseada em pontos relativos por usuário',
+    airdropTerm5:'• A administração reserva o direito de excluir contas suspeitas',
+    airdropTerm6:'• Resultados finais anunciados no lançamento do AirDrop',
+    airdropTerm7:'• Tokens enviados apenas na rede TON',
+    airdropTerm8:'• Pontos não podem ser transferidos entre contas',
+    airdropDays:'dias', airdropTasksUnit:'tarefas', airdropFriendsUnit:'amigos',
+    airdropDailyLoginLabel:'Dias de Login'
   },
 
   es: {
@@ -1194,7 +1244,17 @@ var T = {
     airdropRecBalanceLabel:'Saldo REC', airdropLevelLabel:'Nivel',
     airdropCardLevelsLabel:'Suma de Niveles', airdropTasksDoneLabel:'Tareas Completadas',
     airdropReferralsLabel:'Referidos', airdropDailyBonusLabel:'Bono de Tareas',
-    airdropCompletedTasks:'Tareas completadas', airdropDayTimer:'Nuevas cartas en'
+    airdropCompletedTasks:'Tareas completadas', airdropDayTimer:'Nuevas cartas en',
+    airdropTerm1:'• Participación mínima: completa al menos 5 tareas diarias',
+    airdropTerm2:'• Tu cuenta debe estar activa durante al menos 7 días',
+    airdropTerm3:'• Está prohibido usar cuentas falsas o bots',
+    airdropTerm4:'• La distribución se basa en puntos relativos por usuario',
+    airdropTerm5:'• La administración se reserva el derecho de excluir cuentas sospechosas',
+    airdropTerm6:'• Resultados finales anunciados en el lanzamiento del AirDrop',
+    airdropTerm7:'• Tokens enviados solo en la red TON',
+    airdropTerm8:'• Los puntos no se pueden transferir entre cuentas',
+    airdropDays:'días', airdropTasksUnit:'tareas', airdropFriendsUnit:'amigos',
+    airdropDailyLoginLabel:'Días de Inicio'
   },
 
   tr: {
@@ -1382,7 +1442,17 @@ var T = {
     airdropRecBalanceLabel:'REC Bakiyesi', airdropLevelLabel:'Seviye',
     airdropCardLevelsLabel:'Kart Seviyeleri Toplamı', airdropTasksDoneLabel:'Tamamlanan Görevler',
     airdropReferralsLabel:'Referanslar', airdropDailyBonusLabel:'Görev Bonusu',
-    airdropCompletedTasks:'Tamamlanan görevler', airdropDayTimer:'Yeni kartlar'
+    airdropCompletedTasks:'Tamamlanan görevler', airdropDayTimer:'Yeni kartlar',
+    airdropTerm1:'• Minimum katılım: en az 5 günlük görevi tamamla',
+    airdropTerm2:'• Hesabın en az 7 gün aktif olmalı',
+    airdropTerm3:'• Sahte hesap veya bot kullanımı yasaktır',
+    airdropTerm4:'• Dağıtım, kullanıcı başına göreli puanlara göre yapılır',
+    airdropTerm5:'• Yönetim, şüpheli hesapları hariç tutma hakkını saklı tutar',
+    airdropTerm6:'• Nihai sonuçlar AirDrop başlatıldığında açıklanır',
+    airdropTerm7:'• Tokenlar yalnızca TON ağında gönderilir',
+    airdropTerm8:'• Puanlar hesaplar arasında aktarılamaz',
+    airdropDays:'gün', airdropTasksUnit:'görev', airdropFriendsUnit:'arkadaş',
+    airdropDailyLoginLabel:'Giriş Günleri'
   },
 
   vi: {
@@ -1570,7 +1640,17 @@ var T = {
     airdropRecBalanceLabel:'Số Dư REC', airdropLevelLabel:'Cấp Độ',
     airdropCardLevelsLabel:'Tổng Cấp Thẻ', airdropTasksDoneLabel:'Nhiệm Vụ Hoàn Thành',
     airdropReferralsLabel:'Giới Thiệu', airdropDailyBonusLabel:'Thưởng Nhiệm Vụ',
-    airdropCompletedTasks:'Nhiệm vụ đã hoàn thành', airdropDayTimer:'Thẻ mới sau'
+    airdropCompletedTasks:'Nhiệm vụ đã hoàn thành', airdropDayTimer:'Thẻ mới sau',
+    airdropTerm1:'• Tham gia tối thiểu: hoàn thành ít nhất 5 nhiệm vụ hàng ngày',
+    airdropTerm2:'• Tài khoản của bạn phải hoạt động ít nhất 7 ngày',
+    airdropTerm3:'• Sử dụng tài khoản giả hoặc bot bị cấm',
+    airdropTerm4:'• Phân phối dựa trên điểm tương đối của mỗi người dùng',
+    airdropTerm5:'• Ban quản trị có quyền loại trừ tài khoản đáng ngờ',
+    airdropTerm6:'• Kết quả cuối cùng được công bố khi ra mắt AirDrop',
+    airdropTerm7:'• Token chỉ được gửi trên mạng TON',
+    airdropTerm8:'• Điểm không thể chuyển giữa các tài khoản',
+    airdropDays:'ngày', airdropTasksUnit:'nhiệm vụ', airdropFriendsUnit:'bạn bè',
+    airdropDailyLoginLabel:'Ngày Đăng Nhập'
   },
 
   zh: {
@@ -1746,7 +1826,17 @@ var T = {
     airdropRecBalanceLabel:'REC余额', airdropLevelLabel:'等级',
     airdropCardLevelsLabel:'卡片等级总和', airdropTasksDoneLabel:'已完成任务',
     airdropReferralsLabel:'推荐数', airdropDailyBonusLabel:'任务奖励',
-    airdropCompletedTasks:'已完成任务', airdropDayTimer:'新卡片倒计时'
+    airdropCompletedTasks:'已完成任务', airdropDayTimer:'新卡片倒计时',
+    airdropTerm1:'• 最低参与条件：每天至少完成5个任务',
+    airdropTerm2:'• 您的账户必须活跃至少7天',
+    airdropTerm3:'• 禁止使用虚假账户或机器人',
+    airdropTerm4:'• 分发基于每个用户的相对积分',
+    airdropTerm5:'• 管理层保留排除可疑账户的权利',
+    airdropTerm6:'• 最终结果在AirDrop启动时公布',
+    airdropTerm7:'• 代币仅在TON网络上发送',
+    airdropTerm8:'• 积分不能在账户之间转移',
+    airdropDays:'天', airdropTasksUnit:'任务', airdropFriendsUnit:'朋友',
+    airdropDailyLoginLabel:'每日登录天数'
   },
     vipBoxOpening:'🎁 开启中...',
     adsTitle:'📺 广告', adsWatchEarn:'观看赚取', adsWatchSub:'观看广告免费赚取REC',
