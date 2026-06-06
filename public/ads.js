@@ -24,25 +24,25 @@ function openAds() {
 
   inner.innerHTML =
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">' +
-      '<span style="font-family:Orbitron,sans-serif;font-size:18px;font-weight:900;color:#00FF88;">📺 ADS</span>' +
+      '<span style="font-family:Orbitron,sans-serif;font-size:18px;font-weight:900;color:#00FF88;">' + t('adsTitle','📺 ADS') + '</span>' +
       '<button id="adsCloseBtn" style="background:rgba(255,255,255,0.1);border:none;color:white;width:34px;height:34px;border-radius:50%;cursor:pointer;font-size:18px;">✕</button>' +
     '</div>' +
     '<div style="text-align:center;margin-bottom:20px;">' +
       '<div style="font-size:50px;margin-bottom:8px;">📺</div>' +
-      '<div style="font-family:Orbitron,sans-serif;font-size:15px;color:#00FF88;font-weight:900;">WATCH & EARN</div>' +
-      '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px;">شاهد إعلان واكسب REC مجاناً</div>' +
+      '<div style="font-family:Orbitron,sans-serif;font-size:15px;color:#00FF88;font-weight:900;">' + t('adsWatchEarn','WATCH & EARN') + '</div>' +
+      '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-top:4px;">' + t('adsWatchSub','Watch an ad and earn free REC') + '</div>' +
     '</div>' +
     '<div style="background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.2);border-radius:14px;padding:16px;margin-bottom:14px;text-align:center;">' +
-      '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px;">مكافأة كل إعلان</div>' +
+      '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px;">' + t('adsRewardLabel','Reward per ad') + '</div>' +
       '<div style="font-size:32px;font-family:Orbitron,sans-serif;color:#00FF88;font-weight:900;">+' + AD_REC_REWARD + ' REC</div>' +
     '</div>' +
     '<div style="display:flex;justify-content:space-between;background:rgba(255,255,255,0.04);border-radius:10px;padding:10px 14px;margin-bottom:20px;">' +
-      '<span style="font-size:12px;color:rgba(255,255,255,0.5);">المشاهدات اليوم</span>' +
+      '<span style="font-size:12px;color:rgba(255,255,255,0.5);">' + t('adsWatchedToday','Today views') + '</span>' +
       '<span style="font-size:14px;font-weight:700;color:' + (remaining > 0 ? '#FFD700' : '#FF4444') + ';">' + watched + ' / ' + AD_DAILY_MAX + '</span>' +
     '</div>' +
     (remaining > 0
-      ? '<button id="watchAdBtn" style="width:100%;background:linear-gradient(135deg,#00CC66,#00FF88);border:none;color:#000;padding:14px;border-radius:14px;font-size:15px;font-weight:900;cursor:pointer;">📺 شاهد إعلان ← +' + AD_REC_REWARD + ' REC</button>'
-      : '<div style="text-align:center;padding:14px;background:rgba(255,68,68,0.1);border:1px solid rgba(255,68,68,0.3);border-radius:14px;color:#FF4444;font-size:13px;">✅ وصلت للحد اليومي — تعال غداً!</div>'
+      ? '<button id="watchAdBtn" style="width:100%;background:linear-gradient(135deg,#00CC66,#00FF88);border:none;color:#000;padding:14px;border-radius:14px;font-size:15px;font-weight:900;cursor:pointer;">' + t('adsWatchBtn','📺 Watch Ad') + ' ← +' + AD_REC_REWARD + ' REC</button>'
+      : '<div style="text-align:center;padding:14px;background:rgba(255,68,68,0.1);border:1px solid rgba(255,68,68,0.3);border-radius:14px;color:#FF4444;font-size:13px;">' + t('adsDailyLimit','✅ Daily limit reached — come back tomorrow!') + '</div>'
     );
 
   modal.appendChild(inner);
@@ -56,12 +56,12 @@ function openAds() {
 
 function watchAd(modal) {
   var btn = document.getElementById('watchAdBtn');
-  if(btn) { btn.disabled = true; btn.textContent = '⏳ جاري التحميل...'; }
+  if(btn) { btn.disabled = true; btn.textContent = t('adsLoading','⏳ Loading...'); }
 
   // ✅ تحقق إن Monetag SDK محمل
   if(typeof show_11099536 !== 'function') {
-    if(btn) { btn.disabled = false; btn.textContent = '📺 شاهد إعلان ← +' + AD_REC_REWARD + ' REC'; }
-    if(typeof showToast === 'function') showToast('⏳ الإعلانات تُحمَّل... حاول بعد ثانية');
+    if(btn) { btn.disabled = false; btn.textContent = t('adsWatchBtn','📺 Watch Ad') + ' ← +' + AD_REC_REWARD + ' REC'; }
+    if(typeof showToast === 'function') showToast(t('adsLoading','⏳ Loading...'));
     // حاول تحميل SDK مجدداً
     var s = document.createElement('script');
     s.src = '//libtl.com/sdk.js';
@@ -76,7 +76,7 @@ function watchAd(modal) {
   }).catch(function(e) {
     console.log('Ad error:', e);
     if(btn) { btn.disabled = false; btn.textContent = '📺 شاهد إعلان ← +' + AD_REC_REWARD + ' REC'; }
-    if(typeof showToast === 'function') showToast('❌ الإعلان غير متاح — حاول مجدداً');
+    if(typeof showToast === 'function') showToast(t('adsUnavailable','❌ Ad unavailable — try again'));
   });
 }
 
@@ -89,7 +89,7 @@ function giveAdReward(modal) {
   localStorage.setItem('adsCount', String(watched));
   if(typeof updateUI === 'function') updateUI();
   if(typeof saveData === 'function') saveData(true);
-  if(typeof showToast === 'function') showToast('🎉 +' + AD_REC_REWARD + ' REC! شكراً على المشاهدة');
+  if(typeof showToast === 'function') showToast('🎉 +' + AD_REC_REWARD + ' REC! ' + t('adsRewardMsg','Thanks for watching'));
   if(modal) modal.remove();
 
   // مزامنة مع السيرفر
