@@ -335,18 +335,18 @@ function _tabTasks() {
   cards.forEach(function(card) {
     var lvl = getCardLevel(card.key);
     html += taskCard(card.emoji, 'Upgrade ' + card.name,
-      [{req:20,label:'Reach Level 20',pts:50},{req:40,label:'Reach Level 40',pts:100},{req:70,label:'Reach Level 70',pts:1000}],
+      [{req:20,label:t('airdropReachLvl','Reach Level')+' 20',pts:50},{req:40,label:t('airdropReachLvl','Reach Level')+' 40',pts:100},{req:70,label:t('airdropReachLvl','Reach Level')+' 70',pts:1000}],
       lvl, 'LVL', '#00AAFF', t('airdropDayChallenge','3-day challenge'));
   });
 
   // REC task
   html += taskCard('🟢', t('airdropCollectRecToday','Collect REC Today'),
-    [{req:500,label:'Collect 500 REC',pts:50},{req:1500,label:'Collect 1,500 REC',pts:200},{req:2500,label:'Collect 2,500 REC',pts:500},{req:5000,label:'Collect 5,000 REC',pts:1500},{req:10000,label:'Collect 10,000 REC',pts:5000}],
+    [{req:500,label:t('airdropCollectLabel','Collect {n} REC').replace('{n}','500'),pts:50},{req:1500,label:t('airdropCollectLabel','Collect {n} REC').replace('{n}','1,500'),pts:200},{req:2500,label:t('airdropCollectLabel','Collect {n} REC').replace('{n}','2,500'),pts:500},{req:5000,label:t('airdropCollectLabel','Collect {n} REC').replace('{n}','5,000'),pts:1500},{req:10000,label:t('airdropCollectLabel','Collect {n} REC').replace('{n}','10,000'),pts:5000}],
     Math.floor(dailyRec), 'REC', '#00FF88', t('airdropDailyReset','Resets daily at midnight'));
 
   // Referral tasks
   html += taskCard('👥', t('airdropInviteFriends','Invite Friends'),
-    [{req:10,label:'Invite 10 friends',pts:500},{req:20,label:'Invite 20 friends',pts:2000},{req:50,label:'Invite 50 friends',pts:5000}],
+    [{req:10,label:t('airdropInviteLabel','Invite {n} friends').replace('{n}','10'),pts:500},{req:20,label:t('airdropInviteLabel','Invite {n} friends').replace('{n}','20'),pts:2000},{req:50,label:t('airdropInviteLabel','Invite {n} friends').replace('{n}','50'),pts:5000}],
     refs, 'friends', '#FF8800', t('airdropTotalReferrals','Total referrals'));
 
   // 5 Coming Soon
@@ -396,8 +396,8 @@ function _tabFaq(score) {
       row('🟢',t('airdropRecBalanceLabel','REC Balance'), recBal.toFixed(2)+' REC', Math.min(2000,Math.floor(Math.log10(recBal+1)*400))) +
       row('🏆',t('airdropLevelLabel','Level'),'LVL '+lvl, lvl*10) +
       row('🃏',t('airdropCardLevelsLabel','Card Levels Sum'), cardSum.toLocaleString(), Math.min(1500, cardSum*2)) +
-      row('✅',t('airdropTasksDoneLabel','Tasks Done'), tasks+' tasks', Math.min(300, tasks*15)) +
-      row('👥',t('airdropReferralsLabel','Referrals'), refs+' friends', Math.min(500, refs*50)) +
+      row('✅',t('airdropTasksDoneLabel','Tasks Done'), tasks+' '+t('airdropTasksDoneLabel','tasks'), Math.min(300, tasks*15)) +
+      row('👥',t('airdropReferralsLabel','Referrals'), refs+' '+t('airdropFriends','friends'), Math.min(500, refs*50)) +
       row('🎯',t('airdropDailyBonusLabel','Daily Tasks Bonus'),t('airdropCompletedTasks','Completed tasks'), tasksBonus) +
     '</div>' +
     '<div style="background:rgba(255,255,255,0.03);border-radius:12px;padding:14px;">' +
