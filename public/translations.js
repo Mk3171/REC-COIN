@@ -1614,11 +1614,41 @@ var T = {
     airdropCountdownLabel:'分发开始倒计时', airdropTasksTitle:'完成任务提升积分',
     airdropDayChallenge:'3天挑战', airdropDailyReset:'每天午夜重置',
     airdropTotalReferrals:'总推荐数', airdropScoreBreakdown:'积分详情',
+    airdropTotalScore:'你的总积分', airdropRules:'📜 空投条款',
+    vipBoxOpening:'🎁 开启中...',
+    adsTitle:'📺 广告', adsWatchEarn:'观看赚取', adsWatchSub:'观看广告免费赚取REC',
+    adsRewardLabel:'每次广告奖励', adsWatchedToday:'今日观看次数',
+    adsWatchBtn:'📺 观看广告', adsDailyLimit:'✅ 已达每日上限 — 明天再来!',
+    adsLoading:'⏳ 加载中...', adsUnavailable:'❌ 广告不可用 — 请重试',
+    adsRewardMsg:'感谢观看',
+    airdropPrizePool:'总奖励池', airdropTopMiners:'🏆 顶级矿工',
+    airdropCountdownLabel:'分发开始倒计时', airdropTasksTitle:'完成任务提升积分',
+    airdropDayChallenge:'3天挑战', airdropDailyReset:'每天午夜重置',
+    airdropTotalReferrals:'总推荐数', airdropScoreBreakdown:'积分详情',
     airdropTotalScore:'你的总积分', airdropRules:'📜 空投条款'
 };
 
 var currentLang='ar';
 try{var sl=localStorage.getItem('lang_'+saveKey);if(sl&&T[sl])currentLang=sl;}catch(e){}
+
+// ✅ Auto-detect language from Telegram
+if(currentLang==='ar') {
+  try {
+    var tgLang = window.Telegram && window.Telegram.WebApp &&
+                 window.Telegram.WebApp.initDataUnsafe &&
+                 window.Telegram.WebApp.initDataUnsafe.user &&
+                 window.Telegram.WebApp.initDataUnsafe.user.language_code;
+    if(tgLang) {
+      var langMap = {
+        'ar':'ar','en':'en','ru':'ru','uk':'uk',
+        'pt':'pt','pt-br':'pt','es':'es','tr':'tr',
+        'vi':'vi','zh':'zh','zh-hans':'zh','zh-hant':'zh'
+      };
+      var detected = langMap[tgLang.toLowerCase()];
+      if(detected && T[detected]) currentLang = detected;
+    }
+  } catch(e){}
+}
 
 function t(key,params){
   var tr=T[currentLang]||T.ar;
