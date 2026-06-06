@@ -219,21 +219,6 @@ var T = {
     comboTimerLabel:'⏱ ينتهي الكومبو بعد:',
     comboExpiredAdmin:'⏰ انتهى الوقت! اختر ٣ بطاقات جديدة',
     comboAdminTimerLabel:'متبقي لنهاية الكومبو الحالي:'
-
-    // Ads
-    adsTitle:'📺 الإعلانات', adsWatchEarn:'شاهد واكسب', adsWatchSub:'شاهد إعلان واكسب REC مجاناً',
-    adsRewardLabel:'مكافأة كل إعلان', adsWatchedToday:'المشاهدات اليوم',
-    adsWatchBtn:'📺 شاهد إعلان', adsDailyLimit:'✅ وصلت للحد اليومي — عد غداً!',
-    adsLoading:'⏳ جاري التحميل...', adsUnavailable:'❌ الإعلان غير متاح — حاول مجدداً',
-    adsRewardMsg:'شكراً على المشاهدة',
-    // Box opening
-    vipBoxOpening:'🎁 جاري الفتح...',
-    // AirDrop
-    airdropPrizePool:'إجمالي جائزة الإنزال', airdropTopMiners:'🏆 أفضل المعدنين',
-    airdropCountdownLabel:'يبدأ التوزيع خلال', airdropTasksTitle:'أكمل المهام لزيادة نقاطك',
-    airdropDayChallenge:'تحدي 3 أيام', airdropDailyReset:'يُصفَّر يومياً عند منتصف الليل',
-    airdropTotalReferrals:'الإحالات الإجمالية', airdropScoreBreakdown:'تفاصيل النقاط',
-    airdropTotalScore:'مجموع نقاطك', airdropRules:'📜 شروط وقوانين الإنزال المظلي',
   },
 
   en: {
@@ -403,21 +388,6 @@ var T = {
     vipSubscribeBtn:'👑 Subscribe VIP I', vipPriceLabel:'1 TON / month',
     comboTimerLabel:'⏱ Combo expires in:', comboExpiredAdmin:'⏰ Time up! Choose 3 new cards',
     comboAdminTimerLabel:'Time left for current combo:'
-
-    // Ads
-    adsTitle:'📺 ADS', adsWatchEarn:'WATCH & EARN', adsWatchSub:'Watch an ad and earn free REC',
-    adsRewardLabel:'Reward per ad', adsWatchedToday:'Today\'s views',
-    adsWatchBtn:'📺 Watch Ad', adsDailyLimit:'✅ Daily limit reached — come back tomorrow!',
-    adsLoading:'⏳ Loading...', adsUnavailable:'❌ Ad unavailable — try again',
-    adsRewardMsg:'Thanks for watching',
-    // Box opening
-    vipBoxOpening:'🎁 Opening...',
-    // AirDrop
-    airdropPrizePool:'TOTAL PRIZE POOL', airdropTopMiners:'🏆 TOP MINERS',
-    airdropCountdownLabel:'Distribution starts in', airdropTasksTitle:'Complete tasks to boost your score',
-    airdropDayChallenge:'3-day challenge', airdropDailyReset:'Resets daily at midnight',
-    airdropTotalReferrals:'Total referrals', airdropScoreBreakdown:'SCORE BREAKDOWN',
-    airdropTotalScore:'YOUR TOTAL SCORE', airdropRules:'📜 AirDrop Terms & Conditions',
   },
 
   ru: {
@@ -581,19 +551,6 @@ var T = {
     vipSubscribeBtn:'👑 Подписка VIP I', vipPriceLabel:'1 TON / месяц',
     comboTimerLabel:'⏱ Комбо истекает через:', comboExpiredAdmin:'⏰ Время вышло! Выберите 3 новые карты',
     comboAdminTimerLabel:'Осталось для текущего комбо:'
-
-    // Ads
-    adsTitle:'📺 РЕКЛАМА', adsWatchEarn:'СМОТРИ И ЗАРАБАТЫВАЙ', adsWatchSub:'Смотри рекламу и зарабатывай REC',
-    adsRewardLabel:'Награда за рекламу', adsWatchedToday:'Просмотров сегодня',
-    adsWatchBtn:'📺 Смотреть рекламу', adsDailyLimit:'✅ Дневной лимит — возвращайся завтра!',
-    adsLoading:'⏳ Загрузка...', adsUnavailable:'❌ Реклама недоступна — попробуй снова',
-    adsRewardMsg:'Спасибо за просмотр',
-    vipBoxOpening:'🎁 Открываем...',
-    airdropPrizePool:'ПРИЗОВОЙ ФОНД', airdropTopMiners:'🏆 ТОП МАЙНЕРЫ',
-    airdropCountdownLabel:'Раздача начнётся через', airdropTasksTitle:'Выполняй задания для очков',
-    airdropDayChallenge:'3-дневный челлендж', airdropDailyReset:'Сброс ежедневно в полночь',
-    airdropTotalReferrals:'Всего рефералов', airdropScoreBreakdown:'ДЕТАЛИ ОЧКОВ',
-    airdropTotalScore:'ВАШИ ОЧКИ', airdropRules:'📜 Условия Airdrop',
   },
 
   uk: {
@@ -756,19 +713,6 @@ var T = {
     vipSubscribeBtn:'👑 Підписка VIP I', vipPriceLabel:'1 TON / місяць',
     comboTimerLabel:'⏱ Комбо закінчується через:', comboExpiredAdmin:'⏰ Час вийшов! Оберіть 3 нові карти',
     comboAdminTimerLabel:'Залишилось для поточного комбо:'
-
-    // Ads
-    adsTitle:'📺 РЕКЛАМА', adsWatchEarn:'ДИВИСЬ І ЗАРОБЛЯЙ', adsWatchSub:'Дивись рекламу та заробляй REC',
-    adsRewardLabel:'Нагорода за рекламу', adsWatchedToday:'Переглядів сьогодні',
-    adsWatchBtn:'📺 Переглянути рекламу', adsDailyLimit:'✅ Денний ліміт — повертайся завтра!',
-    adsLoading:'⏳ Завантаження...', adsUnavailable:'❌ Реклама недоступна — спробуй ще раз',
-    adsRewardMsg:'Дякуємо за перегляд',
-    vipBoxOpening:'🎁 Відкриваємо...',
-    airdropPrizePool:'ПРИЗОВИЙ ФОНД', airdropTopMiners:'🏆 ТОП МАЙНЕРИ',
-    airdropCountdownLabel:'Роздача починається через', airdropTasksTitle:'Виконуй завдання для очок',
-    airdropDayChallenge:'3-денний челендж', airdropDailyReset:'Скидання щодня опівночі',
-    airdropTotalReferrals:'Всього рефералів', airdropScoreBreakdown:'ДЕТАЛІ ОЧОК',
-    airdropTotalScore:'ВАШІ ОЧКИ', airdropRules:'📜 Умови Airdrop',
   },
 
   pt: {
@@ -929,19 +873,6 @@ var T = {
     vipSubscribeBtn:'👑 Assinar VIP I', vipPriceLabel:'1 TON / mês',
     comboTimerLabel:'⏱ Combo expira em:', comboExpiredAdmin:'⏰ Tempo esgotado! Escolha 3 novas cartas',
     comboAdminTimerLabel:'Tempo restante do combo atual:'
-
-    // Ads
-    adsTitle:'📺 ANÚNCIOS', adsWatchEarn:'ASSISTA E GANHE', adsWatchSub:'Assista um anúncio e ganhe REC grátis',
-    adsRewardLabel:'Recompensa por anúncio', adsWatchedToday:'Visualizações hoje',
-    adsWatchBtn:'📺 Ver Anúncio', adsDailyLimit:'✅ Limite diário atingido — volte amanhã!',
-    adsLoading:'⏳ Carregando...', adsUnavailable:'❌ Anúncio indisponível — tente novamente',
-    adsRewardMsg:'Obrigado por assistir',
-    vipBoxOpening:'🎁 Abrindo...',
-    airdropPrizePool:'PRÊMIO TOTAL', airdropTopMiners:'🏆 TOP MINERADORES',
-    airdropCountdownLabel:'Distribuição começa em', airdropTasksTitle:'Complete tarefas para ganhar pontos',
-    airdropDayChallenge:'Desafio de 3 dias', airdropDailyReset:'Reinicia diariamente à meia-noite',
-    airdropTotalReferrals:'Total de referidos', airdropScoreBreakdown:'DETALHES DA PONTUAÇÃO',
-    airdropTotalScore:'SUA PONTUAÇÃO', airdropRules:'📜 Termos do Airdrop',
   },
 
   es: {
@@ -1102,19 +1033,6 @@ var T = {
     vipSubscribeBtn:'👑 Suscribirse VIP I', vipPriceLabel:'1 TON / mes',
     comboTimerLabel:'⏱ El combo expira en:', comboExpiredAdmin:'⏰ ¡Tiempo agotado! Elige 3 nuevas cartas',
     comboAdminTimerLabel:'Tiempo restante del combo actual:'
-
-    // Ads
-    adsTitle:'📺 ANUNCIOS', adsWatchEarn:'VER Y GANAR', adsWatchSub:'Mira un anuncio y gana REC gratis',
-    adsRewardLabel:'Recompensa por anuncio', adsWatchedToday:'Vistas hoy',
-    adsWatchBtn:'📺 Ver Anuncio', adsDailyLimit:'✅ Límite diario alcanzado — vuelve mañana!',
-    adsLoading:'⏳ Cargando...', adsUnavailable:'❌ Anuncio no disponible — inténtalo de nuevo',
-    adsRewardMsg:'Gracias por ver',
-    vipBoxOpening:'🎁 Abriendo...',
-    airdropPrizePool:'PREMIO TOTAL', airdropTopMiners:'🏆 TOP MINEROS',
-    airdropCountdownLabel:'La distribución empieza en', airdropTasksTitle:'Completa tareas para ganar puntos',
-    airdropDayChallenge:'Desafío de 3 días', airdropDailyReset:'Se reinicia diariamente a medianoche',
-    airdropTotalReferrals:'Total de referidos', airdropScoreBreakdown:'DETALLES DE PUNTUACIÓN',
-    airdropTotalScore:'TU PUNTUACIÓN', airdropRules:'📜 Términos del Airdrop',
   },
 
   tr: {
@@ -1276,19 +1194,6 @@ var T = {
     vipSubscribeBtn:'👑 VIP I Aboneliği', vipPriceLabel:'1 TON / ay',
     comboTimerLabel:'⏱ Kombo bitiyor:', comboExpiredAdmin:'⏰ Süre doldu! 3 yeni kart seç',
     comboAdminTimerLabel:'Mevcut kombo için kalan süre:'
-
-    // Ads
-    adsTitle:'📺 REKLAMLAR', adsWatchEarn:'İZLE VE KAZAN', adsWatchSub:'Reklam izle ve ücretsiz REC kazan',
-    adsRewardLabel:'Reklam başına ödül', adsWatchedToday:'Bugünkü izlemeler',
-    adsWatchBtn:'📺 Reklam İzle', adsDailyLimit:'✅ Günlük limite ulaşıldı — yarın gel!',
-    adsLoading:'⏳ Yükleniyor...', adsUnavailable:'❌ Reklam mevcut değil — tekrar dene',
-    adsRewardMsg:'İzlediğin için teşekkürler',
-    vipBoxOpening:'🎁 Açılıyor...',
-    airdropPrizePool:'TOPLAM ÖDÜL', airdropTopMiners:'🏆 EN İYİ MADENCİLER',
-    airdropCountdownLabel:'Dağıtım başlıyor', airdropTasksTitle:'Puan kazanmak için görevleri tamamla',
-    airdropDayChallenge:'3 günlük meydan okuma', airdropDailyReset:'Her gece yarısı sıfırlanır',
-    airdropTotalReferrals:'Toplam referanslar', airdropScoreBreakdown:'PUAN DETAYLARI',
-    airdropTotalScore:'TOPLAM PUANIN', airdropRules:'📜 Airdrop Şartları',
   },
 
   vi: {
@@ -1450,19 +1355,6 @@ var T = {
     vipSubscribeBtn:'👑 Đăng ký VIP I', vipPriceLabel:'1 TON / tháng',
     comboTimerLabel:'⏱ Combo hết hạn sau:', comboExpiredAdmin:'⏰ Hết giờ! Chọn 3 thẻ mới',
     comboAdminTimerLabel:'Thời gian còn lại của combo:'
-
-    // Ads
-    adsTitle:'📺 QUẢNG CÁO', adsWatchEarn:'XEM VÀ KIẾM', adsWatchSub:'Xem quảng cáo và kiếm REC miễn phí',
-    adsRewardLabel:'Phần thưởng mỗi quảng cáo', adsWatchedToday:'Lượt xem hôm nay',
-    adsWatchBtn:'📺 Xem Quảng Cáo', adsDailyLimit:'✅ Đã đạt giới hạn ngày — quay lại ngày mai!',
-    adsLoading:'⏳ Đang tải...', adsUnavailable:'❌ Quảng cáo không khả dụng — thử lại',
-    adsRewardMsg:'Cảm ơn bạn đã xem',
-    vipBoxOpening:'🎁 Đang mở...',
-    airdropPrizePool:'TỔNG GIẢI THƯỞNG', airdropTopMiners:'🏆 THỢ ĐÀO HÀNG ĐẦU',
-    airdropCountdownLabel:'Phân phối bắt đầu trong', airdropTasksTitle:'Hoàn thành nhiệm vụ để tăng điểm',
-    airdropDayChallenge:'Thử thách 3 ngày', airdropDailyReset:'Đặt lại hàng ngày vào nửa đêm',
-    airdropTotalReferrals:'Tổng số giới thiệu', airdropScoreBreakdown:'CHI TIẾT ĐIỂM',
-    airdropTotalScore:'TỔNG ĐIỂM CỦA BẠN', airdropRules:'📜 Điều Khoản Airdrop',
   },
 
   zh: {
@@ -1624,19 +1516,6 @@ var T = {
     comboTimerLabel:'⏱ 组合到期:', comboExpiredAdmin:'⏰ 时间到！选择3张新牌',
     comboAdminTimerLabel:'当前组合剩余时间:'
   }
-
-    // Ads
-    adsTitle:'📺 广告', adsWatchEarn:'观看赚取', adsWatchSub:'观看广告免费赚取REC',
-    adsRewardLabel:'每次广告奖励', adsWatchedToday:'今日观看次数',
-    adsWatchBtn:'📺 观看广告', adsDailyLimit:'✅ 已达每日上限 — 明天再来!',
-    adsLoading:'⏳ 加载中...', adsUnavailable:'❌ 广告不可用 — 请重试',
-    adsRewardMsg:'感谢观看',
-    vipBoxOpening:'🎁 开启中...',
-    airdropPrizePool:'总奖励池', airdropTopMiners:'🏆 顶级矿工',
-    airdropCountdownLabel:'分发开始倒计时', airdropTasksTitle:'完成任务提升积分',
-    airdropDayChallenge:'3天挑战', airdropDailyReset:'每天午夜重置',
-    airdropTotalReferrals:'总推荐数', airdropScoreBreakdown:'积分详情',
-    airdropTotalScore:'你的总积分', airdropRules:'📜 空投条款',
 };
 
 var currentLang='ar';
