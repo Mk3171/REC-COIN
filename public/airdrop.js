@@ -170,10 +170,10 @@ function _showAirdropCountdown() {
     '</div>' +
     '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;">' +
       '<div style="font-size:64px;margin-bottom:16px;">🪂</div>' +
-      '<div style="font-family:Orbitron,sans-serif;font-size:13px;color:rgba(255,255,255,0.4);letter-spacing:2px;margin-bottom:8px;">TOTAL PRIZE POOL</div>' +
+      '<div style="font-family:Orbitron,sans-serif;font-size:13px;color:rgba(255,255,255,0.4);letter-spacing:2px;margin-bottom:8px;">' + t('airdropPrizePool','TOTAL PRIZE POOL') + '</div>' +
       '<div style="font-family:Orbitron,sans-serif;font-size:38px;font-weight:900;color:#FFD700;margin-bottom:4px;">1,000,000,000</div>' +
       '<div style="font-size:14px;color:rgba(255,215,0,0.5);margin-bottom:28px;">REC</div>' +
-      '<div style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:16px;">⏳ يبدأ التوزيع خلال</div>' +
+      '<div style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:16px;">' + t('airdropCountdownLabel','Distribution starts in') + '</div>' +
       '<div id="airdropCountdownBox" style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;width:100%;max-width:340px;margin-bottom:24px;"></div>' +
       '<div style="font-size:12px;color:rgba(255,255,255,0.25);">06 يونيو 2027 — 12:00 ظهراً بتوقيت ألمانيا</div>' +
     '</div>';
@@ -251,7 +251,7 @@ function _startInnerCountdown() {
     var box = document.getElementById('airdropInnerCountdown');
     if(!box) return;
     var diff = AIRDROP_DATE - new Date();
-    if(diff <= 0) { box.innerHTML = '<div style="grid-column:1/-1;color:#00FF88;font-size:14px;font-weight:900;text-align:center;">🎉 AirDrop Live!</div>'; return; }
+    if(diff <= 0) { box.innerHTML = '<div style="grid-column:1/-1;color:#00FF88;font-size:14px;font-weight:900;text-align:center;">' + t('airdropLive','🎉 AirDrop Live!') + '</div>'; return; }
     var s = Math.floor(diff/1000);
     var mo=Math.floor(s/(30.44*86400)), wk=Math.floor((s%(30.44*86400))/(7*86400));
     var dd=Math.floor((s%(7*86400))/86400), hh=Math.floor((s%86400)/3600);
@@ -268,12 +268,12 @@ function _tabMain() {
   return '<div id="adSection_main">' +
     '<div style="text-align:center;padding:24px 0 16px;">' +
       '<div style="font-size:48px;margin-bottom:10px;">🪂</div>' +
-      '<div style="font-family:Orbitron,sans-serif;font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:2px;margin-bottom:6px;">TOTAL PRIZE POOL</div>' +
+      '<div style="font-family:Orbitron,sans-serif;font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:2px;margin-bottom:6px;">' + t('airdropPrizePool','TOTAL PRIZE POOL') + '</div>' +
       '<div style="font-family:Orbitron,sans-serif;font-size:36px;font-weight:900;color:#FFD700;">1,000,000,000</div>' +
       '<div style="font-size:14px;color:rgba(255,215,0,0.5);margin-bottom:16px;">REC</div>' +
       '<div id="airdropInnerCountdown" style="display:grid;grid-template-columns:repeat(6,1fr);gap:5px;max-width:340px;margin:0 auto 8px;"></div>' +
     '</div>' +
-    '<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.5);margin-bottom:10px;letter-spacing:1px;">🏆 TOP MINERS</div>' +
+    '<div style="font-size:12px;font-weight:700;color:rgba(255,255,255,0.5);margin-bottom:10px;letter-spacing:1px;">' + t('airdropTopMinersLabel','🏆 TOP MINERS') + '</div>' +
     '<div id="airdropLeaderboard"><div style="text-align:center;padding:20px;color:rgba(255,255,255,0.2);font-size:12px;">⏳ Loading...</div></div>' +
   '</div>';
 }
@@ -336,24 +336,24 @@ function _tabTasks() {
     var lvl = getCardLevel(card.key);
     html += taskCard(card.emoji, 'Upgrade ' + card.name,
       [{req:20,label:'Reach Level 20',pts:50},{req:40,label:'Reach Level 40',pts:100},{req:70,label:'Reach Level 70',pts:1000}],
-      lvl, 'LVL', '#00AAFF', '3-day challenge');
+      lvl, 'LVL', '#00AAFF', t('airdropDayChallenge','3-day challenge'));
   });
 
   // REC task
-  html += taskCard('🟢', 'Collect REC Today',
+  html += taskCard('🟢', t('airdropCollectRecToday','Collect REC Today'),
     [{req:500,label:'Collect 500 REC',pts:50},{req:1500,label:'Collect 1,500 REC',pts:200},{req:2500,label:'Collect 2,500 REC',pts:500},{req:5000,label:'Collect 5,000 REC',pts:1500},{req:10000,label:'Collect 10,000 REC',pts:5000}],
-    Math.floor(dailyRec), 'REC', '#00FF88', 'Resets daily at midnight');
+    Math.floor(dailyRec), 'REC', '#00FF88', t('airdropDailyReset','Resets daily at midnight'));
 
   // Referral tasks
-  html += taskCard('👥', 'Invite Friends',
+  html += taskCard('👥', t('airdropInviteFriends','Invite Friends'),
     [{req:10,label:'Invite 10 friends',pts:500},{req:20,label:'Invite 20 friends',pts:2000},{req:50,label:'Invite 50 friends',pts:5000}],
-    refs, 'friends', '#FF8800', 'Total referrals');
+    refs, 'friends', '#FF8800', t('airdropTotalReferrals','Total referrals'));
 
   // 5 Coming Soon
   ['🎮','🏆','💎','🌍','🔥'].forEach(function(icon) {
     html += '<div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;opacity:0.5;">' +
       '<span style="font-size:28px;">' + icon + '</span>' +
-      '<div><div style="font-size:13px;color:rgba(255,255,255,0.5);">Coming Soon</div>' +
+      '<div><div style="font-size:13px;color:rgba(255,255,255,0.5);">' + t('airdropComingSoon','Coming Soon') + '</div>' +
       '<div style="font-size:11px;color:rgba(255,255,255,0.25);margin-top:2px;">🔒 Stay tuned</div></div>' +
     '</div>';
   });
@@ -385,23 +385,23 @@ function _tabFaq(score) {
 
   return '<div id="adSection_faq" style="display:none;">' +
     '<div style="background:linear-gradient(135deg,rgba(255,215,0,0.1),rgba(255,165,0,0.05));border:1px solid rgba(255,215,0,0.3);border-radius:14px;padding:18px;margin-bottom:16px;text-align:center;">' +
-      '<div style="font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:1px;margin-bottom:6px;">YOUR TOTAL SCORE</div>' +
+      '<div style="font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:1px;margin-bottom:6px;">' + t('airdropTotalScore','YOUR TOTAL SCORE') + '</div>' +
       '<div style="font-family:Orbitron,sans-serif;font-size:42px;font-weight:900;color:#FFD700;">' + score.toLocaleString() + '</div>' +
       '<div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px;">نقطة</div>' +
     '</div>' +
     '<div style="background:rgba(255,255,255,0.03);border-radius:12px;padding:12px 14px;margin-bottom:16px;">' +
-      '<div style="font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:1px;margin-bottom:6px;">SCORE BREAKDOWN</div>' +
-      row('📅','Daily Login Days', loginDays+' days', Math.min(500, loginDays*10)) +
-      row('📱','Active Days', activeDays+' days', Math.min(300, activeDays*10)) +
-      row('🟢','REC Balance', recBal.toFixed(2)+' REC', Math.min(2000,Math.floor(Math.log10(recBal+1)*400))) +
-      row('🏆','Level','LVL '+lvl, lvl*10) +
-      row('🃏','Card Levels Sum', cardSum.toLocaleString(), Math.min(1500, cardSum*2)) +
-      row('✅','Tasks Done', tasks+' tasks', Math.min(300, tasks*15)) +
-      row('👥','Referrals', refs+' friends', Math.min(500, refs*50)) +
-      row('🎯','Daily Tasks Bonus','Completed tasks', tasksBonus) +
+      '<div style="font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:1px;margin-bottom:6px;">' + t('airdropScoreBreakdown','SCORE BREAKDOWN') + '</div>' +
+      row('📅',t('airdropDailyLoginDays','Daily Login Days'), loginDays+' days', Math.min(500, loginDays*10)) +
+      row('📱',t('airdropActiveDaysLabel','Active Days'), activeDays+' days', Math.min(300, activeDays*10)) +
+      row('🟢',t('airdropRecBalanceLabel','REC Balance'), recBal.toFixed(2)+' REC', Math.min(2000,Math.floor(Math.log10(recBal+1)*400))) +
+      row('🏆',t('airdropLevelLabel','Level'),'LVL '+lvl, lvl*10) +
+      row('🃏',t('airdropCardLevelsLabel','Card Levels Sum'), cardSum.toLocaleString(), Math.min(1500, cardSum*2)) +
+      row('✅',t('airdropTasksDoneLabel','Tasks Done'), tasks+' tasks', Math.min(300, tasks*15)) +
+      row('👥',t('airdropReferralsLabel','Referrals'), refs+' friends', Math.min(500, refs*50)) +
+      row('🎯',t('airdropDailyBonusLabel','Daily Tasks Bonus'),t('airdropCompletedTasks','Completed tasks'), tasksBonus) +
     '</div>' +
     '<div style="background:rgba(255,255,255,0.03);border-radius:12px;padding:14px;">' +
-      '<div style="font-size:13px;font-weight:700;color:#FFD700;margin-bottom:10px;">📜 شروط وقوانين AirDrop</div>' +
+      '<div style="font-size:13px;font-weight:700;color:#FFD700;margin-bottom:10px;">' + t('airdropRules','📜 AirDrop Terms & Conditions') + '</div>' +
       '<div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:2.2;">' +
         '• الحد الأدنى للمشاركة: إكمال 5 مهام يومية على الأقل<br>' +
         '• يجب أن يكون حسابك نشيطاً لمدة 7 أيام أو أكثر<br>' +
@@ -433,24 +433,23 @@ setTimeout(function(){ if(typeof trackDailySession==='function') trackDailySessi
 
 // ====== HOME PAGE COUNTDOWN ======
 function startHomeCountdown() {
+  if(window._homeTimerRunning) return;
+  window._homeTimerRunning = true;
   function update() {
     var box = document.getElementById('homeCountdown');
-    if(!box) return;
-    var now = new Date();
-    var diff = AIRDROP_DATE - now;
-    if(diff <= 0) { box.innerHTML = '<div style="grid-column:1/-1;color:#00FF88;font-size:12px;font-weight:900;text-align:center;">🎉 AirDrop Live!</div>'; return; }
+    if(!box) { window._homeTimerRunning = false; clearInterval(window._homeTimer); return; }
+    var diff = AIRDROP_DATE - new Date();
+    if(diff <= 0) { box.innerHTML = '<div style="grid-column:1/-1;color:#00FF88;font-size:12px;text-align:center;">' + t('airdropLive','🎉 AirDrop Live!') + '</div>'; return; }
     var s = Math.floor(diff/1000);
-    var mo = Math.floor(s/(30.44*86400));
-    var wk = Math.floor((s%(30.44*86400))/(7*86400));
-    var dd = Math.floor((s%(7*86400))/86400);
-    var hh = Math.floor((s%86400)/3600);
-    var mm = Math.floor((s%3600)/60);
-    var ss = s%60;
-    function u(v,l){ return '<div style="background:rgba(0,180,255,0.1);border:1px solid rgba(0,180,255,0.2);border-radius:6px;padding:4px 2px;text-align:center;"><div style="font-family:Orbitron,monospace;font-size:13px;font-weight:900;color:#00AAFF;">'+String(v).padStart(2,'0')+'</div><div style="font-size:8px;color:rgba(255,255,255,0.3);margin-top:1px;">'+l+'</div></div>'; }
+    var mo=Math.floor(s/(30.44*86400)), wk=Math.floor((s%(30.44*86400))/(7*86400));
+    var dd=Math.floor((s%(7*86400))/86400), hh=Math.floor((s%86400)/3600);
+    var mm=Math.floor((s%3600)/60), ss=s%60;
+    function u(v,l){ return '<div style="direction:ltr;background:rgba(0,180,255,0.1);border:1px solid rgba(0,180,255,0.2);border-radius:6px;padding:4px 2px;text-align:center;"><div style="font-family:Orbitron,monospace;font-size:13px;font-weight:900;color:#00AAFF;">'+String(v).padStart(2,'0')+'</div><div style="font-size:8px;color:rgba(255,255,255,0.3);margin-top:1px;">'+l+'</div></div>'; }
     box.innerHTML = u(mo,'MO')+u(wk,'WK')+u(dd,'DD')+u(hh,'HR')+u(mm,'MN')+u(ss,'SC');
   }
   update();
-  setInterval(update, 1000);
+  if(window._homeTimer) clearInterval(window._homeTimer);
+  window._homeTimer = setInterval(update, 1000);
 }
 setTimeout(startHomeCountdown, 500);
 
