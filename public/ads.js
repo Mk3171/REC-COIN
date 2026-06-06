@@ -75,7 +75,7 @@ function watchAd(modal) {
     giveAdReward(modal);
   }).catch(function(e) {
     console.log('Ad error:', e);
-    if(btn) { btn.disabled = false; btn.textContent = '📺 شاهد إعلان ← +' + AD_REC_REWARD + ' REC'; }
+    if(btn) { btn.disabled = false; btn.textContent = t('adsWatchBtn','📺 Watch Ad') + ' ← +' + AD_REC_REWARD + ' REC'; }
     if(typeof showToast === 'function') showToast(t('adsUnavailable','❌ Ad unavailable — try again'));
   });
 }
