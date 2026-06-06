@@ -1501,6 +1501,17 @@ app.get('/api/admin/run-blocks', async (req, res) => {
   }
 });
 
+
+// AirDrop Leaderboard
+app.get('/api/leaderboard/airdrop', async (req, res) => {
+  try {
+    const users = await User.find({ airdropScore: { $gt: 0 } })
+      .select('telegramId username firstName airdropScore')
+      .sort({ airdropScore: -1 }).limit(50).lean();
+    res.json(users);
+  } catch(e) { res.json([]); }
+});
+
 app.post('/webhook', (req, res) => { bot.processUpdate(req.body); res.sendStatus(200); });
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'index.html')); });
 app.use(express.static(path.join(__dirname, 'public')));
