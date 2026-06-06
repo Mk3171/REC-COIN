@@ -134,11 +134,19 @@ function calcDailyTasksScore() {
 // ====== Open AirDrop ======
 var _airdropTab = 'main';
 
+// ====== AIRDROP LOCK & COUNTDOWN ======
+var AIRDROP_LOCKED = false; // غيّرها لـ false عند الإطلاق
+var AIRDROP_DATE = new Date('2027-06-06T10:00:00Z'); // 12:00 ظهراً بتوقيت ألمانيا
+
 function openAirdrop() {
+  if(AIRDROP_LOCKED) {
+    _showAirdropCountdown();
+    return;
+  }
   var old = document.getElementById('airdropOverlay');
   if(old) old.remove();
   trackDailySession();
-  getDailyRecStart(); // init today's REC start
+  getDailyRecStart();
   var score = calcAirdropScore();
   if(tgUser) {
     fetch('/api/user/airdrop-score',{method:'POST',headers:{'Content-Type':'application/json'},
@@ -146,6 +154,69 @@ function openAirdrop() {
   }
   _renderAirdrop(score);
 }
+
+function _showAirdropCountdown() {
+  var old = document.getElementById('airdropOverlay');
+  if(old) old.remove();
+
+  var ol = document.createElement('div');
+  ol.id = 'airdropOverlay';
+  ol.style.cssText = 'position:fixed;inset:0;background:#0a0a12;z-index:9000;display:flex;flex-direction:column;overflow:hidden;';
+
+  ol.innerHTML =
+    '<div style="display:flex;align-items:center;gap:12px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,0.07);flex-shrink:0;">' +
+      '<button onclick="document.getElementById(\'airdropOverlay\').remove()" style="background:rgba(255,255,255,0.08);border:none;color:white;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:18px;">←</button>' +
+      '<span style="font-family:Orbitron,sans-serif;font-size:16px;font-weight:900;color:#FFD700;">🪂 AirDrop</span>' +
+    '</div>' +
+    '<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;">' +
+      '<div style="font-size:64px;margin-bottom:16px;">🪂</div>' +
+      '<div style="font-family:Orbitron,sans-serif;font-size:13px;color:rgba(255,255,255,0.4);letter-spacing:2px;margin-bottom:8px;">TOTAL PRIZE POOL</div>' +
+      '<div style="font-family:Orbitron,sans-serif;font-size:38px;font-weight:900;color:#FFD700;margin-bottom:4px;">1,000,000,000</div>' +
+      '<div style="font-size:14px;color:rgba(255,215,0,0.5);margin-bottom:28px;">REC</div>' +
+      '<div style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:16px;">⏳ يبدأ التوزيع خلال</div>' +
+      '<div id="airdropCountdownBox" style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px;width:100%;max-width:340px;margin-bottom:24px;"></div>' +
+      '<div style="font-size:12px;color:rgba(255,255,255,0.25);">06 يونيو 2027 — 12:00 ظهراً بتوقيت ألمانيا</div>' +
+    '</div>';
+
+  document.body.appendChild(ol);
+  _startCountdown();
+}
+
+function _startCountdown() {
+  function update() {
+    var box = document.getElementById('airdropCountdownBox');
+    if(!box) return;
+    var now = new Date();
+    var diff = AIRDROP_DATE - now;
+    if(diff <= 0) {
+      box.innerHTML = '<div style="grid-column:1/-1;color:#00FF88;font-size:16px;font-weight:900;">🎉 AirDrop Started!</div>';
+      return;
+    }
+    var totalSec = Math.floor(diff / 1000);
+    var months  = Math.floor(totalSec / (30.44 * 86400));
+    var weeks   = Math.floor((totalSec % (30.44 * 86400)) / (7 * 86400));
+    var days    = Math.floor((totalSec % (7 * 86400)) / 86400);
+    var hours   = Math.floor((totalSec % 86400) / 3600);
+    var mins    = Math.floor((totalSec % 3600) / 60);
+    var secs    = totalSec % 60;
+
+    function unit(val, label) {
+      return '<div style="background:rgba(255,215,0,0.08);border:1px solid rgba(255,215,0,0.2);border-radius:10px;padding:10px 4px;">' +
+        '<div style="font-family:Orbitron,monospace;font-size:18px;font-weight:900;color:#FFD700;">' + String(val).padStart(2,'0') + '</div>' +
+        '<div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:3px;">' + label + '</div>' +
+      '</div>';
+    }
+
+    box.innerHTML =
+      unit(months,'MON') + unit(weeks,'WKS') + unit(days,'DAYS') +
+      unit(hours,'HRS') + unit(mins,'MIN') + unit(secs,'SEC');
+  }
+  update();
+  if(window._countdownTimer) clearInterval(window._countdownTimer);
+  window._countdownTimer = setInterval(update, 1000);
+}
+
+
 
 function _renderAirdrop(score) {
   var ol = document.createElement('div');
