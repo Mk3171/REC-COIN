@@ -391,26 +391,26 @@ function _tabFaq(score) {
     '</div>' +
     '<div style="background:rgba(255,255,255,0.03);border-radius:12px;padding:12px 14px;margin-bottom:16px;">' +
       '<div style="font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:1px;margin-bottom:6px;">' + t('airdropScoreBreakdown','SCORE BREAKDOWN') + '</div>' +
-      row('📅',t('airdropDailyLoginDays','Daily Login Days'), loginDays+' days', Math.min(500, loginDays*10)) +
-      row('📱',t('airdropActiveDaysLabel','Active Days'), activeDays+' days', Math.min(300, activeDays*10)) +
+      row('📅',t('airdropDailyLoginDays','Daily Login Days'), loginDays+' '+t('airdropDays','days'), Math.min(500, loginDays*10)) +
+      row('📱',t('airdropActiveDaysLabel','Active Days'), activeDays+' '+t('airdropDays','days'), Math.min(300, activeDays*10)) +
       row('🟢',t('airdropRecBalanceLabel','REC Balance'), recBal.toFixed(2)+' REC', Math.min(2000,Math.floor(Math.log10(recBal+1)*400))) +
       row('🏆',t('airdropLevelLabel','Level'),'LVL '+lvl, lvl*10) +
       row('🃏',t('airdropCardLevelsLabel','Card Levels Sum'), cardSum.toLocaleString(), Math.min(1500, cardSum*2)) +
-      row('✅',t('airdropTasksDoneLabel','Tasks Done'), tasks+' '+t('airdropTasksDoneLabel','tasks'), Math.min(300, tasks*15)) +
-      row('👥',t('airdropReferralsLabel','Referrals'), refs+' '+t('airdropFriends','friends'), Math.min(500, refs*50)) +
+      row('✅',t('airdropTasksDoneLabel','Tasks Done'), tasks+' '+t('airdropTasksUnit','tasks'), Math.min(300, tasks*15)) +
+      row('👥',t('airdropReferralsLabel','Referrals'), refs+' '+t('airdropFriendsUnit','friends'), Math.min(500, refs*50)) +
       row('🎯',t('airdropDailyBonusLabel','Daily Tasks Bonus'),t('airdropCompletedTasks','Completed tasks'), tasksBonus) +
     '</div>' +
     '<div style="background:rgba(255,255,255,0.03);border-radius:12px;padding:14px;">' +
       '<div style="font-size:13px;font-weight:700;color:#FFD700;margin-bottom:10px;">' + t('airdropRules','📜 AirDrop Terms & Conditions') + '</div>' +
       '<div style="font-size:12px;color:rgba(255,255,255,0.6);line-height:2.2;">' +
-        '• الحد الأدنى للمشاركة: إكمال 5 مهام يومية على الأقل<br>' +
-        '• يجب أن يكون حسابك نشيطاً لمدة 7 أيام أو أكثر<br>' +
-        '• ممنوع استخدام حسابات مزيفة أو بوتات تلقائية<br>' +
-        '• التوزيع يكون حسب النقاط النسبية لكل مستخدم<br>' +
-        '• يحق للإدارة استبعاد أي حساب مشبوه<br>' +
-        '• النتائج النهائية تُعلن عند إطلاق AirDrop<br>' +
-        '• العملات تُرسل على شبكة TON فقط<br>' +
-        '• لا يمكن نقل النقاط بين الحسابات<br>' +
+        t('airdropTerm1','• Min 5 tasks daily') + '<br>' +
+        t('airdropTerm2','• Active 7+ days') + '<br>' +
+        t('airdropTerm3','• No fake accounts or bots') + '<br>' +
+        t('airdropTerm4','• Distribution by relative points') + '<br>' +
+        t('airdropTerm5','• Admin may exclude suspicious accounts') + '<br>' +
+        t('airdropTerm6','• Results announced at launch') + '<br>' +
+        t('airdropTerm7','• TON network only') + '<br>' +
+        t('airdropTerm8','• No point transfers') + '<br>' +
       '</div>' +
     '</div>' +
   '</div>';
