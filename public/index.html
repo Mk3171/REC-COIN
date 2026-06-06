@@ -149,15 +149,17 @@ function closeSideMenu(){
         </div>
 
         <!-- AIRDROP BUTTON -->
-        <div onclick="openAirdrop()" style="margin:0 12px 8px;background:linear-gradient(135deg,rgba(0,180,255,0.1),rgba(0,100,255,0.06));border:1px solid rgba(0,180,255,0.3);border-radius:14px;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;-webkit-tap-highlight-color:transparent;">
-          <div style="display:flex;align-items:center;gap:10px;">
-            <span style="font-size:24px;">🪂</span>
-            <div>
-              <div style="font-size:13px;font-weight:700;color:#00AAFF;" data-i18n="airdropTitle">AirDrop</div>
-              <div style="font-size:10px;color:rgba(255,255,255,0.35);" data-i18n="airdropSub">Tap to see your score</div>
+        <div style="margin:0 12px 8px;background:linear-gradient(135deg,rgba(0,180,255,0.12),rgba(0,100,255,0.08));border:1px solid rgba(0,180,255,0.35);border-radius:14px;padding:12px 16px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:26px;">🪂</span>
+              <div>
+                <div style="font-size:16px;font-weight:900;color:#00AAFF;letter-spacing:1px;">AirDrop</div>
+                <div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:2px;">06 Jun 2027 — 12:00 Germany</div>
+              </div>
             </div>
+            <div onclick="openAirdrop()" style="background:linear-gradient(135deg,#0080FF,#00AAFF);border-radius:10px;padding:8px 18px;font-size:13px;font-weight:900;color:white;cursor:pointer;-webkit-tap-highlight-color:transparent;">Open</div>
           </div>
-          <div style="background:rgba(0,180,255,0.15);border:1px solid rgba(0,180,255,0.3);border-radius:8px;padding:4px 10px;font-size:11px;color:#00AAFF;font-weight:700;">🔒 <span data-i18n="comingSoon">Coming Soon</span></div>
         </div>
 
         <!-- MAIN: 3 columns -->
@@ -680,49 +682,13 @@ function closeSideMenu(){
   <div id="comboClaimed" style="display:none;text-align:center;padding:10px;color:#00FF88;font-weight:700;font-size:14px;">✅ تم استلام المكافأة اليوم!</div>
 
   <!-- Admin Panel (only for admin) -->
-  <div id="comboAdminPanel" style="display:none;margin-top:20px;border-top:1px solid rgba(255,100,50,0.3);padding-top:16px;">
-
-    <!-- Header -->
-    <div style="font-size:13px;color:#FF6644;letter-spacing:1px;margin-bottom:14px;font-weight:900;">🔧 ADMIN PANEL</div>
-
-    <!-- Tab buttons -->
-    <div style="display:flex;gap:6px;margin-bottom:14px;">
-      <button onclick="adminTab('combo')" id="adminTab_combo" style="flex:1;padding:8px 4px;background:rgba(255,100,50,0.3);border:1px solid rgba(255,100,50,0.5);color:#FF6644;border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">🎯 Combo</button>
-      <button onclick="adminTab('gift')" id="adminTab_gift" style="flex:1;padding:8px 4px;background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">🎁 Gift</button>
-      <button onclick="adminTab('weekly')" id="adminTab_weekly" style="flex:1;padding:8px 4px;background:rgba(0,0,0,0.2);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.5);border-radius:8px;font-size:11px;font-weight:700;cursor:pointer;">🏆 Weekly</button>
+  <div id="comboAdminPanel" style="display:none;margin-top:20px;border-top:1px solid rgba(255,255,255,0.08);padding-top:16px;">
+    <div style="font-size:12px;color:rgba(255,100,50,0.7);letter-spacing:1px;margin-bottom:10px;">🔧 ADMIN — اختر بطاقات الكومبو</div>
+    <div id="comboAdminSlots" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;">
+      <!-- 3 selectors -->
     </div>
-
-    <!-- Combo Tab -->
-    <div id="adminSection_combo">
-      <div id="comboAdminSlots" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px;">
-        <!-- 3 selectors -->
-      </div>
-      <button onclick="saveAdminCombo()" style="width:100%;background:rgba(255,100,50,0.2);border:1px solid rgba(255,100,50,0.4);color:#FF6644;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:4px;">💾 حفظ الكومبو اليومي</button>
-    </div>
-
-    <!-- Gift Tab -->
-    <div id="adminSection_gift" style="display:none;">
-      <div style="margin-bottom:8px;">
-        <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px;">Telegram ID المستخدم</div>
-        <input id="giftUserId" type="number" placeholder="مثال: 5994901709" style="width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.15);color:white;padding:10px;border-radius:8px;font-size:13px;box-sizing:border-box;">
-      </div>
-      <div style="margin-bottom:8px;">
-        <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px;">كمية REC</div>
-        <input id="giftAmount" type="number" placeholder="مثال: 500" style="width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.15);color:white;padding:10px;border-radius:8px;font-size:13px;box-sizing:border-box;">
-      </div>
-      <div style="margin-bottom:10px;">
-        <div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:4px;">رسالة (اختياري)</div>
-        <input id="giftMessage" type="text" placeholder="شكراً لصبرك!" style="width:100%;background:rgba(0,0,0,0.4);border:1px solid rgba(255,255,255,0.15);color:white;padding:10px;border-radius:8px;font-size:13px;box-sizing:border-box;">
-      </div>
-      <button onclick="sendAdminGift()" style="width:100%;background:rgba(0,200,255,0.2);border:1px solid rgba(0,200,255,0.4);color:#00CCFF;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">🎁 إرسال الهدية</button>
-      <div id="giftResult" style="margin-top:8px;font-size:12px;text-align:center;"></div>
-    </div>
-
-    <!-- Weekly Tab -->
-    <div id="adminSection_weekly" style="display:none;">
-      <button id="adminDistBtn" onclick="adminDistributeWeekly()" style="width:100%;background:rgba(0,200,100,0.15);border:1px solid rgba(0,200,100,0.4);color:#00CC66;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">🏆 توزيع جوائز الأسبوع</button>
-    </div>
-
+    <button onclick="saveAdminCombo()" style="width:100%;background:rgba(255,100,50,0.2);border:1px solid rgba(255,100,50,0.4);color:#FF6644;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:Rajdhani,sans-serif;margin-bottom:8px;">💾 حفظ الكومبو اليومي</button>
+    <button id="adminDistBtn" onclick="adminDistributeWeekly()" style="width:100%;background:rgba(0,200,100,0.15);border:1px solid rgba(0,200,100,0.4);color:#00CC66;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;font-family:Rajdhani,sans-serif;">🏆 توزيع جوائز الأسبوع</button>
   </div>
 </div>
 
