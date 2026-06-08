@@ -58,26 +58,28 @@ function watchAd(modal) {
   var btn = document.getElementById('watchAdBtn');
   if(btn) { btn.disabled = true; btn.textContent = t('adsLoading','⏳ Loading...'); }
 
-  // ✅ تحقق إن Monetag SDK محمل
-  if(typeof show_11099536 !== 'function') {
-    if(btn) { btn.disabled = false; btn.textContent = t('adsWatchBtn','📺 Watch Ad') + ' ← +' + AD_REC_REWARD + ' REC'; }
-    if(typeof showToast === 'function') showToast(t('adsLoading','⏳ Loading...'));
-    // حاول تحميل SDK مجدداً
-    var s = document.createElement('script');
-    s.src = '//libtl.com/sdk.js';
-    s.setAttribute('data-zone', '11099536');
-    s.setAttribute('data-sdk', 'show_11099536');
-    document.head.appendChild(s);
-    return;
+  // حاول تشغيل الإعلان
+  function tryShowAd() {
+    if(typeof show_11099536 === 'function') {
+      show_11099536().then(function() {
+        giveAdReward(modal);
+      }).catch(function(e) {
+        console.log('Ad error:', e);
+        if(btn) { btn.disabled = false; btn.textContent = t('adsWatchBtn','📺 Watch Ad') + ' ← +' + AD_REC_REWARD + ' REC'; }
+        if(typeof showToast === 'function') showToast(t('adsUnavailable','❌ Ad unavailable — try again'));
+      });
+    } else {
+      // SDK مو محمل — حمّله ثم حاول مرة ثانية
+      if(btn) { btn.disabled = false; btn.textContent = t('adsWatchBtn','📺 Watch Ad') + ' ← +' + AD_REC_REWARD + ' REC'; }
+      if(typeof showToast === 'function') showToast(t('adsUnavailable','❌ Ad unavailable — try again'));
+      var s = document.createElement('script');
+      s.src = '//libtl.com/sdk.js';
+      s.setAttribute('data-zone', '11099536');
+      s.setAttribute('data-sdk', 'show_11099536');
+      document.head.appendChild(s);
+    }
   }
-
-  show_11099536().then(function() {
-    giveAdReward(modal);
-  }).catch(function(e) {
-    console.log('Ad error:', e);
-    if(btn) { btn.disabled = false; btn.textContent = t('adsWatchBtn','📺 Watch Ad') + ' ← +' + AD_REC_REWARD + ' REC'; }
-    if(typeof showToast === 'function') showToast(t('adsUnavailable','❌ Ad unavailable — try again'));
-  });
+  tryShowAd();
 }
 
 function giveAdReward(modal) {
