@@ -401,7 +401,7 @@ bot.onText(/\/start(.*)/, async (msg, match) => {
   const welcomeText = getWelcomeText(from.first_name || from.username, lang, refId);
   const buttonText = getButtonText(lang);
   try {
-    await bot.sendPhoto(chatId, { source: path.join(__dirname, 'public', 'logo.jpeg'), contentType: 'image/jpeg' }, { caption: welcomeText, reply_markup: { inline_keyboard: [[{ text: buttonText, web_app: { url: MINI_APP_URL } }]] } });
+    await bot.sendPhoto(chatId, MINI_APP_URL + '/logo.jpeg', { caption: welcomeText, reply_markup: { inline_keyboard: [[{ text: buttonText, web_app: { url: MINI_APP_URL } }]] } });
   } catch(e) {
     await bot.sendMessage(chatId, welcomeText, { reply_markup: { inline_keyboard: [[{ text: buttonText, web_app: { url: MINI_APP_URL } }]] } });
   }
