@@ -149,15 +149,15 @@ function closeSideMenu(){
         </div>
 
         <!-- AIRDROP BUTTON -->
-        <div onclick="openAirdrop()" style="margin:0 12px 8px;background:linear-gradient(135deg,rgba(0,180,255,0.1),rgba(0,100,255,0.06));border:1px solid rgba(0,180,255,0.3);border-radius:14px;padding:10px 16px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;-webkit-tap-highlight-color:transparent;">
-          <div style="display:flex;align-items:center;gap:10px;">
-            <span style="font-size:24px;">🪂</span>
-            <div>
-              <div style="font-size:13px;font-weight:700;color:#00AAFF;" data-i18n="airdropTitle">AirDrop</div>
-              <div style="font-size:10px;color:rgba(255,255,255,0.35);" data-i18n="airdropSub">Tap to see your score</div>
+        <div style="margin:0 12px 8px;background:linear-gradient(135deg,rgba(0,180,255,0.12),rgba(0,100,255,0.08));border:1px solid rgba(0,180,255,0.35);border-radius:14px;padding:12px 16px;direction:ltr;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+              <span style="font-size:26px;">🪂</span>
+              <div style="font-size:17px;font-weight:900;color:#00AAFF;letter-spacing:1px;">AirDrop</div>
             </div>
+            <div onclick="openAirdrop()" style="background:linear-gradient(135deg,#0080FF,#00AAFF);border-radius:10px;padding:8px 18px;font-size:13px;font-weight:900;color:white;cursor:pointer;-webkit-tap-highlight-color:transparent;">Open</div>
           </div>
-          <div style="background:rgba(0,180,255,0.15);border:1px solid rgba(0,180,255,0.3);border-radius:8px;padding:4px 10px;font-size:11px;color:#00AAFF;font-weight:700;">🔒 <span data-i18n="comingSoon">Coming Soon</span></div>
+          <div id="homeCountdown" style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;direction:ltr;"></div>
         </div>
 
         <!-- MAIN: 3 columns -->
@@ -961,57 +961,6 @@ function closeSideMenu(){
 <script src="airdrop.js?v=1"></script>
 <script src="levels.js?v=1"></script>
 <script src="app.js?v=8"></script>
-<script>
-function openAds(){
-  var e=document.getElementById("adsModal");
-  if(e){e.remove();return;}
-  var today=new Date().toISOString().split("T")[0];
-  if(localStorage.getItem("adsDate")!==today){localStorage.setItem("adsDate",today);localStorage.setItem("adsCount","0");}
-  var w=parseInt(localStorage.getItem("adsCount")||"0");
-  var m=document.createElement("div");
-  m.id="adsModal";
-  m.style.cssText="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.92);z-index:2147483647;display:flex;align-items:flex-end;";
-  m.onclick=function(ev){if(ev.target===m)m.remove();};
-  var b=document.createElement("div");
-  b.style.cssText="background:#0a1a0e;border-radius:24px 24px 0 0;border-top:2px solid #00FF88;padding:20px 16px 40px;width:100%;";
-  b.innerHTML="<div style='display:flex;justify-content:space-between;margin-bottom:16px;'><span style='font-size:18px;font-weight:900;color:#00FF88;'>📺 ADS</span><button id='adsCls' style='background:rgba(255,255,255,0.1);border:none;color:white;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;'>✕</button></div><div style='text-align:center;padding:16px;'><div style='font-size:48px;'>📺</div><div style='color:#00FF88;font-size:14px;margin:8px 0;font-weight:900;'>WATCH & EARN</div><div style='color:rgba(255,255,255,0.4);font-size:12px;'>شاهد إعلان واكسب REC</div></div><div style='background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.2);border-radius:12px;padding:16px;text-align:center;margin-bottom:14px;'><div style='font-size:28px;color:#00FF88;font-weight:900;'>+5 REC</div><div style='font-size:11px;color:rgba(255,255,255,0.4);'>مكافأة كل إعلان</div></div><div style='display:flex;justify-content:space-between;background:rgba(255,255,255,0.04);border-radius:10px;padding:10px 14px;margin-bottom:16px;'><span style='font-size:12px;color:rgba(255,255,255,0.5);'>اليوم</span><span style='color:#FFD700;font-weight:700;'>"+(w)+" / 100</span></div>"+(100-w>0?"<button id='adsWatchBtn' style='width:100%;background:linear-gradient(135deg,#00CC66,#00FF88);border:none;color:#000;padding:14px;border-radius:14px;font-size:15px;font-weight:900;cursor:pointer;'>📺 شاهد إعلان ← +5 REC</button>":"<div style='text-align:center;color:#FF4444;padding:14px;border:1px solid rgba(255,68,68,0.3);border-radius:12px;'>وصلت للحد اليومي ✅</div>");
-  m.appendChild(b);
-  document.body.appendChild(m);
-  var cl=document.getElementById("adsCls");
-  if(cl)cl.onclick=function(){m.remove();};
-  var wb=document.getElementById("adsWatchBtn");
-  if(wb)wb.onclick=runAd;
-}
-function runAd(){
-  var uid=(typeof tgUser!=="undefined"&&tgUser)?tgUser.id:null;
-  if(!uid)return;
-  var ctrl=null;
-  try{if(window.Adsgram)ctrl=window.Adsgram.init({blockId:"33984"});}catch(e){}
-  if(!ctrl){if(typeof showToast==="function")showToast("الإعلانات غير متاحة حالياً");return;}
-  ctrl.show().then(function(r){
-    if(r&&r.done){
-      fetch("/api/adsgram/reward",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({telegramId:uid})})
-      .then(function(x){return x.json();}).then(function(d){
-        var c=parseInt(localStorage.getItem("adsCount")||"0")+1;
-        localStorage.setItem("adsCount",String(c));
-        if(d.newBalance&&typeof rec!=="undefined")rec=d.newBalance;
-        else if(typeof rec!=="undefined")rec+=5;
-        if(typeof updateUI==="function")updateUI();
-        if(typeof showToast==="function")showToast("🎉 +5 REC!");
-        var m=document.getElementById("adsModal");
-        if(m)m.remove();
-        setTimeout(openAds,200);
-      }).catch(function(){
-        if(typeof rec!=="undefined")rec+=5;
-        if(typeof updateUI==="function")updateUI();
-        if(typeof showToast==="function")showToast("🎉 +5 REC!");
-        var m=document.getElementById("adsModal");
-        if(m)m.remove();
-        setTimeout(openAds,200);
-      });
-    }
-  }).catch(function(){if(typeof showToast==="function")showToast("❌ حاول مجدداً");});
-}
-</script>
+
 </body>
 </html>
