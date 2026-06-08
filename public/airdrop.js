@@ -329,7 +329,7 @@ function _tabTasks() {
   var html = '<div id="adSection_tasks" style="display:none;">';
 
   // Timer
-  html += '<div style="text-align:center;background:rgba(255,68,0,0.08);border:1px solid rgba(255,68,0,0.2);border-radius:10px;padding:8px;margin-bottom:14px;font-size:12px;color:rgba(255,255,255,0.5);">🔄 بطاقات جديدة خلال <span style="color:#FF8800;font-weight:700;">' + diffH + ' ساعة</span></div>';
+  html += '<div style="text-align:center;background:rgba(255,68,0,0.08);border:1px solid rgba(255,68,0,0.2);border-radius:10px;padding:8px;margin-bottom:14px;font-size:12px;color:rgba(255,255,255,0.5);">🔄 ' + t('airdropDayTimer','New cards in') + ' <span style="color:#FF8800;font-weight:700;">' + diffH + 'h</span></div>';
 
   // 3 Card tasks
   cards.forEach(function(card) {
