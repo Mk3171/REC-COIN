@@ -339,7 +339,7 @@ function showVIPBoxResult(type, reward, alreadyOpened) {
       '<div style="font-size:16px;color:rgba(255,255,255,0.6);margin-bottom:8px;">'+t('vipBoxYouGot')+'</div>' +
       '<div style="font-size:24px;font-weight:900;color:' + rewardColor + ';margin-bottom:6px;">' + rewardTitle + '</div>' +
       '<div style="font-size:20px;font-weight:700;color:white;margin-bottom:24px;">' + rewardValue + '</div>' +
-      '<div style="background:' + c.border + ';border-radius:12px;padding:12px;cursor:pointer;color:white;font-size:14px;font-weight:700;">🎉 رائع!</div>' +
+      '<div style="background:' + c.border + ';border-radius:12px;padding:12px;cursor:pointer;color:white;font-size:14px;font-weight:700;">' + t('vipBoxGreat','🎉 Awesome!') + '</div>' +
     '</div>';
 
   document.body.appendChild(overlay);
