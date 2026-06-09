@@ -256,7 +256,8 @@ var T = {
     airdropTerm8:'• لا يمكن نقل النقاط بين الحسابات',
     airdropDays:'أيام', airdropTasksUnit:'مهمة', airdropFriendsUnit:'صديق',
     airdropDailyLoginLabel:'أيام الدخول اليومي',
-    blockCollected:'✅ تم الاستلام', blockLoading:'⏳ جاري التحميل...', vipBoxGreat:'!رائع 🎉'
+    blockCollected:'✅ تم الاستلام', blockLoading:'⏳ جاري التحميل...', vipBoxGreat:'!رائع 🎉',
+    adsTier:'مرحلة', adsAdsLabel:'إعلان', adsTierBonus:'تم استلام مكافأة المرحلة!'
   },
 
   en: {
@@ -463,7 +464,8 @@ var T = {
     airdropTerm8:'• Points cannot be transferred between accounts',
     airdropDays:'days', airdropTasksUnit:'tasks', airdropFriendsUnit:'friends',
     airdropDailyLoginLabel:'Daily Login Days',
-    blockCollected:'✅ Collected', blockLoading:'⏳ Loading...', vipBoxGreat:'Awesome! 🎉'
+    blockCollected:'✅ Collected', blockLoading:'⏳ Loading...', vipBoxGreat:'Awesome! 🎉',
+    adsTier:'Tier', adsAdsLabel:'ads', adsTierBonus:'Tier bonus claimed!'
   },
 
   ru: {
@@ -664,7 +666,8 @@ var T = {
     airdropTerm8:'• Очки нельзя передавать между аккаунтами',
     airdropDays:'дней', airdropTasksUnit:'заданий', airdropFriendsUnit:'друзей',
     airdropDailyLoginLabel:'Дней входа',
-    blockCollected:'✅ Получено', blockLoading:'⏳ Загрузка...', vipBoxGreat:'Отлично! 🎉'
+    blockCollected:'✅ Получено', blockLoading:'⏳ Загрузка...', vipBoxGreat:'Отлично! 🎉',
+    adsTier:'Уровень', adsAdsLabel:'реклам', adsTierBonus:'Бонус уровня получен!'
   },
 
   uk: {
@@ -864,7 +867,8 @@ var T = {
     airdropTerm8:'• Очки не можна передавати між акаунтами',
     airdropDays:'днів', airdropTasksUnit:'завдань', airdropFriendsUnit:'друзів',
     airdropDailyLoginLabel:'Днів входу',
-    blockCollected:'✅ Отримано', blockLoading:'⏳ Завантаження...', vipBoxGreat:'Чудово! 🎉'
+    blockCollected:'✅ Отримано', blockLoading:'⏳ Завантаження...', vipBoxGreat:'Чудово! 🎉',
+    adsTier:'Рівень', adsAdsLabel:'реклам', adsTierBonus:'Бонус рівня отримано!'
   },
 
   pt: {
@@ -1062,7 +1066,8 @@ var T = {
     airdropTerm8:'• Pontos não podem ser transferidos entre contas',
     airdropDays:'dias', airdropTasksUnit:'tarefas', airdropFriendsUnit:'amigos',
     airdropDailyLoginLabel:'Dias de Login',
-    blockCollected:'✅ Coletado', blockLoading:'⏳ Carregando...', vipBoxGreat:'Incrível! 🎉'
+    blockCollected:'✅ Coletado', blockLoading:'⏳ Carregando...', vipBoxGreat:'Incrível! 🎉',
+    adsTier:'Nível', adsAdsLabel:'anúncios', adsTierBonus:'Bônus do nível coletado!'
   },
 
   es: {
@@ -1260,7 +1265,8 @@ var T = {
     airdropTerm8:'• Los puntos no se pueden transferir entre cuentas',
     airdropDays:'días', airdropTasksUnit:'tareas', airdropFriendsUnit:'amigos',
     airdropDailyLoginLabel:'Días de Inicio',
-    blockCollected:'✅ Cobrado', blockLoading:'⏳ Cargando...', vipBoxGreat:'¡Genial! 🎉'
+    blockCollected:'✅ Cobrado', blockLoading:'⏳ Cargando...', vipBoxGreat:'¡Genial! 🎉',
+    adsTier:'Nivel', adsAdsLabel:'anuncios', adsTierBonus:'¡Bono de nivel reclamado!'
   },
 
   tr: {
@@ -1459,7 +1465,8 @@ var T = {
     airdropTerm8:'• Puanlar hesaplar arasında aktarılamaz',
     airdropDays:'gün', airdropTasksUnit:'görev', airdropFriendsUnit:'arkadaş',
     airdropDailyLoginLabel:'Giriş Günleri',
-    blockCollected:'✅ Toplandı', blockLoading:'⏳ Yükleniyor...', vipBoxGreat:'Harika! 🎉'
+    blockCollected:'✅ Toplandı', blockLoading:'⏳ Yükleniyor...', vipBoxGreat:'Harika! 🎉',
+    adsTier:'Seviye', adsAdsLabel:'reklam', adsTierBonus:'Seviye bonusu alındı!'
   },
 
   vi: {
@@ -1658,7 +1665,8 @@ var T = {
     airdropTerm8:'• Điểm không thể chuyển giữa các tài khoản',
     airdropDays:'ngày', airdropTasksUnit:'nhiệm vụ', airdropFriendsUnit:'bạn bè',
     airdropDailyLoginLabel:'Ngày Đăng Nhập',
-    blockCollected:'✅ Đã nhận', blockLoading:'⏳ Đang tải...', vipBoxGreat:'Tuyệt vời! 🎉'
+    blockCollected:'✅ Đã nhận', blockLoading:'⏳ Đang tải...', vipBoxGreat:'Tuyệt vời! 🎉',
+    adsTier:'Cấp', adsAdsLabel:'quảng cáo', adsTierBonus:'Đã nhận thưởng cấp!'
   },
 
   zh: {
@@ -1856,7 +1864,8 @@ var T = {
     airdropDailyReset:'每天午夜重置', airdropTotalReferrals:'总推荐数',
     airdropScoreBreakdown:'积分详情', airdropTotalScore:'你的总积分',
     airdropRules:'📜 空投条款',
-    blockCollected:'✅ 已领取', blockLoading:'⏳ 加载中...', vipBoxGreat:'太棒了! 🎉'
+    blockCollected:'✅ 已领取', blockLoading:'⏳ 加载中...', vipBoxGreat:'太棒了! 🎉',
+    adsTier:'等级', adsAdsLabel:'广告', adsTierBonus:'等级奖励已领取!'
   },
     vipBoxOpening:'🎁 开启中...',
     adsTitle:'📺 广告', adsWatchEarn:'观看赚取', adsWatchSub:'观看广告免费赚取REC',
