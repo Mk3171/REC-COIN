@@ -85,7 +85,7 @@ function openAds() {
     '</div>' +
   '</div>';
 
-  // Tier cards
+  // Tier cards - card style
   var cumulative = 0;
   for(var i = 0; i < AD_TIERS.length; i++) {
     var t2 = AD_TIERS[i];
@@ -98,35 +98,55 @@ function openAds() {
     var isLocked = watched < tStart;
     var bonusClaimed = state.bonusClaimed.indexOf(i) !== -1;
 
-    var borderColor = isComplete ? 'rgba(0,255,136,0.4)' : isActive ? 'rgba(255,215,0,0.4)' : 'rgba(255,255,255,0.08)';
-    var bgColor = isComplete ? 'rgba(0,255,136,0.06)' : isActive ? 'rgba(255,215,0,0.06)' : 'rgba(255,255,255,0.02)';
-    var opacity = isLocked ? '0.4' : '1';
+    var cardBg = isComplete
+      ? 'linear-gradient(135deg,rgba(0,255,136,0.12),rgba(0,180,80,0.06))'
+      : isActive
+        ? 'linear-gradient(135deg,rgba(255,215,0,0.12),rgba(255,140,0,0.06))'
+        : 'linear-gradient(135deg,rgba(255,255,255,0.04),rgba(255,255,255,0.02))';
+    var cardBorder = isComplete ? 'rgba(0,255,136,0.35)' : isActive ? 'rgba(255,215,0,0.35)' : 'rgba(255,255,255,0.07)';
+    var accentColor = isComplete ? '#00FF88' : isActive ? '#FFD700' : 'rgba(255,255,255,0.3)';
 
-    html += '<div style="border:1px solid ' + borderColor + ';background:' + bgColor + ';border-radius:14px;padding:12px 14px;margin-bottom:10px;opacity:' + opacity + ';">';
+    html += '<div style="background:' + cardBg + ';border:1px solid ' + cardBorder + ';border-radius:18px;padding:14px 16px;margin-bottom:10px;opacity:' + (isLocked ? '0.45' : '1') + ';">';
 
-    // Tier header
-    html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">' +
-      '<div style="display:flex;align-items:center;gap:8px;">' +
-        '<span style="font-size:20px;">' + t2.label + '</span>' +
+    // Top row: emoji + tier info + count
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">' +
+      '<div style="display:flex;align-items:center;gap:10px;">' +
+        '<div style="width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:22px;">' +
+          t2.label +
+        '</div>' +
         '<div>' +
-          '<div style="font-size:12px;font-weight:700;color:' + (isComplete ? '#00FF88' : isActive ? '#FFD700' : 'rgba(255,255,255,0.5)') + ';">' +
+          '<div style="font-size:13px;font-weight:900;color:' + accentColor + ';letter-spacing:0.5px;">' +
             t('adsTier','Tier') + ' ' + (i+1) +
           '</div>' +
-          '<div style="font-size:10px;color:rgba(255,255,255,0.3);">' + t2.ads + ' ' + t('adsAdsLabel','ads') + ' → +' + t2.bonus + ' REC</div>' +
+          '<div style="font-size:11px;color:rgba(255,255,255,0.35);margin-top:1px;">' +
+            t2.ads + ' ' + t('adsAdsLabel','ads') +
+          '</div>' +
         '</div>' +
       '</div>' +
-      (isComplete && !bonusClaimed
-        ? '<button onclick="claimTierBonus(' + i + ')" style="background:linear-gradient(135deg,#FFD700,#FF8800);border:none;color:#000;padding:6px 14px;border-radius:8px;font-size:12px;font-weight:900;cursor:pointer;">+' + t2.bonus + ' REC</button>'
-        : isComplete && bonusClaimed
-          ? '<span style="color:#00FF88;font-size:12px;font-weight:700;">✅ +' + t2.bonus + '</span>'
-          : '<span style="color:rgba(255,255,255,0.3);font-size:11px;">' + tWatched + '/' + t2.ads + '</span>'
-      ) +
+      // Right side: progress count + bonus
+      '<div style="text-align:right;">' +
+        '<div style="font-size:14px;font-weight:900;color:' + accentColor + ';">' +
+          tWatched + '<span style="font-size:11px;color:rgba(255,255,255,0.3);">/' + t2.ads + '</span>' +
+        '</div>' +
+        '<div style="font-size:11px;color:rgba(255,215,0,0.8);font-weight:700;margin-top:1px;">+' + t2.bonus + ' REC</div>' +
+      '</div>' +
     '</div>';
 
     // Progress bar
-    html += '<div style="background:rgba(255,255,255,0.06);border-radius:4px;height:4px;">' +
-      '<div style="background:' + (isComplete ? '#00FF88' : '#FFD700') + ';width:' + tPct + '%;height:4px;border-radius:4px;"></div>' +
+    html += '<div style="background:rgba(255,255,255,0.07);border-radius:6px;height:7px;margin-bottom:10px;">' +
+      '<div style="background:' + (isComplete ? 'linear-gradient(90deg,#00FF88,#00CC66)' : 'linear-gradient(90deg,#FFD700,#FF8800)') + ';width:' + tPct + '%;height:7px;border-radius:6px;transition:width 0.4s;"></div>' +
     '</div>';
+
+    // Bottom: claim button or status
+    if(isComplete && !bonusClaimed) {
+      html += '<button onclick="claimTierBonus(' + i + ')" style="width:100%;background:linear-gradient(135deg,#FFD700,#FF8800);border:none;color:#000;padding:10px;border-radius:10px;font-size:13px;font-weight:900;cursor:pointer;letter-spacing:0.5px;">🎁 ' + t('adsTierClaim','Claim') + ' +' + t2.bonus + ' REC</button>';
+    } else if(isComplete && bonusClaimed) {
+      html += '<div style="text-align:center;font-size:12px;color:#00FF88;font-weight:700;">✅ +' + t2.bonus + ' REC ' + t('adsClaimed','Claimed') + '</div>';
+    } else if(isActive) {
+      html += '<div style="text-align:center;font-size:11px;color:rgba(255,215,0,0.6);">▶ ' + t('adsInProgress','In progress...') + '</div>';
+    } else {
+      html += '<div style="text-align:center;font-size:11px;color:rgba(255,255,255,0.2);">🔒 ' + t('adsLocked','Complete previous tier') + '</div>';
+    }
 
     html += '</div>';
   }
