@@ -325,11 +325,11 @@ function showVIPBoxResult(type, reward, alreadyOpened) {
     rewardIcon = '⚡'; rewardTitle = 'REC'; rewardColor = '#00FF88';
     rewardValue = '+' + reward.amount.toFixed(6) + ' REC';
   } else if(reward.type === 'boost') {
-    rewardIcon = '🚀'; rewardTitle = 'تسريع التعدين'; rewardColor = '#FFD700';
-    rewardValue = '×' + reward.multi + ' لمدة ساعة';
+    rewardIcon = '🚀'; rewardTitle = t('vipBoxBoostTitle','Mining Boost'); rewardColor = '#FFD700';
+    rewardValue = t('vipBoxBoostValue','×{n} for 1 hour').replace('{n}', reward.multi);
   } else if(reward.type === 'epicCard') {
-    rewardIcon = '🦅'; rewardTitle = 'بطاقة EPIC النادرة!'; rewardColor = '#FFD700';
-    rewardValue = 'تعدين 0.001 REC/ثانية';
+    rewardIcon = '🦅'; rewardTitle = t('vipBoxEpicCardTitle','EPIC Card!'); rewardColor = '#FFD700';
+    rewardValue = t('vipBoxEpicCardValue','Mining 0.001 REC/sec');
   }
 
   overlay.innerHTML =
