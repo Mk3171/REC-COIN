@@ -128,6 +128,10 @@ function calcDailyTasksScore() {
   if(refs >= 50)  bonus += 5000;
   else if(refs >= 20) bonus += 2000;
   else if(refs >= 10) bonus += 500;
+  var totalAds = (typeof getTotalAdsWatched === 'function') ? getTotalAdsWatched() : 0;
+  if(totalAds >= 200) bonus += 2500;
+  else if(totalAds >= 100) bonus += 1000;
+  else if(totalAds >= 50)  bonus += 500;
   return bonus;
 }
 
@@ -349,8 +353,18 @@ function _tabTasks() {
     [{req:10,label:t('airdropInviteLabel','Invite {n} friends').replace('{n}','10'),pts:500},{req:20,label:t('airdropInviteLabel','Invite {n} friends').replace('{n}','20'),pts:2000},{req:50,label:t('airdropInviteLabel','Invite {n} friends').replace('{n}','50'),pts:5000}],
     refs, 'friends', '#FF8800', t('airdropTotalReferrals','Total referrals'));
 
-  // 5 Coming Soon
-  ['🎮','🏆','💎','🌍','🔥'].forEach(function(icon) {
+  // Ads Watching Task (replaces first Coming Soon)
+  var totalAdsWatched = (typeof getTotalAdsWatched === 'function') ? getTotalAdsWatched() : 0;
+  html += taskCard('📺', t('airdropWatchAdsTask','Watch Ads'),
+    [
+      {req:50,  label:t('airdropWatchAdsLabel','Watch {n} ads').replace('{n}','50'),  pts:500},
+      {req:100, label:t('airdropWatchAdsLabel','Watch {n} ads').replace('{n}','100'), pts:1000},
+      {req:200, label:t('airdropWatchAdsLabel','Watch {n} ads').replace('{n}','200'), pts:2500}
+    ],
+    totalAdsWatched, t('adsAdsLabel','ads'), '#FF6B35', t('airdropTotalAds','Total ads watched'));
+
+  // 4 Coming Soon (was 5)
+  ['🏆','💎','🌍','🔥'].forEach(function(icon) {
     html += '<div style="background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);border-radius:14px;padding:14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;opacity:0.5;">' +
       '<span style="font-size:28px;">' + icon + '</span>' +
       '<div><div style="font-size:13px;color:rgba(255,255,255,0.5);">' + t('airdropComingSoon','Coming Soon') + '</div>' +
