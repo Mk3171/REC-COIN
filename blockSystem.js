@@ -102,30 +102,27 @@ async function runCloudBlockCheck(bot, User) {
 
     if(users.length === 0) return;
 
-    // Filter users with actual mining speed
-    const activeMiners = users.filter(function(u) {
-      return (u.miningSpeed > 0) || (u.cardLevels && Object.keys(u.cardLevels).length > 0);
-    });
-
-    if(activeMiners.length === 0) return;
-    console.log('[Block Cloud] Checking ' + activeMiners.length + ' miners...');
-    const users_filtered = activeMiners;
+    // All active users get a daily luck roll
+    const users_filtered = users;
+    if(!users_filtered.length) return;
+    console.log('[Block Cloud] Daily luck roll for ' + users_filtered.length + ' users...');
 
     for(const user of users_filtered) {
       try {
-        const already = await Block.findOne({ telegramId: user.telegramId, foundAt: { $gte: todayStart } });
-        if(already) continue;
+        // Already won today?
+        const alreadyWon = await Block.findOne({ telegramId: user.telegramId, foundAt: { $gte: todayStart } });
+        if(alreadyWon) continue;
 
-        // Simulate 20 ticks per minute (one per 3 seconds)
-        let found = false;
-        for(let i = 0; i < 20 && !found; i++) {
-          const speed = user.miningSpeed > 0 ? user.miningSpeed : calcMiningSpeedLocal(user.cardLevels || {});
-          if(speed <= 0) continue;
-          const chance = speed / BLOCK_DIFFICULTY;
-          if(Math.random() < chance) {
-            await awardBlock(user, bot);
-            found = true;
-          }
+        // Already rolled today?
+        const alreadyRolled = await DailyRoll.findOne({ telegramId: user.telegramId, date: today });
+        if(alreadyRolled) continue;
+
+        // Record roll
+        try { await DailyRoll.create({ telegramId: user.telegramId, date: today }); } catch(e) {}
+
+        // 40% daily luck chance
+        if(Math.random() < BLOCK_LUCK_CHANCE) {
+          await awardBlock(user, bot);
         }
       } catch(e) {}
     }
@@ -138,19 +135,27 @@ module.exports = function initBlockSystem(app, bot, User) {
 
   app.post('/api/blocks/check', async (req, res) => {
     try {
-      const { telegramId, recPerSec } = req.body;
-      if(!telegramId || !recPerSec) return res.json({ found: false });
-      const speed = parseFloat(recPerSec) || 0;
-      if(speed <= 0) return res.json({ found: false });
+      const { telegramId } = req.body;
+      if(!telegramId) return res.json({ found: false });
 
       const today = getTodayStr();
-      const already = await Block.findOne({ telegramId: parseInt(telegramId), foundAt: { $gte: new Date(today) } });
-      if(already) return res.json({ found: false });
 
-      const chance = speed / BLOCK_DIFFICULTY;
-      console.log("[Block] Check: speed=" + speed + " chance=" + chance.toFixed(8));
-      if(Math.random() > chance) return res.json({ found: false });
+      // Already won a block today?
+      const alreadyWon = await Block.findOne({ telegramId: parseInt(telegramId), foundAt: { $gte: new Date(today) } });
+      if(alreadyWon) return res.json({ found: false });
 
+      // Already rolled today (but didn't win)?
+      const alreadyRolled = await DailyRoll.findOne({ telegramId: parseInt(telegramId), date: today });
+      if(alreadyRolled) return res.json({ found: false });
+
+      // Record this roll attempt (one per day)
+      try { await DailyRoll.create({ telegramId: parseInt(telegramId), date: today }); } catch(e) {}
+
+      // Roll luck: 40% daily chance
+      console.log('[Block] Luck roll for ' + telegramId + ' — chance: ' + (BLOCK_LUCK_CHANCE * 100) + '%');
+      if(Math.random() > BLOCK_LUCK_CHANCE) return res.json({ found: false });
+
+      // Lucky! Award random 100-200 REC block
       const user = await User.findOne({ telegramId: parseInt(telegramId) }).lean();
       if(!user) return res.json({ found: false });
 
