@@ -260,6 +260,7 @@ var T = {
     adsTier:'مرحلة', adsAdsLabel:'إعلان', adsTierBonus:'تم استلام مكافأة المرحلة!',
     adsTierClaim:'استلم', adsClaimed:'تم الاستلام', adsInProgress:'جاري...', adsLocked:'أكمل المرحلة السابقة', adsWaiting:'لم تبدأ بعد',
     airdropWatchAdsTask:'📺 شاهد إعلانات', airdropWatchAdsLabel:'شاهد {n} إعلان', airdropTaskTimeLeft:'متبقي',
+    airdropPointsUnit:'نقطة', airdropWatchAdsFaqLabel:'مهمة الإعلانات', airdropWatchAdsFaqSub:'مراحل مكتملة',
     vipBoxBoostTitle:'تسريع التعدين', vipBoxBoostValue:'×{n} لمدة ساعة', vipBoxEpicCardTitle:'بطاقة EPIC النادرة!', vipBoxEpicCardValue:'تعدين 0.001 REC/ثانية'
   },
 
@@ -471,6 +472,7 @@ var T = {
     adsTier:'Tier', adsAdsLabel:'ads', adsTierBonus:'Tier bonus claimed!',
     adsTierClaim:'Claim', adsClaimed:'Claimed', adsInProgress:'In progress...', adsLocked:'Complete previous tier', adsWaiting:'Not started yet',
     airdropWatchAdsTask:'📺 Watch Ads', airdropWatchAdsLabel:'Watch {n} ads', airdropTaskTimeLeft:'left',
+    airdropPointsUnit:'pts', airdropWatchAdsFaqLabel:'Watch Ads Task', airdropWatchAdsFaqSub:'tiers',
     vipBoxBoostTitle:'Mining Boost', vipBoxBoostValue:'×{n} for 1 hour', vipBoxEpicCardTitle:'EPIC Card!', vipBoxEpicCardValue:'Mining 0.001 REC/sec'
   },
 
@@ -676,6 +678,7 @@ var T = {
     adsTier:'Уровень', adsAdsLabel:'реклам', adsTierBonus:'Бонус уровня получен!',
     adsTierClaim:'Получить', adsClaimed:'Получено', adsInProgress:'В процессе...', adsLocked:'Завершите предыдущий уровень', adsWaiting:'Ещё не начато',
     airdropWatchAdsTask:'📺 Смотреть рекламу', airdropWatchAdsLabel:'Смотреть {n} реклам', airdropTaskTimeLeft:'осталось',
+    airdropPointsUnit:'очков', airdropWatchAdsFaqLabel:'Задание Реклама', airdropWatchAdsFaqSub:'уровней',
     vipBoxBoostTitle:'Ускорение майнинга', vipBoxBoostValue:'×{n} на 1 час', vipBoxEpicCardTitle:'EPIC Карта!', vipBoxEpicCardValue:'Майнинг 0.001 REC/сек'
   },
 
@@ -880,6 +883,7 @@ var T = {
     adsTier:'Рівень', adsAdsLabel:'реклам', adsTierBonus:'Бонус рівня отримано!',
     adsTierClaim:'Отримати', adsClaimed:'Отримано', adsInProgress:'В процесі...', adsLocked:'Завершіть попередній рівень', adsWaiting:'Ще не розпочато',
     airdropWatchAdsTask:'📺 Дивитись рекламу', airdropWatchAdsLabel:'Переглянути {n} реклам', airdropTaskTimeLeft:'залишилось',
+    airdropPointsUnit:'очок', airdropWatchAdsFaqLabel:'Завдання Реклама', airdropWatchAdsFaqSub:'рівнів',
     vipBoxBoostTitle:'Прискорення майнінгу', vipBoxBoostValue:'×{n} на 1 годину', vipBoxEpicCardTitle:'EPIC Карта!', vipBoxEpicCardValue:'Майнінг 0.001 REC/сек'
   },
 
@@ -1082,6 +1086,7 @@ var T = {
     adsTier:'Nível', adsAdsLabel:'anúncios', adsTierBonus:'Bônus do nível coletado!',
     adsTierClaim:'Coletar', adsClaimed:'Coletado', adsInProgress:'Em progresso...', adsLocked:'Complete o nível anterior', adsWaiting:'Ainda não iniciado',
     airdropWatchAdsTask:'📺 Assistir Anúncios', airdropWatchAdsLabel:'Assistir {n} anúncios', airdropTaskTimeLeft:'restante',
+    airdropPointsUnit:'pts', airdropWatchAdsFaqLabel:'Tarefa Anúncios', airdropWatchAdsFaqSub:'níveis',
     vipBoxBoostTitle:'Boost de Mineração', vipBoxBoostValue:'×{n} por 1 hora', vipBoxEpicCardTitle:'Carta EPIC!', vipBoxEpicCardValue:'Mineração 0.001 REC/seg'
   },
 
@@ -1284,6 +1289,7 @@ var T = {
     adsTier:'Nivel', adsAdsLabel:'anuncios', adsTierBonus:'¡Bono de nivel reclamado!',
     adsTierClaim:'Reclamar', adsClaimed:'Reclamado', adsInProgress:'En progreso...', adsLocked:'Completa el nivel anterior', adsWaiting:'Aún no iniciado',
     airdropWatchAdsTask:'📺 Ver Anuncios', airdropWatchAdsLabel:'Ver {n} anuncios', airdropTaskTimeLeft:'restante',
+    airdropPointsUnit:'pts', airdropWatchAdsFaqLabel:'Tarea Anuncios', airdropWatchAdsFaqSub:'niveles',
     vipBoxBoostTitle:'Boost de Minería', vipBoxBoostValue:'×{n} por 1 hora', vipBoxEpicCardTitle:'¡Carta ÉPICA!', vipBoxEpicCardValue:'Minería 0.001 REC/seg'
   },
 
@@ -1487,6 +1493,7 @@ var T = {
     adsTier:'Seviye', adsAdsLabel:'reklam', adsTierBonus:'Seviye bonusu alındı!',
     adsTierClaim:'Al', adsClaimed:'Alındı', adsInProgress:'Devam ediyor...', adsLocked:'Önceki seviyeyi tamamla', adsWaiting:'Henüz başlamadı',
     airdropWatchAdsTask:'📺 Reklam İzle', airdropWatchAdsLabel:'{n} reklam izle', airdropTaskTimeLeft:'kaldı',
+    airdropPointsUnit:'puan', airdropWatchAdsFaqLabel:'Reklam Görevi', airdropWatchAdsFaqSub:'seviye',
     vipBoxBoostTitle:'Madencilik Güçlendirme', vipBoxBoostValue:'×{n} 1 saat için', vipBoxEpicCardTitle:'EPIC Kart!', vipBoxEpicCardValue:'Madencilik 0.001 REC/sn'
   },
 
@@ -1690,6 +1697,7 @@ var T = {
     adsTier:'Cấp', adsAdsLabel:'quảng cáo', adsTierBonus:'Đã nhận thưởng cấp!',
     adsTierClaim:'Nhận', adsClaimed:'Đã nhận', adsInProgress:'Đang tiến hành...', adsLocked:'Hoàn thành cấp trước', adsWaiting:'Chưa bắt đầu',
     airdropWatchAdsTask:'📺 Xem Quảng Cáo', airdropWatchAdsLabel:'Xem {n} quảng cáo', airdropTaskTimeLeft:'còn lại',
+    airdropPointsUnit:'điểm', airdropWatchAdsFaqLabel:'Nhiệm Vụ Quảng Cáo', airdropWatchAdsFaqSub:'cấp độ',
     vipBoxBoostTitle:'Tăng Tốc Đào', vipBoxBoostValue:'×{n} trong 1 giờ', vipBoxEpicCardTitle:'Thẻ EPIC!', vipBoxEpicCardValue:'Đào 0.001 REC/giây'
   },
 
@@ -1892,6 +1900,7 @@ var T = {
     adsTier:'等级', adsAdsLabel:'广告', adsTierBonus:'等级奖励已领取!',
     adsTierClaim:'领取', adsClaimed:'已领取', adsInProgress:'进行中...', adsLocked:'完成上一等级', adsWaiting:'尚未开始',
     airdropWatchAdsTask:'📺 观看广告', airdropWatchAdsLabel:'观看 {n} 个广告', airdropTaskTimeLeft:'剩余',
+    airdropPointsUnit:'分', airdropWatchAdsFaqLabel:'观看广告任务', airdropWatchAdsFaqSub:'等级',
     vipBoxBoostTitle:'挖矿加速', vipBoxBoostValue:'×{n} 持续1小时', vipBoxEpicCardTitle:'EPIC卡片！', vipBoxEpicCardValue:'挖矿 0.001 REC/秒'
   },
     vipBoxOpening:'🎁 开启中...',
