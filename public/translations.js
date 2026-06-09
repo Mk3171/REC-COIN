@@ -257,7 +257,8 @@ var T = {
     airdropDays:'أيام', airdropTasksUnit:'مهمة', airdropFriendsUnit:'صديق',
     airdropDailyLoginLabel:'أيام الدخول اليومي',
     blockCollected:'✅ تم الاستلام', blockLoading:'⏳ جاري التحميل...', vipBoxGreat:'!رائع 🎉',
-    adsTier:'مرحلة', adsAdsLabel:'إعلان', adsTierBonus:'تم استلام مكافأة المرحلة!'
+    adsTier:'مرحلة', adsAdsLabel:'إعلان', adsTierBonus:'تم استلام مكافأة المرحلة!',
+    adsTierClaim:'استلم', adsClaimed:'تم الاستلام', adsInProgress:'جاري...', adsLocked:'أكمل المرحلة السابقة'
   },
 
   en: {
@@ -465,7 +466,8 @@ var T = {
     airdropDays:'days', airdropTasksUnit:'tasks', airdropFriendsUnit:'friends',
     airdropDailyLoginLabel:'Daily Login Days',
     blockCollected:'✅ Collected', blockLoading:'⏳ Loading...', vipBoxGreat:'Awesome! 🎉',
-    adsTier:'Tier', adsAdsLabel:'ads', adsTierBonus:'Tier bonus claimed!'
+    adsTier:'Tier', adsAdsLabel:'ads', adsTierBonus:'Tier bonus claimed!',
+    adsTierClaim:'Claim', adsClaimed:'Claimed', adsInProgress:'In progress...', adsLocked:'Complete previous tier'
   },
 
   ru: {
@@ -667,7 +669,8 @@ var T = {
     airdropDays:'дней', airdropTasksUnit:'заданий', airdropFriendsUnit:'друзей',
     airdropDailyLoginLabel:'Дней входа',
     blockCollected:'✅ Получено', blockLoading:'⏳ Загрузка...', vipBoxGreat:'Отлично! 🎉',
-    adsTier:'Уровень', adsAdsLabel:'реклам', adsTierBonus:'Бонус уровня получен!'
+    adsTier:'Уровень', adsAdsLabel:'реклам', adsTierBonus:'Бонус уровня получен!',
+    adsTierClaim:'Получить', adsClaimed:'Получено', adsInProgress:'В процессе...', adsLocked:'Завершите предыдущий уровень'
   },
 
   uk: {
@@ -868,7 +871,8 @@ var T = {
     airdropDays:'днів', airdropTasksUnit:'завдань', airdropFriendsUnit:'друзів',
     airdropDailyLoginLabel:'Днів входу',
     blockCollected:'✅ Отримано', blockLoading:'⏳ Завантаження...', vipBoxGreat:'Чудово! 🎉',
-    adsTier:'Рівень', adsAdsLabel:'реклам', adsTierBonus:'Бонус рівня отримано!'
+    adsTier:'Рівень', adsAdsLabel:'реклам', adsTierBonus:'Бонус рівня отримано!',
+    adsTierClaim:'Отримати', adsClaimed:'Отримано', adsInProgress:'В процесі...', adsLocked:'Завершіть попередній рівень'
   },
 
   pt: {
@@ -1067,7 +1071,8 @@ var T = {
     airdropDays:'dias', airdropTasksUnit:'tarefas', airdropFriendsUnit:'amigos',
     airdropDailyLoginLabel:'Dias de Login',
     blockCollected:'✅ Coletado', blockLoading:'⏳ Carregando...', vipBoxGreat:'Incrível! 🎉',
-    adsTier:'Nível', adsAdsLabel:'anúncios', adsTierBonus:'Bônus do nível coletado!'
+    adsTier:'Nível', adsAdsLabel:'anúncios', adsTierBonus:'Bônus do nível coletado!',
+    adsTierClaim:'Coletar', adsClaimed:'Coletado', adsInProgress:'Em progresso...', adsLocked:'Complete o nível anterior'
   },
 
   es: {
@@ -1266,7 +1271,8 @@ var T = {
     airdropDays:'días', airdropTasksUnit:'tareas', airdropFriendsUnit:'amigos',
     airdropDailyLoginLabel:'Días de Inicio',
     blockCollected:'✅ Cobrado', blockLoading:'⏳ Cargando...', vipBoxGreat:'¡Genial! 🎉',
-    adsTier:'Nivel', adsAdsLabel:'anuncios', adsTierBonus:'¡Bono de nivel reclamado!'
+    adsTier:'Nivel', adsAdsLabel:'anuncios', adsTierBonus:'¡Bono de nivel reclamado!',
+    adsTierClaim:'Reclamar', adsClaimed:'Reclamado', adsInProgress:'En progreso...', adsLocked:'Completa el nivel anterior'
   },
 
   tr: {
@@ -1466,7 +1472,8 @@ var T = {
     airdropDays:'gün', airdropTasksUnit:'görev', airdropFriendsUnit:'arkadaş',
     airdropDailyLoginLabel:'Giriş Günleri',
     blockCollected:'✅ Toplandı', blockLoading:'⏳ Yükleniyor...', vipBoxGreat:'Harika! 🎉',
-    adsTier:'Seviye', adsAdsLabel:'reklam', adsTierBonus:'Seviye bonusu alındı!'
+    adsTier:'Seviye', adsAdsLabel:'reklam', adsTierBonus:'Seviye bonusu alındı!',
+    adsTierClaim:'Al', adsClaimed:'Alındı', adsInProgress:'Devam ediyor...', adsLocked:'Önceki seviyeyi tamamla'
   },
 
   vi: {
@@ -1666,7 +1673,8 @@ var T = {
     airdropDays:'ngày', airdropTasksUnit:'nhiệm vụ', airdropFriendsUnit:'bạn bè',
     airdropDailyLoginLabel:'Ngày Đăng Nhập',
     blockCollected:'✅ Đã nhận', blockLoading:'⏳ Đang tải...', vipBoxGreat:'Tuyệt vời! 🎉',
-    adsTier:'Cấp', adsAdsLabel:'quảng cáo', adsTierBonus:'Đã nhận thưởng cấp!'
+    adsTier:'Cấp', adsAdsLabel:'quảng cáo', adsTierBonus:'Đã nhận thưởng cấp!',
+    adsTierClaim:'Nhận', adsClaimed:'Đã nhận', adsInProgress:'Đang tiến hành...', adsLocked:'Hoàn thành cấp trước'
   },
 
   zh: {
@@ -1865,7 +1873,8 @@ var T = {
     airdropScoreBreakdown:'积分详情', airdropTotalScore:'你的总积分',
     airdropRules:'📜 空投条款',
     blockCollected:'✅ 已领取', blockLoading:'⏳ 加载中...', vipBoxGreat:'太棒了! 🎉',
-    adsTier:'等级', adsAdsLabel:'广告', adsTierBonus:'等级奖励已领取!'
+    adsTier:'等级', adsAdsLabel:'广告', adsTierBonus:'等级奖励已领取!',
+    adsTierClaim:'领取', adsClaimed:'已领取', adsInProgress:'进行中...', adsLocked:'完成上一等级'
   },
     vipBoxOpening:'🎁 开启中...',
     adsTitle:'📺 广告', adsWatchEarn:'观看赚取', adsWatchSub:'观看广告免费赚取REC',
