@@ -65,7 +65,7 @@ function openAds() {
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:2147483647;display:flex;align-items:flex-end;justify-content:center;';
 
   var inner = document.createElement('div');
-  inner.style.cssText = 'background:linear-gradient(180deg,#0a1a0e,#050d08);border-radius:24px 24px 0 0;border-top:2px solid rgba(0,255,136,0.5);padding:20px 16px 40px;width:100%;max-height:90vh;overflow-y:auto;';
+  inner.style.cssText = 'background:linear-gradient(180deg,#0a1a0e,#050d08);border-radius:24px 24px 0 0;border-top:2px solid rgba(0,255,136,0.5);padding:20px 16px 0;width:100%;max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;';
 
   // Header
   var html = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">' +
@@ -106,7 +106,7 @@ function openAds() {
     var cardBorder = isComplete ? 'rgba(0,255,136,0.35)' : isActive ? 'rgba(255,215,0,0.35)' : 'rgba(255,255,255,0.07)';
     var accentColor = isComplete ? '#00FF88' : isActive ? '#FFD700' : 'rgba(255,255,255,0.3)';
 
-    html += '<div style="background:' + cardBg + ';border:1px solid ' + cardBorder + ';border-radius:18px;padding:14px 16px;margin-bottom:10px;opacity:' + (isLocked ? '0.45' : '1') + ';">';
+    html += '<div style="background:' + cardBg + ';border:1px solid ' + cardBorder + ';border-radius:18px;padding:14px 16px;margin-bottom:10px;">';
 
     // Top row: emoji + tier info + count
     html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">' +
@@ -145,27 +145,31 @@ function openAds() {
     } else if(isActive) {
       html += '<div style="text-align:center;font-size:11px;color:rgba(255,215,0,0.6);">▶ ' + t('adsInProgress','In progress...') + '</div>';
     } else {
-      html += '<div style="text-align:center;font-size:11px;color:rgba(255,255,255,0.2);">🔒 ' + t('adsLocked','Complete previous tier') + '</div>';
+      html += '<div style="text-align:center;font-size:11px;color:rgba(255,255,255,0.25);">⏳ ' + t('adsWaiting','Not started yet') + '</div>';
     }
 
     html += '</div>';
   }
 
-  // Watch button or done
-  html += '<div style="margin-top:4px;">';
+  // Watch button or done — sticky footer outside scrollable area
+  inner.innerHTML = html;
+  inner.style.paddingBottom = '0';
+
+  // Sticky footer with Watch button
+  var footer = document.createElement('div');
+  footer.style.cssText = 'padding:12px 16px 28px;background:linear-gradient(0deg,#050d08 80%,transparent);position:sticky;bottom:0;left:0;right:0;';
   if(allDone) {
-    html += '<div style="text-align:center;padding:14px;background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.2);border-radius:14px;color:#00FF88;font-size:13px;font-weight:700;">' +
+    footer.innerHTML = '<div style="text-align:center;padding:14px;background:rgba(0,255,136,0.08);border:1px solid rgba(0,255,136,0.2);border-radius:14px;color:#00FF88;font-size:13px;font-weight:700;">' +
       '🏆 ' + t('adsDailyLimit','Daily limit reached — come back tomorrow!') +
     '</div>';
   } else {
-    html += '<button id="watchAdBtn" style="width:100%;background:linear-gradient(135deg,#00CC66,#00FF88);border:none;color:#000;padding:14px;border-radius:14px;font-size:15px;font-weight:900;cursor:pointer;">' +
+    footer.innerHTML = '<button id="watchAdBtn" style="width:100%;background:linear-gradient(135deg,#00CC66,#00FF88);border:none;color:#000;padding:14px;border-radius:14px;font-size:15px;font-weight:900;cursor:pointer;box-shadow:0 4px 20px rgba(0,255,136,0.4);">' +
       t('adsWatchBtn','📺 Watch Ad') + ' ← +' + AD_REC_REWARD + ' REC' +
     '</button>';
   }
-  html += '</div>';
 
-  inner.innerHTML = html;
   modal.appendChild(inner);
+  inner.appendChild(footer);
   document.body.appendChild(modal);
 
   modal.addEventListener('click', function(e){ if(e.target === modal) modal.remove(); });
