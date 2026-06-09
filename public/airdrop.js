@@ -128,11 +128,112 @@ function calcDailyTasksScore() {
   if(refs >= 50)  bonus += 5000;
   else if(refs >= 20) bonus += 2000;
   else if(refs >= 10) bonus += 500;
-  var totalAds = (typeof getTotalAdsWatched === 'function') ? getTotalAdsWatched() : 0;
-  if(totalAds >= 200) bonus += 2500;
-  else if(totalAds >= 100) bonus += 1000;
-  else if(totalAds >= 50)  bonus += 500;
+  // Ads task: add pts for each permanently claimed tier
+  var adsState = getAdsTaskState();
+  adsState.claimedTiers.forEach(function(idx) {
+    var tiers = [{req:50,pts:500},{req:100,pts:1000},{req:200,pts:2500}];
+    if(tiers[idx]) bonus += tiers[idx].pts;
+  });
   return bonus;
+}
+
+// ====== Ads Task State System ======
+var ADS_TASK_PERIOD_MS = 2 * 24 * 60 * 60 * 1000; // 2 days
+var ADS_TASK_TIERS = [
+  {req: 50,  pts: 500},
+  {req: 100, pts: 1000},
+  {req: 200, pts: 2500}
+];
+
+function getAdsTaskState() {
+  var d;
+  try { d = JSON.parse(localStorage.getItem('adsTaskState') || 'null'); } catch(e) {}
+  if(!d) d = {claimedTiers: [], currentTierIdx: 0, periodStart: Date.now(), periodAds: 0};
+  if(!d.claimedTiers) d.claimedTiers = [];
+  if(typeof d.currentTierIdx !== 'number') d.currentTierIdx = 0;
+  if(typeof d.periodAds !== 'number') d.periodAds = 0;
+  if(!d.periodStart) d.periodStart = Date.now();
+  var now = Date.now();
+  if(d.currentTierIdx < ADS_TASK_TIERS.length && (now - d.periodStart) >= ADS_TASK_PERIOD_MS) {
+    d.periodAds = 0;
+    d.periodStart = now;
+    saveAdsTaskState(d);
+  }
+  return d;
+}
+
+function saveAdsTaskState(d) {
+  try { localStorage.setItem('adsTaskState', JSON.stringify(d)); } catch(e) {}
+}
+
+function incrementAdsTaskProgress() {
+  var d = getAdsTaskState();
+  if(d.currentTierIdx >= ADS_TASK_TIERS.length) return;
+  d.periodAds = (d.periodAds || 0) + 1;
+  var tier = ADS_TASK_TIERS[d.currentTierIdx];
+  if(d.periodAds >= tier.req) {
+    if(d.claimedTiers.indexOf(d.currentTierIdx) === -1) d.claimedTiers.push(d.currentTierIdx);
+    d.currentTierIdx++;
+    d.periodAds = 0;
+    d.periodStart = Date.now();
+    if(typeof showToast === 'function') {
+      showToast('🎉 +' + tier.pts.toLocaleString() + ' pts! ' + (typeof t === 'function' ? t('adsTierBonus','Ads task tier complete!') : 'Ads task tier complete!'));
+    }
+  }
+  saveAdsTaskState(d);
+}
+
+function renderAdsTaskCard() {
+  var d = getAdsTaskState();
+  var now = Date.now();
+  var timeLeft = Math.max(0, ADS_TASK_PERIOD_MS - (now - d.periodStart));
+  var hoursLeft = Math.floor(timeLeft / 3600000);
+  var minsLeft  = Math.floor((timeLeft % 3600000) / 60000);
+  var timerColor = hoursLeft < 6 ? '#FF4444' : hoursLeft < 24 ? '#FF8800' : '#FFD700';
+
+  var html = '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,107,53,0.25);border-radius:14px;padding:14px;margin-bottom:12px;">';
+
+  html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;">' +
+    '<div style="display:flex;align-items:center;gap:8px;">' +
+      '<span style="font-size:26px;">📺</span>' +
+      '<div>' +
+        '<div style="font-size:13px;font-weight:700;color:white;">' + (typeof t==="function"?t("airdropWatchAdsTask","Watch Ads"):"Watch Ads") + "</div>" +
+        (d.currentTierIdx < ADS_TASK_TIERS.length
+          ? '<div style="font-size:10px;color:' + timerColor + ';margin-top:2px;">⏱ ' + hoursLeft + 'h ' + minsLeft + 'm left</div>'
+          : '<div style="font-size:10px;color:#00FF88;margin-top:2px;">🏆 All tiers complete!</div>'
+        ) +
+      "</div>" +
+    "</div>" +
+  "</div>";
+
+  ADS_TASK_TIERS.forEach(function(tier, i) {
+    var isClaimed = d.claimedTiers.indexOf(i) !== -1;
+    var isActive  = !isClaimed && d.currentTierIdx === i;
+    var isLocked  = !isClaimed && d.currentTierIdx < i;
+    var progress  = isClaimed ? tier.req : (isActive ? Math.min(d.periodAds, tier.req) : 0);
+    var pct = Math.floor(progress / tier.req * 100);
+    var bg     = isClaimed ? "rgba(0,255,136,0.05)"  : isActive ? "rgba(255,107,53,0.07)" : "rgba(255,255,255,0.02)";
+    var border = isClaimed ? "rgba(0,255,136,0.25)"  : isActive ? "rgba(255,107,53,0.35)" : "rgba(255,255,255,0.05)";
+    var barBg  = isClaimed ? "#00FF88" : "linear-gradient(90deg,#FF6B35,#FF8800)";
+
+    html += '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:' + bg + ';border:1px solid ' + border + ';border-radius:10px;margin-bottom:6px;opacity:' + (isLocked?"0.35":"1") + ';">' +
+      '<div style="flex:1;">' +
+        '<div style="font-size:12px;color:rgba(255,255,255,0.65);">Watch ' + tier.req + ' ads</div>' +
+        '<div style="background:rgba(255,255,255,0.07);border-radius:6px;height:6px;margin-top:8px;">' +
+          '<div style="background:' + barBg + ';width:' + pct + '%;height:6px;border-radius:6px;transition:width 0.3s;"></div>' +
+        '</div>' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:4px;">' + progress.toLocaleString() + " / " + tier.req.toLocaleString() + " ads</div>" +
+      "</div>" +
+      '<div style="margin-left:12px;text-align:right;flex-shrink:0;">' +
+        '<div style="font-size:13px;font-weight:900;color:#FFD700;">+' + tier.pts.toLocaleString() + "</div>" +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.3);">pts</div>' +
+        (isClaimed ? '<div style="font-size:13px;color:#00FF88;margin-top:2px;">✅</div>' : "") +
+      "</div>" +
+    "</div>";
+  });
+
+  html += "</div>";
+  return html;
 }
 
 // ====== Open AirDrop ======
@@ -353,15 +454,8 @@ function _tabTasks() {
     [{req:10,label:t('airdropInviteLabel','Invite {n} friends').replace('{n}','10'),pts:500},{req:20,label:t('airdropInviteLabel','Invite {n} friends').replace('{n}','20'),pts:2000},{req:50,label:t('airdropInviteLabel','Invite {n} friends').replace('{n}','50'),pts:5000}],
     refs, 'friends', '#FF8800', t('airdropTotalReferrals','Total referrals'));
 
-  // Ads Watching Task (replaces first Coming Soon)
-  var totalAdsWatched = (typeof getTotalAdsWatched === 'function') ? getTotalAdsWatched() : 0;
-  html += taskCard('📺', t('airdropWatchAdsTask','Watch Ads'),
-    [
-      {req:50,  label:t('airdropWatchAdsLabel','Watch {n} ads').replace('{n}','50'),  pts:500},
-      {req:100, label:t('airdropWatchAdsLabel','Watch {n} ads').replace('{n}','100'), pts:1000},
-      {req:200, label:t('airdropWatchAdsLabel','Watch {n} ads').replace('{n}','200'), pts:2500}
-    ],
-    totalAdsWatched, t('adsAdsLabel','ads'), '#FF6B35', t('airdropTotalAds','Total ads watched'));
+  // Ads Watching Task — 2-day period system
+  html += renderAdsTaskCard();
 
   // 4 Coming Soon (was 5)
   ['🏆','💎','🌍','🔥'].forEach(function(icon) {
