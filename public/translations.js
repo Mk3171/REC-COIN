@@ -255,7 +255,8 @@ var T = {
     airdropTerm7:'• فقط TON العملات تُرسل على شبكة',
     airdropTerm8:'• لا يمكن نقل النقاط بين الحسابات',
     airdropDays:'أيام', airdropTasksUnit:'مهمة', airdropFriendsUnit:'صديق',
-    airdropDailyLoginLabel:'أيام الدخول اليومي'
+    airdropDailyLoginLabel:'أيام الدخول اليومي',
+    blockCollected:'✅ تم الاستلام', blockLoading:'⏳ جاري التحميل...', vipBoxGreat:'!رائع 🎉'
   },
 
   en: {
@@ -461,7 +462,8 @@ var T = {
     airdropTerm7:'• Tokens sent on TON network only',
     airdropTerm8:'• Points cannot be transferred between accounts',
     airdropDays:'days', airdropTasksUnit:'tasks', airdropFriendsUnit:'friends',
-    airdropDailyLoginLabel:'Daily Login Days'
+    airdropDailyLoginLabel:'Daily Login Days',
+    blockCollected:'✅ Collected', blockLoading:'⏳ Loading...', vipBoxGreat:'Awesome! 🎉'
   },
 
   ru: {
@@ -661,7 +663,8 @@ var T = {
     airdropTerm7:'• Токены отправляются только в сети TON',
     airdropTerm8:'• Очки нельзя передавать между аккаунтами',
     airdropDays:'дней', airdropTasksUnit:'заданий', airdropFriendsUnit:'друзей',
-    airdropDailyLoginLabel:'Дней входа'
+    airdropDailyLoginLabel:'Дней входа',
+    blockCollected:'✅ Получено', blockLoading:'⏳ Загрузка...', vipBoxGreat:'Отлично! 🎉'
   },
 
   uk: {
@@ -860,7 +863,8 @@ var T = {
     airdropTerm7:'• Токени надсилаються лише в мережі TON',
     airdropTerm8:'• Очки не можна передавати між акаунтами',
     airdropDays:'днів', airdropTasksUnit:'завдань', airdropFriendsUnit:'друзів',
-    airdropDailyLoginLabel:'Днів входу'
+    airdropDailyLoginLabel:'Днів входу',
+    blockCollected:'✅ Отримано', blockLoading:'⏳ Завантаження...', vipBoxGreat:'Чудово! 🎉'
   },
 
   pt: {
@@ -1057,7 +1061,8 @@ var T = {
     airdropTerm7:'• Tokens enviados apenas na rede TON',
     airdropTerm8:'• Pontos não podem ser transferidos entre contas',
     airdropDays:'dias', airdropTasksUnit:'tarefas', airdropFriendsUnit:'amigos',
-    airdropDailyLoginLabel:'Dias de Login'
+    airdropDailyLoginLabel:'Dias de Login',
+    blockCollected:'✅ Coletado', blockLoading:'⏳ Carregando...', vipBoxGreat:'Incrível! 🎉'
   },
 
   es: {
@@ -1254,7 +1259,8 @@ var T = {
     airdropTerm7:'• Tokens enviados solo en la red TON',
     airdropTerm8:'• Los puntos no se pueden transferir entre cuentas',
     airdropDays:'días', airdropTasksUnit:'tareas', airdropFriendsUnit:'amigos',
-    airdropDailyLoginLabel:'Días de Inicio'
+    airdropDailyLoginLabel:'Días de Inicio',
+    blockCollected:'✅ Cobrado', blockLoading:'⏳ Cargando...', vipBoxGreat:'¡Genial! 🎉'
   },
 
   tr: {
@@ -1452,7 +1458,8 @@ var T = {
     airdropTerm7:'• Tokenlar yalnızca TON ağında gönderilir',
     airdropTerm8:'• Puanlar hesaplar arasında aktarılamaz',
     airdropDays:'gün', airdropTasksUnit:'görev', airdropFriendsUnit:'arkadaş',
-    airdropDailyLoginLabel:'Giriş Günleri'
+    airdropDailyLoginLabel:'Giriş Günleri',
+    blockCollected:'✅ Toplandı', blockLoading:'⏳ Yükleniyor...', vipBoxGreat:'Harika! 🎉'
   },
 
   vi: {
@@ -1650,7 +1657,8 @@ var T = {
     airdropTerm7:'• Token chỉ được gửi trên mạng TON',
     airdropTerm8:'• Điểm không thể chuyển giữa các tài khoản',
     airdropDays:'ngày', airdropTasksUnit:'nhiệm vụ', airdropFriendsUnit:'bạn bè',
-    airdropDailyLoginLabel:'Ngày Đăng Nhập'
+    airdropDailyLoginLabel:'Ngày Đăng Nhập',
+    blockCollected:'✅ Đã nhận', blockLoading:'⏳ Đang tải...', vipBoxGreat:'Tuyệt vời! 🎉'
   },
 
   zh: {
@@ -1847,7 +1855,8 @@ var T = {
     airdropTasksTitle:'完成任务提升积分', airdropDayChallenge:'3天挑战',
     airdropDailyReset:'每天午夜重置', airdropTotalReferrals:'总推荐数',
     airdropScoreBreakdown:'积分详情', airdropTotalScore:'你的总积分',
-    airdropRules:'📜 空投条款'
+    airdropRules:'📜 空投条款',
+    blockCollected:'✅ 已领取', blockLoading:'⏳ 加载中...', vipBoxGreat:'太棒了! 🎉'
   },
     vipBoxOpening:'🎁 开启中...',
     adsTitle:'📺 广告', adsWatchEarn:'观看赚取', adsWatchSub:'观看广告免费赚取REC',
