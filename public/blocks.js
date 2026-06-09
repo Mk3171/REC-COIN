@@ -128,7 +128,7 @@ function collectBlock() {
         overlay.innerHTML =
           '<div style="background:linear-gradient(180deg,#001a00,#000d00);border:2px solid rgba(0,255,136,0.5);border-radius:24px;padding:40px 24px;width:88vw;max-width:340px;text-align:center;">' +
             '<div style="font-size:56px;margin-bottom:12px;">🎉</div>' +
-            '<div style="font-family:Orbitron,sans-serif;font-size:18px;font-weight:900;color:#00FF88;margin-bottom:10px;">تم الاستلام!</div>' +
+            '<div style="font-family:Orbitron,sans-serif;font-size:18px;font-weight:900;color:#00FF88;margin-bottom:10px;">' + t('blockCollected','✅ Collected') + '</div>' +
             '<div style="font-size:32px;font-family:Orbitron,sans-serif;color:#00FF88;font-weight:900;margin:12px 0;">+' + _pendingBlock.reward.toLocaleString() + ' REC</div>' +
             '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:20px;">أضيف لرصيدك ✅</div>' +
             '<button onclick="document.getElementById(\'blockFoundOverlay\').remove()" style="background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);color:#00FF88;padding:12px 32px;border-radius:12px;cursor:pointer;font-size:14px;">إغلاق ✕</button>' +
@@ -162,7 +162,7 @@ function openBlockHistory() {
       '<span style="font-family:Orbitron,sans-serif;font-size:16px;font-weight:900;color:white;">⛏️ Block History</span>' +
     '</div>' +
     '<div id="blockHistoryList" style="flex:1;overflow-y:auto;padding:12px;">' +
-      '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);">⏳ جاري التحميل...</div>' +
+      '<div style="text-align:center;padding:40px;color:rgba(255,255,255,0.3);">' + t('blockLoading','⏳ Loading...') + '</div>' +
     '</div>';
 
   document.body.appendChild(modal);
@@ -179,7 +179,7 @@ function openBlockHistory() {
     list.innerHTML = blocks.map(function(b) {
       var date = new Date(b.foundAt).toLocaleDateString('ar', { day:'numeric', month:'short', year:'numeric' });
       var status = b.collected
-        ? '<span style="color:#00FF88;font-size:11px;">✅ تم الاستلام</span>'
+        ? '<span style="color:#00FF88;font-size:11px;">' + t('blockCollected','✅ Collected') + '</span>'
         : '<span style="color:#FF8800;font-size:11px;cursor:pointer;" onclick="collectBlock()">⏳ اضغط للاستلام</span>';
       return '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px 16px;margin-bottom:10px;">' +
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
