@@ -12,6 +12,14 @@ var AD_TIERS = [
   { ads: 100, bonus: 1000, label: '👑' },
 ];
 
+// ====== Persistent Total Ads Counter ======
+function getTotalAdsWatched() {
+  try { return parseInt(localStorage.getItem('adsTotalWatched') || '0'); } catch(e) { return 0; }
+}
+function incrementTotalAdsWatched() {
+  try { localStorage.setItem('adsTotalWatched', getTotalAdsWatched() + 1); } catch(e) {}
+}
+
 // ====== Daily Reset ======
 function getAdState() {
   var today = new Date().toISOString().split('T')[0];
@@ -207,6 +215,8 @@ function giveAdReward(modal) {
   var state = getAdState();
   state.watched += 1;
   saveAdState(state);
+  incrementTotalAdsWatched();
+  if(typeof incrementAdsTaskProgress === 'function') incrementAdsTaskProgress();
 
   if(typeof rec !== 'undefined') rec += AD_REC_REWARD;
   if(typeof updateUI === 'function') updateUI();
