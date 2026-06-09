@@ -106,6 +106,7 @@ function calcAirdropScore() {
   if(typeof refCount !== 'undefined') score += Math.min(500, refCount * 50);
   if(typeof vipData !== 'undefined' && parseInt(vipData.tier||0)>=1 && parseInt(vipData.expiry||0)>Date.now()) score += 200;
   score += calcDailyTasksScore();
+  score += calcAdsTaskScore();
   return Math.floor(score);
 }
 
@@ -128,10 +129,15 @@ function calcDailyTasksScore() {
   if(refs >= 50)  bonus += 5000;
   else if(refs >= 20) bonus += 2000;
   else if(refs >= 10) bonus += 500;
-  // Ads task: add pts for each permanently claimed tier
-  var adsState = getAdsTaskState();
+  return bonus;
+}
+
+// Ads task score — separate from daily tasks
+function calcAdsTaskScore() {
+  var adsState = (typeof getAdsTaskState === 'function') ? getAdsTaskState() : {claimedTiers:[]};
+  var bonus = 0;
+  var tiers = [{req:50,pts:500},{req:100,pts:1000},{req:200,pts:2500}];
   adsState.claimedTiers.forEach(function(idx) {
-    var tiers = [{req:50,pts:500},{req:100,pts:1000},{req:200,pts:2500}];
     if(tiers[idx]) bonus += tiers[idx].pts;
   });
   return bonus;
@@ -479,6 +485,9 @@ function _tabFaq(score) {
   var tasks = typeof completedTasks !== 'undefined' ? completedTasks.length : 0;
   var refs = typeof refCount !== 'undefined' ? refCount : 0;
   var tasksBonus = calcDailyTasksScore();
+  var adsTaskPts = calcAdsTaskScore();
+  var adsState2 = (typeof getAdsTaskState === 'function') ? getAdsTaskState() : {claimedTiers:[]};
+  var adsClaimedCount = adsState2.claimedTiers.length;
 
   function row(icon, label, val, pts) {
     return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);">' +
@@ -495,7 +504,7 @@ function _tabFaq(score) {
     '<div style="background:linear-gradient(135deg,rgba(255,215,0,0.1),rgba(255,165,0,0.05));border:1px solid rgba(255,215,0,0.3);border-radius:14px;padding:18px;margin-bottom:16px;text-align:center;">' +
       '<div style="font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:1px;margin-bottom:6px;">' + t('airdropTotalScore','YOUR TOTAL SCORE') + '</div>' +
       '<div style="font-family:Orbitron,sans-serif;font-size:42px;font-weight:900;color:#FFD700;">' + score.toLocaleString() + '</div>' +
-      '<div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px;">نقطة</div>' +
+      '<div style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px;">' + t('airdropPointsUnit','pts') + '</div>' +
     '</div>' +
     '<div style="background:rgba(255,255,255,0.03);border-radius:12px;padding:12px 14px;margin-bottom:16px;">' +
       '<div style="font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:1px;margin-bottom:6px;">' + t('airdropScoreBreakdown','SCORE BREAKDOWN') + '</div>' +
@@ -507,6 +516,7 @@ function _tabFaq(score) {
       row('✅',t('airdropTasksDoneLabel','Tasks Done'), tasks+' '+t('airdropTasksUnit','tasks'), Math.min(300, tasks*15)) +
       row('👥',t('airdropReferralsLabel','Referrals'), refs+' '+t('airdropFriendsUnit','friends'), Math.min(500, refs*50)) +
       row('🎯',t('airdropDailyBonusLabel','Daily Tasks Bonus'),t('airdropCompletedTasks','Completed tasks'), tasksBonus) +
+      row('📺',t('airdropWatchAdsFaqLabel','Watch Ads Task'), adsClaimedCount + '/3 ' + t('airdropWatchAdsFaqSub','tiers'), adsTaskPts) +
     '</div>' +
     '<div style="background:rgba(255,255,255,0.03);border-radius:12px;padding:14px;">' +
       '<div style="font-size:13px;font-weight:700;color:#FFD700;margin-bottom:10px;">' + t('airdropRules','📜 AirDrop Terms & Conditions') + '</div>' +
