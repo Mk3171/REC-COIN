@@ -41,7 +41,7 @@ function openVIPInfo() {
     '<div style="width:100%;background:linear-gradient(180deg,#1a0a00,#0d0500);border-radius:24px 24px 0 0;border-top:2px solid rgba(255,200,0,0.3);padding:20px 16px 36px;max-height:88vh;overflow-y:auto;" onclick="event.stopPropagation()">' +
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">' +
       '<div style="font-size:18px;font-weight:900;color:#FFD700;font-family:Impact,sans-serif;letter-spacing:2px;">👑 ' + t('vipLevelsTitle','VIP Levels') + '</div>' +
-      '<div onclick="document.querySelectorAll('.vip-info-ol')[0].remove()" style="width:30px;height:30px;background:rgba(255,255,255,0.08);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.4);font-size:13px;">✕</div>' +
+      '<div onclick="document.querySelectorAll(\'.vip-info-ol\')[0].remove()" style="width:30px;height:30px;background:rgba(255,255,255,0.08);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.4);font-size:13px;">✕</div>' +
     '</div>' +
 
     '<div style="background:rgba(255,50,50,0.08);border:1px solid rgba(255,50,50,0.3);border-radius:14px;padding:14px;margin-bottom:10px;">' +
