@@ -1086,6 +1086,224 @@ app.get('/api/referrals/:telegramId', async (req, res) => {
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
+
+// ====== AUTO COMBO SYSTEM ======
+const SERVER_CARDS = [
+  {key:'0_0',name:"Naruto",e:'🍥',cat:0},
+  {key:'0_1',name:"Goku",e:'⚡',cat:0},
+  {key:'0_2',name:"Luffy",e:'🏴‍☠️',cat:0},
+  {key:'0_3',name:"Sasuke",e:'🌩️',cat:0},
+  {key:'0_4',name:"Itachi",e:'🌸',cat:0},
+  {key:'0_5',name:"Zoro",e:'⚔️',cat:0},
+  {key:'0_6',name:"Totoro",e:'🌿',cat:0},
+  {key:'0_7',name:"Mikasa",e:'🗡️',cat:0},
+  {key:'0_8',name:"Levi",e:'💨',cat:0},
+  {key:'0_9',name:"Eren",e:'🔑',cat:0},
+  {key:'0_10',name:"Armin",e:'📚',cat:0},
+  {key:'0_11',name:"Piccolo",e:'👁️',cat:0},
+  {key:'0_12',name:"Vegeta",e:'👑',cat:0},
+  {key:'0_13',name:"Natsu",e:'🔥',cat:0},
+  {key:'0_14',name:"Gray",e:'❄️',cat:0},
+  {key:'0_15',name:"Erza",e:'🛡️',cat:0},
+  {key:'0_16',name:"Lucy",e:'⭐',cat:0},
+  {key:'0_17',name:"Kirito",e:'🗡️',cat:0},
+  {key:'0_18',name:"Asuna",e:'🌹',cat:0},
+  {key:'0_19',name:"Gon",e:'🌟',cat:0},
+  {key:'0_20',name:"Killua",e:'⚡',cat:0},
+  {key:'0_21',name:"Kuroko",e:'🏀',cat:0},
+  {key:'0_22',name:"Zero Two",e:'🦋',cat:0},
+  {key:'0_23',name:"Rem",e:'💙',cat:0},
+  {key:'0_24',name:"Gojo",e:'🌀',cat:0},
+  {key:'0_25',name:"Yuji",e:'👊',cat:0},
+  {key:'0_26',name:"Tanjiro",e:'💧',cat:0},
+  {key:'0_27',name:"Nezuko",e:'🎋',cat:0},
+  {key:'0_28',name:"Zenitsu",e:'⚡',cat:0},
+  {key:'0_29',name:"Izuku",e:'💚',cat:0},
+  {key:'0_30',name:"Bakugo",e:'💥',cat:0},
+  {key:'0_31',name:"Shoto",e:'🌓',cat:0},
+  {key:'0_32',name:"Ichigo",e:'🌙',cat:0},
+  {key:'0_33',name:"Kazuma",e:'💰',cat:0},
+  {key:'0_34',name:"Aqua",e:'💧',cat:0},
+  {key:'0_35',name:"Megumin",e:'💥',cat:0},
+  {key:'0_36',name:"Yoriichi",e:'☀️',cat:0},
+  {key:'0_37',name:"Rengoku",e:'🔥',cat:0},
+  {key:'0_38',name:"Akaza",e:'🌺',cat:0},
+  {key:'0_39',name:"Chihiro",e:'🏮',cat:0},
+  {key:'1_0',name:"Ferrari SF90",e:'🔴',cat:1},
+  {key:'1_1',name:"Lamborghini Aventador",e:'🟡',cat:1},
+  {key:'1_2',name:"Bugatti Chiron",e:'🔵',cat:1},
+  {key:'1_3',name:"McLaren P1",e:'🟠',cat:1},
+  {key:'1_4',name:"Porsche 911",e:'⚫',cat:1},
+  {key:'1_5',name:"Mercedes AMG GT",e:'⬛',cat:1},
+  {key:'1_6',name:"BMW M8",e:'🔵',cat:1},
+  {key:'1_7',name:"Audi R8",e:'⚪',cat:1},
+  {key:'1_8',name:"Koenigsegg Jesko",e:'🟢',cat:1},
+  {key:'1_9',name:"Pagani Huayra",e:'🥈',cat:1},
+  {key:'1_10',name:"Rolls Royce Ghost",e:'⬜',cat:1},
+  {key:'1_11',name:"Bentley Continental",e:'🟤',cat:1},
+  {key:'1_12',name:"Aston Martin DB11",e:'🟢',cat:1},
+  {key:'1_13',name:"Rimac Nevera",e:'⚡',cat:1},
+  {key:'1_14',name:"Tesla Roadster",e:'🔴',cat:1},
+  {key:'1_15',name:"Nissan GT-R",e:'⬛',cat:1},
+  {key:'1_16',name:"Toyota Supra",e:'🟠',cat:1},
+  {key:'1_17',name:"Mazda RX-7",e:'🔴',cat:1},
+  {key:'1_18',name:"Ferrari 458",e:'🔴',cat:1},
+  {key:'1_19',name:"Lamborghini Huracan",e:'🟡',cat:1},
+  {key:'1_20',name:"McLaren 720S",e:'🟠',cat:1},
+  {key:'1_21',name:"Ferrari LaFerrari",e:'🔴',cat:1},
+  {key:'1_22',name:"McLaren Senna",e:'🟠',cat:1},
+  {key:'1_23',name:"Bugatti Divo",e:'🔵',cat:1},
+  {key:'1_24',name:"Porsche 918",e:'⚫',cat:1},
+  {key:'1_25',name:"Ferrari Enzo",e:'🔴',cat:1},
+  {key:'1_26',name:"McLaren F1",e:'🟠',cat:1},
+  {key:'1_27',name:"Ferrari F40",e:'🔴',cat:1},
+  {key:'1_28',name:"Porsche Carrera GT",e:'⚫',cat:1},
+  {key:'1_29',name:"Koenigsegg Agera",e:'🟢',cat:1},
+  {key:'2_0',name:"Omnia Dubai",e:'🌃',cat:2},
+  {key:'2_1',name:"Pacha Ibiza",e:'🏝️',cat:2},
+  {key:'2_2',name:"Berghain Berlin",e:'⬛',cat:2},
+  {key:'2_3',name:"Fabric London",e:'🇬🇧',cat:2},
+  {key:'2_4',name:"Amnesia Ibiza",e:'🌊',cat:2},
+  {key:'2_5',name:"DC10 Ibiza",e:'🎵',cat:2},
+  {key:'2_6',name:"Marquee NYC",e:'🗽',cat:2},
+  {key:'2_7',name:"LIV Miami",e:'🌴',cat:2},
+  {key:'2_8',name:"E11even Miami",e:'🔥',cat:2},
+  {key:'2_9',name:"Hakkasan Vegas",e:'🎰',cat:2},
+  {key:'2_10',name:"Omnia Vegas",e:'💎',cat:2},
+  {key:'2_11',name:"XS Vegas",e:'✨',cat:2},
+  {key:'2_12',name:"Womb Tokyo",e:'🎌',cat:2},
+  {key:'2_13',name:"Zuma Dubai",e:'🌟',cat:2},
+  {key:'2_14',name:"White Dubai",e:'⬜',cat:2},
+  {key:'2_15',name:"Ministry of Sound",e:'🔊',cat:2},
+  {key:'2_16',name:"Tresor Berlin",e:'💎',cat:2},
+  {key:'2_17',name:"Watergate Berlin",e:'🌊',cat:2},
+  {key:'2_18',name:"Printworks London",e:'🖨️',cat:2},
+  {key:'2_19',name:"Output Brooklyn",e:'🗽',cat:2},
+  {key:'3_0',name:"Buckingham Palace",e:'👑',cat:3},
+  {key:'3_1',name:"Palace of Versailles",e:'🌹',cat:3},
+  {key:'3_2',name:"Alhambra Palace",e:'🌺',cat:3},
+  {key:'3_3',name:"Neuschwanstein Castle",e:'❄️',cat:3},
+  {key:'3_4',name:"Topkapi Palace",e:'🌙',cat:3},
+  {key:'3_5',name:"Kremlin Palace",e:'⭐',cat:3},
+  {key:'3_6',name:"Schönbrunn Palace",e:'🟡',cat:3},
+  {key:'3_7',name:"Monaco Palace",e:'🎰',cat:3},
+  {key:'3_8',name:"Royal Palace Madrid",e:'🔴',cat:3},
+  {key:'3_9',name:"Prague Castle",e:'🧙',cat:3},
+  {key:'3_10',name:"Dubai Palace",e:'🏙️',cat:3},
+  {key:'3_11',name:"Abu Dhabi Palace",e:'🕌',cat:3},
+  {key:'3_12',name:"Riyadh Palace",e:'🌴',cat:3},
+  {key:'3_13',name:"Cairo Palace",e:'🏺',cat:3},
+  {key:'3_14',name:"Istanbul Palace",e:'🌙',cat:3},
+  {key:'3_15',name:"Tokyo Imperial Palace",e:'🌸',cat:3},
+  {key:'3_16',name:"Kyoto Palace",e:'⛩️',cat:3},
+  {key:'3_17',name:"Beijing Palace",e:'🐉',cat:3},
+  {key:'3_18',name:"London Palace",e:'👑',cat:3},
+  {key:'3_19',name:"Paris Palace",e:'🗼',cat:3},
+  {key:'4_0',name:"Dragon Emperor",e:'🐉',cat:4},
+  {key:'4_1',name:"Crystal Phoenix",e:'🦅',cat:4},
+  {key:'4_2',name:"Shadow Reaper",e:'💀',cat:4},
+  {key:'4_3',name:"Solar God",e:'☀️',cat:4},
+  {key:'4_4',name:"Thunder Zeus",e:'⚡',cat:4},
+  {key:'4_5',name:"Neon Samurai",e:'⚔️',cat:4},
+  {key:'4_6',name:"Cosmic Witch",e:'🔮',cat:4},
+  {key:'4_7',name:"Ice Queen",e:'❄️',cat:4},
+  {key:'4_8',name:"Desert Sultan",e:'🏜️',cat:4},
+  {key:'4_9',name:"Ocean Master",e:'🌊',cat:4},
+  {key:'4_10',name:"Sky Pegasus",e:'🐎',cat:4},
+  {key:'4_11',name:"Void Walker",e:'🌌',cat:4},
+];
+
+function getServerCard(key) {
+  return SERVER_CARDS.find(function(c){ return c.key === key; }) || null;
+}
+
+function pickRandomComboCards() {
+  var shuffled = SERVER_CARDS.slice().sort(function(){ return Math.random()-0.5; });
+  var picked = [], usedCats = [];
+  // Prefer cards from different categories
+  for(var i=0; i<shuffled.length && picked.length<3; i++) {
+    if(usedCats.indexOf(shuffled[i].cat) === -1) {
+      picked.push(shuffled[i]);
+      usedCats.push(shuffled[i].cat);
+    }
+  }
+  // Fill remaining if needed
+  for(var j=0; j<shuffled.length && picked.length<3; j++) {
+    if(picked.indexOf(shuffled[j]) === -1) picked.push(shuffled[j]);
+  }
+  return picked.slice(0,3).map(function(c) {
+    var p = c.key.split('_');
+    return { key:c.key, categoryIndex:parseInt(p[0]), cardIndex:parseInt(p[1]) };
+  });
+}
+
+async function autoSetDailyCombo() {
+  try {
+    var today = new Date().toISOString().split('T')[0];
+    var existing = await DailyCombo.findOne({ date: today });
+    if(existing) { console.log('[AutoCombo] Already set for', today); return; }
+
+    var cards = pickRandomComboCards();
+    await DailyCombo.findOneAndUpdate(
+      { date: today },
+      { $set: { cards: cards, reward: 5, setAt: Date.now() } },
+      { upsert: true, new: true }
+    );
+    console.log('[AutoCombo] Set:', cards.map(function(c){ return c.key; }).join(', '));
+    await sendComboToVIP(cards, today);
+  } catch(e) { console.log('[AutoCombo] Error:', e.message); }
+}
+
+async function sendComboToVIP(cards, dateStr) {
+  try {
+    var vipUsers = await User.find({
+      banned: false,
+      'vip.tier': { $gte: 1 },
+      'vip.expiry': { $gt: Date.now() }
+    }).select('telegramId firstName username vip').lean();
+
+    if(!vipUsers.length) return;
+    console.log('[AutoCombo] Notifying', vipUsers.length, 'VIP users');
+
+    var cardLines = cards.map(function(c) {
+      var info = getServerCard(c.key);
+      return info ? (info.e + ' *' + info.name + '*') : c.key;
+    });
+
+    var delay = 0;
+    vipUsers.forEach(function(user) {
+      setTimeout(async function() {
+        try {
+          var name = user.firstName || user.username || 'Miner';
+          var tier = (user.vip && user.vip.tier) ? user.vip.tier : 1;
+          var tierLabel = tier >= 2 ? '💎 VIP ' + tier : '⭐ VIP 1';
+          var msg =
+            '🎯 *Daily Combo — ' + dateStr + '*\n' +
+            '━━━━━━━━━━━━━━━\n' +
+            'Hey ' + name + '! ' + tierLabel + '\n\n' +
+            '*Today\'s combo cards:*\n\n' +
+            cardLines.map(function(c, i){ return (i+1)+'. '+c; }).join('\n') +
+            '\n\n⚡ Upgrade all 3 to claim *+5 REC*!\n' +
+            '━━━━━━━━━━━━━━━';
+          await bot.sendMessage(user.telegramId, msg, {
+            parse_mode: 'Markdown',
+            reply_markup: { inline_keyboard: [[{ text: '🚀 Open Bot', web_app: { url: MINI_APP_URL } }]] }
+          });
+        } catch(e) {}
+      }, delay);
+      delay += 300;
+    });
+  } catch(e) { console.log('[AutoCombo] VIP notify error:', e.message); }
+}
+
+// Check every 30min — auto-set at midnight UTC or if missing
+setInterval(async function() {
+  var h = new Date().getUTCHours(), m = new Date().getUTCMinutes();
+  if(h === 0 && m < 30) await autoSetDailyCombo();
+}, 30 * 60 * 1000);
+// On startup: set today's combo if not set
+setTimeout(function() { autoSetDailyCombo(); }, 8000);
+
 // ====== DAILY COMBO API ======
 
 // GET today's combo (admin sees card keys, others see only progress)
@@ -1225,11 +1443,7 @@ app.post('/api/exchange/tax', async (req, res) => {
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-// POST set combo (admin only)
-app.post('/api/combo/set', async (req, res) => {
-  try {
-    var { adminId, cards } = req.body;
-    if(parseInt(adminId) !== ADMIN_ID) return res.status(403).json({ error: 'Not admin' });
+
     if(!cards || cards.length !== 3) return res.status(400).json({ error: 'Need 3 cards' });
     var today = new Date().toISOString().split('T')[0];
     await DailyCombo.findOneAndUpdate(
