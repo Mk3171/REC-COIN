@@ -1,5 +1,7 @@
 // ====== LEADERBOARD — leaderboard.js ======
 // ====== LEADERBOARD, PROFILE, OFFLINE, INIT — cards.js ======
+var currentTab = 'global';
+
 function switchLeaderTab(tab) {
   currentTab = tab;
   document.querySelectorAll('.lb-tab').forEach(function(b) { b.classList.remove('active'); });
@@ -322,3 +324,43 @@ function connectWallet() {
 }
 
 // ====== INIT ======
+
+
+// ====== AUTO REFRESH EVERY 5 MINUTES ======
+var _lbRefreshTimer = null;
+var _lbLastUpdate = 0;
+
+function startLeaderboardAutoRefresh() {
+  if(_lbRefreshTimer) clearInterval(_lbRefreshTimer);
+  _lbRefreshTimer = setInterval(function() {
+    // Only refresh if leaderboard is visible
+    var lbSection = document.getElementById('leaderboardSection') || 
+                    document.getElementById('lbContent');
+    if(lbSection && lbSection.offsetParent !== null) {
+      loadLeaderboard(currentTab || 'global');
+      _lbLastUpdate = Date.now();
+      updateLastUpdatedLabel();
+    }
+  }, 5 * 60 * 1000); // 5 minutes
+}
+
+function updateLastUpdatedLabel() {
+  var el = document.getElementById('lbLastUpdated');
+  if(!el) return;
+  var seconds = Math.floor((Date.now() - _lbLastUpdate) / 1000);
+  if(seconds < 60) {
+    el.textContent = '🔄 Updated just now';
+  } else {
+    var mins = Math.floor(seconds / 60);
+    el.textContent = '🔄 Updated ' + mins + 'm ago';
+  }
+}
+
+// Update "last updated" label every 30 seconds
+setInterval(updateLastUpdatedLabel, 30000);
+
+// Start auto-refresh when page loads
+setTimeout(function() {
+  startLeaderboardAutoRefresh();
+  _lbLastUpdate = Date.now();
+}, 1000);
