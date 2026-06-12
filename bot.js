@@ -240,12 +240,9 @@ setInterval(async function() {
 // ====== TON TRANSFER ======
 const REC_CONTRACT = 'EQCNkOinRhMSplM0DzP18Fz-4WV293YMHF6umS9tGsvOGDV9';
 const FEE_WALLET   = 'UQD-FoGlRG5pBxZpkf3H9ZOsNTL5basBbTEZE8zvMgHLB99o';
-const WITHDRAW_FEE = 150;
-const MIN_WITHDRAW = 10000;
-const MAX_WITHDRAW = 50000;
-const VIP_MIN_WITHDRAW = 50000;
-const VIP_MAX_WITHDRAW = 1000000;
-const DAILY_LIMIT_DEFAULT = 100000;
+const WITHDRAW_FEE = 70;
+const MIN_WITHDRAW = 500;
+const DAILY_LIMIT_DEFAULT = 10000;
 
 async function sendJetton(toAddress, amount, comment) {
   try {
@@ -500,7 +497,7 @@ function calcRecordMiningSpeed(cardLevels, tapLevelVal) {
 app.get('/api/leaderboard/global', async (req, res) => {
   try {
     var allUsers = await User.find({ banned: false })
-      .sort({ rec: -1 })
+      .sort({ rec: -1 }).limit(100)
       .select('telegramId username firstName rec miningSpeed cardLevels vip lastSeen')
       .lean();
     res.json({ top100: allUsers.map(function(u, i) {
@@ -513,7 +510,7 @@ app.get('/api/leaderboard/global', async (req, res) => {
 app.get('/api/leaderboard/myrank/:telegramId', async (req, res) => {
   try {
     var userId = parseInt(req.params.telegramId);
-    var allUsers = await User.find({ banned: false }).sort({ rec: -1 })
+    var allUsers = await User.find({ banned: false }).sort({ rec: -1 }).limit(500)
       .select('telegramId username firstName rec miningSpeed cardLevels lastSeen').lean();
     var myIndex = allUsers.findIndex(function(u) { return u.telegramId === userId; });
     var myRank = myIndex < 0 ? 999 : myIndex + 1;
@@ -695,7 +692,6 @@ app.post('/api/withdraw', async (req, res) => {
 
     // Check minimum
     if (amount < MIN_WITHDRAW) return res.status(400).json({ error: 'below_minimum', min: MIN_WITHDRAW });
-    if (amount > MAX_WITHDRAW) return res.status(400).json({ error: 'above_maximum', max: MAX_WITHDRAW });
 
     // Check balance
     if (user.rec < amount) return res.status(400).json({ error: 'insufficient_balance' });
@@ -703,7 +699,7 @@ app.post('/api/withdraw', async (req, res) => {
     // Check daily limit
     const today = new Date().toISOString().split('T')[0];
     const dailyWithdrawn = user.lastWithdrawDate === today ? (user.dailyWithdrawn || 0) : 0;
-    const DAILY_LIMIT = (user.vip && user.vip.tier >= 1 && user.vip.expiry > Date.now()) ? 1000000 : MAX_WITHDRAW;
+    const DAILY_LIMIT = (user.vip && user.vip.tier >= 1 && user.vip.expiry > Date.now()) ? 20000 : DAILY_LIMIT_DEFAULT;
     if (dailyWithdrawn + amount > DAILY_LIMIT) {
       return res.status(400).json({ error: 'daily_limit', remaining: DAILY_LIMIT - dailyWithdrawn });
     }
@@ -731,20 +727,24 @@ app.post('/api/withdraw', async (req, res) => {
     });
     await withdrawal.save();
 
-    // Send REC to user (net amount)
-    const userResult = await sendJetton(user.walletAddress, netAmount, 'REC Mining Withdrawal');
+    // Return success immediately
+    res.json({ success: true, netAmount, fee: WITHDRAW_FEE, status: 'pending' });
 
-    // Send fee to admin wallet
-    if (userResult.success) {
-      await sendJetton(FEE_WALLET, WITHDRAW_FEE, 'REC Mining Fee');
-      await Withdrawal.findByIdAndUpdate(withdrawal._id, { status: 'sent', txHash: 'sent' });
-      res.json({ success: true, netAmount, fee: WITHDRAW_FEE });
-    } else {
-      // Refund user if transfer failed
-      await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, { $inc: { rec: amount } });
-      await Withdrawal.findByIdAndUpdate(withdrawal._id, { status: 'failed' });
-      res.status(500).json({ error: 'transfer_failed', details: userResult.error });
-    }
+    // Process blockchain in background (non-blocking)
+    setImmediate(async function() {
+      try {
+        const r = await sendJetton(user.walletAddress, netAmount, 'REC Mining Withdrawal');
+        if (r && r.success) {
+          await sendJetton(FEE_WALLET, WITHDRAW_FEE, 'REC Mining Fee');
+          await Withdrawal.findByIdAndUpdate(withdrawal._id, { status: 'sent' });
+          console.log('[Withdraw] ✅ Sent:', netAmount, 'REC to', user.walletAddress);
+        } else {
+          console.log('[Withdraw] Pending:', r && r.error);
+        }
+      } catch(e) {
+        console.log('[Withdraw] Pending:', e.message);
+      }
+    });
   } catch(e) {
     console.log('Withdraw error:', e);
     res.status(500).json({ error: e.message });
@@ -1090,197 +1090,6 @@ app.get('/api/referrals/:telegramId', async (req, res) => {
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-const SERVER_CARDS = [
-  {key:'0_0',name:"Naruto",e:'🍥',cat:0},
-  {key:'0_1',name:"Goku",e:'⚡',cat:0},
-  {key:'0_2',name:"Luffy",e:'🏴☠',cat:0},
-  {key:'0_3',name:"Sasuke",e:'🌩',cat:0},
-  {key:'0_4',name:"Itachi",e:'🌸',cat:0},
-  {key:'0_5',name:"Zoro",e:'⚔',cat:0},
-  {key:'0_6',name:"Totoro",e:'🌿',cat:0},
-  {key:'0_7',name:"Mikasa",e:'🗡',cat:0},
-  {key:'0_8',name:"Levi",e:'💨',cat:0},
-  {key:'0_9',name:"Eren",e:'🔑',cat:0},
-  {key:'0_10',name:"Armin",e:'📚',cat:0},
-  {key:'0_11',name:"Piccolo",e:'👁',cat:0},
-  {key:'0_12',name:"Vegeta",e:'👑',cat:0},
-  {key:'0_13',name:"Natsu",e:'🔥',cat:0},
-  {key:'0_14',name:"Gray",e:'❄',cat:0},
-  {key:'0_15',name:"Erza",e:'🛡',cat:0},
-  {key:'0_16',name:"Lucy",e:'⭐',cat:0},
-  {key:'0_17',name:"Kirito",e:'🗡',cat:0},
-  {key:'0_18',name:"Asuna",e:'🌹',cat:0},
-  {key:'0_19',name:"Gon",e:'🌟',cat:0},
-  {key:'0_20',name:"Killua",e:'⚡',cat:0},
-  {key:'0_21',name:"Kuroko",e:'🏀',cat:0},
-  {key:'0_22',name:"Zero Two",e:'🦋',cat:0},
-  {key:'0_23',name:"Rem",e:'💙',cat:0},
-  {key:'0_24',name:"Gojo",e:'🌀',cat:0},
-  {key:'0_25',name:"Yuji",e:'👊',cat:0},
-  {key:'0_26',name:"Tanjiro",e:'💧',cat:0},
-  {key:'0_27',name:"Nezuko",e:'🎋',cat:0},
-  {key:'0_28',name:"Zenitsu",e:'⚡',cat:0},
-  {key:'0_29',name:"Izuku",e:'💚',cat:0},
-  {key:'0_30',name:"Bakugo",e:'💥',cat:0},
-  {key:'0_31',name:"Shoto",e:'🌓',cat:0},
-  {key:'0_32',name:"Ichigo",e:'🌙',cat:0},
-  {key:'0_33',name:"Kazuma",e:'💰',cat:0},
-  {key:'0_34',name:"Aqua",e:'💧',cat:0},
-  {key:'0_35',name:"Megumin",e:'💥',cat:0},
-  {key:'0_36',name:"Yoriichi",e:'☀',cat:0},
-  {key:'0_37',name:"Rengoku",e:'🔥',cat:0},
-  {key:'0_38',name:"Akaza",e:'🌺',cat:0},
-  {key:'0_39',name:"Chihiro",e:'🏮',cat:0},
-  {key:'1_0',name:"Ferrari SF90",e:'🔴',cat:1},
-  {key:'1_1',name:"Lamborghini Aventador",e:'🟡',cat:1},
-  {key:'1_2',name:"Bugatti Chiron",e:'🔵',cat:1},
-  {key:'1_3',name:"McLaren P1",e:'🟠',cat:1},
-  {key:'1_4',name:"Porsche 911",e:'⚫',cat:1},
-  {key:'1_5',name:"Mercedes AMG GT",e:'⬛',cat:1},
-  {key:'1_6',name:"BMW M8",e:'🔵',cat:1},
-  {key:'1_7',name:"Audi R8",e:'⚪',cat:1},
-  {key:'1_8',name:"Koenigsegg Jesko",e:'🟢',cat:1},
-  {key:'1_9',name:"Pagani Huayra",e:'🥈',cat:1},
-  {key:'1_10',name:"Rolls Royce Ghost",e:'⬜',cat:1},
-  {key:'1_11',name:"Bentley Continental",e:'🟤',cat:1},
-  {key:'1_12',name:"Aston Martin DB11",e:'🟢',cat:1},
-  {key:'1_13',name:"Rimac Nevera",e:'⚡',cat:1},
-  {key:'1_14',name:"Tesla Roadster",e:'🔴',cat:1},
-  {key:'1_15',name:"Nissan GT-R",e:'⬛',cat:1},
-  {key:'1_16',name:"Toyota Supra",e:'🟠',cat:1},
-  {key:'1_17',name:"Mazda RX-7",e:'🔴',cat:1},
-  {key:'1_18',name:"Ferrari 458",e:'🔴',cat:1},
-  {key:'1_19',name:"Lamborghini Huracan",e:'🟡',cat:1},
-  {key:'1_20',name:"McLaren 720S",e:'🟠',cat:1},
-  {key:'1_21',name:"Ferrari LaFerrari",e:'🔴',cat:1},
-  {key:'1_22',name:"McLaren Senna",e:'🟠',cat:1},
-  {key:'1_23',name:"Bugatti Divo",e:'🔵',cat:1},
-  {key:'1_24',name:"Porsche 918",e:'⚫',cat:1},
-  {key:'1_25',name:"Ferrari Enzo",e:'🔴',cat:1},
-  {key:'1_26',name:"McLaren F1",e:'🟠',cat:1},
-  {key:'1_27',name:"Ferrari F40",e:'🔴',cat:1},
-  {key:'1_28',name:"Porsche Carrera GT",e:'⚫',cat:1},
-  {key:'1_29',name:"Koenigsegg Agera",e:'🟢',cat:1},
-  {key:'2_0',name:"Omnia Dubai",e:'🌃',cat:2},
-  {key:'2_1',name:"Pacha Ibiza",e:'🏝',cat:2},
-  {key:'2_2',name:"Berghain Berlin",e:'⬛',cat:2},
-  {key:'2_3',name:"Fabric London",e:'🇬🇧',cat:2},
-  {key:'2_4',name:"Amnesia Ibiza",e:'🌊',cat:2},
-  {key:'2_5',name:"DC10 Ibiza",e:'🎵',cat:2},
-  {key:'2_6',name:"Marquee NYC",e:'🗽',cat:2},
-  {key:'2_7',name:"LIV Miami",e:'🌴',cat:2},
-  {key:'2_8',name:"E11even Miami",e:'🔥',cat:2},
-  {key:'2_9',name:"Hakkasan Vegas",e:'🎰',cat:2},
-  {key:'2_10',name:"Omnia Vegas",e:'💎',cat:2},
-  {key:'2_11',name:"XS Vegas",e:'✨',cat:2},
-  {key:'2_12',name:"Womb Tokyo",e:'🎌',cat:2},
-  {key:'2_13',name:"Zuma Dubai",e:'🌟',cat:2},
-  {key:'2_14',name:"White Dubai",e:'⬜',cat:2},
-  {key:'2_15',name:"Ministry of Sound",e:'🔊',cat:2},
-  {key:'2_16',name:"Tresor Berlin",e:'💎',cat:2},
-  {key:'2_17',name:"Watergate Berlin",e:'🌊',cat:2},
-  {key:'2_18',name:"Printworks London",e:'🖨',cat:2},
-  {key:'2_19',name:"Output Brooklyn",e:'🗽',cat:2},
-  {key:'3_0',name:"Buckingham Palace",e:'👑',cat:3},
-  {key:'3_1',name:"Palace of Versailles",e:'🌹',cat:3},
-  {key:'3_2',name:"Alhambra Palace",e:'🌺',cat:3},
-  {key:'3_3',name:"Neuschwanstein Castle",e:'❄',cat:3},
-  {key:'3_4',name:"Topkapi Palace",e:'🌙',cat:3},
-  {key:'3_5',name:"Kremlin Palace",e:'⭐',cat:3},
-  {key:'3_6',name:"Schönbrunn Palace",e:'🟡',cat:3},
-  {key:'3_7',name:"Monaco Palace",e:'🎰',cat:3},
-  {key:'3_8',name:"Royal Palace Madrid",e:'🔴',cat:3},
-  {key:'3_9',name:"Prague Castle",e:'🧙',cat:3},
-  {key:'3_10',name:"Dubai Palace",e:'🏙',cat:3},
-  {key:'3_11',name:"Abu Dhabi Palace",e:'🕌',cat:3},
-  {key:'3_12',name:"Riyadh Palace",e:'🌴',cat:3},
-  {key:'3_13',name:"Cairo Palace",e:'🏺',cat:3},
-  {key:'3_14',name:"Istanbul Palace",e:'🌙',cat:3},
-  {key:'3_15',name:"Tokyo Imperial Palace",e:'🌸',cat:3},
-  {key:'3_16',name:"Kyoto Palace",e:'⛩',cat:3},
-  {key:'3_17',name:"Beijing Palace",e:'🐉',cat:3},
-  {key:'3_18',name:"London Palace",e:'👑',cat:3},
-  {key:'3_19',name:"Paris Palace",e:'🗼',cat:3},
-  {key:'4_0',name:"Dragon Emperor",e:'🐉',cat:4},
-  {key:'4_1',name:"Crystal Phoenix",e:'🦅',cat:4},
-  {key:'4_2',name:"Shadow Reaper",e:'💀',cat:4},
-  {key:'4_3',name:"Solar God",e:'☀',cat:4},
-  {key:'4_4',name:"Thunder Zeus",e:'⚡',cat:4},
-  {key:'4_5',name:"Neon Samurai",e:'⚔',cat:4},
-  {key:'4_6',name:"Cosmic Witch",e:'🔮',cat:4},
-  {key:'4_7',name:"Ice Queen",e:'❄',cat:4},
-  {key:'4_8',name:"Desert Sultan",e:'🏜',cat:4},
-  {key:'4_9',name:"Ocean Master",e:'🌊',cat:4},
-  {key:'4_10',name:"Sky Pegasus",e:'🐎',cat:4},
-  {key:'4_11',name:"Void Walker",e:'🌌',cat:4},
-];
-
-function getServerCard(key) {
-  return SERVER_CARDS.find(function(c){ return c.key === key; }) || null;
-}
-function pickRandomComboCards() {
-  var shuffled = SERVER_CARDS.slice().sort(function(){ return Math.random()-0.5; });
-  var picked = [], usedCats = [];
-  for(var i=0; i<shuffled.length && picked.length<3; i++) {
-    if(usedCats.indexOf(shuffled[i].cat) === -1) { picked.push(shuffled[i]); usedCats.push(shuffled[i].cat); }
-  }
-  for(var j=0; j<shuffled.length && picked.length<3; j++) {
-    if(picked.indexOf(shuffled[j]) === -1) picked.push(shuffled[j]);
-  }
-  return picked.slice(0,3).map(function(c) {
-    var p = c.key.split('_');
-    return { key:c.key, categoryIndex:parseInt(p[0]), cardIndex:parseInt(p[1]) };
-  });
-}
-async function autoSetDailyCombo() {
-  try {
-    var today = new Date().toISOString().split('T')[0];
-    var existing = await DailyCombo.findOne({ date: today });
-    if(existing) { console.log('[AutoCombo] Already set for', today); return; }
-    var cards = pickRandomComboCards();
-    await DailyCombo.findOneAndUpdate(
-      { date: today },
-      { $set: { cards: cards, reward: 5, setAt: Date.now() } },
-      { upsert: true, new: true }
-    );
-    console.log('[AutoCombo] ✅ Set:', cards.map(function(c){ return c.key; }).join(', '));
-    sendComboToVIP(cards, today);
-  } catch(e) { console.log('[AutoCombo] Error:', e.message); }
-}
-async function sendComboToVIP(cards, dateStr) {
-  try {
-    var vipUsers = await User.find({ banned:false, 'vip.tier':{ $gte:1 }, 'vip.expiry':{ $gt:Date.now() } })
-      .select('telegramId firstName username vip').lean();
-    if(!vipUsers.length) return;
-    var cardLines = cards.map(function(c) {
-      var info = getServerCard(c.key);
-      return info ? (info.e + ' *' + info.name + '*') : c.key;
-    });
-    var delay = 0;
-    vipUsers.forEach(function(user) {
-      setTimeout(async function() {
-        try {
-          var name = user.firstName || user.username || 'Miner';
-          var msg = '\u{1F3AF} *Daily Combo \u2014 ' + dateStr + '*\n\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\nHey ' + name + '!\n\n*Today combo cards:*\n\n'
-            + cardLines.map(function(c,i){ return (i+1)+'. '+c; }).join('\n')
-            + '\n\nUpgrade all 3 to claim *+5 REC*!';
-          await bot.sendMessage(user.telegramId, msg, {
-            parse_mode: 'Markdown',
-            reply_markup: { inline_keyboard: [[{ text: 'Open Bot', web_app: { url: MINI_APP_URL } }]] }
-          });
-        } catch(e) {}
-      }, delay);
-      delay += 300;
-    });
-  } catch(e) { console.log('[AutoCombo] VIP notify error:', e.message); }
-}
-setInterval(async function() {
-  var h = new Date().getUTCHours(), m = new Date().getUTCMinutes();
-  if(h === 0 && m < 30) { autoSetDailyCombo(); }
-}, 30 * 60 * 1000);
-setTimeout(function() { autoSetDailyCombo(); }, 8000);
-
-
 // ====== DAILY COMBO API ======
 
 // GET today's combo (admin sees card keys, others see only progress)
@@ -1420,6 +1229,21 @@ app.post('/api/exchange/tax', async (req, res) => {
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
+// POST set combo (admin only)
+app.post('/api/combo/set', async (req, res) => {
+  try {
+    var { adminId, cards } = req.body;
+    if(parseInt(adminId) !== ADMIN_ID) return res.status(403).json({ error: 'Not admin' });
+    if(!cards || cards.length !== 3) return res.status(400).json({ error: 'Need 3 cards' });
+    var today = new Date().toISOString().split('T')[0];
+    await DailyCombo.findOneAndUpdate(
+      { date: today },
+      { $set: { cards: cards, reward: 5, setAt: Date.now() } },
+      { upsert: true, new: true }
+    );
+    res.json({ success: true, date: today });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
 
 // POST check card upgrade against combo
 app.post('/api/combo/check', async (req, res) => {
@@ -1729,7 +1553,6 @@ setInterval(() => {
   }).on('error', () => {});
 }, 840000); // every 14 minutes
 
-module.exports = app;
 
 // ====== VIP WITHDRAW (50k - 1M REC) ======
 app.post('/api/vip-withdraw', async (req, res) => {
@@ -1740,7 +1563,6 @@ app.post('/api/vip-withdraw', async (req, res) => {
     const user = await User.findOne({ telegramId: parseInt(telegramId) });
     if(!user) return res.status(404).json({ error: 'user_not_found' });
 
-    // Must be VIP 1+
     if(!user.vip || user.vip.tier < 1 || user.vip.expiry < Date.now())
       return res.status(403).json({ error: 'vip_required' });
 
@@ -1750,22 +1572,30 @@ app.post('/api/vip-withdraw', async (req, res) => {
     if(user.rec < amount) return res.status(400).json({ error: 'insufficient_balance' });
 
     const netAmount = amount - WITHDRAW_FEE;
-
     await User.updateOne({ telegramId: parseInt(telegramId) }, { $inc: { rec: -amount } });
-
-    await Withdrawal.create({
-      telegramId: parseInt(telegramId),
-      username: user.username || '',
-      amount, fee: WITHDRAW_FEE, netAmount,
-      walletAddress: user.walletAddress,
-      status: 'pending',
-      type: 'vip'
+    const wd = await Withdrawal.create({
+      telegramId: parseInt(telegramId), username: user.username || '',
+      amount, fee: WITHDRAW_FEE, netAmount, walletAddress: user.walletAddress,
+      status: 'pending', type: 'vip'
     });
 
-    await sendJetton(user.walletAddress, netAmount, 'VIP REC Withdrawal');
-    await sendJetton(FEE_WALLET, WITHDRAW_FEE, 'VIP REC Fee');
+    res.json({ success: true, netAmount, fee: WITHDRAW_FEE, status: 'pending' });
 
-    res.json({ success: true, netAmount, fee: WITHDRAW_FEE });
+    setImmediate(async function() {
+      try {
+        const r = await sendJetton(user.walletAddress, netAmount, 'VIP REC Withdrawal');
+        if (r && r.success) {
+          await sendJetton(FEE_WALLET, WITHDRAW_FEE, 'VIP REC Fee');
+          await Withdrawal.findByIdAndUpdate(wd._id, { status: 'sent' });
+          console.log('[VIP Withdraw] ✅ Sent:', netAmount, 'REC to', user.walletAddress);
+        } else {
+          console.log('[VIP Withdraw] Pending:', r && r.error);
+        }
+      } catch(e) {
+        console.log('[VIP Withdraw] Pending:', e.message);
+      }
+    });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
+module.exports = app;
