@@ -72,6 +72,12 @@ function renderGlobal(top100, myRankData, weekly) {
     '<div style="font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:2px;margin-bottom:4px;">REWARDS CREDIT IN</div>' +
     '<div id="weeklyCountdown" style="font-family:Orbitron,sans-serif;font-size:16px;color:#FFD700;font-weight:700;letter-spacing:2px;">'+_cdStr+'</div>' +
     '</div>';
+  // Refresh timer label
+  _lbLastUpdate = _lbLastUpdate || Date.now();
+  html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding:0 2px;">' +
+    '<div id="lbLastUpdated" style="font-size:10px;color:rgba(255,255,255,0.2);">🔄 ' + t('lbAutoRefresh','Auto-updates every 5 min') + '</div>' +
+    '<div onclick="loadLeaderboard(currentTab||\'global\')" style="font-size:10px;color:rgba(255,100,50,0.6);cursor:pointer;">↻ ' + t('lbRefreshNow','Refresh') + '</div>' +
+  '</div>';
 
   if(top100.length === 0) {
     cont.innerHTML = html + '<div style="text-align:center;color:#555;padding:30px;">🏆</div>';
@@ -333,13 +339,9 @@ var _lbLastUpdate = 0;
 function startLeaderboardAutoRefresh() {
   if(_lbRefreshTimer) clearInterval(_lbRefreshTimer);
   _lbRefreshTimer = setInterval(function() {
-    // Only refresh if leaderboard is visible
-    var lbSection = document.getElementById('leaderboardSection') || 
-                    document.getElementById('lbContent');
-    if(lbSection && lbSection.offsetParent !== null) {
+    var lbContent = document.getElementById('lbContent');
+    if(lbContent && lbContent.innerHTML && lbContent.innerHTML.length > 50) {
       loadLeaderboard(currentTab || 'global');
-      _lbLastUpdate = Date.now();
-      updateLastUpdatedLabel();
     }
   }, 5 * 60 * 1000); // 5 minutes
 }
@@ -347,12 +349,13 @@ function startLeaderboardAutoRefresh() {
 function updateLastUpdatedLabel() {
   var el = document.getElementById('lbLastUpdated');
   if(!el) return;
-  var seconds = Math.floor((Date.now() - _lbLastUpdate) / 1000);
-  if(seconds < 60) {
-    el.textContent = '🔄 Updated just now';
+  var secsLeft = Math.max(0, 300 - Math.floor((Date.now() - _lbLastUpdate) / 1000));
+  if(secsLeft <= 5) {
+    el.textContent = '🔄 Refreshing...';
+  } else if(secsLeft < 60) {
+    el.textContent = '🔄 Next update in ' + secsLeft + 's';
   } else {
-    var mins = Math.floor(seconds / 60);
-    el.textContent = '🔄 Updated ' + mins + 'm ago';
+    el.textContent = '🔄 Next update in ' + Math.floor(secsLeft/60) + 'm ' + (secsLeft%60) + 's';
   }
 }
 
