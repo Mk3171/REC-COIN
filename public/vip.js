@@ -19,55 +19,55 @@ function openVIPInfo() {
   ol.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:99999;display:flex;align-items:flex-end;';
   ol.className = 'vip-info-ol'; ol.onclick = function(e){ if(e.target===ol) ol.remove(); };
 
-  var feats = [
-    ['📦', t('vipFeat1','3 daily boxes (Common, Rare, Epic)')],
-    ['🦅', t('vipFeat2','Rare Epic card chance (1%)')],
-    ['⚡', t('vipFeat3','x1.5 REC mining speed')],
-    ['🔋', t('vipFeat4','6x energy recharge daily')],
-    ['💰', t('vipFeat5','Withdraw: 50,000 - 100,000 REC/day')],
-    ['🎯', t('vipFeat6','Daily combo hint (1 card)')],
-    ['🎁', t('vipFeat7','+50 REC instant welcome bonus')],
-    ['👑', t('vipFeat8','Gold VIP badge on leaderboard')]
-  ];
-  var featHtml = feats.map(function(f){
-    return '<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);">'
-      + '<span style="flex-shrink:0;font-size:15px;">' + f[0] + '</span>'
-      + '<span style="font-size:12px;color:rgba(255,255,255,0.8);line-height:1.5;">' + f[1] + '</span>'
-    + '</div>';
-  }).join('');
+  ol.innerHTML = '<div style="width:100%;background:linear-gradient(180deg,#1a0a00,#0d0500);border-radius:24px 24px 0 0;border-top:2px solid rgba(255,200,0,0.3);padding:20px 16px 36px;max-height:88vh;overflow-y:auto;" onclick="event.stopPropagation()">' +
+    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">' +
+      '<div style="font-size:18px;font-weight:900;color:#FFD700;font-family:Impact,sans-serif;letter-spacing:2px;">👑 مستويات VIP</div>' +
+      '<div onclick="document.querySelectorAll(\'.vip-info-ol\')[0].remove()" style="width:30px;height:30px;background:rgba(255,255,255,0.08);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.4);font-size:13px;">✕</div>' +
+    '</div>' +
 
-  ol.innerHTML =
-    '<div style="width:100%;background:linear-gradient(180deg,#1a0a00,#0d0500);border-radius:24px 24px 0 0;border-top:2px solid rgba(255,200,0,0.3);padding:20px 16px 36px;max-height:88vh;overflow-y:auto;" onclick="event.stopPropagation()">'
-  + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">'
-  + '<div style="font-size:18px;font-weight:900;color:#FFD700;font-family:Impact,sans-serif;letter-spacing:2px;">👑 ' + t('vipLevelsTitle','VIP Levels') + '</div>'
-  + '<div onclick="document.querySelectorAll(\'.vip-info-ol\')[0].remove()" style="width:30px;height:30px;background:rgba(255,255,255,0.08);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.4);font-size:13px;">✕</div>'
-  + '</div>'
-  + '<div style="background:rgba(255,50,50,0.08);border:1px solid rgba(255,50,50,0.3);border-radius:14px;padding:14px;margin-bottom:10px;">'
-  + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">'
-  + '<div style="font-size:22px;">👑</div>'
-  + '<div><div style="font-size:15px;font-weight:700;color:#FF6644;">VIP I</div>'
-  + '<div style="font-size:10px;color:rgba(255,255,255,0.4);">1 TON / ' + t('vipMonthLabel','month') + '</div></div>'
-  + '<div style="margin-left:auto;background:rgba(255,50,50,0.2);border-radius:8px;padding:4px 10px;font-size:10px;color:#FF6644;font-weight:700;">' + t('vipAvailable','Available') + ' ✅</div>'
-  + '</div>' + featHtml + '</div>'
-  + '<div style="background:rgba(100,100,255,0.06);border:1px solid rgba(100,100,255,0.2);border-radius:14px;padding:14px;margin-bottom:10px;">'
-  + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">'
-  + '<div style="font-size:22px;">👑</div>'
-  + '<div><div style="font-size:15px;font-weight:700;color:#6688FF;">VIP II</div>'
-  + '<div style="font-size:10px;color:rgba(255,255,255,0.4);">' + t('comingSoon','Coming Soon') + '</div></div>'
-  + '<div style="margin-left:auto;background:rgba(255,255,255,0.05);border-radius:8px;padding:4px 10px;font-size:10px;color:rgba(255,255,255,0.3);font-weight:700;">🔒 ' + t('comingSoon','Coming Soon') + '</div>'
-  + '</div>'
-  + '<div style="font-size:11px;color:rgba(255,255,255,0.3);">' + t('vipIIDesc','All VIP I benefits + exclusive extras') + '</div>'
-  + '</div>'
-  + '<div style="background:rgba(170,100,255,0.06);border:1px solid rgba(170,100,255,0.2);border-radius:14px;padding:14px;">'
-  + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">'
-  + '<div style="font-size:22px;">💎</div>'
-  + '<div><div style="font-size:15px;font-weight:700;color:#AA66FF;">VIP III</div>'
-  + '<div style="font-size:10px;color:rgba(255,255,255,0.4);">' + t('comingSoon','Coming Soon') + '</div></div>'
-  + '<div style="margin-left:auto;background:rgba(255,255,255,0.05);border-radius:8px;padding:4px 10px;font-size:10px;color:rgba(255,255,255,0.3);font-weight:700;">🔒 ' + t('comingSoon','Coming Soon') + '</div>'
-  + '</div>'
-  + '<div style="font-size:11px;color:rgba(255,255,255,0.3);">' + t('vipIIIDesc','The highest tier - unmatched benefits') + '</div>'
-  + '</div>'
-  + '</div>';
+    // VIP I
+    '<div style="background:rgba(255,50,50,0.08);border:1px solid rgba(255,50,50,0.3);border-radius:14px;padding:14px;margin-bottom:10px;">' +
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">' +
+        '<div style="font-size:22px;">👑</div>' +
+        '<div><div style="font-size:15px;font-weight:700;color:#FF6644;">VIP I</div>' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.4);">1 TON / شهر</div></div>' +
+        '<div style="margin-left:auto;background:rgba(255,50,50,0.2);border-radius:8px;padding:4px 10px;font-size:10px;color:#FF6644;font-weight:700;">متاح ✅</div>' +
+      '</div>' +
+      '<div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1.9;">' +
+        '📦 ٣ صناديق يومية (Common, Rare, Epic)<br>' +
+        '🦅 فرصة الحصول على بطاقة Epic النادرة (1%)<br>' +
+        '⚡ ×١.٥ سرعة تعدين REC<br>' +
+        '🔋 شحن طاقة ٦ مرات يومياً<br>' +
+        '💰 حد سحب يومي من 1,000 حتى 20,000 REC<br>' +
+        '🎯 تلميح بطاقة واحدة من الكومبو اليومي<br>' +
+        '🎁 +50 REC مكافأة ترحيبية فورية<br>' +
+        '👑 شارة VIP ذهبية بالليدربورد' +
+      '</div>' +
+    '</div>' +
+
+    // VIP II
+    '<div style="background:rgba(100,100,255,0.06);border:1px solid rgba(100,100,255,0.2);border-radius:14px;padding:14px;margin-bottom:10px;">' +
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">' +
+        '<div style="font-size:22px;">👑</div>' +
+        '<div><div style="font-size:15px;font-weight:700;color:#6688FF;">VIP II</div>' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.4);">'+t('comingSoon')+'</div></div>' +
+        '<div style="margin-left:auto;background:rgba(255,255,255,0.05);border-radius:8px;padding:4px 10px;font-size:10px;color:rgba(255,255,255,0.3);font-weight:700;">🔒 '+t('comingSoon')+'</div>' +
+      '</div>' +
+      '<div style="font-size:11px;color:rgba(255,255,255,0.3);">كل مميزات VIP I + مميزات حصرية إضافية</div>' +
+    '</div>' +
+
+    // VIP III
+    '<div style="background:rgba(170,100,255,0.06);border:1px solid rgba(170,100,255,0.2);border-radius:14px;padding:14px;">' +
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">' +
+        '<div style="font-size:22px;">💎</div>' +
+        '<div><div style="font-size:15px;font-weight:700;color:#AA66FF;">VIP III</div>' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.4);">'+t('comingSoon')+'</div></div>' +
+        '<div style="margin-left:auto;background:rgba(255,255,255,0.05);border-radius:8px;padding:4px 10px;font-size:10px;color:rgba(255,255,255,0.3);font-weight:700;">🔒 '+t('comingSoon')+'</div>' +
+      '</div>' +
+      '<div style="font-size:11px;color:rgba(255,255,255,0.3);">المستوى الأعلى — مميزات لا مثيل لها</div>' +
+    '</div>' +
+
+  '</div>';
 
   document.body.appendChild(ol);
 }
@@ -173,10 +173,10 @@ function switchVIPTab(n) {
             '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;">' + t('vipEnergyRemaining',{n:(window.refillData?window.refillData.count:6),max:6}) + '</div></div>' +
             '<div onclick="useEnergyRefill()" style="background:linear-gradient(135deg,#004466,#0088CC);border-radius:10px;padding:7px 16px;font-size:11px;color:white;font-weight:700;cursor:pointer;">' + t('vipEnergyBtn') + '</div>' +
           '</div>' +
-          '<div style="background:rgba(0,255,100,0.05);border:1px solid rgba(0,255,100,0.18);border-radius:14px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;">' +
-            '<div><div style="font-size:12px;font-weight:700;color:#00CC66;">' + t('vipWithdrawTitle') + '</div>' +
-            '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;">' + t('vipWithdrawDesc') + '</div></div>' +
-            '<div style="font-size:11px;color:rgba(0,255,136,0.5);">' + t('vipSoonLock') + '</div>' +
+          '<div onclick="openVIPWithdrawModal()" style="background:rgba(0,255,100,0.08);border:1px solid rgba(0,255,100,0.35);border-radius:14px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;cursor:pointer;">' +
+            '<div><div style="font-size:12px;font-weight:700;color:#00CC66;">' + t('vipWithdrawTitle','VIP Withdraw') + '</div>' +
+            '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;">50,000 – 1,000,000 REC</div></div>' +
+            '<div style="background:linear-gradient(135deg,#006633,#00CC66);border-radius:8px;padding:5px 12px;font-size:11px;color:white;font-weight:700;">Withdraw →</div>' +
           '</div>' +
         '</div>' : '') +
 
@@ -257,7 +257,7 @@ function openVIPBox(type) {
     updateUI();
     if(typeof addXP==='function') addXP(type==='common'?50:type==='rare'?100:200);
     if(reward) showVIPBoxResult(type, reward, false);
-    else showToast('❌ ' + t('vipBoxError','Error opening box'));
+    else showToast('❌ خطأ في فتح الصندوق');
   });
 }
 
@@ -374,7 +374,7 @@ function rollVIPBox(type) {
 function buyVIP(tier) {
   // Check wallet connected
   if (!tonConnect || !tonConnect.connected) {
-    showToast('❌ ' + t('vipConnectWalletFirst','Connect your wallet first!'));
+    showToast('❌ ربط محفظتك أولاً من صفحة Wallet!');
     return;
   }
 
@@ -382,7 +382,7 @@ function buyVIP(tier) {
   var labels = { 1: 'VIP I — 1 TON', 2: 'VIP II — 3 TON', 3: 'VIP III — 10 TON' };
   var nanoAmount = prices[tier];
 
-  showToast('⏳ ' + t('vipOpeningWallet','Opening your wallet...'));
+  showToast('⏳ جاري فتح محفظتك...');
 
   var BOT_WALLET = 'UQD-FoGlRG5pBxZpkf3H9ZOsNTL5basBbTEZE8zvMgHLB99o'; // محفظة البوت — نفس محفظة السحب
 
@@ -411,7 +411,7 @@ function buyVIP(tier) {
       amount: nanoAmount
     }]
   }).then(function(result) {
-    showToast('⏳ ' + t('vipVerifyingPayment','Verifying payment...'));
+    showToast('⏳ جاري التحقق من الدفع...');
 
     // Get user wallet address
     var userWallet = '';
@@ -441,29 +441,29 @@ function buyVIP(tier) {
           // Welcome bonus: 50 REC
           if(data.tier === 1) {
             rec += 50;
-            showToast('🎁 ' + t('vipWelcomeToast','+50 REC Welcome Bonus!'));
+            showToast('🎁 +50 REC مكافأة ترحيبية!');
             setTimeout(function(){
-              showToast('👑 ' + t('vipActivatedSuccess','VIP I activated!'));
+              showToast('👑 تم تفعيل VIP I بنجاح!');
             }, 2000);
           } else {
-            showToast('👑 VIP ' + (tier===1?'I':tier===2?'II':'III') + ' ' + t('vipActivatedOK','activated!'));
+            showToast('👑 تم تفعيل VIP ' + (tier===1?'I':tier===2?'II':'III') + ' بنجاح!');
           }
           if(typeof addXP==='function') addXP(500);
           saveData(true);
           renderVIPPage();
         } else {
-          showToast('❌ ' + (data.error || t('vipVerifyFailed','Verification failed')));
+          showToast('❌ ' + (data.error || 'فشل التحقق، تواصل مع الدعم'));
         }
       }).catch(function() {
-        showToast('❌ ' + t('vipServerError','Server error'));
+        showToast('❌ خطأ في الاتصال بالسيرفر');
       });
     }, 8000);
 
   }).catch(function(e) {
     if (e && e.message && (e.message.includes('cancel') || e.message.includes('reject'))) {
-      showToast('⚠️ ' + t('vipPaymentCancelled','Payment cancelled'));
+      showToast('تم إلغاء الدفع');
     } else {
-      showToast('❌ ' + t('vipPaymentError','Payment error'));
+      showToast('❌ خطأ في الدفع');
     }
   });
 }
@@ -487,10 +487,10 @@ function loadVIPData(callback) {
 function useVIPBoost() {
   if(!vipData || parseInt(vipData.tier||0) < 1 || parseInt(vipData.expiry||0) <= Date.now()) return;
   var today = getTodayStr();
-  if(vipData.boostDate === today) { showToast('✅ ' + t('vipBoostAlreadyActive','Boost already active today')); return; }
+  if(vipData.boostDate === today) { showToast('✅ البوست مفعّل اليوم مسبقاً'); return; }
   vipData.boostDate = today;
   saveData(true);
-  showToast('⚡ ' + t('vipBoostActivatedToast','x1.5 REC mining activated!'));
+  showToast('⚡ تم تفعيل ×١.٥ تعدين REC لبقية اليوم!');
   renderVIPPage();
 }
 
