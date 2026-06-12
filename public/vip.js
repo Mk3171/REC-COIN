@@ -22,59 +22,52 @@ function openVIPInfo() {
   var feats = [
     ['📦', t('vipFeat1','3 daily boxes (Common, Rare, Epic)')],
     ['🦅', t('vipFeat2','Rare Epic card chance (1%)')],
-    ['⚡', t('vipFeat3','×1.5 REC mining speed')],
+    ['⚡', t('vipFeat3','x1.5 REC mining speed')],
     ['🔋', t('vipFeat4','6x energy recharge daily')],
-    ['💰', t('vipFeat5','Withdraw: 50,000 – 100,000 REC/day')],
+    ['💰', t('vipFeat5','Withdraw: 50,000 - 100,000 REC/day')],
     ['🎯', t('vipFeat6','Daily combo hint (1 card)')],
     ['🎁', t('vipFeat7','+50 REC instant welcome bonus')],
     ['👑', t('vipFeat8','Gold VIP badge on leaderboard')]
   ];
-
   var featHtml = feats.map(function(f){
-    return '<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);">' +
-      '<span style="flex-shrink:0;font-size:15px;">' + f[0] + '</span>' +
-      '<span style="font-size:12px;color:rgba(255,255,255,0.8);line-height:1.5;">' + f[1] + '</span>' +
-    '</div>';
+    return '<div style="display:flex;align-items:flex-start;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,0.05);">'
+      + '<span style="flex-shrink:0;font-size:15px;">' + f[0] + '</span>'
+      + '<span style="font-size:12px;color:rgba(255,255,255,0.8);line-height:1.5;">' + f[1] + '</span>'
+    + '</div>';
   }).join('');
 
   ol.innerHTML =
-    '<div style="width:100%;background:linear-gradient(180deg,#1a0a00,#0d0500);border-radius:24px 24px 0 0;border-top:2px solid rgba(255,200,0,0.3);padding:20px 16px 36px;max-height:88vh;overflow-y:auto;" onclick="event.stopPropagation()">' +
-    '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">' +
-      '<div style="font-size:18px;font-weight:900;color:#FFD700;font-family:Impact,sans-serif;letter-spacing:2px;">👑 ' + t('vipLevelsTitle','VIP Levels') + '</div>' +
-      '<div onclick="document.querySelectorAll(\'.vip-info-ol\')[0].remove()" style="width:30px;height:30px;background:rgba(255,255,255,0.08);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.4);font-size:13px;">✕</div>' +
-    '</div>' +
-
-    '<div style="background:rgba(255,50,50,0.08);border:1px solid rgba(255,50,50,0.3);border-radius:14px;padding:14px;margin-bottom:10px;">' +
-      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">' +
-        '<div style="font-size:22px;">👑</div>' +
-        '<div><div style="font-size:15px;font-weight:700;color:#FF6644;">VIP I</div>' +
-        '<div style="font-size:10px;color:rgba(255,255,255,0.4);">1 TON / ' + t('vipMonthLabel','month') + '</div></div>' +
-        '<div style="margin-left:auto;background:rgba(255,50,50,0.2);border-radius:8px;padding:4px 10px;font-size:10px;color:#FF6644;font-weight:700;">' + t('vipAvailable','Available') + ' ✅</div>' +
-      '</div>' +
-      featHtml +
-    '</div>' +
-
-    '<div style="background:rgba(100,100,255,0.06);border:1px solid rgba(100,100,255,0.2);border-radius:14px;padding:14px;margin-bottom:10px;">' +
-      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">' +
-        '<div style="font-size:22px;">👑</div>' +
-        '<div><div style="font-size:15px;font-weight:700;color:#6688FF;">VIP II</div>' +
-        '<div style="font-size:10px;color:rgba(255,255,255,0.4);">' + t('comingSoon','Coming Soon') + '</div></div>' +
-        '<div style="margin-left:auto;background:rgba(255,255,255,0.05);border-radius:8px;padding:4px 10px;font-size:10px;color:rgba(255,255,255,0.3);font-weight:700;">🔒 ' + t('comingSoon','Coming Soon') + '</div>' +
-      '</div>' +
-      '<div style="font-size:11px;color:rgba(255,255,255,0.3);">' + t('vipIIDesc','All VIP I benefits + exclusive extras') + '</div>' +
-    '</div>' +
-
-    '<div style="background:rgba(170,100,255,0.06);border:1px solid rgba(170,100,255,0.2);border-radius:14px;padding:14px;">' +
-      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">' +
-        '<div style="font-size:22px;">💎</div>' +
-        '<div><div style="font-size:15px;font-weight:700;color:#AA66FF;">VIP III</div>' +
-        '<div style="font-size:10px;color:rgba(255,255,255,0.4);">' + t('comingSoon','Coming Soon') + '</div></div>' +
-        '<div style="margin-left:auto;background:rgba(255,255,255,0.05);border-radius:8px;padding:4px 10px;font-size:10px;color:rgba(255,255,255,0.3);font-weight:700;">🔒 ' + t('comingSoon','Coming Soon') + '</div>' +
-      '</div>' +
-      '<div style="font-size:11px;color:rgba(255,255,255,0.3);">' + t('vipIIIDesc','The highest tier — unmatched benefits') + '</div>' +
-    '</div>' +
-
-  '</div>';
+    '<div style="width:100%;background:linear-gradient(180deg,#1a0a00,#0d0500);border-radius:24px 24px 0 0;border-top:2px solid rgba(255,200,0,0.3);padding:20px 16px 36px;max-height:88vh;overflow-y:auto;" onclick="event.stopPropagation()">'
+  + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">'
+  + '<div style="font-size:18px;font-weight:900;color:#FFD700;font-family:Impact,sans-serif;letter-spacing:2px;">👑 ' + t('vipLevelsTitle','VIP Levels') + '</div>'
+  + '<div onclick="document.querySelectorAll(\'.vip-info-ol\')[0].remove()" style="width:30px;height:30px;background:rgba(255,255,255,0.08);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.4);font-size:13px;">✕</div>'
+  + '</div>'
+  + '<div style="background:rgba(255,50,50,0.08);border:1px solid rgba(255,50,50,0.3);border-radius:14px;padding:14px;margin-bottom:10px;">'
+  + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">'
+  + '<div style="font-size:22px;">👑</div>'
+  + '<div><div style="font-size:15px;font-weight:700;color:#FF6644;">VIP I</div>'
+  + '<div style="font-size:10px;color:rgba(255,255,255,0.4);">1 TON / ' + t('vipMonthLabel','month') + '</div></div>'
+  + '<div style="margin-left:auto;background:rgba(255,50,50,0.2);border-radius:8px;padding:4px 10px;font-size:10px;color:#FF6644;font-weight:700;">' + t('vipAvailable','Available') + ' ✅</div>'
+  + '</div>' + featHtml + '</div>'
+  + '<div style="background:rgba(100,100,255,0.06);border:1px solid rgba(100,100,255,0.2);border-radius:14px;padding:14px;margin-bottom:10px;">'
+  + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">'
+  + '<div style="font-size:22px;">👑</div>'
+  + '<div><div style="font-size:15px;font-weight:700;color:#6688FF;">VIP II</div>'
+  + '<div style="font-size:10px;color:rgba(255,255,255,0.4);">' + t('comingSoon','Coming Soon') + '</div></div>'
+  + '<div style="margin-left:auto;background:rgba(255,255,255,0.05);border-radius:8px;padding:4px 10px;font-size:10px;color:rgba(255,255,255,0.3);font-weight:700;">🔒 ' + t('comingSoon','Coming Soon') + '</div>'
+  + '</div>'
+  + '<div style="font-size:11px;color:rgba(255,255,255,0.3);">' + t('vipIIDesc','All VIP I benefits + exclusive extras') + '</div>'
+  + '</div>'
+  + '<div style="background:rgba(170,100,255,0.06);border:1px solid rgba(170,100,255,0.2);border-radius:14px;padding:14px;">'
+  + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">'
+  + '<div style="font-size:22px;">💎</div>'
+  + '<div><div style="font-size:15px;font-weight:700;color:#AA66FF;">VIP III</div>'
+  + '<div style="font-size:10px;color:rgba(255,255,255,0.4);">' + t('comingSoon','Coming Soon') + '</div></div>'
+  + '<div style="margin-left:auto;background:rgba(255,255,255,0.05);border-radius:8px;padding:4px 10px;font-size:10px;color:rgba(255,255,255,0.3);font-weight:700;">🔒 ' + t('comingSoon','Coming Soon') + '</div>'
+  + '</div>'
+  + '<div style="font-size:11px;color:rgba(255,255,255,0.3);">' + t('vipIIIDesc','The highest tier - unmatched benefits') + '</div>'
+  + '</div>'
+  + '</div>';
 
   document.body.appendChild(ol);
 }
@@ -453,7 +446,7 @@ function buyVIP(tier) {
               showToast('👑 ' + t('vipActivatedSuccess','VIP I activated!'));
             }, 2000);
           } else {
-            showToast('👑 VIP ' + (tier===1?'I':tier===2?'II':'III') + ' ' + t('vipActivatedOK','activated successfully!'));
+            showToast('👑 VIP ' + (tier===1?'I':tier===2?'II':'III') + ' ' + t('vipActivatedOK','activated!'));
           }
           if(typeof addXP==='function') addXP(500);
           saveData(true);
@@ -497,7 +490,7 @@ function useVIPBoost() {
   if(vipData.boostDate === today) { showToast('✅ ' + t('vipBoostAlreadyActive','Boost already active today')); return; }
   vipData.boostDate = today;
   saveData(true);
-  showToast('⚡ ' + t('vipBoostActivatedToast','×1.5 REC mining activated!'));
+  showToast('⚡ ' + t('vipBoostActivatedToast','x1.5 REC mining activated!'));
   renderVIPPage();
 }
 
