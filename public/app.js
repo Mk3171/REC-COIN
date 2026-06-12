@@ -827,7 +827,16 @@ function openWithdrawModal() {
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:99999;display:flex;align-items:flex-end;';
   var balance = (typeof rec !== 'undefined') ? rec : 0;
   var hasWallet = (typeof tonConnect !== 'undefined' && tonConnect.connected);
-  var walletAddr = hasWallet && tonConnect.account ? tonConnect.account.address : '';
+  // Get wallet address in UQ... friendly format from walletBtn
+  var walletAddr = '';
+  if(hasWallet) {
+    var wBtn = document.getElementById('walletBtn');
+    if(wBtn && wBtn.getAttribute('data-raw')) {
+      walletAddr = wBtn.getAttribute('data-raw');
+    } else if(tonConnect.account && tonConnect.account.address) {
+      walletAddr = tonConnect.account.address;
+    }
+  }
   var shortAddr = walletAddr ? (walletAddr.substring(0,6)+'...'+walletAddr.substring(walletAddr.length-4)) : '';
   modal.innerHTML =
     '<div style="background:linear-gradient(180deg,#0a160e,#050d08);border-radius:24px 24px 0 0;border-top:2px solid rgba(0,255,136,0.4);padding:20px 18px 36px;width:100%;max-height:90vh;overflow-y:auto;">'
@@ -906,7 +915,16 @@ function openVIPWithdrawModal() {
   modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:99999;display:flex;align-items:flex-end;';
   var balance = (typeof rec !== 'undefined') ? rec : 0;
   var hasWallet = (typeof tonConnect !== 'undefined' && tonConnect.connected);
-  var walletAddr = hasWallet && tonConnect.account ? tonConnect.account.address : '';
+  // Get wallet address in UQ... friendly format from walletBtn
+  var walletAddr = '';
+  if(hasWallet) {
+    var wBtn = document.getElementById('walletBtn');
+    if(wBtn && wBtn.getAttribute('data-raw')) {
+      walletAddr = wBtn.getAttribute('data-raw');
+    } else if(tonConnect.account && tonConnect.account.address) {
+      walletAddr = tonConnect.account.address;
+    }
+  }
   var shortAddr = walletAddr ? (walletAddr.substring(0,6)+'...'+walletAddr.substring(walletAddr.length-4)) : '';
 
   modal.innerHTML =
