@@ -4,6 +4,7 @@ var currentTab = 'global';
 
 function switchLeaderTab(tab) {
   currentTab = tab;
+  currentTab = tab;
   document.querySelectorAll('.lb-tab').forEach(function(b) { b.classList.remove('active'); });
   var btn = document.getElementById('tab_' + tab);
   if(btn) btn.classList.add('active');
@@ -72,12 +73,6 @@ function renderGlobal(top100, myRankData, weekly) {
     '<div style="font-size:10px;color:rgba(255,255,255,0.35);letter-spacing:2px;margin-bottom:4px;">REWARDS CREDIT IN</div>' +
     '<div id="weeklyCountdown" style="font-family:Orbitron,sans-serif;font-size:16px;color:#FFD700;font-weight:700;letter-spacing:2px;">'+_cdStr+'</div>' +
     '</div>';
-  // Refresh timer label
-  _lbLastUpdate = _lbLastUpdate || Date.now();
-  html += '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding:0 2px;">' +
-    '<div id="lbLastUpdated" style="font-size:10px;color:rgba(255,255,255,0.2);">🔄 ' + t('lbAutoRefresh','Auto-updates every 5 min') + '</div>' +
-    '<div onclick="loadLeaderboard(currentTab||\'global\')" style="font-size:10px;color:rgba(255,100,50,0.6);cursor:pointer;">↻ ' + t('lbRefreshNow','Refresh') + '</div>' +
-  '</div>';
 
   if(top100.length === 0) {
     cont.innerHTML = html + '<div style="text-align:center;color:#555;padding:30px;">🏆</div>';
@@ -334,36 +329,26 @@ function connectWallet() {
 
 // ====== AUTO REFRESH EVERY 5 MINUTES ======
 var _lbRefreshTimer = null;
-var _lbLastUpdate = 0;
+var _lbLastUpdate = Date.now();
 
 function startLeaderboardAutoRefresh() {
   if(_lbRefreshTimer) clearInterval(_lbRefreshTimer);
   _lbRefreshTimer = setInterval(function() {
-    var lbContent = document.getElementById('lbContent');
-    if(lbContent && lbContent.innerHTML && lbContent.innerHTML.length > 50) {
+    var content = document.getElementById('lbContent');
+    if(content && content.innerHTML && content.innerHTML.length > 50) {
       loadLeaderboard(currentTab || 'global');
+      _lbLastUpdate = Date.now();
     }
-  }, 5 * 60 * 1000); // 5 minutes
+  }, 5 * 60 * 1000);
 }
 
-function updateLastUpdatedLabel() {
+function updateLbTimer() {
   var el = document.getElementById('lbLastUpdated');
   if(!el) return;
   var secsLeft = Math.max(0, 300 - Math.floor((Date.now() - _lbLastUpdate) / 1000));
-  if(secsLeft <= 5) {
-    el.textContent = '🔄 Refreshing...';
-  } else if(secsLeft < 60) {
-    el.textContent = '🔄 Next update in ' + secsLeft + 's';
-  } else {
-    el.textContent = '🔄 Next update in ' + Math.floor(secsLeft/60) + 'm ' + (secsLeft%60) + 's';
-  }
+  if(secsLeft < 10) el.textContent = '🔄 Refreshing...';
+  else if(secsLeft < 60) el.textContent = '🔄 Next update in ' + secsLeft + 's';
+  else el.textContent = '🔄 Next update in ' + Math.floor(secsLeft/60) + 'm ' + (secsLeft%60) + 's';
 }
-
-// Update "last updated" label every 30 seconds
-setInterval(updateLastUpdatedLabel, 30000);
-
-// Start auto-refresh when page loads
-setTimeout(function() {
-  startLeaderboardAutoRefresh();
-  _lbLastUpdate = Date.now();
-}, 1000);
+setInterval(updateLbTimer, 10000);
+setTimeout(function() { startLeaderboardAutoRefresh(); }, 2000);
