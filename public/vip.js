@@ -175,7 +175,7 @@ function switchVIPTab(n) {
           '</div>' +
           '<div style="background:rgba(0,255,100,0.05);border:1px solid rgba(0,255,100,0.18);border-radius:14px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;">' +
             '<div><div style="font-size:12px;font-weight:700;color:#00CC66;">' + t('vipWithdrawTitle') + '</div>' +
-            '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;">' + t('vipWithdrawDesc') + '</div></div>' +
+            '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;">' + t('vipWithdrawDesc','Withdraw: 50,000 – 100,000 REC/day') + '</div></div>' +
             '<div style="font-size:11px;color:rgba(0,255,136,0.5);">' + t('vipSoonLock') + '</div>' +
           '</div>' +
         '</div>' : '') +
