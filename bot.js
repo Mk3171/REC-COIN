@@ -1478,6 +1478,7 @@ setInterval(runCloudMining, 60 * 1000);
 // أول تشغيل بعد دقيقتين من بدء السيرفر
 setTimeout(runCloudMining, 2 * 60 * 1000);
 console.log('[Cloud Mining] ✅ Started — mining every 60 seconds');
+console.log('[TonCenter] ' + (process.env.TONCENTER_API_KEY ? '✅ API Key configured' : '❌ NO API KEY — set TONCENTER_API_KEY'));
 
 
 // Sync — يرجع الرصيد الحالي من السيرفر
