@@ -1091,12 +1091,12 @@ app.get('/api/referrals/:telegramId', async (req, res) => {
 const SERVER_CARDS = [
   {key:'0_0',name:"Naruto",e:'🍥',cat:0},
   {key:'0_1',name:"Goku",e:'⚡',cat:0},
-  {key:'0_2',name:"Luffy",e:'☠',cat:0},
-  {key:'0_3',name:"Sasuke",e:'⚡',cat:0},
+  {key:'0_2',name:"Luffy",e:'🏴☠',cat:0},
+  {key:'0_3',name:"Sasuke",e:'🌩',cat:0},
   {key:'0_4',name:"Itachi",e:'🌸',cat:0},
   {key:'0_5',name:"Zoro",e:'⚔',cat:0},
   {key:'0_6',name:"Totoro",e:'🌿',cat:0},
-  {key:'0_7',name:"Mikasa",e:'⚔',cat:0},
+  {key:'0_7',name:"Mikasa",e:'🗡',cat:0},
   {key:'0_8',name:"Levi",e:'💨',cat:0},
   {key:'0_9',name:"Eren",e:'🔑',cat:0},
   {key:'0_10',name:"Armin",e:'📚',cat:0},
@@ -1106,7 +1106,7 @@ const SERVER_CARDS = [
   {key:'0_14',name:"Gray",e:'❄',cat:0},
   {key:'0_15',name:"Erza",e:'🛡',cat:0},
   {key:'0_16',name:"Lucy",e:'⭐',cat:0},
-  {key:'0_17',name:"Kirito",e:'⚔',cat:0},
+  {key:'0_17',name:"Kirito",e:'🗡',cat:0},
   {key:'0_18',name:"Asuna",e:'🌹',cat:0},
   {key:'0_19',name:"Gon",e:'🌟',cat:0},
   {key:'0_20',name:"Killua",e:'⚡',cat:0},
@@ -1220,14 +1220,12 @@ function getServerCard(key) {
 function pickRandomComboCards() {
   var shuffled = SERVER_CARDS.slice().sort(function(){ return Math.random()-0.5; });
   var picked = [], usedCats = [];
-  // Prefer cards from different categories
   for(var i=0; i<shuffled.length && picked.length<3; i++) {
     if(usedCats.indexOf(shuffled[i].cat) === -1) {
       picked.push(shuffled[i]);
       usedCats.push(shuffled[i].cat);
     }
   }
-  // Fill remaining if needed
   for(var j=0; j<shuffled.length && picked.length<3; j++) {
     if(picked.indexOf(shuffled[j]) === -1) picked.push(shuffled[j]);
   }
@@ -1242,7 +1240,6 @@ async function autoSetDailyCombo() {
     var today = new Date().toISOString().split('T')[0];
     var existing = await DailyCombo.findOne({ date: today });
     if(existing) { console.log('[AutoCombo] Already set for', today); return; }
-
     var cards = pickRandomComboCards();
     await DailyCombo.findOneAndUpdate(
       { date: today },
@@ -1250,7 +1247,7 @@ async function autoSetDailyCombo() {
       { upsert: true, new: true }
     );
     console.log('[AutoCombo] Set:', cards.map(function(c){ return c.key; }).join(', '));
-    await sendComboToVIP(cards, today);
+    sendComboToVIP(cards, today);
   } catch(e) { console.log('[AutoCombo] Error:', e.message); }
 }
 
@@ -1261,33 +1258,27 @@ async function sendComboToVIP(cards, dateStr) {
       'vip.tier': { $gte: 1 },
       'vip.expiry': { $gt: Date.now() }
     }).select('telegramId firstName username vip').lean();
-
     if(!vipUsers.length) return;
     console.log('[AutoCombo] Notifying', vipUsers.length, 'VIP users');
-
     var cardLines = cards.map(function(c) {
       var info = getServerCard(c.key);
       return info ? (info.e + ' *' + info.name + '*') : c.key;
     });
-
     var delay = 0;
     vipUsers.forEach(function(user) {
       setTimeout(async function() {
         try {
           var name = user.firstName || user.username || 'Miner';
           var tier = (user.vip && user.vip.tier) ? user.vip.tier : 1;
-          var tierLabel = tier >= 2 ? '💎 VIP ' + tier : '⭐ VIP 1';
-          var msg =
-            '🎯 *Daily Combo — ' + dateStr + '*\n' +
-            '━━━━━━━━━━━━━━━\n' +
+          var tierLabel = tier >= 2 ? ('VIP ' + tier) : 'VIP 1';
+          var msg = '🎯 *Daily Combo — ' + dateStr + '*' + '\n' +
             'Hey ' + name + '! ' + tierLabel + '\n\n' +
-            '*Today\'s combo cards:*\n\n' +
-            cardLines.map(function(c, i){ return (i+1)+'. '+c; }).join('\n') +
-            '\n\n⚡ Upgrade all 3 to claim *+5 REC*!\n' +
-            '━━━━━━━━━━━━━━━';
+            '*Today combo cards:*\n\n' +
+            cardLines.map(function(c, i){ return (i+1) + '. ' + c; }).join('\n') +
+            '\n\nUpgrade all 3 to claim *+5 REC*!';
           await bot.sendMessage(user.telegramId, msg, {
             parse_mode: 'Markdown',
-            reply_markup: { inline_keyboard: [[{ text: '🚀 Open Bot', web_app: { url: MINI_APP_URL } }]] }
+            reply_markup: { inline_keyboard: [[{ text: 'Open Bot', web_app: { url: MINI_APP_URL } }]] }
           });
         } catch(e) {}
       }, delay);
@@ -1296,13 +1287,12 @@ async function sendComboToVIP(cards, dateStr) {
   } catch(e) { console.log('[AutoCombo] VIP notify error:', e.message); }
 }
 
-// Check every 30min — auto-set at midnight UTC or if missing
 setInterval(async function() {
   var h = new Date().getUTCHours(), m = new Date().getUTCMinutes();
-  if(h === 0 && m < 30) await autoSetDailyCombo();
+  if(h === 0 && m < 30) { autoSetDailyCombo(); }
 }, 30 * 60 * 1000);
-// On startup: set today's combo if not set
 setTimeout(function() { autoSetDailyCombo(); }, 8000);
+
 
 // ====== DAILY COMBO API ======
 
@@ -1443,17 +1433,7 @@ app.post('/api/exchange/tax', async (req, res) => {
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-
-    if(!cards || cards.length !== 3) return res.status(400).json({ error: 'Need 3 cards' });
-    var today = new Date().toISOString().split('T')[0];
-    await DailyCombo.findOneAndUpdate(
-      { date: today },
-      { $set: { cards: cards, reward: 5, setAt: Date.now() } },
-      { upsert: true, new: true }
-    );
-    res.json({ success: true, date: today });
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
+// [Auto Combo] Daily combo is set automatically
 
 // POST check card upgrade against combo
 app.post('/api/combo/check', async (req, res) => {
