@@ -98,7 +98,7 @@ function applyData(d){
     vipData = d.vipData;
     vipData.boxes = vipData.boxes || {};
   }
-  // refillData — 3 فرص يومية لتعبئة الطاقة
+  // refillData — 6 فرص يومية لـ VIP / 3 للعاديين
   var _today=getTodayStr();
   if(d.refillData && d.refillData.date===_today){
     window.refillData=d.refillData;
@@ -475,14 +475,14 @@ function useEnergyRefill(){
   energy=maxEnergy;
   window.refillData.count--;
   saveData(true); updateUI(); updateUpgradeUI();
-  showToast('⚡ تمت تعبئة الطاقة! '+window.refillData.count+' فرص متبقية');
+  showToast('⚡ ' + t('vipEnergyUsed','Energy refilled!') + ' ' + window.refillData.count + ' ' + t('vipEnergyLeft','remaining'));
 }
 
 function loadRefillData(){
-  // البيانات تتحمل من applyData — بس نتأكد من التاريخ
   var today=getTodayStr();
   if(!window.refillData || window.refillData.date!==today){
-    window.refillData={date:today,count:3};
+    var maxR=(vipData && parseInt(vipData.tier||0)>=1 && parseInt(vipData.expiry||0)>Date.now())?6:3;
+    window.refillData={date:today,count:maxR};
   }
 }
 
@@ -619,12 +619,16 @@ function _infoCard(color, icon, title, sub, body) {
 // ====== DAILY COMBO ======
 var comboData = null;
 var ADMIN_TG_ID = 6995765586;
+var adminComboSelection = [null, null, null];
 
 function openCombo() {
   document.getElementById('comboOverlay').style.display = 'block';
   document.getElementById('comboPopup').style.display = 'block';
   loadComboData();
-
+  if(tgUser && tgUser.id === ADMIN_TG_ID) {
+    document.getElementById('comboAdminPanel').style.display = 'block';
+    buildAdminComboSlots();
+  }
 }
 
 function closeCombo() {
@@ -795,8 +799,55 @@ function sendAdminGift() {
   });
 }
 
-// ====== END DAILY COMBO ======
+// ====== ADMIN COMBO SETTER ======
+function buildAdminComboSlots() {
+  var panel = document.getElementById('comboAdminSlots');
+  if(!panel) return;
+  var cats = typeof categories !== 'undefined' ? categories : [];
+  var allCards = [];
+  cats.forEach(function(cat, ci) {
+    cat.cards.forEach(function(card, idx) {
+      allCards.push({ key: ci+'_'+idx, label: (card.e||'🃏') + ' ' + (card.en||card.n||'Card'), ci: ci, idx: idx });
+    });
+  });
 
+  panel.innerHTML = [0,1,2].map(function(slot) {
+    return '<select id="adminComboSlot_'+slot+'" style="width:100%;background:rgba(0,0,0,0.5);border:1px solid rgba(255,100,50,0.3);color:white;padding:8px;border-radius:8px;font-size:11px;">' +
+      '<option value="">-- بطاقة '+(slot+1)+' --</option>' +
+      allCards.map(function(c) {
+        return '<option value="'+c.key+'|'+c.ci+'|'+c.idx+'">'+c.label+'</option>';
+      }).join('') +
+      '</select>';
+  }).join('');
+}
+
+function saveAdminCombo() {
+  if(!tgUser) { showToast('❌ No tgUser'); return; }
+  if(String(tgUser.id) !== String(ADMIN_TG_ID)) { showToast('❌ Not admin: '+tgUser.id); return; }
+  var cards = [];
+  for(var i=0;i<3;i++) {
+    var sel = document.getElementById('adminComboSlot_'+i);
+    if(!sel) { showToast('❌ Select '+i+' not found'); return; }
+    if(!sel.value) { showToast('❌ اختر بطاقة '+(i+1)); return; }
+    var parts = sel.value.split('|');
+    if(parts.length < 3) { showToast('❌ قيمة خاطئة: '+sel.value); return; }
+    cards.push({ key: parts[0], categoryIndex: parseInt(parts[1]), cardIndex: parseInt(parts[2]) });
+  }
+  if(cards[0].key===cards[1].key || cards[1].key===cards[2].key || cards[0].key===cards[2].key) {
+    showToast('❌ لا تكرر نفس البطاقة'); return;
+  }
+  showToast('⏳ جاري الحفظ...');
+  fetch('/api/combo/set', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ adminId: parseInt(tgUser.id), cards })
+  }).then(function(r){ return r.json(); })
+  .then(function(d){
+    if(d.success) { showToast('✅ تم حفظ الكومبو! ' + d.date); loadComboData(); }
+    else showToast('❌ ' + JSON.stringify(d));
+  }).catch(function(e){ showToast('❌ Fetch error: '+e.message); });
+}
+// ====== END DAILY COMBO ======
 
 // ====== WALLET PAGE ======
 function updateWalletPage() {
