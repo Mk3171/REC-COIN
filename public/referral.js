@@ -111,59 +111,31 @@ function renderRefList() {
 function updateInviteLinkDisplay() {
   var el = document.getElementById('inviteLinkDisplay');
   if(!el) return;
-  if(!window.tgUser) {
-    // Retry every 500ms until tgUser is available
-    setTimeout(updateInviteLinkDisplay, 500);
-    return;
-  }
+  if(!window.tgUser) { setTimeout(updateInviteLinkDisplay, 500); return; }
   var link = 'https://t.me/RecMiningGame_bot?start=ref' + tgUser.id;
   el.textContent = link;
-  // Also update copy/share button data
   window._inviteLink = link;
 }
+document.addEventListener('DOMContentLoaded', function() { setTimeout(updateInviteLinkDisplay, 1000); });
 
-// ====== Auto-init when page loads ======
-document.addEventListener('DOMContentLoaded', function() {
-  setTimeout(updateInviteLinkDisplay, 1000);
-});
-
-// ====== Copy Invite Link ======
 function copyInvite() {
   if(!window.tgUser) { updateInviteLinkDisplay(); return; }
   var link = window._inviteLink || ('https://t.me/RecMiningGame_bot?start=ref' + tgUser.id);
   if(navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(link).then(function() {
-      if(typeof showToast === 'function') showToast('✅ ' + (typeof t === 'function' ? t('linkCopied','Link copied!') : 'Link copied!'));
-    }).catch(function() { _fallbackCopy(link); });
-  } else {
-    _fallbackCopy(link);
-  }
+    navigator.clipboard.writeText(link).then(function(){ if(typeof showToast==='function') showToast('✅ '+(typeof t==='function'?t('linkCopied','Link copied!'):'Link copied!')); }).catch(function(){ _fbCopy(link); });
+  } else { _fbCopy(link); }
 }
-
-function _fallbackCopy(text) {
-  var el = document.createElement('textarea');
-  el.value = text;
-  el.style.cssText = 'position:fixed;top:-9999px;left:-9999px;opacity:0;';
-  document.body.appendChild(el);
-  el.focus(); el.select();
-  try {
-    document.execCommand('copy');
-    if(typeof showToast === 'function') showToast('✅ ' + (typeof t === 'function' ? t('linkCopied','Link copied!') : 'Link copied!'));
-  } catch(e) {}
+function _fbCopy(text) {
+  var el=document.createElement('textarea'); el.value=text; el.style.cssText='position:fixed;top:-9999px;opacity:0;';
+  document.body.appendChild(el); el.focus(); el.select();
+  try{ document.execCommand('copy'); if(typeof showToast==='function') showToast('✅ '+(typeof t==='function'?t('linkCopied','Link copied!'):'Link copied!')); }catch(e){}
   document.body.removeChild(el);
 }
-
-// ====== Share Invite Link ======
 function shareInvite() {
   if(!window.tgUser) { updateInviteLinkDisplay(); return; }
   var link = window._inviteLink || ('https://t.me/RecMiningGame_bot?start=ref' + tgUser.id);
-  var text = typeof t === 'function' ? t('inviteShareText','Join me on REC Mining and start earning!') : 'Join me on REC Mining and start earning!';
-  if(window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openTelegramLink) {
-    var shareUrl = 'https://t.me/share/url?url=' + encodeURIComponent(link) + '&text=' + encodeURIComponent(text);
-    window.Telegram.WebApp.openTelegramLink(shareUrl);
-  } else if(navigator.share) {
-    navigator.share({ title: 'REC Mining', text: text, url: link }).catch(function(){});
-  } else {
-    copyInvite();
-  }
+  var text = typeof t==='function'?t('inviteShareText','Join me on REC Mining!'):' Join me on REC Mining!';
+  if(window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.openTelegramLink) {
+    window.Telegram.WebApp.openTelegramLink('https://t.me/share/url?url='+encodeURIComponent(link)+'&text='+encodeURIComponent(text));
+  } else if(navigator.share) { navigator.share({title:'REC Mining',text:text,url:link}).catch(function(){}); } else { copyInvite(); }
 }
