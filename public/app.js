@@ -619,16 +619,12 @@ function _infoCard(color, icon, title, sub, body) {
 // ====== DAILY COMBO ======
 var comboData = null;
 var ADMIN_TG_ID = 6995765586;
-var adminComboSelection = [null, null, null];
 
 function openCombo() {
   document.getElementById('comboOverlay').style.display = 'block';
   document.getElementById('comboPopup').style.display = 'block';
   loadComboData();
-  if(tgUser && tgUser.id === ADMIN_TG_ID) {
-    document.getElementById('comboAdminPanel').style.display = 'block';
-    buildAdminComboSlots();
-  }
+
 }
 
 function closeCombo() {
@@ -800,53 +796,7 @@ function sendAdminGift() {
 }
 
 // ====== ADMIN COMBO SETTER ======
-function buildAdminComboSlots() {
-  var panel = document.getElementById('comboAdminSlots');
-  if(!panel) return;
-  var cats = typeof categories !== 'undefined' ? categories : [];
-  var allCards = [];
-  cats.forEach(function(cat, ci) {
-    cat.cards.forEach(function(card, idx) {
-      allCards.push({ key: ci+'_'+idx, label: (card.e||'🃏') + ' ' + (card.en||card.n||'Card'), ci: ci, idx: idx });
-    });
-  });
 
-  panel.innerHTML = [0,1,2].map(function(slot) {
-    return '<select id="adminComboSlot_'+slot+'" style="width:100%;background:rgba(0,0,0,0.5);border:1px solid rgba(255,100,50,0.3);color:white;padding:8px;border-radius:8px;font-size:11px;">' +
-      '<option value="">-- بطاقة '+(slot+1)+' --</option>' +
-      allCards.map(function(c) {
-        return '<option value="'+c.key+'|'+c.ci+'|'+c.idx+'">'+c.label+'</option>';
-      }).join('') +
-      '</select>';
-  }).join('');
-}
-
-function saveAdminCombo() {
-  if(!tgUser) { showToast('❌ No tgUser'); return; }
-  if(String(tgUser.id) !== String(ADMIN_TG_ID)) { showToast('❌ Not admin: '+tgUser.id); return; }
-  var cards = [];
-  for(var i=0;i<3;i++) {
-    var sel = document.getElementById('adminComboSlot_'+i);
-    if(!sel) { showToast('❌ Select '+i+' not found'); return; }
-    if(!sel.value) { showToast('❌ اختر بطاقة '+(i+1)); return; }
-    var parts = sel.value.split('|');
-    if(parts.length < 3) { showToast('❌ قيمة خاطئة: '+sel.value); return; }
-    cards.push({ key: parts[0], categoryIndex: parseInt(parts[1]), cardIndex: parseInt(parts[2]) });
-  }
-  if(cards[0].key===cards[1].key || cards[1].key===cards[2].key || cards[0].key===cards[2].key) {
-    showToast('❌ لا تكرر نفس البطاقة'); return;
-  }
-  showToast('⏳ جاري الحفظ...');
-  fetch('/api/combo/set', {
-    method: 'POST',
-    headers: {'Content-Type':'application/json'},
-    body: JSON.stringify({ adminId: parseInt(tgUser.id), cards })
-  }).then(function(r){ return r.json(); })
-  .then(function(d){
-    if(d.success) { showToast('✅ تم حفظ الكومبو! ' + d.date); loadComboData(); }
-    else showToast('❌ ' + JSON.stringify(d));
-  }).catch(function(e){ showToast('❌ Fetch error: '+e.message); });
-}
 // ====== END DAILY COMBO ======
 
 // ====== WALLET PAGE ======
@@ -864,10 +814,12 @@ function updateWalletPage() {
   el = document.getElementById('recPoolBalance'); if(el) el.textContent = rec.toFixed(6);
 }
 
-// ====== WITHDRAW MODAL ======
-var WITHDRAW_MIN = 50000;
-var WITHDRAW_MAX = 100000;
+
+// ====== WITHDRAW MODAL (All Users: 10,000 - 50,000 REC) ======
+var WITHDRAW_MIN = 10000;
+var WITHDRAW_MAX = 50000;
 var WITHDRAW_FEE = 150;
+
 function openWithdrawModal() {
   if(document.getElementById('withdrawModal')) return;
   var modal = document.createElement('div');
@@ -910,9 +862,9 @@ function openWithdrawModal() {
   document.body.appendChild(modal);
   var inp = document.getElementById('withdrawAmountInput');
   if(inp) inp.addEventListener('input', function(){
-    var val = parseFloat(inp.value)||0, calc = document.getElementById('withdrawCalc');
+    var val=parseFloat(inp.value)||0, calc=document.getElementById('withdrawCalc');
     if(!calc) return;
-    if(val>=WITHDRAW_MIN && val<=WITHDRAW_MAX){ calc.style.color='#00FF88'; calc.textContent='✅ '+t('withdrawYouReceive','You receive')+': '+(val-WITHDRAW_FEE).toLocaleString()+' REC'; }
+    if(val>=WITHDRAW_MIN&&val<=WITHDRAW_MAX){ calc.style.color='#00FF88'; calc.textContent='✅ '+t('withdrawYouReceive','You receive')+': '+(val-WITHDRAW_FEE).toLocaleString()+' REC'; }
     else if(val>WITHDRAW_MAX){ calc.style.color='#FF4444'; calc.textContent='❌ Max: '+WITHDRAW_MAX.toLocaleString()+' REC'; }
     else if(val>0){ calc.style.color='#FF4444'; calc.textContent='❌ Min: '+WITHDRAW_MIN.toLocaleString()+' REC'; }
     else calc.textContent='';
@@ -935,6 +887,92 @@ function submitWithdraw(){
     if(d.success){rec-=amount;if(typeof updateUI==='function')updateUI();if(typeof saveData==='function')saveData(true);var m=document.getElementById('withdrawModal');if(m)m.remove();showToast('✅ '+d.netAmount.toLocaleString()+' REC '+t('withdrawSuccess','sent!'));}
     else{showToast('❌ '+(d.error||'Error'));if(btn){btn.disabled=false;btn.textContent='💸 '+t('withdrawSubmit','Confirm Withdrawal');}}
   }).catch(function(){showToast('❌ Network error');if(btn){btn.disabled=false;btn.textContent='💸 '+t('withdrawSubmit','Confirm Withdrawal');}});
+}
+
+
+// ====== VIP WITHDRAW MODAL (50,000 - 1,000,000 REC) ======
+var VIP_WITHDRAW_MIN = 50000;
+var VIP_WITHDRAW_MAX = 1000000;
+var VIP_WITHDRAW_FEE = 150;
+
+function openVIPWithdrawModal() {
+  if(document.getElementById('vipWithdrawModal')) return;
+  if(!vipData || !vipData.tier || vipData.tier < 1 || vipData.expiry < Date.now()) {
+    showToast('❌ VIP 1 required');
+    return;
+  }
+  var modal = document.createElement('div');
+  modal.id = 'vipWithdrawModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:99999;display:flex;align-items:flex-end;';
+  var balance = (typeof rec !== 'undefined') ? rec : 0;
+  var hasWallet = (typeof tonConnect !== 'undefined' && tonConnect.connected);
+  var walletAddr = hasWallet && tonConnect.account ? tonConnect.account.address : '';
+  var shortAddr = walletAddr ? (walletAddr.substring(0,6)+'...'+walletAddr.substring(walletAddr.length-4)) : '';
+
+  modal.innerHTML =
+    '<div style="background:linear-gradient(180deg,#0a1a0e,#050d08);border-radius:24px 24px 0 0;border-top:2px solid rgba(255,200,0,0.4);padding:20px 18px 36px;width:100%;max-height:90vh;overflow-y:auto;">'
+  + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">'
+  + '<div style="font-size:18px;font-weight:900;color:#FFD700;font-family:Orbitron,sans-serif;">👑 VIP Withdraw</div>'
+  + '<div onclick="document.getElementById(\'vipWithdrawModal\').remove()" style="width:32px;height:32px;background:rgba(255,255,255,0.08);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:rgba(255,255,255,0.5);">✕</div>'
+  + '</div>'
+  + '<div style="background:rgba(255,200,0,0.06);border:1px solid rgba(255,200,0,0.2);border-radius:14px;padding:14px;margin-bottom:14px;">'
+  + '<div style="font-size:11px;color:rgba(255,255,255,0.4);">Balance</div>'
+  + '<div style="font-size:22px;font-weight:900;color:#FFD700;font-family:Orbitron,sans-serif;">'+balance.toFixed(2)+' REC</div>'
+  + '</div>'
+  + '<div style="background:rgba(255,200,0,0.05);border:1px solid rgba(255,200,0,0.15);border-radius:12px;padding:12px;margin-bottom:14px;font-size:12px;color:rgba(255,255,255,0.6);">'
+  + '<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>Min</span><span style="color:#FFD700;font-weight:700;">'+VIP_WITHDRAW_MIN.toLocaleString()+' REC</span></div>'
+  + '<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>Max</span><span style="color:#FFD700;font-weight:700;">'+VIP_WITHDRAW_MAX.toLocaleString()+' REC</span></div>'
+  + '<div style="display:flex;justify-content:space-between;"><span>Fee</span><span style="color:#FF8800;font-weight:700;">-'+VIP_WITHDRAW_FEE+' REC</span></div>'
+  + '</div>'
+  + '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px;margin-bottom:14px;display:flex;align-items:center;gap:10px;">'
+  + '<span style="font-size:20px;">💳</span>'
+  + '<div style="flex:1;"><div style="font-size:11px;color:rgba(255,255,255,0.4);">Wallet</div>'
+  + (hasWallet ? '<div style="font-size:12px;color:#00FF88;font-weight:700;">'+shortAddr+'</div>' : '<div style="font-size:12px;color:#FF4444;cursor:pointer;" onclick="connectWallet()">Connect wallet first</div>')
+  + '</div>'+(hasWallet?'<span style="color:#00FF88;">✅</span>':'<span style="color:#FF4444;">❌</span>')+'</div>'
+  + '<div style="margin-bottom:14px;">'
+  + '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:6px;">Amount (REC)</div>'
+  + '<div style="display:flex;gap:8px;">'
+  + '<input id="vipWithdrawInput" type="number" min="'+VIP_WITHDRAW_MIN+'" max="'+VIP_WITHDRAW_MAX+'" step="1" placeholder="'+VIP_WITHDRAW_MIN.toLocaleString()+' - '+VIP_WITHDRAW_MAX.toLocaleString()+'" style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:12px;color:white;font-size:14px;outline:none;" />'
+  + '<button onclick="setVIPWithdrawMax()" style="background:rgba(255,200,0,0.15);border:1px solid rgba(255,200,0,0.4);color:#FFD700;padding:0 14px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;">MAX</button>'
+  + '</div>'
+  + '<div id="vipWithdrawCalc" style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:6px;"></div>'
+  + '</div>'
+  + '<button id="vipWithdrawBtn" onclick="submitVIPWithdraw()" style="width:100%;background:linear-gradient(135deg,#886600,#FFD700);border:none;color:#000;padding:15px;border-radius:14px;font-size:15px;font-weight:900;cursor:pointer;">👑 VIP Withdraw</button>'
+  + '</div>';
+
+  document.body.appendChild(modal);
+  var inp = document.getElementById('vipWithdrawInput');
+  if(inp) inp.addEventListener('input', function(){
+    var val = parseFloat(inp.value)||0, calc = document.getElementById('vipWithdrawCalc');
+    if(!calc) return;
+    if(val>=VIP_WITHDRAW_MIN && val<=VIP_WITHDRAW_MAX){ calc.style.color='#FFD700'; calc.textContent='✅ You receive: '+(val-VIP_WITHDRAW_FEE).toLocaleString()+' REC'; }
+    else if(val>VIP_WITHDRAW_MAX){ calc.style.color='#FF4444'; calc.textContent='❌ Max: '+VIP_WITHDRAW_MAX.toLocaleString()+' REC'; }
+    else if(val>0){ calc.style.color='#FF4444'; calc.textContent='❌ Min: '+VIP_WITHDRAW_MIN.toLocaleString()+' REC'; }
+    else calc.textContent='';
+  });
+}
+
+function setVIPWithdrawMax() {
+  var inp=document.getElementById('vipWithdrawInput'), b=(typeof rec!=='undefined')?rec:0;
+  if(inp){ inp.value=Math.min(Math.floor(b),VIP_WITHDRAW_MAX); inp.dispatchEvent(new Event('input')); }
+}
+
+function submitVIPWithdraw() {
+  var inp=document.getElementById('vipWithdrawInput'); if(!inp) return;
+  var amount=parseFloat(inp.value)||0, balance=(typeof rec!=='undefined')?rec:0;
+  if(!tgUser){ showToast('❌ User error'); return; }
+  if(!(typeof tonConnect!=='undefined'&&tonConnect.connected)){ showToast('❌ Connect wallet first'); connectWallet(); return; }
+  if(amount<VIP_WITHDRAW_MIN){ showToast('❌ Min: '+VIP_WITHDRAW_MIN.toLocaleString()+' REC'); return; }
+  if(amount>VIP_WITHDRAW_MAX){ showToast('❌ Max: '+VIP_WITHDRAW_MAX.toLocaleString()+' REC'); return; }
+  if(amount>balance){ showToast('❌ Insufficient balance'); return; }
+  var btn=document.getElementById('vipWithdrawBtn');
+  if(btn){ btn.disabled=true; btn.textContent='⏳...'; }
+  fetch('/api/vip-withdraw',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({telegramId:tgUser.id,amount:amount})})
+  .then(function(r){ return r.json(); })
+  .then(function(d){
+    if(d.success){ rec-=amount; if(typeof updateUI==='function')updateUI(); if(typeof saveData==='function')saveData(true); var m=document.getElementById('vipWithdrawModal'); if(m)m.remove(); showToast('✅ '+d.netAmount.toLocaleString()+' REC sent!'); }
+    else{ showToast('❌ '+(d.error||'Error')); if(btn){btn.disabled=false;btn.textContent='👑 VIP Withdraw';} }
+  }).catch(function(){ showToast('❌ Network error'); if(btn){btn.disabled=false;btn.textContent='👑 VIP Withdraw';} });
 }
 
 
