@@ -240,9 +240,8 @@ setInterval(async function() {
 // ====== TON TRANSFER ======
 const REC_CONTRACT = 'EQCNkOinRhMSplM0DzP18Fz-4WV293YMHF6umS9tGsvOGDV9';
 const FEE_WALLET   = 'UQD-FoGlRG5pBxZpkf3H9ZOsNTL5basBbTEZE8zvMgHLB99o';
-const WITHDRAW_FEE = 150;
-const MIN_WITHDRAW = 50000;
-const MAX_WITHDRAW = 100000;
+const WITHDRAW_FEE = 70;
+const MIN_WITHDRAW = 500;
 const DAILY_LIMIT_DEFAULT = 10000;
 
 async function sendJetton(toAddress, amount, comment) {
@@ -498,7 +497,7 @@ function calcRecordMiningSpeed(cardLevels, tapLevelVal) {
 app.get('/api/leaderboard/global', async (req, res) => {
   try {
     var allUsers = await User.find({ banned: false })
-      .sort({ rec: -1 }).limit(100)
+      .sort({ rec: -1 })
       .select('telegramId username firstName rec miningSpeed cardLevels vip lastSeen')
       .lean();
     res.json({ top100: allUsers.map(function(u, i) {
@@ -511,7 +510,7 @@ app.get('/api/leaderboard/global', async (req, res) => {
 app.get('/api/leaderboard/myrank/:telegramId', async (req, res) => {
   try {
     var userId = parseInt(req.params.telegramId);
-    var allUsers = await User.find({ banned: false }).sort({ rec: -1 }).limit(500)
+    var allUsers = await User.find({ banned: false }).sort({ rec: -1 })
       .select('telegramId username firstName rec miningSpeed cardLevels lastSeen').lean();
     var myIndex = allUsers.findIndex(function(u) { return u.telegramId === userId; });
     var myRank = myIndex < 0 ? 999 : myIndex + 1;
@@ -693,7 +692,6 @@ app.post('/api/withdraw', async (req, res) => {
 
     // Check minimum
     if (amount < MIN_WITHDRAW) return res.status(400).json({ error: 'below_minimum', min: MIN_WITHDRAW });
-    if (amount > MAX_WITHDRAW) return res.status(400).json({ error: 'above_maximum', max: MAX_WITHDRAW });
 
     // Check balance
     if (user.rec < amount) return res.status(400).json({ error: 'insufficient_balance' });
