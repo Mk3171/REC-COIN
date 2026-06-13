@@ -3,7 +3,7 @@ const TelegramBot = require('node-telegram-bot-api');
 const mongoose = require('mongoose');
 const path = require('path');
 const https = require('https');
-const { sendJetton, registerWithdrawRoutes } = require('./withdraw');
+const { sendJetton, registerWithdrawRoutes, registerDiagnosticRoute } = require('./withdraw');
 
 const app = express();
 app.use(express.json());
@@ -1413,6 +1413,7 @@ mongoose.connection.once('open', () => {
   } catch(e) { console.log('BlockSystem init error:', e.message); }
   // Register withdrawal routes
   registerWithdrawRoutes(app, User, Withdrawal);
+  registerDiagnosticRoute(app);
 });
 
 // ====== KEEP SERVER ALIVE (works on all Node versions) ======
