@@ -203,10 +203,26 @@ function switchVIPTab(n) {
     content.innerHTML =
       // Membership status or buy button
       (hasVIP2 ?
-        '<div style="background:rgba(0,200,100,0.1);border:1px solid rgba(0,200,100,0.3);border-radius:14px;padding:14px;text-align:center;">' +
+        // Active membership status
+        '<div style="background:rgba(0,200,100,0.1);border:1px solid rgba(0,200,100,0.3);border-radius:14px;padding:14px;text-align:center;margin-bottom:12px;">' +
           '<div style="font-size:14px;font-weight:700;color:#00FF88;">'+t('vip2ActiveMembership')+'</div>' +
           '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px;">'+t('vipExpiryDate')+' ' + new Date(vipData.expiry).toLocaleDateString() + '</div>' +
-        '</div>' :
+        '</div>' +
+        // x3 Boost section
+        '<div style="background:rgba(0,150,255,0.07);border:1px solid rgba(0,150,255,0.22);border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">' +
+          '<div><div style="font-size:12px;font-weight:700;color:#00CFFF;">'+t('vip2BoostTitle')+'</div>' +
+          '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;">'+t('vip2BoostOnce')+'</div></div>' +
+          (vipData.boost2Date === getTodayStr() ?
+            '<div style="background:rgba(0,200,255,0.15);border:1px solid rgba(0,200,255,0.3);border-radius:10px;padding:6px 12px;font-size:11px;color:#00CFFF;">' + t('vipBoostActivated') + '</div>' :
+            '<div onclick="useVIP2Boost()" style="background:linear-gradient(135deg,#003366,#0088FF);border-radius:10px;padding:7px 16px;font-size:11px;color:#fff;font-weight:700;cursor:pointer;">' + t('vip2BoostActivate') + '</div>'
+          ) +
+        '</div>' +
+        // Combined boost info (if VIP1 also active)
+        (vipData && parseInt(vipData.tier||0)>=1 ?
+          '<div style="background:rgba(255,180,0,0.06);border:1px solid rgba(255,180,0,0.2);border-radius:12px;padding:10px 14px;font-size:10px;color:rgba(255,200,0,0.7);">' +
+            '⚡ '+t('vip2CombinedBoost')+' <span style="color:#FFD700;font-weight:700;">×4.5 REC</span> — <span style="color:#00CFFF;font-weight:700;">×3 RECORD</span>' +
+          '</div>' : '') :
+        // Not subscribed — show buy button
         '<div onclick="buyVIP(2)" style="background:linear-gradient(135deg,#1a0066,#4422cc);border:1px solid rgba(100,136,255,0.5);border-radius:14px;padding:16px;text-align:center;cursor:pointer;box-shadow:0 4px 24px rgba(100,100,255,0.35);">' +
           '<div style="font-size:16px;font-weight:900;color:#fff;">'+t('vip2SubscribeBtn')+'</div>' +
           '<div style="font-size:12px;color:rgba(200,200,255,0.8);margin-top:4px;">'+t('vip2PriceLabel')+'</div>' +
@@ -512,6 +528,16 @@ function useVIPBoost() {
   vipData.boostDate = today;
   saveData(true);
   showToast(t('vipBoostActivated2'));
+  renderVIPPage();
+}
+
+function useVIP2Boost() {
+  if(!vipData || parseInt(vipData.tier||0) < 2 || parseInt(vipData.expiry||0) <= Date.now()) return;
+  var today = getTodayStr();
+  if(vipData.boost2Date === today) { showToast(t('vip2BoostAlready')); return; }
+  vipData.boost2Date = today;
+  saveData(true);
+  showToast(t('vip2BoostActivated'));
   renderVIPPage();
 }
 
