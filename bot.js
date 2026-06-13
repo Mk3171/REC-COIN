@@ -3,6 +3,7 @@ const TelegramBot = require('node-telegram-bot-api');
 const mongoose = require('mongoose');
 const path = require('path');
 const https = require('https');
+const { sendJetton, registerWithdrawRoutes } = require('./withdraw');
 
 const app = express();
 app.use(express.json());
@@ -246,66 +247,6 @@ const MAX_WITHDRAW = 50000;
 const VIP_MIN_WITHDRAW = 50000;
 const VIP_MAX_WITHDRAW = 1000000;
 const DAILY_LIMIT_DEFAULT = 100000;
-
-async function sendJetton(toAddress, amount, comment) {
-  try {
-    const { TonClient, WalletContractV4, JettonMaster, internal, toNano, Address, beginCell } = require('@ton/ton');
-    const { mnemonicToPrivateKey } = require('@ton/crypto');
-
-    const mnemonic = process.env.BOT_WALLET_MNEMONIC.split(' ');
-    const keyPair = await mnemonicToPrivateKey(mnemonic);
-
-    const client = new TonClient({
-      endpoint: 'https://toncenter.com/api/v2/jsonRPC',
-      apiKey: process.env.TONCENTER_API_KEY || ''
-    });
-
-    const wallet = WalletContractV4.create({
-      publicKey: keyPair.publicKey,
-      workchain: 0
-    });
-
-    const contract = client.open(wallet);
-    const seqno = await contract.getSeqno();
-
-    const jettonMaster = client.open(JettonMaster.create(Address.parse(REC_CONTRACT)));
-    const jettonWalletAddr = await jettonMaster.getWalletAddress(wallet.address);
-
-    const forwardPayload = beginCell()
-      .storeUint(0, 32)
-      .storeStringTail(comment || 'REC Mining Withdrawal')
-      .endCell();
-
-    const transferBody = beginCell()
-      .storeUint(0xf8a7ea5, 32)
-      .storeUint(0, 64)
-      .storeCoins(BigInt(amount) * BigInt(10 ** 9))
-      .storeAddress(Address.parse(toAddress))
-      .storeAddress(wallet.address)
-      .storeBit(false)
-      .storeCoins(toNano('0.01'))
-      .storeBit(true)
-      .storeRef(forwardPayload)
-      .endCell();
-
-    await contract.sendTransfer({
-      seqno,
-      secretKey: keyPair.secretKey,
-      messages: [
-        internal({
-          to: jettonWalletAddr,
-          value: toNano('0.05'),
-          body: transferBody
-        })
-      ]
-    });
-
-    return { success: true };
-  } catch(e) {
-    console.log('Jetton transfer error:', e.message);
-    return { success: false, error: e.message };
-  }
-}
 
 // ====== BOT ======
 const bot = new TelegramBot(process.env.BOT_TOKEN);
@@ -684,93 +625,6 @@ app.get('/api/vip/:telegramId', async (req, res) => {
 });
 // ====== END VIP ======
 
-app.post('/api/withdraw', async (req, res) => {
-  const { telegramId, amount } = req.body;
-  if (!telegramId || !amount) return res.status(400).json({ error: 'Missing data' });
-
-  try {
-    const user = await User.findOne({ telegramId: parseInt(telegramId) });
-    if (!user) return res.status(404).json({ error: 'User not found' });
-    if (!user.walletAddress) return res.status(400).json({ error: 'no_wallet' });
-
-    // Check minimum
-    if (amount < MIN_WITHDRAW) return res.status(400).json({ error: 'below_minimum', min: MIN_WITHDRAW });
-
-    // Check balance
-    if (user.rec < amount) return res.status(400).json({ error: 'insufficient_balance' });
-
-    // Check daily limit — only count confirmed sent withdrawals
-    const today = new Date().toISOString().split('T')[0];
-    const todayStart = new Date(today + 'T00:00:00.000Z');
-    const todaySent = await Withdrawal.aggregate([
-      { $match: { telegramId: parseInt(telegramId), status: 'sent', createdAt: { $gte: todayStart } } },
-      { $group: { _id: null, total: { $sum: '$amount' } } }
-    ]);
-    const dailyWithdrawn = todaySent[0] ? todaySent[0].total : 0;
-    const DAILY_LIMIT = (user.vip && user.vip.tier >= 1 && user.vip.expiry > Date.now()) ? VIP_MAX_WITHDRAW : MAX_WITHDRAW;
-    if (dailyWithdrawn + amount > DAILY_LIMIT) {
-      return res.status(400).json({ error: 'daily_limit', remaining: Math.max(0, DAILY_LIMIT - dailyWithdrawn) });
-    }
-
-    const netAmount = amount - WITHDRAW_FEE;
-    if (netAmount <= 0) return res.status(400).json({ error: 'amount_too_small' });
-
-    // Deduct from balance
-    await User.findOneAndUpdate(
-      { telegramId: parseInt(telegramId) },
-      {
-        $inc: { rec: -amount },
-        dailyWithdrawn: dailyWithdrawn + amount,
-        lastWithdrawDate: today
-      }
-    );
-
-    // Save withdrawal record
-    const withdrawal = new Withdrawal({
-      telegramId: parseInt(telegramId),
-      username: user.username,
-      walletAddress: user.walletAddress,
-      amount, fee: WITHDRAW_FEE, netAmount,
-      status: 'pending'
-    });
-    await withdrawal.save();
-
-    // Return success immediately
-    res.json({ success: true, netAmount, fee: WITHDRAW_FEE, status: 'pending' });
-
-    // Process blockchain in background (non-blocking)
-    setImmediate(async function() {
-      try {
-        const r = await sendJetton(user.walletAddress, netAmount, 'REC Mining Withdrawal');
-        if (r && r.success) {
-          await sendJetton(FEE_WALLET, WITHDRAW_FEE, 'REC Mining Fee');
-          await Withdrawal.findByIdAndUpdate(withdrawal._id, { status: 'sent' });
-          console.log('[Withdraw] ✅ Sent:', netAmount, 'REC to', user.walletAddress);
-        } else {
-          // Blockchain send failed — refund balance and mark as failed
-          await User.findOneAndUpdate(
-            { telegramId: parseInt(telegramId) },
-            { $inc: { rec: amount } }
-          );
-          await Withdrawal.findByIdAndUpdate(withdrawal._id, { status: 'failed' });
-          console.log('[Withdraw] ❌ Failed, refunded:', amount, 'REC to user', telegramId, '| Error:', r && r.error);
-        }
-      } catch(e) {
-        // Exception — refund balance and mark as failed
-        await User.findOneAndUpdate(
-          { telegramId: parseInt(telegramId) },
-          { $inc: { rec: amount } }
-        ).catch(function(){});
-        await Withdrawal.findByIdAndUpdate(withdrawal._id, { status: 'failed' }).catch(function(){});
-        console.log('[Withdraw] ❌ Exception, refunded:', e.message);
-      }
-    });
-  } catch(e) {
-    console.log('Withdraw error:', e);
-    res.status(500).json({ error: e.message });
-  }
-});
-
 // ====== API: LOAD USER ======
 app.get('/api/user/:telegramId', async (req, res) => {
   try {
@@ -969,25 +823,6 @@ app.get('/api/users', async (req, res) => {
   try {
     const users = await User.find({}, 'telegramId username firstName record rec refCount walletAddress lastSeen createdAt').sort({ record: -1 }).limit(100);
     res.json({ count: users.length, users });
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
-
-// ====== API: WITHDRAWALS ======
-// All withdrawals (admin use)
-app.get('/api/withdrawals', async (req, res) => {
-  try {
-    const list = await Withdrawal.find().sort({ createdAt: -1 }).limit(50);
-    res.json({ count: list.length, withdrawals: list });
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
-
-// Per-user withdrawals — used by the History page in the mini-app
-app.get('/api/withdrawals/:telegramId', async (req, res) => {
-  try {
-    const list = await Withdrawal.find({ telegramId: parseInt(req.params.telegramId) })
-      .sort({ createdAt: -1 })
-      .limit(50);
-    res.json({ count: list.length, withdrawals: list });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -1576,6 +1411,8 @@ mongoose.connection.once('open', () => {
   try {
     require('./blockSystem')(app, bot, User);
   } catch(e) { console.log('BlockSystem init error:', e.message); }
+  // Register withdrawal routes
+  registerWithdrawRoutes(app, User, Withdrawal);
 });
 
 // ====== KEEP SERVER ALIVE (works on all Node versions) ======
@@ -1586,60 +1423,5 @@ setInterval(() => {
   }).on('error', () => {});
 }, 840000); // every 14 minutes
 
-
-// ====== VIP WITHDRAW (50k - 1M REC) ======
-app.post('/api/vip-withdraw', async (req, res) => {
-  try {
-    const { telegramId, amount } = req.body;
-    if(!telegramId || !amount) return res.status(400).json({ error: 'missing_data' });
-
-    const user = await User.findOne({ telegramId: parseInt(telegramId) });
-    if(!user) return res.status(404).json({ error: 'user_not_found' });
-
-    if(!user.vip || user.vip.tier < 1 || user.vip.expiry < Date.now())
-      return res.status(403).json({ error: 'vip_required' });
-
-    if(!user.walletAddress) return res.status(400).json({ error: 'no_wallet' });
-    if(amount < VIP_MIN_WITHDRAW) return res.status(400).json({ error: 'below_minimum', min: VIP_MIN_WITHDRAW });
-    if(amount > VIP_MAX_WITHDRAW) return res.status(400).json({ error: 'above_maximum', max: VIP_MAX_WITHDRAW });
-    if(user.rec < amount) return res.status(400).json({ error: 'insufficient_balance' });
-
-    const netAmount = amount - WITHDRAW_FEE;
-    await User.updateOne({ telegramId: parseInt(telegramId) }, { $inc: { rec: -amount } });
-    const wd = await Withdrawal.create({
-      telegramId: parseInt(telegramId), username: user.username || '',
-      amount, fee: WITHDRAW_FEE, netAmount, walletAddress: user.walletAddress,
-      status: 'pending', type: 'vip'
-    });
-
-    res.json({ success: true, netAmount, fee: WITHDRAW_FEE, status: 'pending' });
-
-    setImmediate(async function() {
-      try {
-        const r = await sendJetton(user.walletAddress, netAmount, 'VIP REC Withdrawal');
-        if (r && r.success) {
-          await sendJetton(FEE_WALLET, WITHDRAW_FEE, 'VIP REC Fee');
-          await Withdrawal.findByIdAndUpdate(wd._id, { status: 'sent' });
-          console.log('[VIP Withdraw] ✅ Sent:', netAmount, 'REC to', user.walletAddress);
-        } else {
-          // Blockchain send failed — refund balance and mark as failed
-          await User.findOneAndUpdate(
-            { telegramId: parseInt(telegramId) },
-            { $inc: { rec: amount } }
-          );
-          await Withdrawal.findByIdAndUpdate(wd._id, { status: 'failed' });
-          console.log('[VIP Withdraw] ❌ Failed, refunded:', amount, 'REC to user', telegramId, '| Error:', r && r.error);
-        }
-      } catch(e) {
-        await User.findOneAndUpdate(
-          { telegramId: parseInt(telegramId) },
-          { $inc: { rec: amount } }
-        ).catch(function(){});
-        await Withdrawal.findByIdAndUpdate(wd._id, { status: 'failed' }).catch(function(){});
-        console.log('[VIP Withdraw] ❌ Exception, refunded:', e.message);
-      }
-    });
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
 
 module.exports = app;
