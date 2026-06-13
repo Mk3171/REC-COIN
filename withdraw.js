@@ -193,3 +193,65 @@ function registerWithdrawRoutes(app, User, Withdrawal) {
 }
 
 module.exports = { sendJetton, registerWithdrawRoutes };
+
+
+// ── Diagnostic endpoint ───────────────────────────────────
+function registerDiagnosticRoute(app) {
+  app.get('/api/test-wallet', async (req, res) => {
+    const log = [];
+    const out = (msg) => { log.push(msg); console.log('[TEST-WALLET]', msg); };
+
+    out('=== Wallet Diagnostic ===');
+
+    // 1. Check env vars
+    const mnemonic_raw = process.env.BOT_WALLET_MNEMONIC;
+    const expectedAddr = process.env.BOT_WALLET_ADDRESS;
+    out('BOT_WALLET_MNEMONIC: ' + (mnemonic_raw ? 'SET (' + mnemonic_raw.trim().split(/\s+/).length + ' words)' : 'MISSING ❌'));
+    out('BOT_WALLET_ADDRESS: ' + (expectedAddr || 'MISSING ❌'));
+
+    if (!mnemonic_raw) return res.json({ ok: false, log });
+
+    const mnemonic = mnemonic_raw.trim().split(/\s+/);
+    if (mnemonic.length !== 24) {
+      out('❌ Expected 24 words, got: ' + mnemonic.length);
+      return res.json({ ok: false, log });
+    }
+
+    try {
+      const { TonClient, WalletContractV4, Address } = require('@ton/ton');
+      const { mnemonicToPrivateKey } = require('@ton/crypto');
+
+      const keyPair = await mnemonicToPrivateKey(mnemonic);
+      const wallet = WalletContractV4.create({ publicKey: keyPair.publicKey, workchain: 0 });
+      const derivedAddr = wallet.address.toString({ urlSafe: true, bounceable: true });
+      out('Derived V4 address: ' + derivedAddr);
+      out('Expected address:   ' + (expectedAddr || '(not set)'));
+      out('Address match: ' + (derivedAddr === expectedAddr ? '✅ YES' : '❌ NO — mismatch!'));
+
+      const client = new TonClient({
+        endpoint: 'https://toncenter.com/api/v2/jsonRPC',
+        apiKey: process.env.TONCENTER_API_KEY || ''
+      });
+      const contract = client.open(wallet);
+
+      try {
+        const seqno = await contract.getSeqno();
+        out('getSeqno(): ' + seqno + ' ✅');
+        const balance = await contract.getBalance();
+        out('TON balance: ' + (Number(balance) / 1e9).toFixed(4) + ' TON');
+        res.json({ ok: true, log });
+      } catch(e) {
+        out('getSeqno() FAILED ❌: ' + e.message);
+        out('→ Wallet not deployed or wrong address derived from mnemonic');
+        res.json({ ok: false, log });
+      }
+
+    } catch(e) {
+      out('Unexpected error ❌: ' + e.message);
+      res.json({ ok: false, log });
+    }
+  });
+  console.log('[Diagnostic] ✅ /api/test-wallet registered');
+}
+
+module.exports = { sendJetton, registerWithdrawRoutes, registerDiagnosticRoute };
