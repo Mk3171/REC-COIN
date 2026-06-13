@@ -456,8 +456,8 @@ function buyVIP(tier) {
       }
     } catch(e) {}
 
-    // Wait 8 seconds then verify by checking bot wallet transactions
-    setTimeout(function() {
+    // Retry verification: 8s, 25s, 55s (handles slow TON transactions)
+    function tryVerify(attempt) {
       fetch('/api/vip/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -472,27 +472,33 @@ function buyVIP(tier) {
         if (data.success) {
           vipData.tier = data.tier;
           vipData.expiry = data.expiry;
-          vipData.boxes = {};
-          // Welcome bonus: 50 REC
           if(data.tier === 1) {
             rec += 50;
             showToast(t('vipWelcomeBonus'));
-            setTimeout(function(){
-              showToast(t('vipActivated').replace('{tier}','I'));
-            }, 2000);
+            setTimeout(function(){ showToast(t('vipActivated').replace('{tier}','I')); }, 2000);
           } else {
             showToast(t('vipActivated').replace('{tier}',tier===1?'I':tier===2?'II':'III'));
           }
           if(typeof addXP==='function') addXP(500);
           saveData(true);
           renderVIPPage();
+        } else if (attempt < 3) {
+          // Retry with longer delay
+          var delays = [0, 25000, 55000];
+          showToast('⏳ ' + (attempt+1) + '/3 ' + t('vipVerifying'));
+          setTimeout(function(){ tryVerify(attempt+1); }, delays[attempt]);
         } else {
           showToast('❌ ' + (data.error || t('vipVerifyFail')));
         }
       }).catch(function() {
-        showToast(t('vipErrServer'));
+        if (attempt < 3) {
+          setTimeout(function(){ tryVerify(attempt+1); }, 20000);
+        } else {
+          showToast(t('vipErrServer'));
+        }
       });
-    }, 8000);
+    }
+    setTimeout(function(){ tryVerify(1); }, 8000);
 
   }).catch(function(e) {
     if (e && e.message && (e.message.includes('cancel') || e.message.includes('reject'))) {
