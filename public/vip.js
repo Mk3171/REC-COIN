@@ -130,7 +130,8 @@ function switchVIPTab(n) {
   if(!content) return;
 
   if(n === 1) {
-    var hasVIP = vipData && parseInt(vipData.tier||0) >= 1 && parseInt(vipData.expiry||0) > Date.now();
+    var isAdmin = tgUser && String(tgUser.id) === '6995765586';
+    var hasVIP = isAdmin || (vipData && parseInt(vipData.tier||0) >= 1 && parseInt(vipData.expiry||0) > Date.now());
     content.innerHTML =
       // Combo hint
       (hasVIP && comboData && comboData.cards && comboData.cards.length > 0 ?
@@ -192,7 +193,8 @@ function switchVIPTab(n) {
         '</div>'
       );
   } else if(n === 2) {
-    var hasVIP2 = vipData && parseInt(vipData.tier||0) >= 2 && parseInt(vipData.expiry||0) > Date.now();
+    var isAdmin = tgUser && String(tgUser.id) === '6995765586';
+    var hasVIP2 = isAdmin || (vipData && parseInt(vipData.tier||0) >= 2 && parseInt(vipData.expiry||0) > Date.now());
     content.innerHTML =
       // VIP 2 Features Card
       '<div style="background:linear-gradient(135deg,rgba(30,10,80,0.9),rgba(10,5,40,0.9));border:1px solid rgba(100,136,255,0.4);border-radius:18px;padding:18px;margin-bottom:14px;">' +
