@@ -251,13 +251,16 @@ function closeSideMenu(){
           <div onclick="openRECORDInfo()" style="width:22px;height:22px;border-radius:50%;background:rgba(255,100,50,0.15);border:1px solid rgba(255,100,50,0.35);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#FF6644;cursor:pointer;flex-shrink:0;">?</div>
         </div>
       </div>
-      <div style="display:flex;gap:8px;margin-bottom:15px;overflow-x:auto;padding-bottom:5px;">
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:6px;">
         <button class="cat-btn active" onclick="showCategory(0,this)" data-i18n="catAnime">🎌 Anime</button>
         <button class="cat-btn" onclick="showCategory(1,this)" data-i18n="catCars">🚗 Cars</button>
         <button class="cat-btn" onclick="showCategory(2,this)" data-i18n="catClubs">🌙 Clubs</button>
         <button class="cat-btn" onclick="showCategory(3,this)" data-i18n="catPalaces">🏰 Palaces</button>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:15px;">
         <button class="cat-btn" onclick="showCategory(4,this)" data-i18n="catLimited" style="border-color:rgba(255,215,0,0.4);color:#FFD700;background:rgba(255,180,0,0.08);">🔥 Limited</button>
         <button class="cat-btn" onclick="showVip2Category(this)" style="border-color:rgba(0,180,255,0.4);color:#00CFFF;background:rgba(0,150,255,0.08);">💎 VIP 2</button>
+        <button class="cat-btn" style="opacity:0.3;cursor:default;">👑 VIP 3</button>
       </div>
       <div class="card-grid" id="cat-0"></div>
       <div class="card-grid" id="cat-1" style="display:none"></div>
