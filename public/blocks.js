@@ -173,7 +173,7 @@ function openBlockHistory() {
     var list = document.getElementById('blockHistoryList');
     if(!list) return;
     if(!blocks || blocks.length === 0) {
-      list.innerHTML = '<div style="text-align:center;padding:60px 20px;"><div style="font-size:48px;margin-bottom:12px;">⛏️</div><div style="color:rgba(255,255,255,0.3);font-size:14px;">ما لاقيت أي بلوك لحد هلا</div><div style="color:rgba(255,255,255,0.2);font-size:12px;margin-top:8px;">استمر بالتعدين!</div></div>';
+      list.innerHTML = '<div style="text-align:center;padding:60px 20px;"><div style="font-size:48px;margin-bottom:12px;">⛏️</div><div style="color:rgba(255,255,255,0.3);font-size:14px;">' + t('blockEmpty') + '</div><div style="color:rgba(255,255,255,0.2);font-size:12px;margin-top:8px;">' + t('blockEmptySub') + '</div></div>';
       return;
     }
     list.innerHTML = blocks.map(function(b) {
