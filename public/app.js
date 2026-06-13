@@ -59,6 +59,12 @@ function calcTotalSpeeds(){
 // ====== DATA ======
 var tgUser = null;
 try { var _tgWA = window.Telegram && window.Telegram.WebApp; tgUser = _tgWA && _tgWA.initDataUnsafe && _tgWA.initDataUnsafe.user ? _tgWA.initDataUnsafe.user : null; } catch(e){}
+// Read referral from deep link start_param
+var _startRef = '';
+try {
+  var _sp = window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe && window.Telegram.WebApp.initDataUnsafe.start_param;
+  if (_sp && _sp.startsWith('ref')) _startRef = _sp.replace('ref','');
+} catch(e){}
 var saveKey = 'recmining_' + (tgUser ? tgUser.id : 'guest');
 
 // Migration: if no data under correct key, check old keys
@@ -171,6 +177,7 @@ function saveToServer(){
       body: JSON.stringify({
         telegramId: tgUser.id,
         initData: initData,
+        startRef: _startRef || '',
         username: tgUser.username || '',
         firstName: tgUser.first_name || '',
         record, rec, energy, maxEnergy,
