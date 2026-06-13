@@ -240,9 +240,12 @@ setInterval(async function() {
 // ====== TON TRANSFER ======
 const REC_CONTRACT = 'EQCNkOinRhMSplM0DzP18Fz-4WV293YMHF6umS9tGsvOGDV9';
 const FEE_WALLET   = 'UQD-FoGlRG5pBxZpkf3H9ZOsNTL5basBbTEZE8zvMgHLB99o';
-const WITHDRAW_FEE = 70;
-const MIN_WITHDRAW = 500;
-const DAILY_LIMIT_DEFAULT = 10000;
+const WITHDRAW_FEE = 150;
+const MIN_WITHDRAW = 10000;
+const MAX_WITHDRAW = 50000;
+const VIP_MIN_WITHDRAW = 50000;
+const VIP_MAX_WITHDRAW = 1000000;
+const DAILY_LIMIT_DEFAULT = 100000;
 
 async function sendJetton(toAddress, amount, comment) {
   try {
@@ -696,12 +699,17 @@ app.post('/api/withdraw', async (req, res) => {
     // Check balance
     if (user.rec < amount) return res.status(400).json({ error: 'insufficient_balance' });
 
-    // Check daily limit
+    // Check daily limit — from actual successful withdrawals only
     const today = new Date().toISOString().split('T')[0];
-    const dailyWithdrawn = user.lastWithdrawDate === today ? (user.dailyWithdrawn || 0) : 0;
-    const DAILY_LIMIT = (user.vip && user.vip.tier >= 1 && user.vip.expiry > Date.now()) ? 20000 : DAILY_LIMIT_DEFAULT;
+    const todayStart = new Date(today + 'T00:00:00.000Z');
+    const todaySent = await Withdrawal.aggregate([
+      { $match: { telegramId: parseInt(telegramId), status: { $in: ['sent', 'pending'] }, createdAt: { $gte: todayStart } } },
+      { $group: { _id: null, total: { $sum: '$amount' } } }
+    ]);
+    const dailyWithdrawn = todaySent[0] ? todaySent[0].total : 0;
+    const DAILY_LIMIT = (user.vip && user.vip.tier >= 1 && user.vip.expiry > Date.now()) ? VIP_MAX_WITHDRAW : MAX_WITHDRAW;
     if (dailyWithdrawn + amount > DAILY_LIMIT) {
-      return res.status(400).json({ error: 'daily_limit', remaining: DAILY_LIMIT - dailyWithdrawn });
+      return res.status(400).json({ error: 'daily_limit', remaining: Math.max(0, DAILY_LIMIT - dailyWithdrawn) });
     }
 
     const netAmount = amount - WITHDRAW_FEE;
@@ -1478,7 +1486,8 @@ setInterval(runCloudMining, 60 * 1000);
 // أول تشغيل بعد دقيقتين من بدء السيرفر
 setTimeout(runCloudMining, 2 * 60 * 1000);
 console.log('[Cloud Mining] ✅ Started — mining every 60 seconds');
-console.log('[TonCenter] ' + (process.env.TONCENTER_API_KEY ? '✅ API Key configured' : '❌ NO API KEY — set TONCENTER_API_KEY'));
+console.log('[TonCenter] ' + (process.env.TONCENTER_API_KEY ? '✅ API Key configured' : '❌ NO API KEY'));
+
 
 
 // Sync — يرجع الرصيد الحالي من السيرفر
@@ -1595,6 +1604,41 @@ app.post('/api/vip-withdraw', async (req, res) => {
       } catch(e) {
         console.log('[VIP Withdraw] Pending:', e.message);
       }
+    });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+
+// ====== VIP WITHDRAW (50k - 1M REC) ======
+app.post('/api/vip-withdraw', async (req, res) => {
+  try {
+    const { telegramId, amount } = req.body;
+    if(!telegramId || !amount) return res.status(400).json({ error: 'missing_data' });
+    const user = await User.findOne({ telegramId: parseInt(telegramId) });
+    if(!user) return res.status(404).json({ error: 'user_not_found' });
+    if(!user.vip || user.vip.tier < 1 || user.vip.expiry < Date.now())
+      return res.status(403).json({ error: 'vip_required' });
+    if(!user.walletAddress) return res.status(400).json({ error: 'no_wallet' });
+    if(amount < VIP_MIN_WITHDRAW) return res.status(400).json({ error: 'below_minimum', min: VIP_MIN_WITHDRAW });
+    if(amount > VIP_MAX_WITHDRAW) return res.status(400).json({ error: 'above_maximum', max: VIP_MAX_WITHDRAW });
+    if(user.rec < amount) return res.status(400).json({ error: 'insufficient_balance' });
+    const netAmount = amount - WITHDRAW_FEE;
+    await User.updateOne({ telegramId: parseInt(telegramId) }, { $inc: { rec: -amount } });
+    const wd = await Withdrawal.create({
+      telegramId: parseInt(telegramId), username: user.username || '',
+      amount, fee: WITHDRAW_FEE, netAmount, walletAddress: user.walletAddress,
+      status: 'pending', type: 'vip'
+    });
+    res.json({ success: true, netAmount, fee: WITHDRAW_FEE, status: 'pending' });
+    setImmediate(async function() {
+      try {
+        const r = await sendJetton(user.walletAddress, netAmount, 'VIP REC Withdrawal');
+        if (r && r.success) {
+          await sendJetton(FEE_WALLET, WITHDRAW_FEE, 'VIP REC Fee');
+          await Withdrawal.findByIdAndUpdate(wd._id, { status: 'sent' });
+          console.log('[VIP Withdraw] ✅ Sent:', netAmount, 'REC to', user.walletAddress);
+        } else { console.log('[VIP Withdraw] Pending:', r && r.error); }
+      } catch(e) { console.log('[VIP Withdraw] Pending:', e.message); }
     });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
