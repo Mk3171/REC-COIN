@@ -257,12 +257,19 @@ function closeSideMenu(){
         <button class="cat-btn" onclick="showCategory(2,this)" data-i18n="catClubs">🌙 Clubs</button>
         <button class="cat-btn" onclick="showCategory(3,this)" data-i18n="catPalaces">🏰 Palaces</button>
         <button class="cat-btn" onclick="showCategory(4,this)" data-i18n="catLimited" style="border-color:rgba(255,215,0,0.4);color:#FFD700;background:rgba(255,180,0,0.08);">🔥 Limited</button>
+        <button class="cat-btn" onclick="showVip2Category(this)" style="border-color:rgba(0,180,255,0.4);color:#00CFFF;background:rgba(0,150,255,0.08);">💎 VIP 2</button>
       </div>
       <div class="card-grid" id="cat-0"></div>
       <div class="card-grid" id="cat-1" style="display:none"></div>
       <div class="card-grid" id="cat-2" style="display:none"></div>
       <div class="card-grid" id="cat-3" style="display:none"></div>
       <div class="card-grid" id="cat-4" style="display:none"></div>
+      <div class="card-grid" id="cat-5" style="display:none"></div>
+      <div id="vip2-lock-msg" style="display:none;text-align:center;padding:40px 20px;">
+        <div style="font-size:48px;margin-bottom:16px;">🔒</div>
+        <div style="font-size:18px;color:#00CFFF;font-weight:700;margin-bottom:8px;">VIP Level 2 Required</div>
+        <div style="font-size:13px;color:rgba(255,255,255,0.5);">Upgrade to VIP 2 to unlock these exclusive cards that mine REC directly!</div>
+      </div>
     </div>
 
     <!-- TASKS PAGE -->
