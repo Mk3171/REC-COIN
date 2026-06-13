@@ -57,7 +57,9 @@ function openVIPInfo() {
         t('vip2Feature1')+'<br>' +
         t('vip2Feature2')+'<br>' +
         t('vip2Feature3')+'<br>' +
-        t('vip2Feature4') +
+        t('vip2Feature4')+'<br>' +
+        '🔥 '+t('vip2BoostTitle')+'<br>' +
+        '⚡ '+t('vip2CombinedBoost')+' <b style="color:#FFD700;">×4.5 REC</b> / <b style="color:#00CFFF;">×3 RECORD</b>' +
       '</div>' +
     '</div>' +
 
@@ -217,11 +219,7 @@ function switchVIPTab(n) {
             '<div onclick="useVIP2Boost()" style="background:linear-gradient(135deg,#003366,#0088FF);border-radius:10px;padding:7px 16px;font-size:11px;color:#fff;font-weight:700;cursor:pointer;">' + t('vip2BoostActivate') + '</div>'
           ) +
         '</div>' +
-        // Combined boost info (if VIP1 also active)
-        (vipData && parseInt(vipData.tier||0)>=1 ?
-          '<div style="background:rgba(255,180,0,0.06);border:1px solid rgba(255,180,0,0.2);border-radius:12px;padding:10px 14px;font-size:10px;color:rgba(255,200,0,0.7);">' +
-            '⚡ '+t('vip2CombinedBoost')+' <span style="color:#FFD700;font-weight:700;">×4.5 REC</span> — <span style="color:#00CFFF;font-weight:700;">×3 RECORD</span>' +
-          '</div>' : '') :
+        '' :
         // Not subscribed — show buy button
         '<div onclick="buyVIP(2)" style="background:linear-gradient(135deg,#1a0066,#4422cc);border:1px solid rgba(100,136,255,0.5);border-radius:14px;padding:16px;text-align:center;cursor:pointer;box-shadow:0 4px 24px rgba(100,100,255,0.35);">' +
           '<div style="font-size:16px;font-weight:900;color:#fff;">'+t('vip2SubscribeBtn')+'</div>' +
@@ -532,7 +530,8 @@ function useVIPBoost() {
 }
 
 function useVIP2Boost() {
-  if(!vipData || parseInt(vipData.tier||0) < 2 || parseInt(vipData.expiry||0) <= Date.now()) return;
+  var isAdmin = tgUser && String(tgUser.id) === '6995765586';
+  if(!isAdmin && (!vipData || parseInt(vipData.tier||0) < 2 || parseInt(vipData.expiry||0) <= Date.now())) return;
   var today = getTodayStr();
   if(vipData.boost2Date === today) { showToast(t('vip2BoostAlready')); return; }
   vipData.boost2Date = today;
