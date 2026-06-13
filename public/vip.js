@@ -46,14 +46,19 @@ function openVIPInfo() {
     '</div>' +
 
     // VIP II
-    '<div style="background:rgba(100,100,255,0.06);border:1px solid rgba(100,100,255,0.2);border-radius:14px;padding:14px;margin-bottom:10px;">' +
-      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">' +
-        '<div style="font-size:22px;">👑</div>' +
+    '<div style="background:rgba(30,10,80,0.5);border:1px solid rgba(100,136,255,0.35);border-radius:14px;padding:14px;margin-bottom:10px;">' +
+      '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">' +
+        '<div style="font-size:22px;">💎</div>' +
         '<div><div style="font-size:15px;font-weight:700;color:#6688FF;">VIP II</div>' +
-        '<div style="font-size:10px;color:rgba(255,255,255,0.4);">'+t('comingSoon')+'</div></div>' +
-        '<div style="margin-left:auto;background:rgba(255,255,255,0.05);border-radius:8px;padding:4px 10px;font-size:10px;color:rgba(255,255,255,0.3);font-weight:700;">🔒 '+t('comingSoon')+'</div>' +
+        '<div style="font-size:10px;color:rgba(100,136,255,0.6);">5 TON / شهر</div></div>' +
+        '<div style="margin-left:auto;background:rgba(100,136,255,0.15);border-radius:8px;padding:4px 10px;font-size:10px;color:#6688FF;font-weight:700;">متاح ✅</div>' +
       '</div>' +
-      '<div style="font-size:11px;color:rgba(255,255,255,0.3);">كل مميزات VIP I + مميزات حصرية إضافية</div>' +
+      '<div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1.9;">' +
+        '💎 الوصول لـ 20 بطاقة VIP حصرية<br>' +
+        '⚡ كل بطاقة تصل إلى 5 REC/s عند Max<br>' +
+        '🏆 أقصى إنتاج: 100 REC/s من 20 بطاقة<br>' +
+        '👑 كل مميزات VIP I مشمولة' +
+      '</div>' +
     '</div>' +
 
     // VIP III
@@ -196,21 +201,6 @@ function switchVIPTab(n) {
     var isAdmin = tgUser && String(tgUser.id) === '6995765586';
     var hasVIP2 = isAdmin || (vipData && parseInt(vipData.tier||0) >= 2 && parseInt(vipData.expiry||0) > Date.now());
     content.innerHTML =
-      // VIP 2 Features Card
-      '<div style="background:linear-gradient(135deg,rgba(30,10,80,0.9),rgba(10,5,40,0.9));border:1px solid rgba(100,136,255,0.4);border-radius:18px;padding:18px;margin-bottom:14px;">' +
-        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">' +
-          '<div style="font-size:28px;">💎</div>' +
-          '<div><div style="font-size:17px;font-weight:900;color:#6688FF;font-family:Impact,sans-serif;letter-spacing:2px;">VIP II</div>' +
-          '<div style="font-size:10px;color:rgba(100,136,255,0.6);">5 TON / شهر</div></div>' +
-        '</div>' +
-        '<div style="font-size:11px;color:rgba(255,255,255,0.7);line-height:2;">' +
-          '💎 الوصول لـ 20 بطاقة VIP حصرية<br>' +
-          '⚡ كل بطاقة تصل إلى 5 REC/s عند Max<br>' +
-          '🏆 أقصى إنتاج: <span style="color:#00CFFF;font-weight:700;">100 REC/s</span> من 20 بطاقة<br>' +
-          '👑 كل مميزات VIP I مشمولة' +
-        '</div>' +
-      '</div>' +
-
       // Membership status or buy button
       (hasVIP2 ?
         '<div style="background:rgba(0,200,100,0.1);border:1px solid rgba(0,200,100,0.3);border-radius:14px;padding:14px;text-align:center;">' +
