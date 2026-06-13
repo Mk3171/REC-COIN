@@ -41,6 +41,7 @@ var T = {
     // Cards
     cardsTitle:'🃏 البطاقات', catAnime:'🎌 أنمي', catCars:'🚗 سيارات',
     catClubs:'🌙 ملاهي', catPalaces:'🏰 قصور', catLimited:'🔥 محدود',
+  catVip2:'💎 VIP 2',
     cardLevel:'المستوى', cardUpgradeBtn:'ترقية', cardMaxLevel:'✅ الحد الأقصى!',
     cardMiningBonus:'تعدين البطاقة', cardUpgradeCost:'تكلفة الترقية',
     cardWaitTime:'وقت الانتظار', upgrading:'⏳ جاري الترقية...',
@@ -300,6 +301,7 @@ var T = {
     remainingToday:'Remaining today:', refillEnergyBtn:'Refill Energy ⚡',
     cardsTitle:'🃏 Cards', catAnime:'🎌 Anime', catCars:'🚗 Cars',
     catClubs:'🌙 Clubs', catPalaces:'🏰 Palaces', catLimited:'🔥 Limited',
+  catVip2:'💎 VIP 2',
     cardLevel:'Level', cardUpgradeBtn:'Upgrade', cardMaxLevel:'✅ Max level!',
     cardMiningBonus:'Card Mining', cardUpgradeCost:'Upgrade Cost',
     cardWaitTime:'Wait Time', upgrading:'⏳ Upgrading...',
