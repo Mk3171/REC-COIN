@@ -682,13 +682,16 @@ function renderComboSlots(d) {
     return;
   }
 
+  var isVipUser = (typeof vipData !== 'undefined' && vipData && parseInt(vipData.tier||0) >= 1 && parseInt(vipData.expiry||0) > Date.now());
+  var isAdminUser = tgUser && String(tgUser.id) === '6995765586';
   slots.innerHTML = d.cards.map(function(c, i) {
     var cardInfo = getCardInfo(c.categoryIndex, c.cardIndex);
     var done = c.done;
-    return '<div style="background:' + (done ? 'rgba(0,255,136,0.1)' : 'rgba(255,255,255,0.04)') + ';border:1px solid ' + (done ? 'rgba(0,255,136,0.4)' : 'rgba(255,255,255,0.08)') + ';border-radius:14px;padding:14px 8px;text-align:center;">' +
-      '<div style="font-size:28px;margin-bottom:6px;">' + (done ? (cardInfo ? cardInfo.e : '✅') : '?') + '</div>' +
-      '<div style="font-size:10px;color:' + (done ? '#00FF88' : 'rgba(255,255,255,0.3)') + ';font-weight:700;">' + (done ? (cardInfo ? cardInfo.name : 'Done') : '???') + '</div>' +
-      '<div style="font-size:18px;margin-top:6px;">' + (done ? '✅' : '🔒') + '</div>' +
+    var revealed = done || isVipUser || isAdminUser || (c.key && c.key !== '?');
+    return '<div style="background:' + (done ? 'rgba(0,255,136,0.1)' : revealed ? 'rgba(255,180,0,0.07)' : 'rgba(255,255,255,0.04)') + ';border:1px solid ' + (done ? 'rgba(0,255,136,0.4)' : revealed ? 'rgba(255,180,0,0.3)' : 'rgba(255,255,255,0.08)') + ';border-radius:14px;padding:14px 8px;text-align:center;">' +
+      '<div style="font-size:28px;margin-bottom:6px;">' + (revealed && cardInfo ? cardInfo.e : done ? '✅' : '❓') + '</div>' +
+      '<div style="font-size:10px;color:' + (done ? '#00FF88' : revealed ? '#FFD700' : 'rgba(255,255,255,0.3)') + ';font-weight:700;">' + (revealed && cardInfo ? cardInfo.name : done ? 'Done' : '???') + '</div>' +
+      '<div style="font-size:18px;margin-top:6px;">' + (done ? '✅' : revealed ? '🔓' : '🔒') + '</div>' +
       '</div>';
   }).join('');
 
