@@ -596,7 +596,7 @@ app.post('/api/vip/verify', async (req, res) => {
       vi: `👑 Cảm ơn! VIP ${vipTierName} đã được kích hoạt!\n⏳ Hết hạn: ${expiryDate}${vip2ExtraEn}`,
       zh: `👑 谢谢！VIP ${vipTierName} 激活成功！\n⏳ 到期：${expiryDate}${vip2ExtraEn}`
     };
-    const userLang = user.lang || 'en';
+    const userLang = user.language || 'en';
     const msg = vipMsgs[userLang] || vipMsgs.en;
     try { await bot.sendMessage(telegramId, msg); } catch(e) {}
 
@@ -1428,5 +1428,73 @@ setInterval(() => {
   }).on('error', () => {});
 }, 840000); // every 14 minutes
 
+
+
+// ====== DAILY BOOST REMINDER (9 AM UTC) ======
+const BOOST_REMINDER_MSGS = {
+  vip1: {
+    ar: '⚡ فعّل مضاعفة ×١.٥ تعدين REC اليوم! افتح البوت واضغط تفعيل.',
+    en: '⚡ Activate your ×1.5 REC mining boost today! Open the bot and press Activate.',
+    ru: '⚡ Активируй буст ×1.5 REC сегодня! Открой бот и нажми активировать.',
+    uk: '⚡ Активуй буст ×1.5 REC сьогодні! Відкрий бот і натисни активувати.',
+    pt: '⚡ Ative seu boost ×1.5 REC hoje! Abra o bot e pressione Ativar.',
+    es: '⚡ ¡Activa tu boost ×1.5 REC hoy! Abre el bot y presiona Activar.',
+    tr: '⚡ Bugün ×1.5 REC boostunu etkinleştir! Botu aç ve Etkinleştir\'e bas.',
+    vi: '⚡ Kích hoạt boost ×1.5 REC hôm nay! Mở bot và nhấn Kích hoạt.',
+    zh: '⚡ 今天激活×1.5 REC加速！打开机器人并点击激活。',
+  },
+  vip2: {
+    ar: '🔥 فعّل مضاعفة ×3 لكل البطاقات اليوم! افتح البوت واضغط تفعيل.',
+    en: '🔥 Activate your ×3 all cards boost today! Open the bot and press Activate.',
+    ru: '🔥 Активируй буст ×3 всех карт сегодня! Открой бот и нажми активировать.',
+    uk: '🔥 Активуй буст ×3 всіх карт сьогодні! Відкрий бот і натисни активувати.',
+    pt: '🔥 Ative seu boost ×3 de todas as cartas hoje! Abra o bot e pressione Ativar.',
+    es: '🔥 ¡Activa tu boost ×3 de todas las cartas hoy! Abre el bot y presiona Activar.',
+    tr: '🔥 Bugün ×3 tüm kartlar boostunu etkinleştir! Botu aç ve Etkinleştir\'e bas.',
+    vi: '🔥 Kích hoạt boost ×3 tất cả thẻ hôm nay! Mở bot và nhấn Kích hoạt.',
+    zh: '🔥 今天激活×3全卡片加速！打开机器人并点击激活。',
+  }
+};
+
+async function sendDailyBoostReminders() {
+  try {
+    console.log('[BoostReminder] Sending daily reminders...');
+    const vipUsers = await User.find({
+      'vip.tier': { $gte: 1 },
+      'vip.expiry': { $gt: Date.now() }
+    }).select('telegramId language vip');
+
+    let sent1 = 0, sent2 = 0;
+    for (const user of vipUsers) {
+      const lang = user.language || 'en';
+      const tier = parseInt(user.vip && user.vip.tier || 0);
+      try {
+        if (tier >= 1) {
+          const msg = BOOST_REMINDER_MSGS.vip1[lang] || BOOST_REMINDER_MSGS.vip1.en;
+          await bot.sendMessage(user.telegramId, msg);
+          sent1++;
+          await new Promise(r => setTimeout(r, 80));
+        }
+        if (tier >= 2) {
+          const msg = BOOST_REMINDER_MSGS.vip2[lang] || BOOST_REMINDER_MSGS.vip2.en;
+          await bot.sendMessage(user.telegramId, msg);
+          sent2++;
+          await new Promise(r => setTimeout(r, 80));
+        }
+      } catch(e) { /* user blocked bot — ignore */ }
+    }
+    console.log('[BoostReminder] ✅ VIP1:', sent1, '| VIP2:', sent2);
+  } catch(e) {
+    console.log('[BoostReminder] Error:', e.message);
+  }
+}
+
+// Check every minute — send reminders at 9:00 AM UTC
+setInterval(function() {
+  const now = new Date();
+  if (now.getUTCHours() === 9 && now.getUTCMinutes() === 0) {
+    sendDailyBoostReminders();
+  }
+}, 60000);
 
 module.exports = app;
