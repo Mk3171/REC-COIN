@@ -634,14 +634,14 @@ function closeSideMenu(){
       <span style="margin-left:auto;color:rgba(255,255,255,0.2);font-size:16px;">›</span>
     </a>
 
-    <!-- Payouts — Locked -->
-    <div style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);border-radius:14px;padding:14px 16px;opacity:0.4;cursor:not-allowed;">
+    <!-- Payouts → Wallet -->
+    <div onclick="showPage('wallet',document.getElementById('navWalletBtn'));closeSideMenu();" style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px 16px;cursor:pointer;">
       <span style="font-size:22px;">💸</span>
       <div>
         <div style="font-size:15px;font-weight:700;color:white;font-family:Rajdhani,sans-serif;" data-i18n="menuPayouts">Payouts</div>
-        <div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:1px;">Coming Soon</div>
+        <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:1px;" data-i18n="menuPayoutsSub">Withdraw REC</div>
       </div>
-      <span style="margin-left:auto;background:rgba(255,255,255,0.08);color:rgba(255,255,255,0.3);font-size:9px;padding:3px 8px;border-radius:6px;font-family:Rajdhani,sans-serif;font-weight:700;letter-spacing:1px;">SOON</span>
+      <span style="margin-left:auto;color:rgba(255,255,255,0.3);font-size:16px;">›</span>
     </div>
 
     <!-- FAQ / Terms -->
