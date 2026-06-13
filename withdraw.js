@@ -26,7 +26,8 @@ async function sendJetton(toAddress, amount, comment) {
   }
 
   try {
-    const { TonClient, WalletContractV5R1, JettonMaster, internal, toNano, Address, beginCell } = require('@ton/ton');
+    const tonModule = require('@ton/ton');
+    const { TonClient, JettonMaster, internal, toNano, Address, beginCell } = tonModule;
     const { mnemonicToPrivateKey } = require('@ton/crypto');
 
     const keyPair = await mnemonicToPrivateKey(mnemonic);
@@ -37,9 +38,22 @@ async function sendJetton(toAddress, amount, comment) {
       apiKey: process.env.TONCENTER_API_KEY || ''
     });
 
-    const wallet = WalletContractV5R1.create({ publicKey: keyPair.publicKey, workchain: 0 });
-    console.log('[sendJetton] Derived wallet address (W5):', wallet.address.toString());
-    console.log('[sendJetton] Expected bot address:', process.env.BOT_WALLET_ADDRESS);
+    // Auto-detect wallet version
+    const expectedAddr = (process.env.BOT_WALLET_ADDRESS || '').trim();
+    const versions = ['WalletContractV5R1','WalletContractV5Beta','WalletContractV4','WalletContractV3R2'];
+    let wallet = null;
+    for (const ver of versions) {
+      if (tonModule[ver]) {
+        const w = tonModule[ver].create({ publicKey: keyPair.publicKey, workchain: 0 });
+        const addr = w.address.toString({ urlSafe: true, bounceable: false });
+        console.log('[sendJetton] Trying', ver, '→', addr);
+        if (!expectedAddr || addr === expectedAddr) { wallet = w; console.log('[sendJetton] ✅ Matched:', ver); break; }
+      }
+    }
+    if (!wallet) {
+      console.log('[sendJetton] ❌ No wallet version matched expected address:', expectedAddr);
+      return { success: false, error: 'No matching wallet version found' };
+    }
 
     const contract = client.open(wallet);
 
@@ -218,13 +232,24 @@ function registerDiagnosticRoute(app) {
     }
 
     try {
-      const { TonClient, WalletContractV5R1, Address } = require('@ton/ton');
+      const tonModule = require('@ton/ton');
+      const { TonClient, Address } = tonModule;
       const { mnemonicToPrivateKey } = require('@ton/crypto');
 
       const keyPair = await mnemonicToPrivateKey(mnemonic);
-      const wallet = WalletContractV5R1.create({ publicKey: keyPair.publicKey, workchain: 0 });
-      const derivedAddr = wallet.address.toString({ urlSafe: true, bounceable: false });
-      out('Derived W5 address: ' + derivedAddr);
+      const versions = ['WalletContractV5R1','WalletContractV5Beta','WalletContractV4','WalletContractV3R2'];
+      let matchedWallet = null, matchedVer = null;
+      for (const ver of versions) {
+        if (tonModule[ver]) {
+          const w = tonModule[ver].create({ publicKey: keyPair.publicKey, workchain: 0 });
+          const addr = w.address.toString({ urlSafe: true, bounceable: false });
+          out(ver + ' → ' + addr + (addr === expectedAddr ? ' ✅ MATCH' : ''));
+          if (addr === expectedAddr) { matchedWallet = w; matchedVer = ver; }
+        } else { out(ver + ' → not available in this @ton/ton version'); }
+      }
+      const wallet = matchedWallet;
+      const derivedAddr = wallet ? wallet.address.toString({ urlSafe: true, bounceable: false }) : null;
+      out('Best match: ' + (matchedVer || 'NONE ❌'));
       out('Expected address:   ' + (expectedAddr || '(not set)'));
       out('Address match: ' + (derivedAddr === expectedAddr ? '✅ YES' : '❌ NO — mismatch!'));
 
