@@ -971,9 +971,10 @@ app.get('/api/combo/today/:telegramId', async (req, res) => {
     var progress = (user && user.comboProgress && user.comboProgress.date === today)
       ? user.comboProgress.done : [];
 
+    var isVip = user && user.vip && user.vip.tier >= 1 && user.vip.expiry > Date.now();
     var cards = combo.cards.map(function(c) {
       return {
-        key: isAdmin ? c.key : '?',
+        key: (isAdmin || isVip) ? c.key : '?',
         categoryIndex: c.categoryIndex,
         cardIndex: c.cardIndex,
         done: progress.indexOf(c.key) !== -1
@@ -1095,7 +1096,106 @@ app.post('/api/exchange/tax', async (req, res) => {
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-// POST set combo (admin only)
+// ====== AUTO DAILY COMBO ======
+// Card categories mirrored from cards-data.js (name + emoji only, for notifications)
+const COMBO_CARD_NAMES = [
+  // 0: Anime (40 cards)
+  ['Naruto','Goku','Luffy','Sasuke','Itachi','Zoro','Totoro','Mikasa','Levi','Eren',
+   'Armin','Piccolo','Vegeta','Natsu','Gray','Erza','Lucy','Kirito','Asuna','Gon',
+   'Killua','Kuroko','Zero Two','Rem','Gojo','Yuji','Tanjiro','Nezuko','Zenitsu','Izuku',
+   'Bakugo','Shoto','Ichigo','Kazuma','Aqua','Megumin','Yoriichi','Rengoku','Akaza','Chihiro'],
+  // 1: Cars (30 cards)
+  ['Ferrari SF90','Lamborghini Aventador','Bugatti Chiron','McLaren P1','Porsche 911',
+   'Mercedes AMG GT','BMW M8','Audi R8','Koenigsegg Jesko','Pagani Huayra',
+   'Rolls Royce Ghost','Bentley Continental','Aston Martin DB11','Rimac Nevera','Tesla Roadster',
+   'Nissan GT-R','Toyota Supra','Mazda RX-7','Ferrari 458','Lamborghini Huracan',
+   'McLaren 720S','Ferrari LaFerrari','McLaren Senna','Bugatti Divo','Porsche 918',
+   'Ferrari Enzo','McLaren F1','Ferrari F40','Porsche Carrera GT','Koenigsegg Agera'],
+  // 2: Clubs (20 cards)
+  ['Omnia Dubai','Pacha Ibiza','Berghain Berlin','Fabric London','Amnesia Ibiza',
+   'DC10 Ibiza','Marquee NYC','LIV Miami','E11even Miami','Hakkasan Vegas',
+   'Omnia Vegas','XS Vegas','Womb Tokyo','Zuma Dubai','White Dubai',
+   'Ministry of Sound','Tresor Berlin','Watergate Berlin','Printworks London','Output Brooklyn'],
+  // 3: Palaces (20 cards)
+  ['Buckingham Palace','Palace of Versailles','Alhambra Palace','Neuschwanstein Castle','Topkapi Palace',
+   'Kremlin Palace','Schönbrunn Palace','Monaco Palace','Royal Palace Madrid','Prague Castle',
+   'Dubai Palace','Abu Dhabi Palace','Riyadh Palace','Cairo Palace','Istanbul Palace',
+   'Tokyo Imperial Palace','Kyoto Palace','Beijing Palace','London Palace','Paris Palace'],
+  // 4: Limited (use first 10 only)
+  ['Dragon Emperor','Phoenix Queen','Shadow Lord','Crystal Mage','Storm Titan',
+   'Void Walker','Sun Deity','Moon Goddess','Thunder King','Ice Queen']
+];
+
+async function pickAndSetDailyCombo() {
+  try {
+    var today = new Date().toISOString().split('T')[0];
+    var existing = await DailyCombo.findOne({ date: today });
+    if(existing) return; // already set today
+
+    // Pick 3 random cards from different categories
+    var chosen = [];
+    var usedCats = [];
+    while(chosen.length < 3) {
+      var catIdx = Math.floor(Math.random() * 4); // use first 4 categories
+      if(usedCats.indexOf(catIdx) !== -1) continue;
+      var catCards = COMBO_CARD_NAMES[catIdx];
+      var cardIdx = Math.floor(Math.random() * catCards.length);
+      var key = catIdx + '_' + cardIdx;
+      chosen.push({ key, categoryIndex: catIdx, cardIndex: cardIdx });
+      usedCats.push(catIdx);
+    }
+
+    await DailyCombo.findOneAndUpdate(
+      { date: today },
+      { $set: { cards: chosen, reward: 5, setAt: Date.now() } },
+      { upsert: true, new: true }
+    );
+    console.log('[DailyCombo] ✅ Auto-set for', today, ':', chosen.map(function(c){ return COMBO_CARD_NAMES[c.categoryIndex][c.cardIndex]; }));
+
+    // Notify VIP users
+    try {
+      var vipUsers = await User.find({
+        'vip.tier': { $gte: 1 },
+        'vip.expiry': { $gt: Date.now() }
+      }).select('telegramId username');
+
+      for(var i = 0; i < vipUsers.length; i++) {
+        var u = vipUsers[i];
+        var msg = '🎯 *Daily Combo Cards* — ' + today + '\n\n';
+        chosen.forEach(function(c, idx) {
+          msg += (idx+1) + '. *' + COMBO_CARD_NAMES[c.categoryIndex][c.cardIndex] + '*\n';
+        });
+        msg += '\n💰 Reward: *5 REC*\n🔓 Upgrade all 3 to claim!';
+        try {
+          await bot.sendMessage(u.telegramId, msg, { parse_mode: 'Markdown' });
+          await new Promise(function(r){ setTimeout(r, 100); }); // rate limit
+        } catch(e) { /* user blocked bot — ignore */ }
+      }
+      console.log('[DailyCombo] ✅ Notified', vipUsers.length, 'VIP users');
+    } catch(e) { console.log('[DailyCombo] VIP notify error:', e.message); }
+
+    // Send hint to channel (only first card name as hint)
+    try {
+      var hintCard = COMBO_CARD_NAMES[chosen[0].categoryIndex][chosen[0].cardIndex];
+      var hintMsg = '💡 *Daily Combo Hint*\n\nOne of today\'s combo cards starts with: *' +
+        hintCard.substring(0, 3) + '...*\n\n🔓 VIP members get all 3 cards! Join VIP for full access.';
+      await bot.sendMessage(GROUP_CHAT_ID, hintMsg, { parse_mode: 'Markdown' });
+      console.log('[DailyCombo] ✅ Hint sent to channel');
+    } catch(e) { console.log('[DailyCombo] Channel hint error:', e.message); }
+
+  } catch(e) { console.log('[DailyCombo] Auto-set error:', e.message); }
+}
+
+// Run at startup and every day at midnight
+pickAndSetDailyCombo();
+setInterval(function() {
+  var now = new Date();
+  if(now.getHours() === 0 && now.getMinutes() === 0) {
+    pickAndSetDailyCombo();
+  }
+}, 60000); // check every minute
+
+// POST set combo (admin only — manual override)
 app.post('/api/combo/set', async (req, res) => {
   try {
     var { adminId, cards } = req.body;
