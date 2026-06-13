@@ -553,8 +553,8 @@ app.post('/api/vip/verify', async (req, res) => {
       return res.json({ success: false, error: 'Cannot check transactions' });
     }
 
-    // Look for matching payment in last 5 minutes
-    const fiveMinAgo = Math.floor(Date.now()/1000) - 300;
+    // Look for matching payment in last 15 minutes
+    const fiveMinAgo = Math.floor(Date.now()/1000) - 900;
     let found = false;
     let foundTxId = null;
 
@@ -577,11 +577,12 @@ app.post('/api/vip/verify', async (req, res) => {
       return res.json({ success: false, error: 'Payment not found — please wait and try again' });
     }
 
-    // Activate VIP
+    // Activate VIP — preserve existing boxes if upgrading
     const expiry = Date.now() + 30 * 24 * 60 * 60 * 1000;
+    const existingBoxes = (user.vip && user.vip.boxes) ? user.vip.boxes : {};
     await User.findOneAndUpdate(
       { telegramId },
-      { vip: { tier, expiry, boxes: {}, txId: foundTxId } }
+      { vip: { tier, expiry, boxes: existingBoxes, txId: foundTxId } }
     );
 
     // Notify user in their language
