@@ -96,8 +96,8 @@ function renderVIPPage() {
         '<div style="font-size:10px;color:rgba(255,255,255,0.7);margin-top:2px;">'+t('vipPriceLabel')+'</div>' +
       '</div>' +
       '<div onclick="switchVIPTab(2)" id="vipTab2" style="flex:1;text-align:center;padding:10px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);cursor:pointer;">' +
-        '<div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.4);">👑 VIP II</div>' +
-        '<div style="font-size:10px;color:rgba(255,255,255,0.3);margin-top:2px;">'+t('comingSoon')+'</div>' +
+        '<div style="font-size:13px;font-weight:700;color:#6688FF;">💎 VIP II</div>' +
+        '<div style="font-size:10px;color:rgba(100,136,255,0.7);margin-top:2px;">5 TON / شهر</div>' +
       '</div>' +
       '<div onclick="switchVIPTab(3)" id="vipTab3" style="flex:1;text-align:center;padding:10px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);cursor:pointer;">' +
         '<div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.4);">👑 VIP III</div>' +
@@ -189,6 +189,35 @@ function switchVIPTab(n) {
         '<div onclick="buyVIP(1)" style="background:linear-gradient(135deg,#cc0000,#ff3333);border:none;border-radius:14px;padding:16px;text-align:center;cursor:pointer;box-shadow:0 4px 20px rgba(255,0,0,0.4);">' +
           '<div style="font-size:16px;font-weight:900;color:#FFD700;">' + t('vipSubscribeBtn') + '</div>' +
           '<div style="font-size:12px;color:rgba(255,255,255,0.8);margin-top:4px;">' + t('vipPriceLabel') + '</div>' +
+        '</div>'
+      );
+  } else if(n === 2) {
+    var hasVIP2 = vipData && parseInt(vipData.tier||0) >= 2 && parseInt(vipData.expiry||0) > Date.now();
+    content.innerHTML =
+      // VIP 2 Features Card
+      '<div style="background:linear-gradient(135deg,rgba(30,10,80,0.9),rgba(10,5,40,0.9));border:1px solid rgba(100,136,255,0.4);border-radius:18px;padding:18px;margin-bottom:14px;">' +
+        '<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">' +
+          '<div style="font-size:28px;">💎</div>' +
+          '<div><div style="font-size:17px;font-weight:900;color:#6688FF;font-family:Impact,sans-serif;letter-spacing:2px;">VIP II</div>' +
+          '<div style="font-size:10px;color:rgba(100,136,255,0.6);">5 TON / شهر</div></div>' +
+        '</div>' +
+        '<div style="font-size:11px;color:rgba(255,255,255,0.7);line-height:2;">' +
+          '💎 الوصول لـ 20 بطاقة VIP حصرية<br>' +
+          '⚡ كل بطاقة تصل إلى 5 REC/s عند Max<br>' +
+          '🏆 أقصى إنتاج: <span style="color:#00CFFF;font-weight:700;">100 REC/s</span> من 20 بطاقة<br>' +
+          '👑 كل مميزات VIP I مشمولة' +
+        '</div>' +
+      '</div>' +
+
+      // Membership status or buy button
+      (hasVIP2 ?
+        '<div style="background:rgba(0,200,100,0.1);border:1px solid rgba(0,200,100,0.3);border-radius:14px;padding:14px;text-align:center;">' +
+          '<div style="font-size:14px;font-weight:700;color:#00FF88;">💎 VIP II نشط</div>' +
+          '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px;">ينتهي: ' + new Date(vipData.expiry).toLocaleDateString() + '</div>' +
+        '</div>' :
+        '<div onclick="buyVIP(2)" style="background:linear-gradient(135deg,#1a0066,#4422cc);border:1px solid rgba(100,136,255,0.5);border-radius:14px;padding:16px;text-align:center;cursor:pointer;box-shadow:0 4px 24px rgba(100,100,255,0.35);">' +
+          '<div style="font-size:16px;font-weight:900;color:#fff;">💎 اشترك في VIP II</div>' +
+          '<div style="font-size:12px;color:rgba(200,200,255,0.8);margin-top:4px;">5 TON / شهر</div>' +
         '</div>'
       );
   } else {
@@ -378,8 +407,8 @@ function buyVIP(tier) {
     return;
   }
 
-  var prices = { 1: '1000000000', 2: '3000000000', 3: '10000000000' }; // nanoTON
-  var labels = { 1: 'VIP I — 1 TON', 2: 'VIP II — 3 TON', 3: 'VIP III — 10 TON' };
+  var prices = { 1: '1000000000', 2: '5000000000', 3: '10000000000' }; // nanoTON
+  var labels = { 1: 'VIP I — 1 TON', 2: 'VIP II — 5 TON', 3: 'VIP III — 10 TON' };
   var nanoAmount = prices[tier];
 
   showToast('⏳ جاري فتح محفظتك...');
