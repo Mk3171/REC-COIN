@@ -206,10 +206,6 @@ function switchVIPTab(n) {
       // Membership status or buy button
       (hasVIP2 ?
         // Active membership status
-        '<div style="background:rgba(0,200,100,0.1);border:1px solid rgba(0,200,100,0.3);border-radius:14px;padding:14px;text-align:center;margin-bottom:12px;">' +
-          '<div style="font-size:14px;font-weight:700;color:#00FF88;">'+t('vip2ActiveMembership')+'</div>' +
-          '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px;">'+t('vipExpiryDate')+' ' + new Date(vipData.expiry).toLocaleDateString() + '</div>' +
-        '</div>' +
         // x3 Boost section
         '<div style="background:rgba(0,150,255,0.07);border:1px solid rgba(0,150,255,0.22);border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">' +
           '<div><div style="font-size:12px;font-weight:700;color:#00CFFF;">'+t('vip2BoostTitle')+'</div>' +
@@ -219,7 +215,11 @@ function switchVIPTab(n) {
             '<div onclick="useVIP2Boost()" style="background:linear-gradient(135deg,#003366,#0088FF);border-radius:10px;padding:7px 16px;font-size:11px;color:#fff;font-weight:700;cursor:pointer;">' + t('vip2BoostActivate') + '</div>'
           ) +
         '</div>' +
-        '' :
+        // Active membership box at bottom (like VIP I)
+        '<div style="background:rgba(0,200,100,0.1);border:1px solid rgba(0,200,100,0.3);border-radius:14px;padding:14px;text-align:center;">' +
+          '<div style="font-size:14px;font-weight:700;color:#00FF88;">'+t('vip2ActiveMembership')+'</div>' +
+          '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px;">'+t('vipExpiryDate')+' ' + new Date(vipData.expiry).toLocaleDateString() + '</div>' +
+        '</div>' :
         // Not subscribed — show buy button
         '<div onclick="buyVIP(2)" style="background:linear-gradient(135deg,#1a0066,#4422cc);border:1px solid rgba(100,136,255,0.5);border-radius:14px;padding:16px;text-align:center;cursor:pointer;box-shadow:0 4px 24px rgba(100,100,255,0.35);">' +
           '<div style="font-size:16px;font-weight:900;color:#fff;">'+t('vip2SubscribeBtn')+'</div>' +
