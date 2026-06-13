@@ -699,11 +699,11 @@ app.post('/api/withdraw', async (req, res) => {
     // Check balance
     if (user.rec < amount) return res.status(400).json({ error: 'insufficient_balance' });
 
-    // Check daily limit — from actual successful withdrawals only
+    // Check daily limit — only count confirmed sent withdrawals
     const today = new Date().toISOString().split('T')[0];
     const todayStart = new Date(today + 'T00:00:00.000Z');
     const todaySent = await Withdrawal.aggregate([
-      { $match: { telegramId: parseInt(telegramId), status: { $in: ['sent', 'pending'] }, createdAt: { $gte: todayStart } } },
+      { $match: { telegramId: parseInt(telegramId), status: 'sent', createdAt: { $gte: todayStart } } },
       { $group: { _id: null, total: { $sum: '$amount' } } }
     ]);
     const dailyWithdrawn = todaySent[0] ? todaySent[0].total : 0;
@@ -747,10 +747,22 @@ app.post('/api/withdraw', async (req, res) => {
           await Withdrawal.findByIdAndUpdate(withdrawal._id, { status: 'sent' });
           console.log('[Withdraw] ✅ Sent:', netAmount, 'REC to', user.walletAddress);
         } else {
-          console.log('[Withdraw] Pending:', r && r.error);
+          // Blockchain send failed — refund balance and mark as failed
+          await User.findOneAndUpdate(
+            { telegramId: parseInt(telegramId) },
+            { $inc: { rec: amount } }
+          );
+          await Withdrawal.findByIdAndUpdate(withdrawal._id, { status: 'failed' });
+          console.log('[Withdraw] ❌ Failed, refunded:', amount, 'REC to user', telegramId, '| Error:', r && r.error);
         }
       } catch(e) {
-        console.log('[Withdraw] Pending:', e.message);
+        // Exception — refund balance and mark as failed
+        await User.findOneAndUpdate(
+          { telegramId: parseInt(telegramId) },
+          { $inc: { rec: amount } }
+        ).catch(function(){});
+        await Withdrawal.findByIdAndUpdate(withdrawal._id, { status: 'failed' }).catch(function(){});
+        console.log('[Withdraw] ❌ Exception, refunded:', e.message);
       }
     });
   } catch(e) {
@@ -961,9 +973,20 @@ app.get('/api/users', async (req, res) => {
 });
 
 // ====== API: WITHDRAWALS ======
+// All withdrawals (admin use)
 app.get('/api/withdrawals', async (req, res) => {
   try {
     const list = await Withdrawal.find().sort({ createdAt: -1 }).limit(50);
+    res.json({ count: list.length, withdrawals: list });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// Per-user withdrawals — used by the History page in the mini-app
+app.get('/api/withdrawals/:telegramId', async (req, res) => {
+  try {
+    const list = await Withdrawal.find({ telegramId: parseInt(req.params.telegramId) })
+      .sort({ createdAt: -1 })
+      .limit(50);
     res.json({ count: list.length, withdrawals: list });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
@@ -1599,46 +1622,22 @@ app.post('/api/vip-withdraw', async (req, res) => {
           await Withdrawal.findByIdAndUpdate(wd._id, { status: 'sent' });
           console.log('[VIP Withdraw] ✅ Sent:', netAmount, 'REC to', user.walletAddress);
         } else {
-          console.log('[VIP Withdraw] Pending:', r && r.error);
+          // Blockchain send failed — refund balance and mark as failed
+          await User.findOneAndUpdate(
+            { telegramId: parseInt(telegramId) },
+            { $inc: { rec: amount } }
+          );
+          await Withdrawal.findByIdAndUpdate(wd._id, { status: 'failed' });
+          console.log('[VIP Withdraw] ❌ Failed, refunded:', amount, 'REC to user', telegramId, '| Error:', r && r.error);
         }
       } catch(e) {
-        console.log('[VIP Withdraw] Pending:', e.message);
+        await User.findOneAndUpdate(
+          { telegramId: parseInt(telegramId) },
+          { $inc: { rec: amount } }
+        ).catch(function(){});
+        await Withdrawal.findByIdAndUpdate(wd._id, { status: 'failed' }).catch(function(){});
+        console.log('[VIP Withdraw] ❌ Exception, refunded:', e.message);
       }
-    });
-  } catch(e) { res.status(500).json({ error: e.message }); }
-});
-
-
-// ====== VIP WITHDRAW (50k - 1M REC) ======
-app.post('/api/vip-withdraw', async (req, res) => {
-  try {
-    const { telegramId, amount } = req.body;
-    if(!telegramId || !amount) return res.status(400).json({ error: 'missing_data' });
-    const user = await User.findOne({ telegramId: parseInt(telegramId) });
-    if(!user) return res.status(404).json({ error: 'user_not_found' });
-    if(!user.vip || user.vip.tier < 1 || user.vip.expiry < Date.now())
-      return res.status(403).json({ error: 'vip_required' });
-    if(!user.walletAddress) return res.status(400).json({ error: 'no_wallet' });
-    if(amount < VIP_MIN_WITHDRAW) return res.status(400).json({ error: 'below_minimum', min: VIP_MIN_WITHDRAW });
-    if(amount > VIP_MAX_WITHDRAW) return res.status(400).json({ error: 'above_maximum', max: VIP_MAX_WITHDRAW });
-    if(user.rec < amount) return res.status(400).json({ error: 'insufficient_balance' });
-    const netAmount = amount - WITHDRAW_FEE;
-    await User.updateOne({ telegramId: parseInt(telegramId) }, { $inc: { rec: -amount } });
-    const wd = await Withdrawal.create({
-      telegramId: parseInt(telegramId), username: user.username || '',
-      amount, fee: WITHDRAW_FEE, netAmount, walletAddress: user.walletAddress,
-      status: 'pending', type: 'vip'
-    });
-    res.json({ success: true, netAmount, fee: WITHDRAW_FEE, status: 'pending' });
-    setImmediate(async function() {
-      try {
-        const r = await sendJetton(user.walletAddress, netAmount, 'VIP REC Withdrawal');
-        if (r && r.success) {
-          await sendJetton(FEE_WALLET, WITHDRAW_FEE, 'VIP REC Fee');
-          await Withdrawal.findByIdAndUpdate(wd._id, { status: 'sent' });
-          console.log('[VIP Withdraw] ✅ Sent:', netAmount, 'REC to', user.walletAddress);
-        } else { console.log('[VIP Withdraw] Pending:', r && r.error); }
-      } catch(e) { console.log('[VIP Withdraw] Pending:', e.message); }
     });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
