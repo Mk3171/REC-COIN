@@ -364,14 +364,16 @@ window.addEventListener('pagehide', function() {
 // ====== MAIN INTERVAL (3s) ======
 setInterval(function(){
   checkUpgradeTimers();
+  // ====== Boost checks ======
+  var _isVip2Boost = vipData && parseInt(vipData.tier||0)>=2 && parseInt(vipData.expiry||0)>Date.now() && vipData.boost2Date===getTodayStr();
+  var _isVip1Boost = vipData && parseInt(vipData.tier||0)>=1 && parseInt(vipData.expiry||0)>Date.now() && vipData.boostDate===getTodayStr();
   // ====== RECORD Mining ======
-  if(recordPerSec > 0) record += recordPerSec * 3;
+  if(recordPerSec > 0) record += recordPerSec * (_isVip2Boost ? 3 : 1) * 3;
   // ====== REC Mining ======
   if(recPerSec > 0){
     var _effectiveRec = recPerSec;
-    if(vipData && parseInt(vipData.tier||0)>=1 && parseInt(vipData.expiry||0)>Date.now() && vipData.boostDate===getTodayStr()){
-      _effectiveRec *= 1.5;
-    }
+    if(_isVip2Boost) _effectiveRec *= 3;
+    if(_isVip1Boost) _effectiveRec *= 1.5;
     rec += _effectiveRec * 3;
     // ====== Block Check ======
     if(typeof checkForBlock === 'function') checkForBlock();
@@ -449,10 +451,12 @@ function updateUI(){
   // Mining speeds on home
   var recs=document.getElementById('recSpeedShow');
   var recs2=document.getElementById('recordSpeedShow');
-  var _displayRec = recPerSec;
-  if(vipData && parseInt(vipData.tier||0)>=1 && parseInt(vipData.expiry||0)>Date.now() && vipData.boostDate===getTodayStr()) _displayRec*=1.5;
+  var _isV2B = vipData && parseInt(vipData.tier||0)>=2 && parseInt(vipData.expiry||0)>Date.now() && vipData.boost2Date===getTodayStr();
+  var _isV1B = vipData && parseInt(vipData.tier||0)>=1 && parseInt(vipData.expiry||0)>Date.now() && vipData.boostDate===getTodayStr();
+  var _displayRec = recPerSec * (_isV2B?3:1) * (_isV1B?1.5:1);
+  var _displayRecord = recordPerSec * (_isV2B?3:1);
   if(recs)recs.textContent=_displayRec>0?_displayRec.toFixed(8):'0.00000000';
-  if(recs2)recs2.textContent=recordPerSec>0?Math.floor(recordPerSec).toLocaleString():'0';
+  if(recs2)recs2.textContent=_displayRecord>0?Math.floor(_displayRecord).toLocaleString():'0';
   // Rank
   var m=getMyMedal();
   var mrn=document.getElementById('myRankName');if(mrn){mrn.textContent=m.name;mrn.style.color=m.color;}
