@@ -1,3 +1,7 @@
+// VIP2 formulas (also defined in app.js — kept here for cards-data scope)
+function vipCardRECSpeed(lvl){ if(lvl<=0)return 0; return 0.0005*Math.pow(10000,(lvl-1)/99); }
+function vipCardCost(lvl){ return Math.floor(500000*Math.pow(9e9,lvl/99)); }
+
 // ====== CARDS DATA & UPGRADE LOGIC — cards-data.js ======
 var categories=[
   {nameKey:'catAnime',cards:[
@@ -69,6 +73,29 @@ var categories=[
     {n:'Ocean Master',en:'Ocean Master',e:'🌊'},
     {n:'Sky Pegasus',en:'Sky Pegasus',e:'🐎'},
     {n:'Void Walker',en:'Void Walker',e:'🌌'}
+  ]},
+  // ====== VIP2 CARDS (Category 5) — REC mining only, 5 REC/s at max ======
+  {nameKey:'catVip2',cards:[
+    {n:'Galactic Emperor',en:'Galactic Emperor',e:'👑'},
+    {n:'Nebula Goddess',en:'Nebula Goddess',e:'🌸'},
+    {n:'Quantum Titan',en:'Quantum Titan',e:'⚛️'},
+    {n:'Stellar Phoenix',en:'Stellar Phoenix',e:'🌟'},
+    {n:'Dark Matter Lord',en:'Dark Matter Lord',e:'🌑'},
+    {n:'Aurora Valkyrie',en:'Aurora Valkyrie',e:'🌈'},
+    {n:'Supernova King',en:'Supernova King',e:'💥'},
+    {n:'Cosmic Oracle',en:'Cosmic Oracle',e:'🔭'},
+    {n:'Singularity Beast',en:'Singularity Beast',e:'🌀'},
+    {n:'Event Horizon',en:'Event Horizon',e:'🕳️'},
+    {n:'Pulsar Guardian',en:'Pulsar Guardian',e:'💫'},
+    {n:'Quasar Empress',en:'Quasar Empress',e:'✨'},
+    {n:'Hypernova Sage',en:'Hypernova Sage',e:'🧿'},
+    {n:'Magnetar Warrior',en:'Magnetar Warrior',e:'🧲'},
+    {n:'Celestial Warlord',en:'Celestial Warlord',e:'⚔️'},
+    {n:'Photon Assassin',en:'Photon Assassin',e:'💡'},
+    {n:'Gravity Master',en:'Gravity Master',e:'🌍'},
+    {n:'Plasma Overlord',en:'Plasma Overlord',e:'🔥'},
+    {n:'Anti-Matter God',en:'Anti-Matter God',e:'♾️'},
+    {n:'Universe Creator',en:'Universe Creator',e:'🌌'}
   ]}
 ];
 
@@ -141,8 +168,11 @@ function showCardInfo(ci, idx) {
   var key = ci+'_'+idx;
   var card = categories[ci].cards[idx];
   var lvl = cardLevels[key]||0;
-  var recRec = cardRecordSpeed(lvl);
-  var recSpd = cardRECSpeed(lvl);
+  var isLimited = ci === 4;
+  var isVip2 = ci === 5;
+  var multi = isLimited ? 3 : 1;
+  var recRec = isVip2 ? 0 : cardRecordSpeed(lvl) * multi;
+  var recSpd = isVip2 ? vipCardRECSpeed(lvl) : cardRECSpeed(lvl) * multi;
   var name = getCardName(card);
 
   function closePopup(e) {
@@ -211,6 +241,7 @@ function directUpgrade(ci, idx, event) {
 }
 
 function renderCardGridItem(div, key, card) {
+  var isVip2 = parseInt(key.split('_')[0]) === 5;
   var ci = parseInt(key.split('_')[0]);
   var idx = parseInt(key.split('_')[1]);
   var lvl = cardLevels[key]||0;
@@ -220,13 +251,14 @@ function renderCardGridItem(div, key, card) {
   var rem = isUpgrading ? Math.max(0, Math.ceil((upg.endTime-now)/1000)) : 0;
   var recRec = cardRecordSpeed(lvl);
   var isLimited = ci === 4;
-  var cost = cardCost(lvl, isLimited);
+  var cost = isVip2 ? vipCardCost(lvl) : cardCost(lvl, isLimited);
   var rarity = getCardRarity(lvl);
   var cardName = getCardName(card);
   var bg = getCardBg(ci, idx);
   var canUpgrade = record >= cost && lvl < 100 && !isUpgrading;
   var multi = isLimited ? 3 : 1;
-  var boostedRec = recRec * multi;
+  var boostedRec = isVip2 ? 0 : recRec * multi; // VIP2 doesn't give RECORD
+  var vip2Rec = isVip2 ? vipCardRECSpeed(lvl) : 0;
 
   div.style.cssText = 'background:linear-gradient('+bg+');border:1px solid '+(lvl>0?rarity.border:'#1a1a2a')+';border-radius:16px;overflow:hidden;cursor:pointer;position:relative;'+
     (lvl>0?'box-shadow:0 0 20px '+rarity.glow+';':'');
@@ -251,7 +283,9 @@ function renderCardGridItem(div, key, card) {
       '<div style="font-size:11px;color:#ddd;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:3px;">'+cardName+'</div>'+
       // Mining speed or status
       (lvl > 0
-        ? '<div style="font-size:9px;color:#00FF88;margin-bottom:5px;">⚡ '+Math.floor(boostedRec)+' R/s'+(isLimited?' <span style="color:#FFD700;">×3</span>':'')+'</div>'
+        ? (isVip2
+            ? '<div style="font-size:9px;color:#00CFFF;margin-bottom:5px;">💎 '+vip2Rec.toFixed(4)+' REC/s</div>'
+            : '<div style="font-size:9px;color:#00FF88;margin-bottom:5px;">⚡ '+Math.floor(boostedRec)+' R/s'+(isLimited?' <span style="color:#FFD700;">×3</span>':'')+'</div>')
         : '<div style="font-size:9px;color:#444;margin-bottom:5px;">⛔ No mining</div>')+
       // Upgrade button
       (lvl >= 100
@@ -283,8 +317,8 @@ function openCard(ci,idx){
   var canUpgrade=!isUpgrading&&record>=cost&&lvl<100;
   var recRec=cardRecordSpeed(lvl);
   var recSpd=cardRECSpeed(lvl);
-  var nextRecRec=lvl<100?cardRecordSpeed(lvl+1):0;
-  var nextRecSpd=lvl<100?cardRECSpeed(lvl+1):0;
+  var nextRecRec=isVip2?0:(lvl<100?cardRecordSpeed(lvl+1)*multi:0);
+  var nextRecSpd=isVip2?(lvl<100?vipCardRECSpeed(lvl+1):0):(lvl<100?cardRECSpeed(lvl+1)*multi:0);
   var rem=isUpgrading?Math.max(0,Math.ceil((upg.endTime-now)/1000)):0;
 
   document.getElementById('cardDetail').innerHTML=
@@ -379,6 +413,26 @@ function upgradeCard(ci,idx){
   document.getElementById('cardModal').classList.remove('none');
   openCard(ci,idx);
   showToast(t('toastUpgradeStart')+' ⏳ '+formatWait(wait));
+}
+
+// VIP2 category — locked for non-VIP2 users
+function showVip2Category(btn) {
+  var isVip2User = vipData && parseInt(vipData.tier||0) >= 2 && parseInt(vipData.expiry||0) > Date.now();
+  document.querySelectorAll('.cat-btn').forEach(function(b){ b.classList.remove('active'); });
+  btn.classList.add('active');
+  for(var i=0;i<=4;i++){
+    var g=document.getElementById('cat-'+i);
+    if(g) g.style.display='none';
+  }
+  var lock=document.getElementById('vip2-lock-msg');
+  var grid=document.getElementById('cat-5');
+  if(isVip2User){
+    if(lock) lock.style.display='none';
+    if(grid){ grid.style.display=''; buildCards(5); }
+  } else {
+    if(grid) grid.style.display='none';
+    if(lock) lock.style.display='block';
+  }
 }
 
 function showCategory(idx,btn){
