@@ -125,7 +125,7 @@ var T = {
     // Side menu
     menuSupport:'الدعم الفني', menuNews:'الأخبار',
     menuNewsDesc:'التحديثات والإعلانات', menuChat:'الدردشة',
-    menuChatDesc:'دردشة المجتمع', menuPayouts:'المدفوعات',
+    menuChatDesc:'دردشة المجتمع', menuPayouts:'المدفوعات', menuPayoutsSub:'سحب REC',
     menuFaq:'الأسئلة الشائعة والشروط', menuFaqDesc:'القواعد والشروط',
     blockHistory:'سجل البلوكات', blockHistorySub:'سجل البلوكات الخاصة بك',
     blockFound:'🔴 لقيت بلوك!', blockFoundSub:'لقيت بلوك جديد!', blockReward:'💰 مكافأتك', blockCollect:'⚡ استلام', blockCollectHint:'اضغط استلام لإضافة المكافأة لرصيدك', blockCollecting:'⏳ جاري الاستلام...', blockCollected:'تم الاستلام!', blockAddedBal:'تمت إضافة المكافأة لرصيدك ✅', blockClose:'إغلاق ✕', blockCollectErr:'❌ خطأ في الاستلام — حاول مجدداً', blockLoading:'⏳ جاري التحميل...', blockEmpty:'ما لقيت أي بلوك لحد هلا', blockEmptySub:'استمر بالتعدين!', blockStatusDone:'✅ تم الاستلام', blockStatusPending:'⏳ لم يُستلم', blockLoadErr:'خطأ في التحميل',
@@ -378,7 +378,7 @@ var T = {
     ppNoCards:'No cards upgraded yet',
     menuSupport:'Support', menuNews:'News',
     menuNewsDesc:'Updates & Announcements', menuChat:'Chat',
-    menuChatDesc:'Community Chat', menuPayouts:'Payouts',
+    menuChatDesc:'Community Chat', menuPayouts:'Payouts', menuPayoutsSub:'Withdraw REC',
     menuFaq:'FAQ & Terms', menuFaqDesc:'Rules & Conditions',
     blockHistory:'Block History', blockHistorySub:'Your block records',
     blockFound:'🔴 Block Found!', blockFoundSub:'You found a new block!', blockReward:'💰 Your Reward', blockCollect:'⚡ COLLECT', blockCollectHint:'Press Collect to add reward to your balance', blockCollecting:'⏳ Collecting...', blockCollected:'Collected!', blockAddedBal:'Reward added to your balance ✅', blockClose:'Close ✕', blockCollectErr:'❌ Collection failed — try again', blockLoading:'⏳ Loading...', blockEmpty:'No blocks found yet', blockEmptySub:'Keep mining!', blockStatusDone:'✅ Collected', blockStatusPending:'⏳ Pending', blockLoadErr:'Failed to load',
@@ -613,7 +613,7 @@ var T = {
     ppNoCards:'Карточки ещё не улучшены',
     menuSupport:'Поддержка', menuNews:'Новости',
     menuNewsDesc:'Обновления и объявления', menuChat:'Чат',
-    menuChatDesc:'Чат сообщества', menuPayouts:'Выплаты',
+    menuChatDesc:'Чат сообщества', menuPayouts:'Выплаты', menuPayoutsSub:'Вывод REC',
     menuFaq:'FAQ и Условия', menuFaqDesc:'Правила и условия',
     blockHistory:'История блоков', blockHistorySub:'Ваши записи о блоках',
     blockFound:'🔴 Блок найден!', blockFoundSub:'Вы нашли новый блок!', blockReward:'💰 Ваша награда', blockCollect:'⚡ ПОЛУЧИТЬ', blockCollectHint:'Нажмите чтобы получить награду', blockCollecting:'⏳ Получение...', blockCollected:'Получено!', blockAddedBal:'Награда добавлена ✅', blockClose:'Закрыть ✕', blockCollectErr:'❌ Ошибка — попробуйте снова', blockLoading:'⏳ Загрузка...', blockEmpty:'Блоков пока нет', blockEmptySub:'Продолжайте майнить!', blockStatusDone:'✅ Получено', blockStatusPending:'⏳ Ожидание', blockLoadErr:'Ошибка загрузки',
@@ -841,7 +841,7 @@ var T = {
     ppNoCards:'Картки ще не покращені',
     menuSupport:'Підтримка', menuNews:'Новини',
     menuNewsDesc:'Оновлення та оголошення', menuChat:'Чат',
-    menuChatDesc:'Чат спільноти', menuPayouts:'Виплати',
+    menuChatDesc:'Чат спільноти', menuPayouts:'Виплати', menuPayoutsSub:'Вивід REC',
     menuFaq:'FAQ та Умови', menuFaqDesc:'Правила та умови',
     blockHistory:'Історія блоків', blockHistorySub:'Ваші записи про блоки',
     blockFound:'🔴 Блок знайдено!', blockFoundSub:'Ви знайшли новий блок!', blockReward:'💰 Ваша нагорода', blockCollect:'⚡ ОТРИМАТИ', blockCollectHint:'Натисніть щоб отримати нагороду', blockCollecting:'⏳ Отримання...', blockCollected:'Отримано!', blockAddedBal:'Нагороду додано ✅', blockClose:'Закрити ✕', blockCollectErr:'❌ Помилка — спробуйте знову', blockLoading:'⏳ Завантаження...', blockEmpty:'Блоків поки немає', blockEmptySub:'Продовжуйте майнити!', blockStatusDone:'✅ Отримано', blockStatusPending:'⏳ Очікування', blockLoadErr:'Помилка завантаження',
@@ -1069,7 +1069,7 @@ var T = {
     ppNoCards:'Nenhuma carta melhorada',
     menuSupport:'Suporte', menuNews:'Notícias',
     menuNewsDesc:'Atualizações e Anúncios', menuChat:'Chat',
-    menuChatDesc:'Chat da Comunidade', menuPayouts:'Pagamentos',
+    menuChatDesc:'Chat da Comunidade', menuPayouts:'Pagamentos', menuPayoutsSub:'Sacar REC',
     menuFaq:'FAQ e Termos', menuFaqDesc:'Regras e Condições',
     blockHistory:'Histórico de Blocos', blockHistorySub:'Seus registros de blocos',
     blockFound:'🔴 Bloco Encontrado!', blockFoundSub:'Você encontrou um novo bloco!', blockReward:'💰 Sua Recompensa', blockCollect:'⚡ COLETAR', blockCollectHint:'Pressione para adicionar recompensa ao saldo', blockCollecting:'⏳ Coletando...', blockCollected:'Coletado!', blockAddedBal:'Recompensa adicionada ✅', blockClose:'Fechar ✕', blockCollectErr:'❌ Falha — tente novamente', blockLoading:'⏳ Carregando...', blockEmpty:'Nenhum bloco ainda', blockEmptySub:'Continue minerando!', blockStatusDone:'✅ Coletado', blockStatusPending:'⏳ Pendente', blockLoadErr:'Erro ao carregar',
@@ -1295,7 +1295,7 @@ var T = {
     ppNoCards:'Sin tarjetas mejoradas aún',
     menuSupport:'Soporte', menuNews:'Noticias',
     menuNewsDesc:'Actualizaciones y Anuncios', menuChat:'Chat',
-    menuChatDesc:'Chat de la Comunidad', menuPayouts:'Pagos',
+    menuChatDesc:'Chat de la Comunidad', menuPayouts:'Pagos', menuPayoutsSub:'Retirar REC',
     menuFaq:'FAQ y Términos', menuFaqDesc:'Reglas y Condiciones',
     blockHistory:'Historial de Bloques', blockHistorySub:'Tus registros de bloques',
     blockFound:'🔴 ¡Bloque Encontrado!', blockFoundSub:'¡Encontraste un nuevo bloque!', blockReward:'💰 Tu Recompensa', blockCollect:'⚡ RECOLECTAR', blockCollectHint:'Presiona para agregar recompensa al saldo', blockCollecting:'⏳ Recolectando...', blockCollected:'¡Recolectado!', blockAddedBal:'Recompensa añadida ✅', blockClose:'Cerrar ✕', blockCollectErr:'❌ Error — inténtalo de nuevo', blockLoading:'⏳ Cargando...', blockEmpty:'Aún no hay bloques', blockEmptySub:'¡Sigue minando!', blockStatusDone:'✅ Recolectado', blockStatusPending:'⏳ Pendiente', blockLoadErr:'Error al cargar',
@@ -1521,7 +1521,7 @@ var T = {
     ppNoCards:'Henüz yükseltilmiş kart yok',
     menuSupport:'Destek', menuNews:'Haberler',
     menuNewsDesc:'Güncellemeler ve Duyurular', menuChat:'Sohbet',
-    menuChatDesc:'Topluluk Sohbeti', menuPayouts:'Ödemeler',
+    menuChatDesc:'Topluluk Sohbeti', menuPayouts:'Ödemeler', menuPayoutsSub:'REC Çek',
     menuFaq:'SSS ve Koşullar', menuFaqDesc:'Kurallar ve Koşullar',
     blockHistory:'Blok Geçmişi', blockHistorySub:'Blok kayıtlarınız',
     blockFound:'🔴 Blok Bulundu!', blockFoundSub:'Yeni bir blok buldunuz!', blockReward:'💰 Ödülünüz', blockCollect:'⚡ AL', blockCollectHint:'Ödülü almak için tıklayın', blockCollecting:'⏳ Alınıyor...', blockCollected:'Alındı!', blockAddedBal:'Ödül eklendi ✅', blockClose:'Kapat ✕', blockCollectErr:'❌ Hata — tekrar deneyin', blockLoading:'⏳ Yükleniyor...', blockEmpty:'Henüz blok yok', blockEmptySub:'Madenciliğe devam et!', blockStatusDone:'✅ Alındı', blockStatusPending:'⏳ Bekliyor', blockLoadErr:'Yükleme hatası',
@@ -1748,7 +1748,7 @@ var T = {
     ppNoCards:'Chưa có thẻ nào được nâng cấp',
     menuSupport:'Hỗ trợ', menuNews:'Tin tức',
     menuNewsDesc:'Cập nhật & Thông báo', menuChat:'Trò chuyện',
-    menuChatDesc:'Trò chuyện cộng đồng', menuPayouts:'Thanh toán',
+    menuChatDesc:'Trò chuyện cộng đồng', menuPayouts:'Thanh toán', menuPayoutsSub:'Rút REC',
     menuFaq:'FAQ & Điều khoản', menuFaqDesc:'Quy tắc & Điều kiện',
     blockHistory:'Lịch sử Block', blockHistorySub:'Hồ sơ block của bạn',
     blockFound:'🔴 Tìm thấy Block!', blockFoundSub:'Bạn đã tìm thấy block mới!', blockReward:'💰 Phần thưởng', blockCollect:'⚡ NHẬN', blockCollectHint:'Nhấn để thêm phần thưởng vào số dư', blockCollecting:'⏳ Đang nhận...', blockCollected:'Đã nhận!', blockAddedBal:'Đã thêm phần thưởng ✅', blockClose:'Đóng ✕', blockCollectErr:'❌ Lỗi — thử lại', blockLoading:'⏳ Đang tải...', blockEmpty:'Chưa có block nào', blockEmptySub:'Tiếp tục đào!', blockStatusDone:'✅ Đã nhận', blockStatusPending:'⏳ Chờ', blockLoadErr:'Lỗi tải',
@@ -1975,7 +1975,7 @@ var T = {
     ppNoCards:'还没有升级任何卡片',
     menuSupport:'支持', menuNews:'新闻',
     menuNewsDesc:'更新和公告', menuChat:'聊天',
-    menuChatDesc:'社区聊天', menuPayouts:'支付',
+    menuChatDesc:'社区聊天', menuPayouts:'支付', menuPayoutsSub:'提取 REC',
     menuFaq:'FAQ和条款', menuFaqDesc:'规则和条件',
     blockHistory:'区块历史', blockHistorySub:'您的区块记录',
     blockFound:'🔴 发现区块！', blockFoundSub:'您发现了新区块！', blockReward:'💰 您的奖励', blockCollect:'⚡ 领取', blockCollectHint:'点击将奖励添加到余额', blockCollecting:'⏳ 领取中...', blockCollected:'已领取！', blockAddedBal:'奖励已添加 ✅', blockClose:'关闭 ✕', blockCollectErr:'❌ 错误 — 请重试', blockLoading:'⏳ 加载中...', blockEmpty:'暂无区块记录', blockEmptySub:'继续挖矿！', blockStatusDone:'✅ 已领取', blockStatusPending:'⏳ 待领取', blockLoadErr:'加载失败',
@@ -2136,8 +2136,20 @@ var T = {
     airdropTotalScore:'你的总积分', airdropRules:'📜 空投条款'
 };
 
-var currentLang='ar';
+var currentLang='en';
+// Try localStorage first
 try{var sl=localStorage.getItem('lang_'+saveKey);if(sl&&T[sl])currentLang=sl;}catch(e){}
+// If still default, detect from Telegram language_code
+if(currentLang==='en'){
+  try{
+    var tgLang=window.Telegram&&window.Telegram.WebApp&&window.Telegram.WebApp.initDataUnsafe&&window.Telegram.WebApp.initDataUnsafe.user&&window.Telegram.WebApp.initDataUnsafe.user.language_code;
+    if(tgLang){
+      var langMap={'ru':'ru','uk':'uk','pt':'pt','es':'es','tr':'tr','vi':'vi','zh-hans':'zh','zh-hant':'zh','zh':'zh','ar':'ar'};
+      var mapped=langMap[tgLang]||langMap[tgLang.split('-')[0]];
+      if(mapped&&T[mapped])currentLang=mapped;
+    }
+  }catch(e){}
+}
 
 // ✅ Auto-detect language from Telegram
 if(currentLang==='ar') {
