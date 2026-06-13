@@ -26,7 +26,7 @@ async function sendJetton(toAddress, amount, comment) {
   }
 
   try {
-    const { TonClient, WalletContractV4, JettonMaster, internal, toNano, Address, beginCell } = require('@ton/ton');
+    const { TonClient, WalletContractV5R1, JettonMaster, internal, toNano, Address, beginCell } = require('@ton/ton');
     const { mnemonicToPrivateKey } = require('@ton/crypto');
 
     const keyPair = await mnemonicToPrivateKey(mnemonic);
@@ -37,8 +37,8 @@ async function sendJetton(toAddress, amount, comment) {
       apiKey: process.env.TONCENTER_API_KEY || ''
     });
 
-    const wallet = WalletContractV4.create({ publicKey: keyPair.publicKey, workchain: 0 });
-    console.log('[sendJetton] Derived wallet address (V4):', wallet.address.toString());
+    const wallet = WalletContractV5R1.create({ publicKey: keyPair.publicKey, workchain: 0 });
+    console.log('[sendJetton] Derived wallet address (W5):', wallet.address.toString());
     console.log('[sendJetton] Expected bot address:', process.env.BOT_WALLET_ADDRESS);
 
     const contract = client.open(wallet);
@@ -218,13 +218,13 @@ function registerDiagnosticRoute(app) {
     }
 
     try {
-      const { TonClient, WalletContractV4, Address } = require('@ton/ton');
+      const { TonClient, WalletContractV5R1, Address } = require('@ton/ton');
       const { mnemonicToPrivateKey } = require('@ton/crypto');
 
       const keyPair = await mnemonicToPrivateKey(mnemonic);
-      const wallet = WalletContractV4.create({ publicKey: keyPair.publicKey, workchain: 0 });
-      const derivedAddr = wallet.address.toString({ urlSafe: true, bounceable: true });
-      out('Derived V4 address: ' + derivedAddr);
+      const wallet = WalletContractV5R1.create({ publicKey: keyPair.publicKey, workchain: 0 });
+      const derivedAddr = wallet.address.toString({ urlSafe: true, bounceable: false });
+      out('Derived W5 address: ' + derivedAddr);
       out('Expected address:   ' + (expectedAddr || '(not set)'));
       out('Address match: ' + (derivedAddr === expectedAddr ? '✅ YES' : '❌ NO — mismatch!'));
 
