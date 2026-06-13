@@ -21,7 +21,7 @@ function openVIPInfo() {
 
   ol.innerHTML = '<div style="width:100%;background:linear-gradient(180deg,#1a0a00,#0d0500);border-radius:24px 24px 0 0;border-top:2px solid rgba(255,200,0,0.3);padding:20px 16px 36px;max-height:88vh;overflow-y:auto;" onclick="event.stopPropagation()">' +
     '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">' +
-      '<div style="font-size:18px;font-weight:900;color:#FFD700;font-family:Impact,sans-serif;letter-spacing:2px;">👑 مستويات VIP</div>' +
+      '<div style="font-size:18px;font-weight:900;color:#FFD700;font-family:Impact,sans-serif;letter-spacing:2px;">'+t('vipLevelsTitle')+'</div>' +
       '<div onclick="document.querySelectorAll(\'.vip-info-ol\')[0].remove()" style="width:30px;height:30px;background:rgba(255,255,255,0.08);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;color:rgba(255,255,255,0.4);font-size:13px;">✕</div>' +
     '</div>' +
 
@@ -30,18 +30,18 @@ function openVIPInfo() {
       '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">' +
         '<div style="font-size:22px;">👑</div>' +
         '<div><div style="font-size:15px;font-weight:700;color:#FF6644;">VIP I</div>' +
-        '<div style="font-size:10px;color:rgba(255,255,255,0.4);">1 TON / شهر</div></div>' +
-        '<div style="margin-left:auto;background:rgba(255,50,50,0.2);border-radius:8px;padding:4px 10px;font-size:10px;color:#FF6644;font-weight:700;">متاح ✅</div>' +
+        '<div style="font-size:10px;color:rgba(255,255,255,0.4);">'+t('vipPriceLabelI')+'</div></div>' +
+        '<div style="margin-left:auto;background:rgba(255,50,50,0.2);border-radius:8px;padding:4px 10px;font-size:10px;color:#FF6644;font-weight:700;">'+t('vip2Available')+'</div>' +
       '</div>' +
       '<div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1.9;">' +
-        '📦 ٣ صناديق يومية (Common, Rare, Epic)<br>' +
-        '🦅 فرصة الحصول على بطاقة Epic النادرة (1%)<br>' +
-        '⚡ ×١.٥ سرعة تعدين REC<br>' +
-        '🔋 شحن طاقة ٦ مرات يومياً<br>' +
-        '💰 حد سحب يومي من 1,000 حتى 20,000 REC<br>' +
-        '🎯 تلميح بطاقة واحدة من الكومبو اليومي<br>' +
-        '🎁 +50 REC مكافأة ترحيبية فورية<br>' +
-        '👑 شارة VIP ذهبية بالليدربورد' +
+        t('vip1Feature1')+'<br>' +
+        t('vip1Feature2')+'<br>' +
+        t('vip1Feature3')+'<br>' +
+        t('vip1Feature4')+'<br>' +
+        t('vip1Feature5')+'<br>' +
+        t('vip1Feature6')+'<br>' +
+        t('vip1Feature7')+'<br>' +
+        t('vip1Feature8') +
       '</div>' +
     '</div>' +
 
@@ -50,14 +50,14 @@ function openVIPInfo() {
       '<div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">' +
         '<div style="font-size:22px;">💎</div>' +
         '<div><div style="font-size:15px;font-weight:700;color:#6688FF;">VIP II</div>' +
-        '<div style="font-size:10px;color:rgba(100,136,255,0.6);">5 TON / شهر</div></div>' +
-        '<div style="margin-left:auto;background:rgba(100,136,255,0.15);border-radius:8px;padding:4px 10px;font-size:10px;color:#6688FF;font-weight:700;">متاح ✅</div>' +
+        '<div style="font-size:10px;color:rgba(100,136,255,0.6);">'+t('vip2PriceLabel')+'</div></div>' +
+        '<div style="margin-left:auto;background:rgba(100,136,255,0.15);border-radius:8px;padding:4px 10px;font-size:10px;color:#6688FF;font-weight:700;">'+t('vip2Available')+'</div>' +
       '</div>' +
       '<div style="font-size:11px;color:rgba(255,255,255,0.6);line-height:1.9;">' +
-        '💎 الوصول لـ 20 بطاقة VIP حصرية<br>' +
-        '⚡ كل بطاقة تصل إلى 5 REC/s عند Max<br>' +
-        '🏆 أقصى إنتاج: 100 REC/s من 20 بطاقة<br>' +
-        '👑 كل مميزات VIP I مشمولة' +
+        t('vip2Feature1')+'<br>' +
+        t('vip2Feature2')+'<br>' +
+        t('vip2Feature3')+'<br>' +
+        t('vip2Feature4') +
       '</div>' +
     '</div>' +
 
@@ -102,7 +102,7 @@ function renderVIPPage() {
       '</div>' +
       '<div onclick="switchVIPTab(2)" id="vipTab2" style="flex:1;text-align:center;padding:10px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);cursor:pointer;">' +
         '<div style="font-size:13px;font-weight:700;color:#6688FF;">💎 VIP II</div>' +
-        '<div style="font-size:10px;color:rgba(100,136,255,0.7);margin-top:2px;">5 TON / شهر</div>' +
+        '<div style="font-size:10px;color:rgba(100,136,255,0.7);margin-top:2px;">'+t('vip2PriceLabel')+'</div>' +
       '</div>' +
       '<div onclick="switchVIPTab(3)" id="vipTab3" style="flex:1;text-align:center;padding:10px;border-radius:12px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);cursor:pointer;">' +
         '<div style="font-size:13px;font-weight:700;color:rgba(255,255,255,0.4);">👑 VIP III</div>' +
@@ -204,12 +204,12 @@ function switchVIPTab(n) {
       // Membership status or buy button
       (hasVIP2 ?
         '<div style="background:rgba(0,200,100,0.1);border:1px solid rgba(0,200,100,0.3);border-radius:14px;padding:14px;text-align:center;">' +
-          '<div style="font-size:14px;font-weight:700;color:#00FF88;">💎 VIP II نشط</div>' +
-          '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px;">ينتهي: ' + new Date(vipData.expiry).toLocaleDateString() + '</div>' +
+          '<div style="font-size:14px;font-weight:700;color:#00FF88;">'+t('vip2ActiveMembership')+'</div>' +
+          '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:4px;">'+t('vipExpiryDate')+' ' + new Date(vipData.expiry).toLocaleDateString() + '</div>' +
         '</div>' :
         '<div onclick="buyVIP(2)" style="background:linear-gradient(135deg,#1a0066,#4422cc);border:1px solid rgba(100,136,255,0.5);border-radius:14px;padding:16px;text-align:center;cursor:pointer;box-shadow:0 4px 24px rgba(100,100,255,0.35);">' +
-          '<div style="font-size:16px;font-weight:900;color:#fff;">💎 اشترك في VIP II</div>' +
-          '<div style="font-size:12px;color:rgba(200,200,255,0.8);margin-top:4px;">5 TON / شهر</div>' +
+          '<div style="font-size:16px;font-weight:900;color:#fff;">'+t('vip2SubscribeBtn')+'</div>' +
+          '<div style="font-size:12px;color:rgba(200,200,255,0.8);margin-top:4px;">'+t('vip2PriceLabel')+'</div>' +
         '</div>'
       );
   } else {
@@ -278,7 +278,7 @@ function openVIPBox(type) {
     updateUI();
     if(typeof addXP==='function') addXP(type==='common'?50:type==='rare'?100:200);
     if(reward) showVIPBoxResult(type, reward, false);
-    else showToast('❌ خطأ في فتح الصندوق');
+    else showToast(t('vipErrBoxOpen'));
   });
 }
 
@@ -395,7 +395,7 @@ function rollVIPBox(type) {
 function buyVIP(tier) {
   // Check wallet connected
   if (!tonConnect || !tonConnect.connected) {
-    showToast('❌ ربط محفظتك أولاً من صفحة Wallet!');
+    showToast(t('vipErrWallet'));
     return;
   }
 
@@ -403,7 +403,7 @@ function buyVIP(tier) {
   var labels = { 1: 'VIP I — 1 TON', 2: 'VIP II — 5 TON', 3: 'VIP III — 10 TON' };
   var nanoAmount = prices[tier];
 
-  showToast('⏳ جاري فتح محفظتك...');
+  showToast(t('vipLoadingWallet'));
 
   var BOT_WALLET = 'UQD-FoGlRG5pBxZpkf3H9ZOsNTL5basBbTEZE8zvMgHLB99o'; // محفظة البوت — نفس محفظة السحب
 
@@ -432,7 +432,7 @@ function buyVIP(tier) {
       amount: nanoAmount
     }]
   }).then(function(result) {
-    showToast('⏳ جاري التحقق من الدفع...');
+    showToast(t('vipVerifying'));
 
     // Get user wallet address
     var userWallet = '';
@@ -462,29 +462,29 @@ function buyVIP(tier) {
           // Welcome bonus: 50 REC
           if(data.tier === 1) {
             rec += 50;
-            showToast('🎁 +50 REC مكافأة ترحيبية!');
+            showToast(t('vipWelcomeBonus'));
             setTimeout(function(){
-              showToast('👑 تم تفعيل VIP I بنجاح!');
+              showToast(t('vipActivated').replace('{tier}','I'));
             }, 2000);
           } else {
-            showToast('👑 تم تفعيل VIP ' + (tier===1?'I':tier===2?'II':'III') + ' بنجاح!');
+            showToast(t('vipActivated').replace('{tier}',tier===1?'I':tier===2?'II':'III'));
           }
           if(typeof addXP==='function') addXP(500);
           saveData(true);
           renderVIPPage();
         } else {
-          showToast('❌ ' + (data.error || 'فشل التحقق، تواصل مع الدعم'));
+          showToast('❌ ' + (data.error || t('vipVerifyFail')));
         }
       }).catch(function() {
-        showToast('❌ خطأ في الاتصال بالسيرفر');
+        showToast(t('vipErrServer'));
       });
     }, 8000);
 
   }).catch(function(e) {
     if (e && e.message && (e.message.includes('cancel') || e.message.includes('reject'))) {
-      showToast('تم إلغاء الدفع');
+      showToast(t('vipCancelled'));
     } else {
-      showToast('❌ خطأ في الدفع');
+      showToast(t('vipErrPayment'));
     }
   });
 }
@@ -508,10 +508,10 @@ function loadVIPData(callback) {
 function useVIPBoost() {
   if(!vipData || parseInt(vipData.tier||0) < 1 || parseInt(vipData.expiry||0) <= Date.now()) return;
   var today = getTodayStr();
-  if(vipData.boostDate === today) { showToast('✅ البوست مفعّل اليوم مسبقاً'); return; }
+  if(vipData.boostDate === today) { showToast(t('vipBoostAlready')); return; }
   vipData.boostDate = today;
   saveData(true);
-  showToast('⚡ تم تفعيل ×١.٥ تعدين REC لبقية اليوم!');
+  showToast(t('vipBoostActivated2'));
   renderVIPPage();
 }
 
