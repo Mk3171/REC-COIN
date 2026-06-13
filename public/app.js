@@ -12,7 +12,8 @@ function cardRECSpeed(lvl){
 }
 // RECORD cost to upgrade from current level
 // Level 0→1: 10K | Level 50: 110M | Level 75: 11.5B | Level 99→100: 1T
-function cardCost(lvl, isLimited){
+function cardCost(lvl, isLimited, isVip2){
+  if(isVip2) return Math.floor(500000*Math.pow(9e9,lvl/99));
   if(isLimited) return Math.floor(100000*Math.pow(9e9,lvl/99));
   return Math.floor(10000*Math.pow(1e10,lvl/99));
 }
@@ -30,13 +31,28 @@ function formatWait(sec){
 var recordPerSec=0, recPerSec=0;
 var weeklyEndMs = 0;
 function getLimitedMulti(key){ return parseInt(key.split('_')[0])===4 ? 3 : 1; }
+// VIP2 cards (cat 5): REC only, 5 REC/s at level 100, no RECORD
+function vipCardRECSpeed(lvl){
+  if(lvl<=0) return 0;
+  return 0.0005 * Math.pow(10000,(lvl-1)/99); // lvl1=0.0005, lvl100=5
+}
+// VIP2 card cost (expensive: 5x Limited)
+function vipCardCost(lvl){
+  return Math.floor(500000*Math.pow(9e9,lvl/99));
+}
 function calcTotalSpeeds(){
   recordPerSec=0; recPerSec=0;
   Object.keys(cardLevels).forEach(function(key){
     var lvl=cardLevels[key]||0;
-    var m=getLimitedMulti(key);
-    recordPerSec+=cardRecordSpeed(lvl)*m;
-    recPerSec+=cardRECSpeed(lvl)*m;
+    var ci=parseInt(key.split('_')[0]);
+    if(ci===5){
+      // VIP2: REC only, no RECORD
+      recPerSec+=vipCardRECSpeed(lvl);
+    } else {
+      var m=getLimitedMulti(key);
+      recordPerSec+=cardRecordSpeed(lvl)*m;
+      recPerSec+=cardRECSpeed(lvl)*m;
+    }
   });
 }
 
@@ -682,16 +698,13 @@ function renderComboSlots(d) {
     return;
   }
 
-  var isVipUser = (typeof vipData !== 'undefined' && vipData && parseInt(vipData.tier||0) >= 1 && parseInt(vipData.expiry||0) > Date.now());
-  var isAdminUser = tgUser && String(tgUser.id) === '6995765586';
   slots.innerHTML = d.cards.map(function(c, i) {
     var cardInfo = getCardInfo(c.categoryIndex, c.cardIndex);
     var done = c.done;
-    var revealed = done || isVipUser || isAdminUser || (c.key && c.key !== '?');
-    return '<div style="background:' + (done ? 'rgba(0,255,136,0.1)' : revealed ? 'rgba(255,180,0,0.07)' : 'rgba(255,255,255,0.04)') + ';border:1px solid ' + (done ? 'rgba(0,255,136,0.4)' : revealed ? 'rgba(255,180,0,0.3)' : 'rgba(255,255,255,0.08)') + ';border-radius:14px;padding:14px 8px;text-align:center;">' +
-      '<div style="font-size:28px;margin-bottom:6px;">' + (revealed && cardInfo ? cardInfo.e : done ? '✅' : '❓') + '</div>' +
-      '<div style="font-size:10px;color:' + (done ? '#00FF88' : revealed ? '#FFD700' : 'rgba(255,255,255,0.3)') + ';font-weight:700;">' + (revealed && cardInfo ? cardInfo.name : done ? 'Done' : '???') + '</div>' +
-      '<div style="font-size:18px;margin-top:6px;">' + (done ? '✅' : revealed ? '🔓' : '🔒') + '</div>' +
+    return '<div style="background:' + (done ? 'rgba(0,255,136,0.1)' : 'rgba(255,255,255,0.04)') + ';border:1px solid ' + (done ? 'rgba(0,255,136,0.4)' : 'rgba(255,255,255,0.08)') + ';border-radius:14px;padding:14px 8px;text-align:center;">' +
+      '<div style="font-size:28px;margin-bottom:6px;">' + (done ? (cardInfo ? cardInfo.e : '✅') : '?') + '</div>' +
+      '<div style="font-size:10px;color:' + (done ? '#00FF88' : 'rgba(255,255,255,0.3)') + ';font-weight:700;">' + (done ? (cardInfo ? cardInfo.name : 'Done') : '???') + '</div>' +
+      '<div style="font-size:18px;margin-top:6px;">' + (done ? '✅' : '🔒') + '</div>' +
       '</div>';
   }).join('');
 
