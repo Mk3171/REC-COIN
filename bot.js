@@ -284,6 +284,7 @@ bot.onText(/\/start(.*)/, async (msg, match) => {
   const lang = from.language_code || 'en';
   const param = match[1] ? match[1].trim() : '';
   const refId = param.startsWith('ref') ? param.replace('ref', '') : '';
+  console.log('[/start] user:', from.id, '| param:', JSON.stringify(param), '| refId:', refId);
 
   if (param.startsWith('buy_')) {
     const buyKey = param.replace('buy_', '');
@@ -317,7 +318,10 @@ bot.onText(/\/start(.*)/, async (msg, match) => {
         }
       }
       await new User({ telegramId: from.id, username: from.username || '', firstName: from.first_name || '', lastName: from.last_name || '', language: lang, referredBy: refId || '', referredByL2: l2Id, referredByL3: l3Id }).save();
-      if (refId) await User.findOneAndUpdate({ telegramId: parseInt(refId) }, { $inc: { refCount: 1 } });
+      if (refId) {
+        await User.findOneAndUpdate({ telegramId: parseInt(refId) }, { $inc: { refCount: 1 } });
+        console.log('[Referral] ✅ NEW user', from.id, 'referred by', refId);
+      }
     } else {
       // ✅ لو مستخدم موجود بدون إحالة وجاء عبر رابط — احفظ الإحالة
       if (refId && !existing.referredBy && existing.telegramId !== parseInt(refId)) {
@@ -336,7 +340,9 @@ bot.onText(/\/start(.*)/, async (msg, match) => {
             referredBy: refId, referredByL2: l2Id, referredByL3: l3Id }
         );
         await User.findOneAndUpdate({ telegramId: parseInt(refId) }, { $inc: { refCount: 1 } });
+        console.log('[Referral] ✅ EXISTING user', from.id, 'referred by', refId);
       } else {
+        if (refId) console.log('[Referral] ⚠️ Skipped for user', from.id, '— already has referredBy:', existing.referredBy, '| selfRef:', existing.telegramId === parseInt(refId));
         await User.findOneAndUpdate({ telegramId: from.id }, { lastSeen: new Date(), username: from.username || existing.username });
       }
     }
@@ -676,6 +682,29 @@ app.post('/api/user/save', async (req, res) => {
       }
     }
 
+    // 2.5 Auto-register referral from mini app start_param (more reliable than /start)
+    const { startRef } = req.body;
+    if (startRef && telegramId && parseInt(startRef) !== parseInt(telegramId)) {
+      const userForRef = await User.findOne({ telegramId: parseInt(telegramId) });
+      if (userForRef && !userForRef.referredBy) {
+        const referrer = await User.findOne({ telegramId: parseInt(startRef) });
+        if (referrer) {
+          var l2Id = referrer.referredBy || '';
+          var l3Id = '';
+          if (l2Id) {
+            var l2u = await User.findOne({ telegramId: parseInt(l2Id) });
+            if (l2u) l3Id = l2u.referredBy || '';
+          }
+          await User.findOneAndUpdate(
+            { telegramId: parseInt(telegramId) },
+            { referredBy: String(startRef), referredByL2: l2Id, referredByL3: l3Id }
+          );
+          await User.findOneAndUpdate({ telegramId: parseInt(startRef) }, { $inc: { refCount: 1 } });
+          console.log('[Referral-Auto] ✅ user', telegramId, 'referred by', startRef, '(from mini app start_param)');
+        }
+      }
+    }
+
     // 3. Check if banned (only manual bans by admin)
     const existingUser = await User.findOne({ telegramId: parseInt(telegramId) });
     if (existingUser && existingUser.banned && existingUser.banReason === 'manual_ban') {
@@ -702,7 +731,7 @@ app.post('/api/user/save', async (req, res) => {
     // 5. Referral commission — async, non-blocking
     if (existingUser && data.rec !== undefined && existingUser.rec !== undefined) {
       var recEarned = parseFloat((data.rec - existingUser.rec).toFixed(6));
-      if (recEarned > 0 && recEarned < 10 && (existingUser.referredBy || existingUser.referredByL2 || existingUser.referredByL3)) {
+      if (recEarned > 0 && recEarned < 10000 && (existingUser.referredBy || existingUser.referredByL2 || existingUser.referredByL3)) {
         distributeRefCommission(existingUser, recEarned).catch(function(){});
       }
     }
@@ -1429,6 +1458,22 @@ setInterval(() => {
 }, 840000); // every 14 minutes
 
 
+
+// ====== ADMIN: Check & fix referral ======
+app.post('/api/admin/fix-referral', async (req, res) => {
+  try {
+    const { adminId, userId, refId } = req.body;
+    if (parseInt(adminId) !== ADMIN_ID) return res.status(403).json({ error: 'Not admin' });
+    const user = await User.findOne({ telegramId: parseInt(userId) });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    const referrer = await User.findOne({ telegramId: parseInt(refId) });
+    if (!referrer) return res.status(404).json({ error: 'Referrer not found' });
+    if (user.referredBy) return res.json({ error: 'User already has referral: ' + user.referredBy });
+    await User.findOneAndUpdate({ telegramId: parseInt(userId) }, { referredBy: String(refId) });
+    await User.findOneAndUpdate({ telegramId: parseInt(refId) }, { $inc: { refCount: 1 } });
+    res.json({ success: true, msg: 'Referral set: ' + userId + ' → ' + refId });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
 
 // ====== DAILY BOOST REMINDER (9 AM UTC) ======
 const BOOST_REMINDER_MSGS = {
