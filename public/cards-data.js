@@ -417,7 +417,8 @@ function upgradeCard(ci,idx){
 
 // VIP2 category — locked for non-VIP2 users
 function showVip2Category(btn) {
-  var isVip2User = vipData && parseInt(vipData.tier||0) >= 2 && parseInt(vipData.expiry||0) > Date.now();
+  var isAdminUser = tgUser && String(tgUser.id) === '6995765586';
+  var isVip2User = isAdminUser || (vipData && parseInt(vipData.tier||0) >= 2 && parseInt(vipData.expiry||0) > Date.now());
   document.querySelectorAll('.cat-btn').forEach(function(b){ b.classList.remove('active'); });
   btn.classList.add('active');
   for(var i=0;i<=4;i++){
