@@ -1,3 +1,19 @@
+function adminResetDiscount() {
+  if(!tgUser || String(tgUser.id) !== '6995765586') return;
+  fetch('/api/admin/reset-discount', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ adminId: tgUser.id, telegramId: tgUser.id })
+  }).then(function(r){ return r.json(); }).then(function(d) {
+    if(d.success) {
+      vipData.discountDate = '';
+      vipData.discountExpiry = 0;
+      showToast('✅ Discount reset!');
+      renderVIPPage(); switchVIPTab(2);
+    }
+  });
+}
+
 function checkPendingVip() {
   try {
     var pending = JSON.parse(localStorage.getItem('pendingVipCheck') || 'null');
@@ -294,6 +310,9 @@ function switchVIPTab(n) {
             }
           })() +
         '</div>' +
+        // Admin reset button (only for admin)
+        (isAdmin ?
+          '<div onclick="adminResetDiscount()" style="background:rgba(255,0,0,0.1);border:1px solid rgba(255,0,0,0.3);border-radius:10px;padding:6px 12px;font-size:10px;color:rgba(255,100,100,0.7);text-align:center;margin-bottom:8px;cursor:pointer;">🔄 Reset Discount (Admin)</div>' : '') +
         // x3 Boost section
         '<div style="background:rgba(0,150,255,0.07);border:1px solid rgba(0,150,255,0.22);border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">' +
           '<div><div style="font-size:12px;font-weight:700;color:#00CFFF;">'+t('vip2BoostTitle')+'</div>' +
