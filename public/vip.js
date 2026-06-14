@@ -470,8 +470,16 @@ function buyVIP(tier) {
       .then(function(r) { return r.json(); })
       .then(function(data) {
         if (data.success) {
+          // Activate VIP in local state
           vipData.tier = data.tier;
           vipData.expiry = data.expiry;
+          vipData.boxes = vipData.boxes || {};
+          // Save to localStorage explicitly
+          try { 
+            var ls = JSON.parse(localStorage.getItem(saveKey) || '{}');
+            ls.vip = { tier: data.tier, expiry: data.expiry, boxes: vipData.boxes };
+            localStorage.setItem(saveKey, JSON.stringify(ls));
+          } catch(e) {}
           if(data.tier === 1) {
             rec += 50;
             showToast(t('vipWelcomeBonus'));
@@ -482,8 +490,24 @@ function buyVIP(tier) {
           if(typeof addXP==='function') addXP(500);
           saveData(true);
           renderVIPPage();
+          if(tier === 2) switchVIPTab(2);
+        } else if (data.error === 'VIP already active') {
+          // VIP already activated — just refresh UI
+          showToast('✅ VIP ' + (tier===1?'I':tier===2?'II':'III') + ' ' + t('vipActivated').replace('👑 ','').replace('{tier}','').trim());
+          loadFromServer(function(sd){
+            if(sd && sd.vip && sd.vip.tier >= tier) {
+              vipData.tier = sd.vip.tier;
+              vipData.expiry = sd.vip.expiry;
+              try {
+                var ls = JSON.parse(localStorage.getItem(saveKey) || '{}');
+                ls.vip = { tier: sd.vip.tier, expiry: sd.vip.expiry, boxes: vipData.boxes || {} };
+                localStorage.setItem(saveKey, JSON.stringify(ls));
+              } catch(e) {}
+              renderVIPPage();
+              if(tier === 2) switchVIPTab(2);
+            }
+          });
         } else if (attempt < 3) {
-          // Retry with longer delay
           var delays = [0, 25000, 55000];
           showToast('⏳ ' + (attempt+1) + '/3 ' + t('vipVerifying'));
           setTimeout(function(){ tryVerify(attempt+1); }, delays[attempt]);
