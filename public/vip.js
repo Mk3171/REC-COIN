@@ -201,7 +201,7 @@ function switchVIPTab(n) {
       );
   } else if(n === 2) {
     var isAdmin = tgUser && String(tgUser.id) === '6995765586';
-    var hasVIP2 = !isAdmin && (vipData && parseInt(vipData.tier||0) >= 2 && parseInt(vipData.expiry||0) > Date.now()); // ADMIN TEST: showing buy button
+    var hasVIP2 = vipData && parseInt(vipData.tier||0) >= 2 && parseInt(vipData.expiry||0) > Date.now();
     content.innerHTML =
       // Membership status or buy button
       (hasVIP2 ?
