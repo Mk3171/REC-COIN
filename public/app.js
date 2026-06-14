@@ -1178,8 +1178,9 @@ function loadAndInit() {
     // Always sync VIP from server (critical for membership status)
     loadFromServer(function(serverData) {
       if(!serverData) return;
-      // Sync VIP tier/expiry only — keep local daily state (boxes, boost, refill)
+      // Sync VIP tier/expiry — always trust server
       if(serverData.vip && parseInt(serverData.vip.tier||0) > 0) {
+        var prevTier = vipData.tier || 0;
         vipData.tier = serverData.vip.tier;
         vipData.expiry = serverData.vip.expiry;
         // Merge boxes only if local doesn't have today's entry
@@ -1190,6 +1191,15 @@ function loadAndInit() {
               vipData.boxes[k] = serverData.vip.boxes[k];
             }
           });
+        }
+        // If VIP page is open and tier changed, refresh it
+        if(prevTier !== vipData.tier && typeof renderVIPPage === 'function') {
+          var vipPageEl = document.getElementById('vipPageContent');
+          if(vipPageEl && vipPageEl.offsetParent !== null) {
+            renderVIPPage();
+            if(vipData.tier === 2 && typeof switchVIPTab === 'function') switchVIPTab(2);
+            else if(typeof switchVIPTab === 'function') switchVIPTab(1);
+          }
         }
       }
       // ✅ Sync rec from server if server has more (block rewards added server-side)
