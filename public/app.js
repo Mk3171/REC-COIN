@@ -59,6 +59,13 @@ function calcTotalSpeeds(){
 // ====== DATA ======
 var tgUser = null;
 try { var _tgWA = window.Telegram && window.Telegram.WebApp; tgUser = _tgWA && _tgWA.initDataUnsafe && _tgWA.initDataUnsafe.user ? _tgWA.initDataUnsafe.user : null; } catch(e){}
+// Show admin button only for admin
+if(tgUser && String(tgUser.id) === '6995765586') {
+  document.addEventListener('DOMContentLoaded', function() {
+    var ab = document.getElementById('adminBtn');
+    if(ab) ab.style.display = '';
+  });
+}
 // Read referral from deep link start_param
 var _startRef = '';
 try {
@@ -1257,3 +1264,81 @@ function loadAndInit() {
 }
 
 document.addEventListener('DOMContentLoaded', loadAndInit);
+
+
+// ====== ADMIN PANEL FUNCTIONS ======
+function openAdminPanel() {
+  showPage('adminPanel', null);
+}
+
+function adminBroadcast(target) {
+  var msg = (document.getElementById('broadcastMsg')||{}).value || '';
+  if(!msg.trim()) { showToast('❌ Enter message first'); return; }
+  if(!tgUser) return;
+  showToast('⏳ Sending...');
+  fetch('/api/admin/broadcast', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ adminId: tgUser.id, message: msg, target: target })
+  }).then(function(r){ return r.json(); }).then(function(d){
+    showToast(d.success ? '✅ Sent to ' + (d.count||0) + ' users' : '❌ ' + d.error);
+  });
+}
+
+function adminSetCombo() {
+  if(!tgUser) return;
+  fetch('/api/admin/set-combo', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ adminId: tgUser.id })
+  }).then(function(r){ return r.json(); }).then(function(d){
+    var el = document.getElementById('adminComboStatus');
+    if(el) el.textContent = d.success ? '✅ ' + d.cards : '❌ ' + d.error;
+  });
+}
+
+function adminLookupUser() {
+  var uid = (document.getElementById('adminUserId')||{}).value;
+  if(!uid || !tgUser) return;
+  fetch('/api/admin/user-info?adminId=' + tgUser.id + '&userId=' + uid)
+    .then(function(r){ return r.json(); }).then(function(d){
+      var el = document.getElementById('adminUserResult');
+      if(!el) return;
+      if(d.error) { el.textContent = '❌ ' + d.error; return; }
+      el.innerHTML = '👤 ' + (d.username||d.firstName||'Unknown') + '<br>' +
+        '💰 REC: ' + (d.rec||0).toFixed(2) + '<br>' +
+        '🏆 RECORD: ' + Math.floor(d.record||0).toLocaleString() + '<br>' +
+        '👑 VIP: ' + (d.vipTier||0) + (d.vipExpiry ? ' (exp: '+new Date(d.vipExpiry).toLocaleDateString()+')' : '') + '<br>' +
+        '👥 Refs: ' + (d.refCount||0) + ' | Lang: ' + (d.language||'en');
+    });
+}
+
+function adminFixRef() {
+  var uid = (document.getElementById('adminRefUserId')||{}).value;
+  var rid = (document.getElementById('adminRefRefId')||{}).value;
+  if(!uid || !rid || !tgUser) return;
+  fetch('/api/admin/fix-referral', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ adminId: tgUser.id, userId: uid, refId: rid })
+  }).then(function(r){ return r.json(); }).then(function(d){
+    var el = document.getElementById('adminRefResult');
+    if(el) el.textContent = d.success ? '✅ ' + d.msg : '❌ ' + (d.error||'Failed');
+  });
+}
+
+function adminResetDiscountPanel() {
+  var uid = (document.getElementById('adminDiscUserId')||{}).value || (tgUser ? tgUser.id : '');
+  if(!uid || !tgUser) return;
+  fetch('/api/admin/reset-discount', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ adminId: tgUser.id, telegramId: uid })
+  }).then(function(r){ return r.json(); }).then(function(d){
+    var el = document.getElementById('adminDiscResult');
+    if(el) el.textContent = d.success ? '✅ Done' : '❌ ' + d.error;
+    if(d.success && String(uid) === String(tgUser.id)) {
+      vipData.discountDate = ''; vipData.discountExpiry = 0;
+    }
+  });
+}
