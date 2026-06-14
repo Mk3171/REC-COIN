@@ -275,6 +275,25 @@ function switchVIPTab(n) {
       // Membership status or buy button
       (hasVIP2 ?
         // Active membership status
+        // 20% Discount section
+        '<div style="background:rgba(255,165,0,0.07);border:1px solid rgba(255,165,0,0.22);border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">' +
+          '<div>' +
+            '<div style="font-size:12px;font-weight:700;color:#FFA500;">'+t('vip2DiscountTitle')+'</div>' +
+            '<div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px;">'+t('vip2DiscountOnce')+'</div>' +
+          '</div>' +
+          (function(){
+            var dActive = vipData.discountExpiry && vipData.discountExpiry > Date.now();
+            var dUsed = vipData.discountDate === getTodayStr() && !dActive;
+            if(dActive) {
+              var secsLeft = Math.ceil((vipData.discountExpiry - Date.now())/1000);
+              return '<div style="background:rgba(255,165,0,0.15);border:1px solid rgba(255,165,0,0.4);border-radius:10px;padding:6px 12px;font-size:11px;color:#FFA500;">⏱ '+secsLeft+'s</div>';
+            } else if(dUsed) {
+              return '<div style="background:rgba(255,165,0,0.1);border:1px solid rgba(255,165,0,0.2);border-radius:10px;padding:6px 12px;font-size:11px;color:rgba(255,165,0,0.5);">'+t('vipBoostActivated')+'</div>';
+            } else {
+              return '<div onclick="useVIP2Discount()" style="background:linear-gradient(135deg,#7a3d00,#FF8C00);border-radius:10px;padding:7px 16px;font-size:11px;color:#fff;font-weight:700;cursor:pointer;">'+t('vip2DiscountActivate')+'</div>';
+            }
+          })() +
+        '</div>' +
         // x3 Boost section
         '<div style="background:rgba(0,150,255,0.07);border:1px solid rgba(0,150,255,0.22);border-radius:14px;padding:12px 14px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;">' +
           '<div><div style="font-size:12px;font-weight:700;color:#00CFFF;">'+t('vip2BoostTitle')+'</div>' +
@@ -635,6 +654,35 @@ function useVIPBoost() {
   saveData(true);
   showToast(t('vipBoostActivated2'));
   renderVIPPage();
+}
+
+function useVIP2Discount() {
+  var isAdmin = tgUser && String(tgUser.id) === '6995765586';
+  if(!isAdmin && (!vipData || parseInt(vipData.tier||0) < 2 || parseInt(vipData.expiry||0) <= Date.now())) return;
+  var today = getTodayStr();
+  if(vipData.discountDate === today && (!vipData.discountExpiry || vipData.discountExpiry < Date.now())) {
+    showToast(t('vip2DiscountUsed'));
+    return;
+  }
+  vipData.discountDate = today;
+  vipData.discountExpiry = Date.now() + 2 * 60 * 1000; // 2 minutes
+  saveData(true);
+  showToast(t('vip2DiscountActivated'));
+  renderVIPPage();
+  switchVIPTab(2);
+  // Auto-refresh countdown every second
+  var discTimer = setInterval(function() {
+    if(!vipData.discountExpiry || vipData.discountExpiry < Date.now()) {
+      clearInterval(discTimer);
+      if(typeof renderVIPPage === 'function') { renderVIPPage(); switchVIPTab(2); }
+    } else {
+      var el = document.querySelector('.disc-timer');
+      if(el) {
+        var s = Math.ceil((vipData.discountExpiry - Date.now())/1000);
+        el.textContent = '⏱ ' + s + 's';
+      }
+    }
+  }, 1000);
 }
 
 function useVIP2Boost() {
