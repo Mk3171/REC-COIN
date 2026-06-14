@@ -18,6 +18,25 @@
   from { transform: translateX(100%); }
   to { transform: translateX(0); }
 }
+.combo-slot {
+  flex: 1; max-width: 100px;
+  background: rgba(255,200,0,0.06);
+  border: 1px solid rgba(255,200,0,0.2);
+  border-radius: 12px;
+  padding: 8px 4px;
+  text-align: center;
+  min-height: 80px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  transition: border-color 0.3s;
+}
+.combo-slot.found {
+  border-color: rgba(0,255,136,0.5);
+  background: rgba(0,255,136,0.06);
+}
 </style>
 <script>
 function openSideMenu(){
@@ -169,11 +188,7 @@ function closeSideMenu(){
               <span class="sa-icon">📺</span>
               <span class="sa-label" style="color:#00FF88;">Ads</span>
             </div>
-            <div class="side-action-btn" onclick="openCombo()" style="border-color:rgba(255,200,0,0.4);position:relative;" id="comboBtnWrap">
-              <span class="sa-icon">🎯</span>
-              <span class="sa-label" style="color:#FFD700;" data-i18n="sideCombo">Combo</span>
-              <div id="comboDotBadge" style="display:none;position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:#FF4444;"></div>
-            </div>
+
             <div class="side-action-btn" onclick="openUpgrade()" style="border-color:rgba(255,100,50,0.25);">
               <span class="sa-icon">⬆️</span>
               <span class="sa-label" style="color:#FF8844;" data-i18n="sideUpgrade">Upgrade</span>
@@ -254,6 +269,21 @@ function closeSideMenu(){
           <div style="font-size:10px;color:rgba(255,255,255,0.5);">Upgrade now to save RECORD</div>
         </div>
         <div id="discountBannerTimer" style="font-size:18px;font-weight:900;color:#FFD700;font-family:Orbitron,monospace;">2:00</div>
+      </div>
+      <!-- Daily Combo Section -->
+      <div id="dailyComboSection" style="background:rgba(255,200,0,0.06);border:1px solid rgba(255,200,0,0.2);border-radius:14px;padding:12px 14px;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <div style="font-size:13px;font-weight:700;color:#FFD700;">🎯 <span data-i18n="dailyComboTitle">Daily Combo</span></div>
+          <div style="font-size:10px;color:rgba(255,255,255,0.4);">+5 REC</div>
+        </div>
+        <div id="comboCardsRow" style="display:flex;gap:8px;justify-content:center;">
+          <div class="combo-slot" id="comboSlot0"></div>
+          <div class="combo-slot" id="comboSlot1"></div>
+          <div class="combo-slot" id="comboSlot2"></div>
+        </div>
+        <div id="comboClaimRow" style="margin-top:10px;display:none;">
+          <button onclick="claimComboReward()" style="width:100%;background:linear-gradient(135deg,#CC8800,#FFD700);border:none;border-radius:10px;padding:8px;color:#000;font-weight:700;font-size:12px;cursor:pointer;">🎁 Claim +5 REC</button>
+        </div>
       </div>
       <!-- RECORD counter above tabs -->
       <div style="text-align:center;margin-bottom:12px;">
