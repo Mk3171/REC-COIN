@@ -715,12 +715,14 @@ function useVIP2Discount() {
         var bt = document.getElementById('discountBannerTimer');
         if(bt) bt.textContent = timeStr;
       }
-      if(typeof updateUI === 'function') updateUI();
+      // Refresh all card buttons to show discount prices
+      if(typeof refreshAllCardsDiscount === 'function') refreshAllCardsDiscount();
     }
   }, 1000);
-  // Immediately show banner if cards page is open
+  // Immediately show banner and refresh cards
   var banner0 = document.getElementById('discountBanner');
   if(banner0) banner0.style.display = 'flex';
+  if(typeof refreshAllCardsDiscount === 'function') refreshAllCardsDiscount();
 }
 
 function useVIP2Boost() {
