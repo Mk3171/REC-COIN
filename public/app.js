@@ -1192,6 +1192,8 @@ function loadAndInit() {
             }
           });
         }
+        // Resume discount timer if still active after reload
+        if(typeof resumeDiscountTimer === 'function') setTimeout(resumeDiscountTimer, 200);
         // If VIP page is open and tier changed, refresh it
         if(prevTier !== vipData.tier && typeof renderVIPPage === 'function') {
           var vipPageEl = document.getElementById('vipPageContent');
