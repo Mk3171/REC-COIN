@@ -672,21 +672,36 @@ function useVIP2Discount() {
   switchVIPTab(2);
   // Auto-refresh countdown every second
   var discTimer = setInterval(function() {
-    if(!vipData.discountExpiry || vipData.discountExpiry < Date.now()) {
+    var now = Date.now();
+    if(!vipData.discountExpiry || vipData.discountExpiry < now) {
       clearInterval(discTimer);
+      vipData.discountExpiry = 0;
+      // Hide banner
+      var banner = document.getElementById('discountBanner');
+      if(banner) banner.style.display = 'none';
       renderVIPPage(); switchVIPTab(2);
       if(typeof updateUI === 'function') updateUI();
     } else {
-      // Update timer in VIP tab
+      var secsLeft = Math.ceil((vipData.discountExpiry - now)/1000);
+      var mins = Math.floor(secsLeft/60);
+      var secs = secsLeft % 60;
+      var timeStr = mins + ':' + (secs < 10 ? '0' : '') + secs;
+      // Update VIP tab timer
       var el = document.querySelector('.disc-timer');
-      if(el) {
-        var s = Math.ceil((vipData.discountExpiry - Date.now())/1000);
-        el.textContent = '⏱ ' + s + 's';
+      if(el) el.textContent = '⏱ ' + secsLeft + 's';
+      // Show and update banner on cards page
+      var banner = document.getElementById('discountBanner');
+      if(banner) {
+        banner.style.display = 'flex';
+        var bt = document.getElementById('discountBannerTimer');
+        if(bt) bt.textContent = timeStr;
       }
-      // Refresh card prices every 5s to show discount
       if(typeof updateUI === 'function') updateUI();
     }
   }, 1000);
+  // Immediately show banner if cards page is open
+  var banner0 = document.getElementById('discountBanner');
+  if(banner0) banner0.style.display = 'flex';
 }
 
 function useVIP2Boost() {
