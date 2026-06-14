@@ -286,7 +286,7 @@ function switchVIPTab(n) {
             var dUsed = vipData.discountDate === getTodayStr() && !dActive;
             if(dActive) {
               var secsLeft = Math.ceil((vipData.discountExpiry - Date.now())/1000);
-              return '<div style="background:rgba(255,165,0,0.15);border:1px solid rgba(255,165,0,0.4);border-radius:10px;padding:6px 12px;font-size:11px;color:#FFA500;">⏱ '+secsLeft+'s</div>';
+              return '<div class="disc-timer" style="background:rgba(255,165,0,0.15);border:1px solid rgba(255,165,0,0.4);border-radius:10px;padding:6px 12px;font-size:11px;color:#FFA500;">⏱ '+secsLeft+'s</div>';
             } else if(dUsed) {
               return '<div style="background:rgba(255,165,0,0.1);border:1px solid rgba(255,165,0,0.2);border-radius:10px;padding:6px 12px;font-size:11px;color:rgba(255,165,0,0.5);">'+t('vipBoostActivated')+'</div>';
             } else {
@@ -674,13 +674,17 @@ function useVIP2Discount() {
   var discTimer = setInterval(function() {
     if(!vipData.discountExpiry || vipData.discountExpiry < Date.now()) {
       clearInterval(discTimer);
-      if(typeof renderVIPPage === 'function') { renderVIPPage(); switchVIPTab(2); }
+      renderVIPPage(); switchVIPTab(2);
+      if(typeof updateUI === 'function') updateUI();
     } else {
+      // Update timer in VIP tab
       var el = document.querySelector('.disc-timer');
       if(el) {
         var s = Math.ceil((vipData.discountExpiry - Date.now())/1000);
         el.textContent = '⏱ ' + s + 's';
       }
+      // Refresh card prices every 5s to show discount
+      if(typeof updateUI === 'function') updateUI();
     }
   }, 1000);
 }
