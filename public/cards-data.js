@@ -778,3 +778,68 @@ function refreshAllCardsDiscount() {
     updateCardGridItem(key);
   });
 }
+
+// ====== DAILY COMBO IN CARDS PAGE ======
+var _comboData = null;
+
+function loadComboInCards() {
+  if(!tgUser) return;
+  fetch('/api/combo/today/' + tgUser.id)
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      _comboData = d;
+      renderComboInCards();
+    }).catch(function(){});
+}
+
+function renderComboInCards() {
+  if(!_comboData) return;
+  var isVip1 = vipData && parseInt(vipData.tier||0) >= 1 && parseInt(vipData.expiry||0) > Date.now();
+  var isAdmin = tgUser && String(tgUser.id) === '6995765586';
+  var showNames = isVip1 || isAdmin;
+  var cards = _comboData.cards || [{},{},{}];
+  var done = _comboData.progress || [];
+  var claimed = _comboData.rewardClaimed;
+
+  for(var i=0; i<3; i++) {
+    var slot = document.getElementById('comboSlot'+i);
+    if(!slot) continue;
+    var card = cards[i];
+    var isDone = done.indexOf(card.key) !== -1;
+    slot.className = 'combo-slot' + (isDone ? ' found' : '');
+
+    if(!card.key) {
+      slot.innerHTML = '<div style="font-size:24px;">🔒</div><div style="font-size:9px;color:rgba(255,255,255,0.3);">???</div>';
+    } else if(showNames && card.name) {
+      slot.innerHTML =
+        '<div style="font-size:22px;">' + (isDone ? '✅' : card.emoji||'🃏') + '</div>' +
+        '<div style="font-size:8px;color:' + (isDone?'#00FF88':'#FFD700') + ';margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:80px;">' + card.name + '</div>' +
+        (isDone ? '' : '<div style="font-size:8px;color:rgba(255,255,255,0.3);">Upgrade!</div>');
+    } else {
+      slot.innerHTML =
+        '<div style="font-size:24px;">' + (isDone ? '✅' : '🔒') + '</div>' +
+        '<div style="font-size:9px;color:rgba(255,255,255,0.3);">???</div>';
+    }
+  }
+
+  // Show claim button if all 3 found and not claimed
+  var claimRow = document.getElementById('comboClaimRow');
+  if(claimRow) claimRow.style.display = (done.length >= 3 && !claimed) ? 'block' : 'none';
+}
+
+function claimComboReward() {
+  if(!tgUser || !_comboData) return;
+  fetch('/api/combo/claim', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ telegramId: tgUser.id })
+  }).then(function(r){ return r.json(); }).then(function(d){
+    if(d.success) {
+      rec += d.reward || 5;
+      showToast('🎁 +' + (d.reward||5) + ' REC!');
+      _comboData.rewardClaimed = true;
+      renderComboInCards();
+      if(typeof saveData === 'function') saveData(true);
+    }
+  });
+}
