@@ -1507,6 +1507,17 @@ const BOOST_REMINDER_MSGS = {
     vi: '⚡ Kích hoạt boost ×1.5 REC hôm nay! Mở bot và nhấn Kích hoạt.',
     zh: '⚡ 今天激活×1.5 REC加速！打开机器人并点击激活。',
   },
+  vip2discount: {
+    ar: '🏷️ فعّل خصم 20% على ترقية البطاقات اليوم! دقيقتان فقط — افتح البوت واضغط تفعيل.',
+    en: '🏷️ Activate your 20% card upgrade discount today! 2 minutes only — open the bot and press Activate.',
+    ru: '🏷️ Активируй скидку 20% на улучшение карт сегодня! Только 2 минуты.',
+    uk: '🏷️ Активуй знижку 20% на покращення карт сьогодні! Тільки 2 хвилини.',
+    pt: '🏷️ Ative seu desconto de 20% em upgrades hoje! Apenas 2 minutos.',
+    es: '🏷️ ¡Activa tu descuento del 20% en mejoras hoy! Solo 2 minutos.',
+    tr: '🏷️ Bugün kart yükseltmede %20 indirimi etkinleştir! Sadece 2 dakika.',
+    vi: '🏷️ Kích hoạt giảm 20% nâng cấp thẻ hôm nay! Chỉ 2 phút.',
+    zh: '🏷️ 今天激活卡片升级8折优惠！仅2分钟。',
+  },
   vip2: {
     ar: '🔥 فعّل مضاعفة ×3 لكل البطاقات اليوم! افتح البوت واضغط تفعيل.',
     en: '🔥 Activate your ×3 all cards boost today! Open the bot and press Activate.',
@@ -1543,6 +1554,10 @@ async function sendDailyBoostReminders() {
           const msg = BOOST_REMINDER_MSGS.vip2[lang] || BOOST_REMINDER_MSGS.vip2.en;
           await bot.sendMessage(user.telegramId, msg);
           sent2++;
+          await new Promise(r => setTimeout(r, 80));
+          // Also send discount reminder
+          const msgD = BOOST_REMINDER_MSGS.vip2discount[lang] || BOOST_REMINDER_MSGS.vip2discount.en;
+          await bot.sendMessage(user.telegramId, msgD);
           await new Promise(r => setTimeout(r, 80));
         }
       } catch(e) { /* user blocked bot — ignore */ }
