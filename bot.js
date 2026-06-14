@@ -588,20 +588,27 @@ app.post('/api/vip/verify', async (req, res) => {
     // Notify user in their language
     const vipTierName = tier === 1 ? 'I' : tier === 2 ? 'II' : 'III';
     const expiryDate = new Date(expiry).toLocaleDateString();
-    const vip2Extra = tier === 2 ?
-      '\n\n💎 تم فتح 20 بطاقة VIP حصرية!\n⚡ كل بطاقة تصل إلى 5 REC/s\n🏆 أقصى إنتاج: 100 REC/s' : '';
-    const vip2ExtraEn = tier === 2 ?
-      '\n\n💎 20 Exclusive VIP Cards unlocked!\n⚡ Each card reaches 5 REC/s at max\n🏆 Max output: 100 REC/s' : '';
+    const vip2Extras = tier === 2 ? {
+      ar: '\n\n💎 تم فتح 20 بطاقة VIP حصرية!\n⚡ كل بطاقة تصل إلى 5 REC/s\n🏆 أقصى إنتاج: 100 REC/s',
+      en: '\n\n💎 20 Exclusive VIP Cards unlocked!\n⚡ Each card reaches 5 REC/s at max\n🏆 Max output: 100 REC/s',
+      ru: '\n\n💎 20 эксклюзивных VIP карт разблокировано!\n⚡ Каждая карта до 5 REC/s на Max\n🏆 Макс. добыча: 100 REC/s',
+      uk: '\n\n💎 20 ексклюзивних VIP карт розблоковано!\n⚡ Кожна карта до 5 REC/s на Max\n🏆 Макс. видобуток: 100 REC/s',
+      pt: '\n\n💎 20 cartas VIP exclusivas desbloqueadas!\n⚡ Cada carta chega a 5 REC/s no Max\n🏆 Produção máx: 100 REC/s',
+      es: '\n\n💎 ¡20 cartas VIP exclusivas desbloqueadas!\n⚡ Cada carta llega a 5 REC/s en Max\n🏆 Producción máx: 100 REC/s',
+      tr: '\n\n💎 20 özel VIP kart açıldı!\n⚡ Her kart Max seviyede 5 REC/s\n🏆 Maks. üretim: 100 REC/s',
+      vi: '\n\n💎 20 thẻ VIP độc quyền đã mở khóa!\n⚡ Mỗi thẻ đạt 5 REC/s ở cấp Max\n🏆 Sản lượng tối đa: 100 REC/s',
+      zh: '\n\n💎 20张独家VIP卡已解锁！\n⚡ 每张卡Max时产出5 REC/s\n🏆 最大产出: 100 REC/s',
+    } : {};
     const vipMsgs = {
-      ar: `👑 شكراً لك! تم تفعيل VIP ${vipTierName} بنجاح!\n⏳ تنتهي في: ${expiryDate}${vip2Extra}`,
-      en: `👑 Thank you! VIP ${vipTierName} activated successfully!\n⏳ Expires: ${expiryDate}${vip2ExtraEn}`,
-      ru: `👑 Спасибо! VIP ${vipTierName} успешно активирован!\n⏳ Истекает: ${expiryDate}${vip2ExtraEn}`,
-      uk: `👑 Дякуємо! VIP ${vipTierName} успішно активовано!\n⏳ Закінчується: ${expiryDate}${vip2ExtraEn}`,
-      pt: `👑 Obrigado! VIP ${vipTierName} ativado!\n⏳ Expira: ${expiryDate}${vip2ExtraEn}`,
-      es: `👑 ¡Gracias! VIP ${vipTierName} activado!\n⏳ Expira: ${expiryDate}${vip2ExtraEn}`,
-      tr: `👑 Teşekkürler! VIP ${vipTierName} etkinleştirildi!\n⏳ Bitiş: ${expiryDate}${vip2ExtraEn}`,
-      vi: `👑 Cảm ơn! VIP ${vipTierName} đã được kích hoạt!\n⏳ Hết hạn: ${expiryDate}${vip2ExtraEn}`,
-      zh: `👑 谢谢！VIP ${vipTierName} 激活成功！\n⏳ 到期：${expiryDate}${vip2ExtraEn}`
+      ar: `👑 شكراً لك! تم تفعيل VIP ${vipTierName} بنجاح!\n⏳ تنتهي في: ${expiryDate}${vip2Extras.ar||''}`,
+      en: `👑 Thank you! VIP ${vipTierName} activated successfully!\n⏳ Expires: ${expiryDate}${vip2Extras.en||''}`,
+      ru: `👑 Спасибо! VIP ${vipTierName} успешно активирован!\n⏳ Истекает: ${expiryDate}${vip2Extras.ru||''}`,
+      uk: `👑 Дякуємо! VIP ${vipTierName} успішно активовано!\n⏳ Закінчується: ${expiryDate}${vip2Extras.uk||''}`,
+      pt: `👑 Obrigado! VIP ${vipTierName} ativado!\n⏳ Expira: ${expiryDate}${vip2Extras.pt||''}`,
+      es: `👑 ¡Gracias! VIP ${vipTierName} activado!\n⏳ Expira: ${expiryDate}${vip2Extras.es||''}`,
+      tr: `👑 Teşekkürler! VIP ${vipTierName} etkinleştirildi!\n⏳ Bitiş: ${expiryDate}${vip2Extras.tr||''}`,
+      vi: `👑 Cảm ơn! VIP ${vipTierName} đã được kích hoạt!\n⏳ Hết hạn: ${expiryDate}${vip2Extras.vi||''}`,
+      zh: `👑 谢谢！VIP ${vipTierName} 激活成功！\n⏳ 到期：${expiryDate}${vip2Extras.zh||''}`
     };
     const userLang = user.language || 'en';
     const msg = vipMsgs[userLang] || vipMsgs.en;
