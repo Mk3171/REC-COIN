@@ -189,6 +189,7 @@ function saveToServer(){
         recordMiningSpeed: recordPerSec,
         refillData: window.refillData,
         vip: vipData,
+        language: (typeof currentLang !== 'undefined' ? currentLang : 'en'),
         playerXP: (typeof playerXP!=='undefined'?playerXP:0),
         claimedLevels: (typeof claimedLevels!=='undefined'?claimedLevels:{})
       })
