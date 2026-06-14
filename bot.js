@@ -126,7 +126,7 @@ const UserSchema = new mongoose.Schema({
   referredByL3:    { type: String, default: '' },
   totalRefCommission: { type: Number, default: 0 },
   comboProgress:   { type: Object, default: { date: '', done: [], claimed: false } },
-  weeklyPrize:     { type: Object, default: { rank: 0, amount: 0, week: '', claimed: false } }
+  weeklyPrize:     { type: Object, default: { rank: 0, amount: 0, week: '', claimed: false } },
   vip:             { type: Object, default: { tier: 0, expiry: 0, boxes: {}, txId: '', boostDate: '', boost2Date: '' } }
 });
 
