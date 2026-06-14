@@ -126,6 +126,7 @@ const UserSchema = new mongoose.Schema({
   referredByL3:    { type: String, default: '' },
   totalRefCommission: { type: Number, default: 0 },
   comboProgress:   { type: Object, default: { date: '', done: [], claimed: false } },
+  weeklyPrize:     { type: Object, default: { rank: 0, amount: 0, week: '', claimed: false } }
   vip:             { type: Object, default: { tier: 0, expiry: 0, boxes: {}, txId: '', boostDate: '', boost2Date: '' } }
 });
 
@@ -1575,6 +1576,114 @@ setInterval(function() {
   if(now.getUTCHours()===0 && now.getUTCMinutes()===0) pickAndSetDailyCombo();
   if(now.getUTCHours()===9 && now.getUTCMinutes()===0) sendDailyBoostReminders();
 }, 60000);
+
+// ====== WEEKLY PRIZES SYSTEM ======
+function getWeeklyPrize(rank) {
+  if(rank === 1) return 250;
+  if(rank === 2) return 150;
+  if(rank === 3) return 100;
+  if(rank === 4) return 50;
+  if(rank >= 5 && rank <= 10) return Math.floor(200 / 6);  // ~33
+  if(rank >= 11 && rank <= 50) return Math.floor(150 / 40); // ~3
+  if(rank >= 51 && rank <= 100) return 3;
+  return 0;
+}
+
+function getCurrentWeek() {
+  var d = new Date();
+  var jan1 = new Date(d.getFullYear(), 0, 1);
+  return d.getFullYear() + '-W' + Math.ceil(((d - jan1) / 86400000 + jan1.getDay() + 1) / 7);
+}
+
+// GET top 100 with prize amounts (admin view)
+app.get('/api/admin/leaderboard-prizes', async (req, res) => {
+  try {
+    if(parseInt(req.query.adminId) !== ADMIN_ID) return res.status(403).json({ error: 'Not admin' });
+    var top100 = await User.find({})
+      .sort({ rec: -1 })
+      .limit(100)
+      .select('telegramId username firstName rec weeklyPrize');
+    var week = getCurrentWeek();
+    var result = top100.map(function(u, i) {
+      var rank = i + 1;
+      var prize = getWeeklyPrize(rank);
+      return {
+        rank, telegramId: u.telegramId,
+        name: u.username || u.firstName || 'User',
+        rec: u.rec || 0,
+        prize,
+        alreadyPaid: u.weeklyPrize && u.weeklyPrize.week === week && u.weeklyPrize.amount > 0
+      };
+    });
+    res.json({ success: true, week, users: result });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// POST distribute prizes to top 100
+app.post('/api/admin/distribute-prizes', async (req, res) => {
+  try {
+    if(parseInt(req.body.adminId) !== ADMIN_ID) return res.status(403).json({ error: 'Not admin' });
+    var week = getCurrentWeek();
+    var top100 = await User.find({}).sort({ rec: -1 }).limit(100).select('telegramId username firstName language weeklyPrize');
+    var distributed = 0;
+    for(var i = 0; i < top100.length; i++) {
+      var u = top100[i];
+      var rank = i + 1;
+      var prize = getWeeklyPrize(rank);
+      if(prize <= 0) continue;
+      // Set prize (overwrite if re-distributing)
+      await User.findOneAndUpdate(
+        { telegramId: u.telegramId },
+        { weeklyPrize: { rank, amount: prize, week, claimed: false } }
+      );
+      // Send Telegram notification
+      try {
+        var lang = u.language || 'en';
+        var msgs = {
+          ar: '🏆 جائزتك الأسبوعية جاهزة!\n\n🥇 مركزك: #' + rank + '\n💰 جائزتك: +' + prize + ' REC\n\nافتح البوت واضغط استلام!',
+          en: '🏆 Your weekly reward is ready!\n\n🥇 Your rank: #' + rank + '\n💰 Your prize: +' + prize + ' REC\n\nOpen the bot and press Claim!',
+          ru: '🏆 Ваша еженедельная награда готова!\n\n🥇 Ваш ранг: #' + rank + '\n💰 Приз: +' + prize + ' REC\n\nОткройте бот и нажмите Получить!',
+        };
+        var msg = msgs[lang] || msgs.en;
+        await bot.sendMessage(u.telegramId, msg);
+        await new Promise(r => setTimeout(r, 80));
+      } catch(e) {}
+      distributed++;
+    }
+    res.json({ success: true, distributed, week });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// POST claim weekly prize
+app.post('/api/prizes/claim', async (req, res) => {
+  try {
+    var { telegramId } = req.body;
+    var user = await User.findOne({ telegramId: parseInt(telegramId) });
+    if(!user) return res.status(404).json({ error: 'User not found' });
+    if(!user.weeklyPrize || user.weeklyPrize.claimed || !user.weeklyPrize.amount)
+      return res.json({ success: false, error: 'No prize to claim' });
+    var prize = user.weeklyPrize.amount;
+    // Add to REC balance
+    await User.findOneAndUpdate(
+      { telegramId: parseInt(telegramId) },
+      {
+        $inc: { rec: prize },
+        'weeklyPrize.claimed': true
+      }
+    );
+    res.json({ success: true, prize, rank: user.weeklyPrize.rank });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// GET check unclaimed prize
+app.get('/api/prizes/pending/:telegramId', async (req, res) => {
+  try {
+    var user = await User.findOne({ telegramId: parseInt(req.params.telegramId) }).select('weeklyPrize');
+    if(!user || !user.weeklyPrize || user.weeklyPrize.claimed || !user.weeklyPrize.amount)
+      return res.json({ hasPrize: false });
+    res.json({ hasPrize: true, rank: user.weeklyPrize.rank, amount: user.weeklyPrize.amount, week: user.weeklyPrize.week });
+  } catch(e) { res.json({ hasPrize: false }); }
+});
 
 // ====== ADMIN: Broadcast message ======
 app.post('/api/admin/broadcast', async (req, res) => {
