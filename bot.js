@@ -521,6 +521,22 @@ app.post('/api/create-invoice', async (req, res) => {
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
+// ====== API: Reset VIP2 discount for testing ======
+app.post('/api/admin/reset-discount', async (req, res) => {
+  try {
+    const { adminId, telegramId } = req.body;
+    if (parseInt(adminId) !== ADMIN_ID) return res.status(403).json({ error: 'Not admin' });
+    const uid = telegramId || adminId;
+    const user = await User.findOne({ telegramId: parseInt(uid) });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+    var vip = user.vip || {};
+    vip.discountDate = '';
+    vip.discountExpiry = 0;
+    await User.findOneAndUpdate({ telegramId: parseInt(uid) }, { vip });
+    res.json({ success: true, msg: 'Discount reset for user ' + uid });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
 // ====== API: VIP STATUS (always fresh from DB) ======
 app.get('/api/vip/status/:telegramId', async (req, res) => {
   try {
