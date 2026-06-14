@@ -180,6 +180,7 @@ function openVIPInfo() {
         t('vip2Feature3')+'<br>' +
         t('vip2Feature4')+'<br>' +
         '🔥 '+t('vip2BoostTitle')+'<br>' +
+        '🏷️ '+t('vip2DiscountTitle')+'<br>' +
         '⚡ '+t('vip2CombinedBoost')+' <b style="color:#FFD700;">×4.5 REC</b> / <b style="color:#00CFFF;">×3 RECORD</b>' +
       '</div>' +
     '</div>' +
