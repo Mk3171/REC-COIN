@@ -1576,6 +1576,53 @@ setInterval(function() {
   if(now.getUTCHours()===9 && now.getUTCMinutes()===0) sendDailyBoostReminders();
 }, 60000);
 
+// ====== ADMIN: Broadcast message ======
+app.post('/api/admin/broadcast', async (req, res) => {
+  try {
+    const { adminId, message, target } = req.body;
+    if(parseInt(adminId) !== ADMIN_ID) return res.status(403).json({ error: 'Not admin' });
+    var query = target === 'vip'
+      ? { 'vip.tier': { $gte: 1 }, 'vip.expiry': { $gt: Date.now() } }
+      : {};
+    var users = await User.find(query).select('telegramId');
+    var count = 0;
+    for(var u of users) {
+      try { await bot.sendMessage(u.telegramId, message); count++; await new Promise(r=>setTimeout(r,50)); } catch(e){}
+    }
+    res.json({ success: true, count });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// ====== ADMIN: Force re-pick daily combo ======
+app.post('/api/admin/set-combo', async (req, res) => {
+  try {
+    const { adminId } = req.body;
+    if(parseInt(adminId) !== ADMIN_ID) return res.status(403).json({ error: 'Not admin' });
+    var today = new Date().toISOString().split('T')[0];
+    await DailyCombo.deleteOne({ date: today });
+    var combo = await pickAndSetDailyCombo();
+    var cards = combo ? combo.cards.map(c=>c.key).join(', ') : 'failed';
+    res.json({ success: !!combo, cards });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// ====== ADMIN: User info ======
+app.get('/api/admin/user-info', async (req, res) => {
+  try {
+    if(parseInt(req.query.adminId) !== ADMIN_ID) return res.status(403).json({ error: 'Not admin' });
+    var user = await User.findOne({ telegramId: parseInt(req.query.userId) })
+      .select('telegramId username firstName rec record vip refCount language');
+    if(!user) return res.status(404).json({ error: 'User not found' });
+    res.json({
+      username: user.username, firstName: user.firstName,
+      rec: user.rec, record: user.record,
+      vipTier: user.vip && user.vip.tier || 0,
+      vipExpiry: user.vip && user.vip.expiry || 0,
+      refCount: user.refCount, language: user.language
+    });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
 // ====== ADMIN: Check & fix referral ======
 app.post('/api/admin/fix-referral', async (req, res) => {
   try {
