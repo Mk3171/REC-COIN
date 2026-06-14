@@ -1076,4 +1076,16 @@ function closeSideMenu(){
 <script src="referral.js?v=1"></script>
 
 
+  <!-- WEEKLY PRIZE POPUP -->
+  <div id="weeklyPrizePopup" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:none;align-items:center;justify-content:center;">
+    <div style="background:linear-gradient(135deg,#1a1200,#332200);border:2px solid rgba(255,215,0,0.5);border-radius:20px;padding:28px 24px;margin:20px;text-align:center;max-width:320px;width:100%;box-shadow:0 0 40px rgba(255,215,0,0.2);">
+      <div style="font-size:48px;margin-bottom:12px;">🏆</div>
+      <div style="font-size:18px;font-weight:900;color:#FFD700;margin-bottom:6px;">Weekly Reward!</div>
+      <div id="prizeRankText" style="font-size:13px;color:rgba(255,255,255,0.6);margin-bottom:16px;"></div>
+      <div id="prizeAmountText" style="font-size:42px;font-weight:900;color:#00FF88;margin-bottom:6px;"></div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:20px;">REC</div>
+      <button onclick="claimWeeklyPrize()" style="width:100%;background:linear-gradient(135deg,#CC8800,#FFD700);border:none;border-radius:12px;padding:12px;color:#000;font-weight:900;font-size:15px;cursor:pointer;">🎁 Claim Reward</button>
+    </div>
+  </div>
+
 </body>
