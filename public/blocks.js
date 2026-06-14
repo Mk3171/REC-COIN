@@ -77,13 +77,13 @@ function showBlockPopup(block) {
     '@keyframes bpulse{0%,100%{box-shadow:0 0 40px rgba(255,0,0,0.4)}50%{box-shadow:0 0 100px rgba(255,0,0,0.8)}}</style>' +
     '<div style="font-size:56px;margin-bottom:10px;">⛏️</div>' +
     '<div style="font-family:Orbitron,sans-serif;font-size:20px;font-weight:900;color:#FF0000;letter-spacing:2px;margin-bottom:4px;">BLOCK FOUND!</div>' +
-    '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:20px;">لقيت بلوك جديد!</div>' +
+    '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:20px;">'+t('blockFoundSub')+'</div>' +
     '<div style="background:rgba(255,0,0,0.08);border:1px solid rgba(255,0,0,0.3);border-radius:12px;padding:8px 16px;display:inline-block;margin-bottom:16px;">' +
       '<span style="font-size:13px;color:rgba(255,255,255,0.4);">🔴 Block #</span>' +
       '<span style="font-size:20px;font-family:Orbitron,monospace;color:#FF4444;font-weight:900;">' + block.blockNumber + '</span>' +
     '</div>' +
     '<div style="background:rgba(0,255,136,0.06);border:1px solid rgba(0,255,136,0.25);border-radius:14px;padding:18px;margin-bottom:22px;">' +
-      '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:6px;">💰 مكافأتك</div>' +
+      '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:6px;">'+t('blockReward')+'</div>' +
       '<div style="font-family:Orbitron,sans-serif;font-size:34px;font-weight:900;color:#00FF88;">+' + block.reward.toLocaleString() + '</div>' +
       '<div style="font-size:13px;color:rgba(0,255,136,0.6);margin-top:2px;">REC</div>' +
     '</div>' +
@@ -93,7 +93,7 @@ function showBlockPopup(block) {
       'font-size:18px;font-weight:900;cursor:pointer;' +
       'font-family:Orbitron,sans-serif;letter-spacing:1px;' +
     '">⚡ COLLECT</button>' +
-    '<div style="font-size:11px;color:rgba(255,255,255,0.2);margin-top:10px;">اضغط Collect لاستلام مكافأتك</div>';
+    '<div style="font-size:11px;color:rgba(255,255,255,0.2);margin-top:10px;">'+t('blockCollectHint')+'</div>';
 
   overlay.appendChild(box);
   document.body.appendChild(overlay);
@@ -105,7 +105,7 @@ function showBlockPopup(block) {
 function collectBlock() {
   if(!_pendingBlock || !window.tgUser) return;
   var btn = document.getElementById('collectBlockBtn');
-  if(btn) { btn.disabled = true; btn.textContent = '⏳ جاري الاستلام...'; }
+  if(btn) { btn.disabled = true; btn.textContent = t('blockCollecting','⏳ Collecting...'); }
 
   fetch('/api/blocks/collect', {
     method: 'POST',
@@ -130,8 +130,8 @@ function collectBlock() {
             '<div style="font-size:56px;margin-bottom:12px;">🎉</div>' +
             '<div style="font-family:Orbitron,sans-serif;font-size:18px;font-weight:900;color:#00FF88;margin-bottom:10px;">' + t('blockCollected','✅ Collected') + '</div>' +
             '<div style="font-size:32px;font-family:Orbitron,sans-serif;color:#00FF88;font-weight:900;margin:12px 0;">+' + _pendingBlock.reward.toLocaleString() + ' REC</div>' +
-            '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:20px;">أضيف لرصيدك ✅</div>' +
-            '<button onclick="document.getElementById(\'blockFoundOverlay\').remove()" style="background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);color:#00FF88;padding:12px 32px;border-radius:12px;cursor:pointer;font-size:14px;">إغلاق ✕</button>' +
+            '<div style="font-size:12px;color:rgba(255,255,255,0.4);margin-bottom:20px;">'+t('blockAddedBalance')+'</div>' +
+            '<button onclick="document.getElementById(\'blockFoundOverlay\').remove()" style="background:rgba(0,255,136,0.1);border:1px solid rgba(0,255,136,0.3);color:#00FF88;padding:12px 32px;border-radius:12px;cursor:pointer;font-size:14px;">'+t('blockClose')+'</button>' +
           '</div>';
       }
       _pendingBlock = null;
@@ -180,7 +180,7 @@ function openBlockHistory() {
       var date = new Date(b.foundAt).toLocaleDateString('ar', { day:'numeric', month:'short', year:'numeric' });
       var status = b.collected
         ? '<span style="color:#00FF88;font-size:11px;">' + t('blockCollected','✅ Collected') + '</span>'
-        : '<span style="color:#FF8800;font-size:11px;cursor:pointer;" onclick="collectBlock()">⏳ اضغط للاستلام</span>';
+        : '<span style="color:#FF8800;font-size:11px;cursor:pointer;" onclick="collectBlock()">'+t('blockPressToClaim')+'</span>';
       return '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:14px 16px;margin-bottom:10px;">' +
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">' +
           '<div style="font-family:Orbitron,monospace;font-size:13px;color:#FF4444;">🔴 Block #' + b.blockNumber + '</div>' +
