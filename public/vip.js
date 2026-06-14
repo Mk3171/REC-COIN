@@ -1,6 +1,75 @@
+function checkPendingVip() {
+  try {
+    var pending = JSON.parse(localStorage.getItem('pendingVipCheck') || 'null');
+    if(!pending || !pending.tier) return;
+    // Only check if within last 20 minutes
+    if(Date.now() - pending.time > 20 * 60 * 1000) {
+      localStorage.removeItem('pendingVipCheck');
+      return;
+    }
+    console.log('[VIP] Pending check found, verifying tier', pending.tier);
+    showToast(t('vipVerifying'));
+    var checkAttempts = 0;
+    function doCheck() {
+      fetch('/api/vip/verify', {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ telegramId: tgUser ? tgUser.id : null, tier: pending.tier })
+      }).then(function(r){ return r.json(); }).then(function(data) {
+        if(data.success) {
+          vipData.tier = data.tier;
+          vipData.expiry = data.expiry;
+          vipData.boxes = vipData.boxes || {};
+          try {
+            localStorage.removeItem('pendingVipCheck');
+            var ls = JSON.parse(localStorage.getItem(saveKey)||'{}');
+            ls.vip = { tier: data.tier, expiry: data.expiry, boxes: vipData.boxes };
+            localStorage.setItem(saveKey, JSON.stringify(ls));
+          } catch(e) {}
+          showToast(t('vipActivated').replace('{tier}', pending.tier===1?'I':pending.tier===2?'II':'III'));
+          if(typeof saveData === 'function') saveData(true);
+          renderVIPPage();
+          if(pending.tier === 2) switchVIPTab(2);
+        } else if(checkAttempts < 2) {
+          checkAttempts++;
+          setTimeout(doCheck, 10000);
+        } else {
+          localStorage.removeItem('pendingVipCheck');
+        }
+      }).catch(function(){ if(checkAttempts < 2){ checkAttempts++; setTimeout(doCheck,15000); } });
+    }
+    setTimeout(doCheck, 3000);
+  } catch(e) {}
+}
+
 function openVIP() {
-  renderVIPPage();
   showPage('vip', null);
+  // Always fetch fresh VIP status from server before rendering
+  if(tgUser) {
+    fetch('/api/vip/status/' + tgUser.id)
+      .then(function(r){ return r.json(); })
+      .then(function(data) {
+        if(data.tier && data.tier > 0) {
+          vipData.tier = data.tier;
+          vipData.expiry = data.expiry;
+          vipData.boxes = data.boxes || vipData.boxes || {};
+          // Update localStorage
+          try {
+            var ls = JSON.parse(localStorage.getItem(saveKey)||'{}');
+            ls.vip = { tier: data.tier, expiry: data.expiry, boxes: vipData.boxes };
+            localStorage.setItem(saveKey, JSON.stringify(ls));
+          } catch(e) {}
+        }
+        renderVIPPage();
+        setTimeout(checkPendingVip, 500);
+      })
+      .catch(function() {
+        renderVIPPage();
+        setTimeout(checkPendingVip, 500);
+      });
+  } else {
+    renderVIPPage();
+  }
   // دايماً حمّل بيانات الكومبو عند فتح VIP
   if(tgUser) {
     fetch('/api/combo/today/' + tgUser.id)
@@ -446,6 +515,14 @@ function buyVIP(tier) {
       amount: nanoAmount
     }]
   }).then(function(result) {
+    // Save pending check to localStorage — survives mini app reload
+    try {
+      localStorage.setItem('pendingVipCheck', JSON.stringify({
+        tier: tier,
+        time: Date.now(),
+        wallet: (tonConnect&&tonConnect.wallet&&tonConnect.wallet.account ? tonConnect.wallet.account.address : '')
+      }));
+    } catch(e) {}
     showToast(t('vipVerifying'));
 
     // Get user wallet address
@@ -488,6 +565,7 @@ function buyVIP(tier) {
             showToast(t('vipActivated').replace('{tier}',tier===1?'I':tier===2?'II':'III'));
           }
           if(typeof addXP==='function') addXP(500);
+          try { localStorage.removeItem('pendingVipCheck'); } catch(e) {}
           saveData(true);
           renderVIPPage();
           if(tier === 2) switchVIPTab(2);
