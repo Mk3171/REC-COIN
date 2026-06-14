@@ -1,3 +1,39 @@
+// Restart discount timer if still active (called on app load / page open)
+function resumeDiscountTimer() {
+  if(!vipData || !vipData.discountExpiry || vipData.discountExpiry < Date.now()) return;
+  // Show banner immediately
+  var banner0 = document.getElementById('discountBanner');
+  if(banner0) banner0.style.display = 'flex';
+  // Restart countdown
+  var discTimer = setInterval(function() {
+    var now = Date.now();
+    if(!vipData.discountExpiry || vipData.discountExpiry < now) {
+      clearInterval(discTimer);
+      vipData.discountExpiry = 0;
+      var banner = document.getElementById('discountBanner');
+      if(banner) banner.style.display = 'none';
+      if(typeof renderVIPPage === 'function') { renderVIPPage(); switchVIPTab(2); }
+      if(typeof refreshAllCardsDiscount === 'function') refreshAllCardsDiscount();
+    } else {
+      var secsLeft = Math.ceil((vipData.discountExpiry - now)/1000);
+      var mins = Math.floor(secsLeft/60);
+      var secs = secsLeft % 60;
+      var timeStr = mins + ':' + (secs < 10 ? '0' : '') + secs;
+      // Update VIP tab
+      var el = document.querySelector('.disc-timer');
+      if(el) el.textContent = '⏱ ' + secsLeft + 's';
+      // Update cards banner
+      var banner = document.getElementById('discountBanner');
+      if(banner) {
+        banner.style.display = 'flex';
+        var bt = document.getElementById('discountBannerTimer');
+        if(bt) bt.textContent = timeStr;
+      }
+      if(typeof refreshAllCardsDiscount === 'function') refreshAllCardsDiscount();
+    }
+  }, 1000);
+}
+
 function adminResetDiscount() {
   if(!tgUser || String(tgUser.id) !== '6995765586') return;
   fetch('/api/admin/reset-discount', {
