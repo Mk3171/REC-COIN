@@ -769,3 +769,12 @@ function getMyMedal(){
   return medals[0];
 }
 
+
+// Refresh all card grid items when discount state changes
+function refreshAllCardsDiscount() {
+  var items = document.querySelectorAll('[id^="citem_"]');
+  items.forEach(function(item) {
+    var key = item.id.replace('citem_', '');
+    updateCardGridItem(key);
+  });
+}
