@@ -226,6 +226,11 @@ function directUpgrade(ci, idx, event) {
   var upg = cardUpgrades[key];
   if(upg && upg.endTime > Date.now()){ showToast(t('toastAlreadyUpgrading')); return; }
   var cost = cardCost(lvl, ci===4);
+  // VIP2 20% discount (2-minute window, non-VIP cards only)
+  var isVip2Active = vipData && parseInt(vipData.tier||0) >= 2 && parseInt(vipData.expiry||0) > Date.now();
+  if(isVip2Active && vipData.discountExpiry && vipData.discountExpiry > Date.now()) {
+    cost = Math.floor(cost * 0.8);
+  }
   if(record < cost){ showToast('⛔ ' + t('toastNotEnoughRecord')); return; }
   record -= cost;
   var wait = cardWait(lvl);
@@ -252,6 +257,13 @@ function renderCardGridItem(div, key, card) {
   var recRec = cardRecordSpeed(lvl);
   var isLimited = ci === 4;
   var cost = isVip2 ? vipCardCost(lvl) : cardCost(lvl, isLimited);
+  // VIP2 20% discount — only on non-VIP2 cards
+  if(!isVip2) {
+    var _isVip2A = vipData && parseInt(vipData.tier||0) >= 2 && parseInt(vipData.expiry||0) > Date.now();
+    if(_isVip2A && vipData.discountExpiry && vipData.discountExpiry > Date.now()) {
+      cost = Math.floor(cost * 0.8);
+    }
+  }
   var rarity = getCardRarity(lvl);
   var cardName = getCardName(card);
   var bg = getCardBg(ci, idx);
