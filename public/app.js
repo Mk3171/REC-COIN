@@ -1201,6 +1201,8 @@ function loadAndInit() {
         }
         // Resume discount timer if still active after reload
         if(typeof resumeDiscountTimer === 'function') setTimeout(resumeDiscountTimer, 200);
+        // Check for unclaimed weekly prize
+        if(typeof checkWeeklyPrize === 'function') setTimeout(checkWeeklyPrize, 1500);
         // If VIP page is open and tier changed, refresh it
         if(prevTier !== vipData.tier && typeof renderVIPPage === 'function') {
           var vipPageEl = document.getElementById('vipPageContent');
@@ -1340,5 +1342,90 @@ function adminResetDiscountPanel() {
     if(d.success && String(uid) === String(tgUser.id)) {
       vipData.discountDate = ''; vipData.discountExpiry = 0;
     }
+  });
+}
+
+
+// ====== WEEKLY PRIZE SYSTEM ======
+var _pendingPrize = null;
+
+function checkWeeklyPrize() {
+  if(!tgUser) return;
+  fetch('/api/prizes/pending/' + tgUser.id)
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(d.hasPrize) {
+        _pendingPrize = d;
+        var rankEl = document.getElementById('prizeRankText');
+        var amtEl = document.getElementById('prizeAmountText');
+        if(rankEl) rankEl.textContent = '🥇 Rank #' + d.rank + ' this week';
+        if(amtEl) amtEl.textContent = '+' + d.amount;
+        var popup = document.getElementById('weeklyPrizePopup');
+        if(popup) popup.style.display = 'flex';
+      }
+    }).catch(function(){});
+}
+
+function claimWeeklyPrize() {
+  if(!tgUser || !_pendingPrize) return;
+  fetch('/api/prizes/claim', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ telegramId: tgUser.id })
+  }).then(function(r){ return r.json(); })
+  .then(function(d){
+    if(d.success) {
+      rec += d.prize;
+      showToast('🏆 +' + d.prize + ' REC claimed!');
+      if(typeof saveData === 'function') saveData(true);
+    }
+    var popup = document.getElementById('weeklyPrizePopup');
+    if(popup) popup.style.display = 'none';
+    _pendingPrize = null;
+  });
+}
+
+// ====== ADMIN PRIZE FUNCTIONS ======
+function adminLoadPrizes() {
+  if(!tgUser) return;
+  var listEl = document.getElementById('adminPrizesList');
+  if(listEl) listEl.innerHTML = '⏳ Loading...';
+  fetch('/api/admin/leaderboard-prizes?adminId=' + tgUser.id)
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      if(!d.success || !listEl) return;
+      var html = '<div style="color:rgba(255,215,0,0.6);margin-bottom:6px;">Week: ' + d.week + '</div>';
+      html += '<table style="width:100%;border-collapse:collapse;">';
+      html += '<tr style="color:rgba(255,255,255,0.4);font-size:10px;"><td>#</td><td>Name</td><td>REC</td><td style="color:#FFD700;">Prize</td></tr>';
+      d.users.forEach(function(u) {
+        var rankIcon = u.rank===1?'🥇':u.rank===2?'🥈':u.rank===3?'🥉':'';
+        var paid = u.alreadyPaid ? ' ✅' : '';
+        html += '<tr style="border-top:1px solid rgba(255,255,255,0.05);padding:2px 0;">' +
+          '<td style="color:rgba(255,255,255,0.5);padding:3px 2px;">' + rankIcon + u.rank + '</td>' +
+          '<td style="color:white;padding:3px 2px;max-width:100px;overflow:hidden;text-overflow:ellipsis;">' + u.name + '</td>' +
+          '<td style="color:rgba(255,255,255,0.5);padding:3px 2px;font-size:10px;">' + Math.floor(u.rec).toLocaleString() + '</td>' +
+          '<td style="color:#FFD700;font-weight:700;padding:3px 2px;">+' + u.prize + paid + '</td>' +
+          '</tr>';
+      });
+      html += '</table>';
+      listEl.innerHTML = html;
+    }).catch(function(){ if(listEl) listEl.innerHTML = '❌ Error'; });
+}
+
+function adminDistributePrizes() {
+  if(!tgUser) return;
+  if(!confirm('Distribute prizes to top 100 users?')) return;
+  var statusEl = document.getElementById('adminPrizeStatus');
+  if(statusEl) statusEl.textContent = '⏳ Distributing...';
+  fetch('/api/admin/distribute-prizes', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ adminId: tgUser.id })
+  }).then(function(r){ return r.json(); })
+  .then(function(d){
+    if(statusEl) statusEl.textContent = d.success
+      ? '✅ Sent to ' + d.distributed + ' users (' + d.week + ')'
+      : '❌ ' + d.error;
+    if(d.success) adminLoadPrizes();
   });
 }
