@@ -698,7 +698,59 @@ function closeSideMenu(){
     </a>
 
   </div>
-</div>
+
+
+    <!-- ADMIN PANEL PAGE -->
+<div id="adminPanel" class="page" style="display:none;padding:16px;overflow-y:auto;">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
+      <button onclick="showPage('home',null)" style="background:rgba(255,255,255,0.08);border:none;color:white;padding:6px 14px;border-radius:20px;cursor:pointer;">← Back</button>
+      <div style="font-size:16px;font-weight:700;color:#FF4444;">🛡️ Admin Panel</div>
+    </div>
+
+    <!-- Broadcast Message -->
+    <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px;margin-bottom:12px;">
+      <div style="font-size:13px;font-weight:700;color:#FF4444;margin-bottom:10px;">📢 Broadcast Message</div>
+      <textarea id="broadcastMsg" placeholder="Type message to send to ALL users..." style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:white;padding:10px;font-size:13px;resize:vertical;min-height:80px;box-sizing:border-box;"></textarea>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button onclick="adminBroadcast('all')" style="flex:1;background:linear-gradient(135deg,#CC0000,#FF2200);border:none;color:white;padding:8px;border-radius:10px;cursor:pointer;font-size:12px;">Send to All</button>
+        <button onclick="adminBroadcast('vip')" style="flex:1;background:linear-gradient(135deg,#7700CC,#AA00FF);border:none;color:white;padding:8px;border-radius:10px;cursor:pointer;font-size:12px;">VIP Only</button>
+      </div>
+    </div>
+
+    <!-- Set Daily Combo -->
+    <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px;margin-bottom:12px;">
+      <div style="font-size:13px;font-weight:700;color:#FFD700;margin-bottom:10px;">🎯 Daily Combo</div>
+      <button onclick="adminSetCombo()" style="width:100%;background:linear-gradient(135deg,#886600,#FFD700);border:none;color:#000;padding:8px;border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;">🔄 Re-pick Today's Combo</button>
+      <div id="adminComboStatus" style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:6px;text-align:center;"></div>
+    </div>
+
+    <!-- User Lookup -->
+    <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px;margin-bottom:12px;">
+      <div style="font-size:13px;font-weight:700;color:#00FF88;margin-bottom:10px;">🔍 User Lookup</div>
+      <input id="adminUserId" type="number" placeholder="Telegram ID..." style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:white;padding:8px 10px;font-size:13px;box-sizing:border-box;margin-bottom:8px;">
+      <button onclick="adminLookupUser()" style="width:100%;background:rgba(0,255,136,0.15);border:1px solid rgba(0,255,136,0.3);color:#00FF88;padding:8px;border-radius:10px;cursor:pointer;font-size:12px;">Lookup User</button>
+      <div id="adminUserResult" style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:8px;"></div>
+    </div>
+
+    <!-- Fix Referral -->
+    <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px;margin-bottom:12px;">
+      <div style="font-size:13px;font-weight:700;color:#00CFFF;margin-bottom:10px;">🔗 Fix Referral</div>
+      <input id="adminRefUserId" type="number" placeholder="User ID..." style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:white;padding:8px 10px;font-size:13px;box-sizing:border-box;margin-bottom:6px;">
+      <input id="adminRefRefId" type="number" placeholder="Referrer ID..." style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:white;padding:8px 10px;font-size:13px;box-sizing:border-box;margin-bottom:8px;">
+      <button onclick="adminFixRef()" style="width:100%;background:rgba(0,200,255,0.1);border:1px solid rgba(0,200,255,0.3);color:#00CFFF;padding:8px;border-radius:10px;cursor:pointer;font-size:12px;">Fix Referral</button>
+      <div id="adminRefResult" style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:6px;"></div>
+    </div>
+
+    <!-- Reset VIP Discount -->
+    <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px;">
+      <div style="font-size:13px;font-weight:700;color:#FFA500;margin-bottom:10px;">🏷️ Reset Discount</div>
+      <input id="adminDiscUserId" type="number" placeholder="User ID (empty = yourself)..." style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:white;padding:8px 10px;font-size:13px;box-sizing:border-box;margin-bottom:8px;">
+      <button onclick="adminResetDiscountPanel()" style="width:100%;background:rgba(255,165,0,0.1);border:1px solid rgba(255,165,0,0.3);color:#FFA500;padding:8px;border-radius:10px;cursor:pointer;font-size:12px;">Reset Discount</button>
+      <div id="adminDiscResult" style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:6px;"></div>
+    </div>
+  </div>
+
+  </div>
 
 <!-- PROFILE STATS POPUP -->
 <!-- COMBO OVERLAY -->
@@ -1019,55 +1071,5 @@ function closeSideMenu(){
 <script src="app.js?v=8"></script>
 <script src="referral.js?v=1"></script>
 
-  <!-- ADMIN PANEL PAGE -->
-  <div id="adminPanel" class="page" style="display:none;padding:16px;overflow-y:auto;">
-    <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
-      <button onclick="showPage('home',null)" style="background:rgba(255,255,255,0.08);border:none;color:white;padding:6px 14px;border-radius:20px;cursor:pointer;">← Back</button>
-      <div style="font-size:16px;font-weight:700;color:#FF4444;">🛡️ Admin Panel</div>
-    </div>
-
-    <!-- Broadcast Message -->
-    <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px;margin-bottom:12px;">
-      <div style="font-size:13px;font-weight:700;color:#FF4444;margin-bottom:10px;">📢 Broadcast Message</div>
-      <textarea id="broadcastMsg" placeholder="Type message to send to ALL users..." style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:white;padding:10px;font-size:13px;resize:vertical;min-height:80px;box-sizing:border-box;"></textarea>
-      <div style="display:flex;gap:8px;margin-top:8px;">
-        <button onclick="adminBroadcast('all')" style="flex:1;background:linear-gradient(135deg,#CC0000,#FF2200);border:none;color:white;padding:8px;border-radius:10px;cursor:pointer;font-size:12px;">Send to All</button>
-        <button onclick="adminBroadcast('vip')" style="flex:1;background:linear-gradient(135deg,#7700CC,#AA00FF);border:none;color:white;padding:8px;border-radius:10px;cursor:pointer;font-size:12px;">VIP Only</button>
-      </div>
-    </div>
-
-    <!-- Set Daily Combo -->
-    <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px;margin-bottom:12px;">
-      <div style="font-size:13px;font-weight:700;color:#FFD700;margin-bottom:10px;">🎯 Daily Combo</div>
-      <button onclick="adminSetCombo()" style="width:100%;background:linear-gradient(135deg,#886600,#FFD700);border:none;color:#000;padding:8px;border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;">🔄 Re-pick Today's Combo</button>
-      <div id="adminComboStatus" style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:6px;text-align:center;"></div>
-    </div>
-
-    <!-- User Lookup -->
-    <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px;margin-bottom:12px;">
-      <div style="font-size:13px;font-weight:700;color:#00FF88;margin-bottom:10px;">🔍 User Lookup</div>
-      <input id="adminUserId" type="number" placeholder="Telegram ID..." style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:white;padding:8px 10px;font-size:13px;box-sizing:border-box;margin-bottom:8px;">
-      <button onclick="adminLookupUser()" style="width:100%;background:rgba(0,255,136,0.15);border:1px solid rgba(0,255,136,0.3);color:#00FF88;padding:8px;border-radius:10px;cursor:pointer;font-size:12px;">Lookup User</button>
-      <div id="adminUserResult" style="font-size:11px;color:rgba(255,255,255,0.6);margin-top:8px;"></div>
-    </div>
-
-    <!-- Fix Referral -->
-    <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px;margin-bottom:12px;">
-      <div style="font-size:13px;font-weight:700;color:#00CFFF;margin-bottom:10px;">🔗 Fix Referral</div>
-      <input id="adminRefUserId" type="number" placeholder="User ID..." style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:white;padding:8px 10px;font-size:13px;box-sizing:border-box;margin-bottom:6px;">
-      <input id="adminRefRefId" type="number" placeholder="Referrer ID..." style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:white;padding:8px 10px;font-size:13px;box-sizing:border-box;margin-bottom:8px;">
-      <button onclick="adminFixRef()" style="width:100%;background:rgba(0,200,255,0.1);border:1px solid rgba(0,200,255,0.3);color:#00CFFF;padding:8px;border-radius:10px;cursor:pointer;font-size:12px;">Fix Referral</button>
-      <div id="adminRefResult" style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:6px;"></div>
-    </div>
-
-    <!-- Reset VIP Discount -->
-    <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px;">
-      <div style="font-size:13px;font-weight:700;color:#FFA500;margin-bottom:10px;">🏷️ Reset Discount</div>
-      <input id="adminDiscUserId" type="number" placeholder="User ID (empty = yourself)..." style="width:100%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:white;padding:8px 10px;font-size:13px;box-sizing:border-box;margin-bottom:8px;">
-      <button onclick="adminResetDiscountPanel()" style="width:100%;background:rgba(255,165,0,0.1);border:1px solid rgba(255,165,0,0.3);color:#FFA500;padding:8px;border-radius:10px;cursor:pointer;font-size:12px;">Reset Discount</button>
-      <div id="adminDiscResult" style="font-size:11px;color:rgba(255,255,255,0.5);margin-top:6px;"></div>
-    </div>
-  </div>
 
 </body>
-</html>
