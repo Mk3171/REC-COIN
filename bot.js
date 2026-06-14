@@ -1039,11 +1039,27 @@ app.get('/api/combo/today/:telegramId', async (req, res) => {
     var progress = (user && user.comboProgress && user.comboProgress.date === today)
       ? user.comboProgress.done : [];
 
+    // Check if user has VIP1+
+    var vipUser = await User.findOne({ telegramId: parseInt(req.params.telegramId) }).select('vip cardLevels comboProgress');
+    var isVip1 = vipUser && vipUser.vip && parseInt(vipUser.vip.tier||0) >= 1 && parseInt(vipUser.vip.expiry||0) > Date.now();
+    var showDetails = isAdmin || isVip1;
+
+    // Card names from categories (simplified - use categoryIndex and cardIndex)
+    var catEmojis = [['🌀','⚡','🏴‍☠️','🔥','❄️','🌹','⚔️','🌊','🌸','🗡️','🛡️','💜','⭐','🐉','💫','🦋','🌙','☁️','🌺','🔮','💎','🗿','🎯','🌟','💥','🎭','🧿','🏹','🌈','💠','✨','🪄','🎪','🦅','🦁','🐺','🔱','🌀','⚡','🏅'],
+      ['🔴','🟡','🔵','🟠','⚫','🏎️','🚗','🚀','🏆','🥇','🌟','🔴','🟡','🔵','🟠','⚫','🏎️','🚗','🚀','🏆','🥇','🌟','🔴','🟡','🔵','🟠','⚫','🏎️','🚗','🌟'],
+      ['⚽','🏀','🎾','⚾','🏈','🏐','🎱','🏓','🏸','🥊','🎯','🎮','🎲','🎰','🃏','🎪','🎭','🎨','🎬','🎤'],
+      ['🏯','🏰','🏛️','🕌','⛩️','🗼','🗽','🏟️','🏢','🌉','🌁','🌃','🌆','🌇','🌉','🌌','🌠','🎇','🎆','🌅']];
+
     var cards = combo.cards.map(function(c) {
+      var emoji = catEmojis[c.categoryIndex] && catEmojis[c.categoryIndex][c.cardIndex] ? catEmojis[c.categoryIndex][c.cardIndex] : '🃏';
+      var cardNum = (c.cardIndex||0) + 1;
+      var catN = ['Anime','Cars','Clubs','Palaces'][c.categoryIndex] || '';
       return {
-        key: isAdmin ? c.key : '?',
+        key: showDetails ? c.key : '?',
         categoryIndex: c.categoryIndex,
         cardIndex: c.cardIndex,
+        name: showDetails ? (catN + ' #' + cardNum) : '???',
+        emoji: showDetails ? emoji : '🔒',
         done: progress.indexOf(c.key) !== -1
       };
     });
@@ -1494,6 +1510,72 @@ setInterval(() => {
 
 
 
+// ====== DAILY COMBO SYSTEM ======
+// All card keys from categories 0-3 (Anime, Cars, Clubs, Palaces) only
+var ALL_COMBO_CARDS = [];
+for(var _ci=0;_ci<4;_ci++) {
+  var _counts = [40,30,20,20]; // cards per category
+  for(var _i=0;_i<_counts[_ci];_i++) {
+    ALL_COMBO_CARDS.push({ key:_ci+'_'+_i, categoryIndex:_ci, cardIndex:_i });
+  }
+}
+
+async function pickAndSetDailyCombo() {
+  try {
+    var today = new Date().toISOString().split('T')[0];
+    var existing = await DailyCombo.findOne({ date: today });
+    if(existing) { console.log('[Combo] Already set for', today); return existing; }
+
+    // Pick 3 random unique cards
+    var pool = ALL_COMBO_CARDS.slice();
+    var picked = [];
+    while(picked.length < 3 && pool.length > 0) {
+      var idx = Math.floor(Math.random() * pool.length);
+      picked.push(pool.splice(idx,1)[0]);
+    }
+    var combo = await DailyCombo.create({ date: today, cards: picked, reward: 5 });
+    console.log('[Combo] ✅ Set for', today, ':', picked.map(c=>c.key).join(', '));
+
+    // Send hint to channel t.me/Momokh1 — first card emoji only
+    try {
+      var catNames = ['Anime','Cars','Clubs','Palaces'];
+      var hint = '🎯 Daily Combo hint — ' + today + '\nFirst card category: *' + catNames[picked[0].categoryIndex] + '*\nFind all 3 to earn +5 REC!';
+      await bot.sendMessage('@Momokh1', hint, { parse_mode: 'Markdown' });
+      console.log('[Combo] Channel hint sent');
+    } catch(e) { console.log('[Combo] Channel error:', e.message); }
+
+    // Notify VIP1 users with all 3 card keys
+    var vipUsers = await User.find({ 'vip.tier': { $gte: 1 }, 'vip.expiry': { $gt: Date.now() } }).select('telegramId language vip');
+    var catNamesAr = { ar:['أنمي','سيارات','نوادي','قصور'], en:['Anime','Cars','Clubs','Palaces'], ru:['Аниме','Авто','Клубы','Дворцы'], uk:['Аніме','Авто','Клуби','Палаци'], pt:['Anime','Carros','Clubes','Palácios'], es:['Anime','Autos','Clubes','Palacios'], tr:['Anime','Arabalar','Kulüpler','Saraylar'], vi:['Anime','Xe hơi','Câu lạc bộ','Cung điện'], zh:['动漫','汽车','俱乐部','宫殿'] };
+    var cardNums = picked.map(c=>c.cardIndex+1);
+    var sent=0;
+    for(var u of vipUsers) {
+      try {
+        var lang = u.language||'en';
+        var cn = catNamesAr[lang]||catNamesAr.en;
+        var msg = '🎯 Daily Combo — ' + today + '\n\n' +
+          '1️⃣ ' + cn[picked[0].categoryIndex] + ' #' + cardNums[0] + '\n' +
+          '2️⃣ ' + cn[picked[1].categoryIndex] + ' #' + cardNums[1] + '\n' +
+          '3️⃣ ' + cn[picked[2].categoryIndex] + ' #' + cardNums[2] + '\n\n' +
+          '💰 Reward: +5 REC';
+        await bot.sendMessage(u.telegramId, msg);
+        sent++;
+        await new Promise(r=>setTimeout(r,80));
+      } catch(e){}
+    }
+    console.log('[Combo] VIP1 notified:', sent);
+    return combo;
+  } catch(e) { console.log('[Combo] Error:', e.message); }
+}
+
+// Run daily at midnight UTC
+pickAndSetDailyCombo();
+setInterval(function() {
+  var now = new Date();
+  if(now.getUTCHours()===0 && now.getUTCMinutes()===0) pickAndSetDailyCombo();
+  if(now.getUTCHours()===9 && now.getUTCMinutes()===0) sendDailyBoostReminders();
+}, 60000);
+
 // ====== ADMIN: Check & fix referral ======
 app.post('/api/admin/fix-referral', async (req, res) => {
   try {
@@ -1584,12 +1666,6 @@ async function sendDailyBoostReminders() {
   }
 }
 
-// Check every minute — send reminders at 9:00 AM UTC
-setInterval(function() {
-  const now = new Date();
-  if (now.getUTCHours() === 9 && now.getUTCMinutes() === 0) {
-    sendDailyBoostReminders();
-  }
-}, 60000);
+// Boost reminders now included in combo scheduler above
 
 module.exports = app;
