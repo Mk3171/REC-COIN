@@ -520,6 +520,15 @@ app.post('/api/create-invoice', async (req, res) => {
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
+// ====== API: VIP STATUS (always fresh from DB) ======
+app.get('/api/vip/status/:telegramId', async (req, res) => {
+  try {
+    const user = await User.findOne({ telegramId: parseInt(req.params.telegramId) }).select('vip');
+    if(!user || !user.vip || !user.vip.tier) return res.json({ tier: 0 });
+    res.json({ tier: user.vip.tier, expiry: user.vip.expiry, boxes: user.vip.boxes || {} });
+  } catch(e) { res.json({ tier: 0 }); }
+});
+
 // ====== API: WITHDRAW ======
 
 // ====== VIP PURCHASE ======
