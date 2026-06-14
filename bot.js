@@ -533,9 +533,10 @@ app.post('/api/vip/verify', async (req, res) => {
     const user = await User.findOne({ telegramId });
     if (!user) return res.status(404).json({ error: 'User not found' });
 
-    // Check if VIP already active
+    // Check if VIP already active — return success so frontend updates UI
     if (user.vip && user.vip.tier >= tier && user.vip.expiry > Date.now()) {
-      return res.json({ success: false, error: 'VIP already active' });
+      console.log('[VIP Verify] Already active tier', tier, 'for user', telegramId);
+      return res.json({ success: true, tier: user.vip.tier, expiry: user.vip.expiry, alreadyActive: true });
     }
 
     const expectedNano = tier === 1 ? 1000000000 : tier === 2 ? 5000000000 : 10000000000;
