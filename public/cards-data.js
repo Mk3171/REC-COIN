@@ -256,14 +256,9 @@ function renderCardGridItem(div, key, card) {
   var rem = isUpgrading ? Math.max(0, Math.ceil((upg.endTime-now)/1000)) : 0;
   var recRec = cardRecordSpeed(lvl);
   var isLimited = ci === 4;
-  var cost = isVip2 ? vipCardCost(lvl) : cardCost(lvl, isLimited);
-  // VIP2 20% discount — only on non-VIP2 cards
-  if(!isVip2) {
-    var _isVip2A = vipData && parseInt(vipData.tier||0) >= 2 && parseInt(vipData.expiry||0) > Date.now();
-    if(_isVip2A && vipData.discountExpiry && vipData.discountExpiry > Date.now()) {
-      cost = Math.floor(cost * 0.8);
-    }
-  }
+  var baseCost = isVip2 ? vipCardCost(lvl) : cardCost(lvl, isLimited);
+  var discountActive = !isVip2 && vipData && parseInt(vipData.tier||0) >= 2 && parseInt(vipData.expiry||0) > Date.now() && vipData.discountExpiry && vipData.discountExpiry > Date.now();
+  var cost = discountActive ? Math.floor(baseCost * 0.8) : baseCost;
   var rarity = getCardRarity(lvl);
   var cardName = getCardName(card);
   var bg = getCardBg(ci, idx);
@@ -304,8 +299,11 @@ function renderCardGridItem(div, key, card) {
         ? '<div style="background:rgba(255,215,0,0.15);border:1px solid #FFD700;border-radius:8px;padding:4px;font-size:9px;color:#FFD700;text-align:center;">MAX ✅</div>'
         : isUpgrading
           ? '<div id="timer_'+key+'" style="background:rgba(255,200,0,0.15);border:1px solid #FFD700;border-radius:8px;padding:4px;font-size:9px;color:#FFD700;text-align:center;">⏳ '+formatWait(rem)+'</div>'
-          : '<button onclick="directUpgrade('+ci+','+idx+',event)" style="width:100%;background:'+(canUpgrade?'linear-gradient(135deg,#CC0000,#FF2200)':'rgba(30,30,30,0.8)')+';border:1px solid '+(canUpgrade?'#FF4444':'#333')+';border-radius:8px;padding:4px;font-size:9px;color:'+(canUpgrade?'white':'#555')+';cursor:'+(canUpgrade?'pointer':'not-allowed')+';font-weight:bold;">'+
-            (lvl===0?'🔓 ':'⬆️ ')+formatCost(cost)+' REC</button>')+
+          : '<button onclick="directUpgrade('+ci+','+idx+',event)" style="width:100%;background:'+(canUpgrade?'linear-gradient(135deg,#CC0000,#FF2200)':'rgba(30,30,30,0.8)')+';border:1px solid '+(canUpgrade?'#FF4444':'#333')+';border-radius:8px;padding:4px 2px;font-size:9px;color:'+(canUpgrade?'white':'#555')+';cursor:'+(canUpgrade?'pointer':'not-allowed')+';font-weight:bold;">'+
+            (discountActive
+              ? (lvl===0?'🔓 ':'⬆️ ')+'<span style="text-decoration:line-through;opacity:0.5;font-size:8px;">'+formatCost(baseCost)+'</span> <span style="color:#FFD700;">'+formatCost(cost)+'</span> REC'
+              : (lvl===0?'🔓 ':'⬆️ ')+formatCost(cost)+' REC')+
+            '</button>')+
     '</div>';
 }
 
