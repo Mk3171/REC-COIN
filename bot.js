@@ -1473,6 +1473,134 @@ app.post('/webhook', (req, res) => { bot.processUpdate(req.body); res.sendStatus
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'index.html')); });
 app.use(express.static(path.join(__dirname, 'public')));
 
+// ====== NFT BATCH MINT ======
+const { TonClient, WalletContractV4, internal, toNano, beginCell, Address } = require('@ton/ton');
+const { mnemonicToPrivateKey } = require('@ton/crypto');
+const axios_nft = require('axios');
+
+const NFT_COLLECTION = 'EQC_gZR0JaGya8i_P9Lj4VZyfK3pnU5sYp9sJJpVUALYVhoV';
+
+const REC_NFT_TYPES = [
+  {
+    name: 'Crystal', count: 50,
+    imageCID: 'bafkreidnvzqtchhhm4a4y4oyzewwdav63tz2farry24npm4in5axnpuy3a',
+    description: 'Forged from pure crystal. The rarest REC Camera ever created. Holders get x10 Mining Speed in REC Mining Bot.',
+    attributes: [{ trait_type:'Boost', value:'x10 Mining Speed' },{ trait_type:'Rarity', value:'Mythic' },{ trait_type:'Type', value:'Crystal Camera' }]
+  },
+  {
+    name: 'Inferno', count: 50,
+    imageCID: 'bafybeicf65yugcyej7any6hhpwjh2jkcr4gdfffyne47vgbh6awaxfsxnm',
+    description: 'Born from fire. The Inferno Camera burns through limits. Holders get x5 Mining Speed in REC Mining Bot.',
+    attributes: [{ trait_type:'Boost', value:'x5 Mining Speed' },{ trait_type:'Rarity', value:'Legendary' },{ trait_type:'Type', value:'Inferno Camera' }]
+  },
+  {
+    name: 'Shadow', count: 50,
+    imageCID: 'bafkreieoi22ey7tnb7je46ejiojwnyay3xtw4vocbefx74csbn7lgpp7yu',
+    description: 'Silent and powerful. The Shadow camera operates in the dark. Holders get x3 Mining Speed in REC Mining Bot.',
+    attributes: [{ trait_type:'Boost', value:'x3 Mining Speed' },{ trait_type:'Rarity', value:'Uncommon' },{ trait_type:'Type', value:'Shadow Camera' }]
+  },
+  {
+    name: 'Neon', count: 50,
+    imageCID: 'bafkreidaiud3b34n53hhxdryygo7ob2ox3i62fzbbwjqt6yjad326ayyda',
+    description: 'The entry point to the REC universe. Connect your camera, start mining. Holders get x4 Mining Speed in REC Mining Bot.',
+    attributes: [{ trait_type:'Boost', value:'x4 Mining Speed' },{ trait_type:'Rarity', value:'Rare' },{ trait_type:'Type', value:'Neon Camera' }]
+  }
+];
+
+async function uploadNFTMetadata(metadata) {
+  const res = await axios_nft.post('https://api.pinata.cloud/pinning/pinJSONToIPFS', metadata, {
+    headers: {
+      'pinata_api_key': process.env.PINATA_API_KEY,
+      'pinata_secret_api_key': process.env.PINATA_SECRET,
+      'Content-Type': 'application/json'
+    }
+  });
+  return res.data.IpfsHash;
+}
+
+app.post('/api/admin/mint-nfts', async (req, res) => {
+  const { secret } = req.body;
+  if (secret !== 'REC-MINT-2025') return res.status(403).json({ error: 'Unauthorized' });
+
+  const logs = [];
+  const log = (msg) => { console.log(msg); logs.push(msg); };
+
+  try {
+    const TON_MNEMONIC = process.env.TON_MNEMONIC;
+    if (!TON_MNEMONIC) return res.json({ error: 'TON_MNEMONIC not set in Render env vars', logs });
+    if (!process.env.PINATA_API_KEY) return res.json({ error: 'PINATA_API_KEY not set', logs });
+    if (!process.env.PINATA_SECRET) return res.json({ error: 'PINATA_SECRET not set', logs });
+
+    const client = new TonClient({
+      endpoint: 'https://toncenter.com/api/v2/jsonRPC',
+      apiKey: process.env.TONCENTER_API_KEY || ''
+    });
+
+    const mnemonicArray = TON_MNEMONIC.trim().split(' ');
+    const keyPair = await mnemonicToPrivateKey(mnemonicArray);
+    const wallet = client.open(WalletContractV4.create({ publicKey: keyPair.publicKey, workchain: 0 }));
+    const ownerAddress = wallet.address.toString({ bounceable: false });
+    log('✅ Wallet: ' + ownerAddress);
+
+    let itemIndex = 4; // 4 already minted manually
+    let totalMinted = 0;
+
+    for (const nftType of REC_NFT_TYPES) {
+      log('🎯 Minting ' + nftType.count + 'x ' + nftType.name);
+      for (let i = 1; i <= nftType.count; i++) {
+        try {
+          // Upload metadata to Pinata
+          const metadata = {
+            name: 'REC Camera: ' + nftType.name + ' #' + i,
+            description: nftType.description,
+            image: 'https://ipfs.io/ipfs/' + nftType.imageCID,
+            attributes: nftType.attributes
+          };
+          const metaCID = await uploadNFTMetadata(metadata);
+
+          // Build mint message
+          const nftContent = beginCell()
+            .storeUint(0x01, 8)
+            .storeStringTail('https://ipfs.io/ipfs/' + metaCID)
+            .endCell();
+
+          const nftItemData = beginCell()
+            .storeAddress(Address.parse(ownerAddress))
+            .storeRef(nftContent)
+            .endCell();
+
+          const mintBody = beginCell()
+            .storeUint(1, 32)
+            .storeUint(Date.now() % 0xFFFFFFFF, 64)
+            .storeUint(itemIndex, 64)
+            .storeCoins(toNano('0.05'))
+            .storeRef(nftItemData)
+            .endCell();
+
+          const seqno = await wallet.getSeqno();
+          await wallet.sendTransfer({
+            secretKey: keyPair.secretKey,
+            seqno,
+            messages: [internal({ to: Address.parse(NFT_COLLECTION), value: toNano('0.07'), body: mintBody })]
+          });
+
+          log('[' + i + '/' + nftType.count + '] ✅ ' + nftType.name + ' #' + i + ' minted (index ' + itemIndex + ')');
+          itemIndex++;
+          totalMinted++;
+          await new Promise(r => setTimeout(r, 15000)); // 15s between mints
+        } catch(e) {
+          log('[' + i + '/' + nftType.count + '] ❌ Error: ' + e.message);
+          itemIndex++;
+        }
+      }
+    }
+
+    res.json({ success: true, totalMinted, logs });
+  } catch(e) {
+    res.json({ error: e.message, logs });
+  }
+});
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
