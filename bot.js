@@ -1526,7 +1526,7 @@ app.post('/api/admin/mint-nfts', async (req, res) => {
   const log = (msg) => { console.log(msg); logs.push(msg); };
 
   try {
-    const TON_MNEMONIC = process.env.TON_MNEMONIC;
+    const TON_MNEMONIC = process.env.TON_MNEMONIC || process.env.BOT_WALLET_MNEMONIC || process.env.NEMONIC;
     if (!TON_MNEMONIC) return res.json({ error: 'TON_MNEMONIC not set in Render env vars', logs });
     if (!process.env.PINATA_API_KEY) return res.json({ error: 'PINATA_API_KEY not set', logs });
     if (!process.env.PINATA_SECRET) return res.json({ error: 'PINATA_SECRET not set', logs });
