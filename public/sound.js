@@ -2,104 +2,81 @@
 
 var soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
 var currentAudio = null;
-var currentPage = '';
+var currentSoundPage = '';
 
 var SOUNDS = {
-  'home':         '/Sounds/home.mp3',
-  'exchange':     '/Sounds/home.mp3',
-  'daily':        '/Sounds/home.mp3',
-  'upgrade':      '/Sounds/home.mp3',
-  'upgradePage':  '/Sounds/home.mp3',
-  'cards':        '/Sounds/cards.mp3',
-  'tasks':        '/Sounds/tasks.mp3',
-  'invite':       '/Sounds/invite.mp3',
-  'wallet':       '/Sounds/wallet.mp3',
-  'vip':          '/Sounds/vip.mp3',
-  'nft':          '/Sounds/nft.mp3',
-  'shop':         '/Sounds/shop.mp3',
-  'airdrop':      '/Sounds/airdrop.mp3',
-  'rank':         '/Sounds/leaderboard.mp3',
-  'game1':        '/Sounds/game1.mp3',
-  'game2':        '/Sounds/game2.mp3'
+  'home':        '/Sounds/home.mp3',
+  'exchange':    '/Sounds/home.mp3',
+  'daily':       '/Sounds/home.mp3',
+  'upgradePage': '/Sounds/home.mp3',
+  'cards':       '/Sounds/cards.mp3',
+  'tasks':       '/Sounds/tasks.mp3',
+  'invite':      '/Sounds/invite.mp3',
+  'wallet':      '/Sounds/wallet.mp3',
+  'vip':         '/Sounds/vip.mp3',
+  'nft':         '/Sounds/nft.mp3',
+  'shop':        '/Sounds/shop.mp3',
+  'airdrop':     '/Sounds/airdrop.mp3',
+  'rank':        '/Sounds/leaderboard.mp3'
 };
 
 function playPageSound(pageId) {
   if (!soundEnabled) return;
   var src = SOUNDS[pageId];
-  if (!src) return;
-  if (currentAudio && currentPage === pageId) return; // نفس الصفحة ما نعيد التشغيل
+  if (!src) { stopSound(); return; }
+  if (currentSoundPage === pageId && currentAudio && !currentAudio.paused) return;
 
-  // أوقف الصوت الحالي
-  if (currentAudio) {
-    currentAudio.pause();
-    currentAudio.currentTime = 0;
-    currentAudio = null;
-  }
+  stopSound();
 
   try {
     var audio = new Audio(src);
     audio.loop = true;
-    audio.volume = 0.4;
-    var playPromise = audio.play();
-    if (playPromise !== undefined) {
-      playPromise.then(function() {
-        currentAudio = audio;
-        currentPage = pageId;
-      }).catch(function(e) {
-        // Autoplay blocked - will play on next user interaction
-        document.addEventListener('touchstart', function resumeAudio() {
-          audio.play().then(function() {
-            currentAudio = audio;
-            currentPage = pageId;
-          }).catch(function(){});
-          document.removeEventListener('touchstart', resumeAudio);
-        }, { once: true });
-      });
-    }
+    audio.volume = 0.35;
+    audio.play().then(function() {
+      currentAudio = audio;
+      currentSoundPage = pageId;
+    }).catch(function() {
+      currentAudio = audio;
+      currentSoundPage = pageId;
+      document.addEventListener('touchstart', function once() {
+        if (currentAudio) currentAudio.play().catch(function(){});
+        document.removeEventListener('touchstart', once);
+      }, { once: true });
+    });
   } catch(e) {}
 }
 
 function stopSound() {
   if (currentAudio) {
-    currentAudio.pause();
-    currentAudio.currentTime = 0;
+    try { currentAudio.pause(); currentAudio.currentTime = 0; } catch(e) {}
     currentAudio = null;
-    currentPage = '';
+    currentSoundPage = '';
   }
 }
 
 function toggleSound() {
   soundEnabled = !soundEnabled;
-  localStorage.setItem('soundEnabled', soundEnabled);
-  updateSoundBtn();
-  if (!soundEnabled) {
-    stopSound();
-  } else {
-    playPageSound(currentPage || 'home');
-  }
-}
-
-function updateSoundBtn() {
+  localStorage.setItem('soundEnabled', soundEnabled ? 'true' : 'false');
   var btn = document.getElementById('soundToggleBtn');
   if (btn) btn.textContent = soundEnabled ? '🔊' : '🔇';
+  if (!soundEnabled) { stopSound(); }
+  else { playPageSound(currentSoundPage || 'home'); }
 }
 
-// Override showPage to add sound
-var _origShowPage = showPage;
-function showPage(id, btn) {
-  _origShowPage(id, btn);
-  playPageSound(id);
-}
+// Hook into navigation WITHOUT overriding showPage
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest('[onclick]');
+  if (!btn) return;
+  var fn = btn.getAttribute('onclick') || '';
+  var match = fn.match(/showPage\(['"](\w+)['"]/);
+  if (match) {
+    setTimeout(function() { playPageSound(match[1]); }, 50);
+  }
+}, true);
 
-// Play sound for game pages
-function playGameSound(gameNum) {
-  playPageSound('game' + gameNum);
-}
-
-// Init sound on first page load
-document.addEventListener('DOMContentLoaded', function() {
-  setTimeout(function() {
-    playPageSound('home');
-    updateSoundBtn();
-  }, 500);
+// Init
+window.addEventListener('load', function() {
+  var btn = document.getElementById('soundToggleBtn');
+  if (btn) btn.textContent = soundEnabled ? '🔊' : '🔇';
+  setTimeout(function() { playPageSound('home'); }, 800);
 });
