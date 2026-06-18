@@ -1508,18 +1508,8 @@ const REC_NFT_TYPES = [
 ];
 
 async function uploadNFTMetadata(metadata) {
-  const FormData = require('form-data');
-  const form = new FormData();
-  const jsonBlob = Buffer.from(JSON.stringify(metadata));
-  form.append('file', jsonBlob, { filename: 'metadata.json', contentType: 'application/json' });
-  form.append('name', metadata.name);
-  const res = await axios_nft.post('https://uploads.pinata.cloud/v3/files', form, {
-    headers: {
-      'Authorization': `Bearer ${process.env.PINATA_JWT}`,
-      ...form.getHeaders()
-    }
-  });
-  return res.data.data.cid;
+  // Use image CID directly - no Pinata upload needed
+  return metadata.imageCID;
 }
 
 app.post('/api/admin/mint-nfts', async (req, res) => {
@@ -1532,7 +1522,6 @@ app.post('/api/admin/mint-nfts', async (req, res) => {
   try {
     const TON_MNEMONIC = process.env.TON_MNEMONIC || process.env.BOT_WALLET_MNEMONIC || process.env.NEMONIC;
     if (!TON_MNEMONIC) return res.json({ error: 'TON_MNEMONIC not set in Render env vars', logs });
-    if (!process.env.PINATA_JWT) return res.json({ error: 'PINATA_JWT not set', logs });
 
     const client = new TonClient({
       endpoint: 'https://toncenter.com/api/v2/jsonRPC',
@@ -1553,18 +1542,10 @@ app.post('/api/admin/mint-nfts', async (req, res) => {
       for (let i = 1; i <= nftType.count; i++) {
         try {
           // Upload metadata to Pinata
-          const metadata = {
-            name: 'REC Camera: ' + nftType.name + ' #' + i,
-            description: nftType.description,
-            image: 'https://ipfs.io/ipfs/' + nftType.imageCID,
-            attributes: nftType.attributes
-          };
-          const metaCID = await uploadNFTMetadata(metadata);
-
-          // Build mint message
+          // Use image CID directly as NFT content
           const nftContent = beginCell()
             .storeUint(0x01, 8)
-            .storeStringTail('https://ipfs.io/ipfs/' + metaCID)
+            .storeStringTail('https://ipfs.io/ipfs/' + nftType.imageCID)
             .endCell();
 
           const nftItemData = beginCell()
