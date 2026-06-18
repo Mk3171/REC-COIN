@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>REC Cameras</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Rajdhani:wght@400;600&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background:#0a0a0a;
+    font-family:'Rajdhani',sans-serif;
+    color:#fff;
+    min-height:100vh;
+  }
+
+  /* HEADER */
+  .header {
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:14px 16px;
+    border-bottom:1px solid rgba(255,255,255,0.08);
+  }
+  .col-icon {
+    width:48px; height:48px;
+    border-radius:12px;
+    object-fit:cover;
+  }
+  .col-info h2 {
+    font-family:'Orbitron',sans-serif;
+    font-size:16px;
+    font-weight:700;
+    color:#fff;
+  }
+  .col-info p {
+    font-size:11px;
+    color:rgba(255,255,255,0.4);
+    margin-top:2px;
+  }
+
+  /* STATS BAR */
+  .stats {
+    display:flex;
+    gap:0;
+    padding:12px 16px;
+    border-bottom:1px solid rgba(255,255,255,0.06);
+  }
+  .stat {
+    flex:1;
+    text-align:center;
+  }
+  .stat-val {
+    font-family:'Orbitron',sans-serif;
+    font-size:13px;
+    font-weight:700;
+    color:#fff;
+  }
+  .stat-label {
+    font-size:10px;
+    color:rgba(255,255,255,0.35);
+    margin-top:2px;
+  }
+
+  /* GRID */
+  .grid {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:1px;
+    background:rgba(255,255,255,0.06);
+    margin-top:1px;
+  }
+  .nft-item {
+    background:#0a0a0a;
+    cursor:pointer;
+    transition:opacity 0.15s;
+  }
+  .nft-item:active { opacity:0.75; }
+  .nft-img {
+    width:100%;
+    aspect-ratio:1/1;
+    object-fit:cover;
+    display:block;
+  }
+  .nft-meta {
+    padding:10px 10px 12px;
+  }
+  .nft-collection {
+    font-size:10px;
+    color:rgba(255,255,255,0.35);
+    margin-bottom:2px;
+  }
+  .nft-name {
+    font-size:13px;
+    font-weight:600;
+    color:#fff;
+    margin-bottom:6px;
+    line-height:1.2;
+  }
+  .nft-price {
+    display:flex;
+    align-items:center;
+    gap:5px;
+  }
+  .ton-icon {
+    width:14px; height:14px;
+    background:linear-gradient(135deg,#0088cc,#00aeff);
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:8px;
+    color:#fff;
+    font-weight:900;
+    flex-shrink:0;
+  }
+  .price-val {
+    font-family:'Orbitron',sans-serif;
+    font-size:12px;
+    font-weight:700;
+    color:#fff;
+  }
+  .rarity-badge {
+    display:inline-block;
+    font-size:9px;
+    padding:2px 7px;
+    border-radius:20px;
+    font-weight:700;
+    margin-bottom:5px;
+  }
+  .r-uncommon { background:rgba(100,200,100,0.12); color:#66CC66; border:1px solid rgba(100,200,100,0.25); }
+  .r-rare     { background:rgba(100,100,255,0.12); color:#6699FF; border:1px solid rgba(100,100,255,0.25); }
+  .r-legendary{ background:rgba(255,165,0,0.12);  color:#FFAA00; border:1px solid rgba(255,165,0,0.25); }
+  .r-mythic   { background:rgba(200,0,255,0.12);  color:#CC44FF; border:1px solid rgba(200,0,255,0.25); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <img class="col-icon" src="https://ipfs.io/ipfs/bafybeicf65yugcyej7any6hhpwjh2jkcr4gdfffyne47vgbh6awaxfsxnm" alt="REC">
+  <div class="col-info">
+    <h2>REC Cameras</h2>
+    <p>Official NFT Collection · TON Blockchain</p>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat">
+    <div class="stat-val">4</div>
+    <div class="stat-label">items</div>
+  </div>
+  <div class="stat">
+    <div class="stat-val">2 TON</div>
+    <div class="stat-label">floor price</div>
+  </div>
+  <div class="stat">
+    <div class="stat-val">×3–×10</div>
+    <div class="stat-label">mining boost</div>
+  </div>
+</div>
+
+<div class="grid">
+
+  <div class="nft-item" onclick="openNFT('neon')">
+    <img class="nft-img" src="https://ipfs.io/ipfs/bafkreidaiud3b34n53hhxdryygo7ob2ox3i62fzbbwjqt6yjad326ayyda" alt="Neon">
+    <div class="nft-meta">
+      <div class="nft-collection">REC Cameras</div>
+      <div class="rarity-badge r-rare">Rare</div>
+      <div class="nft-name">REC Camera: Neon</div>
+      <div class="nft-price">
+        <div class="ton-icon">◆</div>
+        <span class="price-val">2</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="nft-item" onclick="openNFT('shadow')">
+    <img class="nft-img" src="https://ipfs.io/ipfs/bafkreieoi22ey7tnb7je46ejiojwnyay3xtw4vocbefx74csbn7lgpp7yu" alt="Shadow">
+    <div class="nft-meta">
+      <div class="nft-collection">REC Cameras</div>
+      <div class="rarity-badge r-uncommon">Uncommon</div>
+      <div class="nft-name">REC Camera: Shadow</div>
+      <div class="nft-price">
+        <div class="ton-icon">◆</div>
+        <span class="price-val">3</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="nft-item" onclick="openNFT('inferno')">
+    <img class="nft-img" src="https://ipfs.io/ipfs/bafybeicf65yugcyej7any6hhpwjh2jkcr4gdfffyne47vgbh6awaxfsxnm" alt="Inferno">
+    <div class="nft-meta">
+      <div class="nft-collection">REC Cameras</div>
+      <div class="rarity-badge r-legendary">Legendary</div>
+      <div class="nft-name">REC Camera: Inferno #1</div>
+      <div class="nft-price">
+        <div class="ton-icon">◆</div>
+        <span class="price-val">5</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="nft-item" onclick="openNFT('crystal')">
+    <img class="nft-img" src="https://ipfs.io/ipfs/bafkreidnvzqtchhhm4a4y4oyzewwdav63tz2farry24npm4in5axnpuy3a" alt="Crystal">
+    <div class="nft-meta">
+      <div class="nft-collection">REC Cameras</div>
+      <div class="rarity-badge r-mythic">Mythic</div>
+      <div class="nft-name">REC Camera: Crystal</div>
+      <div class="nft-price">
+        <div class="ton-icon">◆</div>
+        <span class="price-val">18</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const tg = window.Telegram && window.Telegram.WebApp;
+  if(tg){ tg.ready(); tg.expand(); }
+
+  const LINKS = {
+    crystal: 'https://getgems.io/collection/EQC_gZR0JaGya8i_P9Lj4VZyfK3pnU5sYp9sJJpVUALYVhoV/EQBFw_-3113QQFrST0roZMYbjtgER8RchlbmIH7Y0bPTt8PD',
+    neon:    'https://getgems.io/collection/EQC_gZR0JaGya8i_P9Lj4VZyfK3pnU5sYp9sJJpVUALYVhoV/EQBNpwBS0LTwprDCuMtcfdeFdm_urAtkSZjJoyrmYfV2DqCo',
+    shadow:  'https://getgems.io/collection/EQC_gZR0JaGya8i_P9Lj4VZyfK3pnU5sYp9sJJpVUALYVhoV/EQAPhUrnqedcEe7RNJiIxkey21_z-So9xO12jDBffinbCPX-',
+    inferno: 'https://getgems.io/collection/EQC_gZR0JaGya8i_P9Lj4VZyfK3pnU5sYp9sJJpVUALYVhoV/EQDLk0aUz0ZocdD1M2KjVOmxTBvl1XibXBTei9PAO4_pGI4g'
+  };
+
+  function openNFT(type){
+    const url = LINKS[type];
+    if(tg && tg.openLink){ tg.openLink(url); }
+    else{ window.open(url, '_blank'); }
+  }
+</script>
+</body>
+</html>
