@@ -66,8 +66,8 @@ function renderNFTPage() {
   html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:14px 16px 10px;">';
   html += '<div style="font-family:Orbitron,sans-serif;font-size:16px;font-weight:700;color:#fff;letter-spacing:2px;">📷 NFT</div>';
   if (isConnected) {
-    html += '<div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px;">';
-    html += '<div style="font-size:11px;color:#00FF88;font-weight:700;">'+shortAddr+'</div>';
+    html += '<div onclick="showNFTWalletMenu()" style="cursor:pointer;text-align:right;">';
+    html += '<div style="font-size:11px;color:#00FF88;font-weight:700;">'+shortAddr+' ▾</div>';
     html += '<div style="font-size:10px;color:rgba(255,255,255,0.35);" id="nft-ton-balance">loading...</div>';
     html += '</div>';
   } else {
@@ -209,6 +209,42 @@ function openCollectionStore() {
   } else {
     window.open(COLLECTION_URL, '_blank');
   }
+}
+
+function showNFTWalletMenu() {
+  var walletAddr = '';
+  if (tonConnect && tonConnect.account) walletAddr = rawToFriendly(tonConnect.account.address);
+  
+  window.Telegram.WebApp.showPopup({
+    title: '💎 Wallet',
+    message: walletAddr,
+    buttons: [
+      { id: 'copy', type: 'default', text: '📋 Copy Address' },
+      { id: 'disconnect', type: 'destructive', text: '🔴 Disconnect' },
+      { id: 'close', type: 'cancel', text: 'Close' }
+    ]
+  }, function(btnId) {
+    if (btnId === 'copy') {
+      try {
+        if (navigator.clipboard) {
+          navigator.clipboard.writeText(walletAddr);
+        } else {
+          var el = document.createElement('textarea');
+          el.value = walletAddr;
+          document.body.appendChild(el);
+          el.select();
+          document.execCommand('copy');
+          document.body.removeChild(el);
+        }
+        showToast('✅ Address copied!');
+      } catch(e) { showToast('✅ ' + walletAddr); }
+    } else if (btnId === 'disconnect') {
+      if (tonConnect) {
+        tonConnect.disconnect();
+        setTimeout(function(){ renderNFTPage(); }, 500);
+      }
+    }
+  });
 }
 
 function connectWalletNFT() {
