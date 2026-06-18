@@ -104,6 +104,8 @@ var record,rec,energy,maxEnergy,tapLevelVal,energyLevelVal,tapPowerVal,
     completedTasks,cardLevels,cardUpgrades,refCount,claimedMilest,
     dailyLogin,mysteryLastDate,dailyTasksData,cardTasksClaimed,totalTaps;
 var vipData = {tier:0, expiry:0, boxes:{}, boost:null, hasEpicCard:false, epicExpiry:0};
+var nftBoost = 1;
+var nftType = '';
 
 function applyData(d){
   record=d.record||0; rec=d.rec||0;
@@ -393,6 +395,7 @@ setInterval(function(){
     var _effectiveRec = recPerSec;
     if(_isVip2Boost) _effectiveRec *= 3;
     if(_isVip1Boost) _effectiveRec *= 1.5;
+    if(nftBoost && nftBoost > 1) _effectiveRec *= nftBoost;
     rec += _effectiveRec * 3;
     // ====== Block Check ======
     if(typeof checkForBlock === 'function') checkForBlock();
@@ -472,7 +475,7 @@ function updateUI(){
   var recs2=document.getElementById('recordSpeedShow');
   var _isV2B = vipData && parseInt(vipData.tier||0)>=2 && parseInt(vipData.expiry||0)>Date.now() && vipData.boost2Date===getTodayStr();
   var _isV1B = vipData && parseInt(vipData.tier||0)>=1 && parseInt(vipData.expiry||0)>Date.now() && vipData.boostDate===getTodayStr();
-  var _displayRec = recPerSec * (_isV2B?3:1) * (_isV1B?1.5:1);
+  var _displayRec = recPerSec * (_isV2B?3:1) * (_isV1B?1.5:1) * (nftBoost||1);
   var _displayRecord = recordPerSec * (_isV2B?3:1);
   if(recs)recs.textContent=_displayRec>0?_displayRec.toFixed(8):'0.00000000';
   if(recs2)recs2.textContent=_displayRecord>0?Math.floor(_displayRecord).toLocaleString():'0';
@@ -1216,6 +1219,11 @@ function loadAndInit() {
             else if(typeof switchVIPTab === 'function') switchVIPTab(1);
           }
         }
+      }
+      // Sync NFT boost from server
+      if(serverData.nftBoost && serverData.nftBoost > 1) {
+        nftBoost = serverData.nftBoost;
+        nftType = serverData.nftType || '';
       }
       // ✅ Sync rec from server if server has more (block rewards added server-side)
       if(serverData.rec && serverData.rec > (typeof rec !== 'undefined' ? rec : 0)) {
