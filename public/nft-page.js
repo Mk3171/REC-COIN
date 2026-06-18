@@ -82,6 +82,8 @@ function renderNFTPage() {
   html += '<div style="flex:1;text-align:center;"><div style="font-family:Orbitron,sans-serif;font-size:12px;font-weight:700;">×3–×10</div><div style="font-size:10px;color:rgba(255,255,255,0.35);margin-top:2px;">mining boost</div></div>';
   html += '</div>';
 
+  // NFT Boost Badge (if active)
+  html += getNFTBoostBadge();
   // Grid
   html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1px;background:rgba(255,255,255,0.06);margin-top:1px;">';
   NFT_DATA.forEach(function(nft) {
@@ -253,7 +255,10 @@ function connectWalletNFT() {
   var checkInterval = setInterval(function() {
     if (typeof tonConnect !== 'undefined' && tonConnect && tonConnect.connected) {
       clearInterval(checkInterval);
-      setTimeout(function(){ renderNFTPage(); }, 500);
+      setTimeout(function(){
+        renderNFTPage();
+        setTimeout(verifyNFTBoost, 1000);
+      }, 500);
     }
   }, 500);
   // Stop checking after 30 seconds
@@ -263,4 +268,35 @@ function connectWalletNFT() {
 function openNFTPage() {
   showPage('nft', null);
   renderNFTPage();
+}
+
+// ====== Auto-verify NFT when wallet connected ======
+function verifyNFTBoost() {
+  if (!tgUser) return;
+  fetch('/api/nft/verify', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ telegramId: tgUser.id })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data) {
+    if (data.ok && data.boost > 1) {
+      nftBoost = data.boost;
+      nftType = data.type;
+      showToast('🎉 NFT Boost activated: ×' + data.boost);
+      renderNFTPage();
+    }
+  }).catch(function(){});
+}
+
+// Show NFT boost badge in page
+function getNFTBoostBadge() {
+  if (!nftBoost || nftBoost <= 1) return '';
+  var colors = { shadow:'#66CC66', neon:'#6699FF', inferno:'#FFAA00', crystal:'#CC44FF' };
+  var c = colors[nftType] || '#FF3333';
+  return '<div style="margin:0 16px 10px;padding:10px 14px;background:rgba(255,50,50,0.08);border:1px solid rgba(255,50,50,0.2);border-radius:12px;display:flex;align-items:center;gap:10px;">'
+    + '<span style="font-size:20px;">📷</span>'
+    + '<div><div style="font-size:12px;font-weight:700;color:'+c+';">NFT Boost Active: ×'+nftBoost+'</div>'
+    + '<div style="font-size:10px;color:rgba(255,255,255,0.4);">'+nftType.charAt(0).toUpperCase()+nftType.slice(1)+' Camera</div></div>'
+    + '</div>';
 }
