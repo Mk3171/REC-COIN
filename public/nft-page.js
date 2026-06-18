@@ -213,7 +213,15 @@ function openCollectionStore() {
 
 function connectWalletNFT() {
   connectWallet();
-  setTimeout(function(){ renderNFTPage(); }, 1500);
+  // Listen for wallet connection and refresh page
+  var checkInterval = setInterval(function() {
+    if (typeof tonConnect !== 'undefined' && tonConnect && tonConnect.connected) {
+      clearInterval(checkInterval);
+      setTimeout(function(){ renderNFTPage(); }, 500);
+    }
+  }, 500);
+  // Stop checking after 30 seconds
+  setTimeout(function(){ clearInterval(checkInterval); }, 30000);
 }
 
 function openNFTPage() {
