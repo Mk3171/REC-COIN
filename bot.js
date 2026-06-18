@@ -1508,13 +1508,18 @@ const REC_NFT_TYPES = [
 ];
 
 async function uploadNFTMetadata(metadata) {
-  const res = await axios_nft.post('https://api.pinata.cloud/pinning/pinJSONToIPFS', metadata, {
+  const FormData = require('form-data');
+  const form = new FormData();
+  const jsonBlob = Buffer.from(JSON.stringify(metadata));
+  form.append('file', jsonBlob, { filename: 'metadata.json', contentType: 'application/json' });
+  form.append('name', metadata.name);
+  const res = await axios_nft.post('https://uploads.pinata.cloud/v3/files', form, {
     headers: {
       'Authorization': `Bearer ${process.env.PINATA_JWT}`,
-      'Content-Type': 'application/json'
+      ...form.getHeaders()
     }
   });
-  return res.data.IpfsHash;
+  return res.data.data.cid;
 }
 
 app.post('/api/admin/mint-nfts', async (req, res) => {
