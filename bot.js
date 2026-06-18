@@ -127,7 +127,9 @@ const UserSchema = new mongoose.Schema({
   totalRefCommission: { type: Number, default: 0 },
   comboProgress:   { type: Object, default: { date: '', done: [], claimed: false } },
   weeklyPrize:     { type: Object, default: { rank: 0, amount: 0, week: '', claimed: false } },
-  vip:             { type: Object, default: { tier: 0, expiry: 0, boxes: {}, txId: '', boostDate: '', boost2Date: '' } }
+  vip:             { type: Object, default: { tier: 0, expiry: 0, boxes: {}, txId: '', boostDate: '', boost2Date: '' } },
+  nftBoost:        { type: Number, default: 1 },
+  nftType:         { type: String, default: '' }
 });
 
 const User = mongoose.model('User', UserSchema);
@@ -1120,9 +1122,11 @@ app.post('/api/user/offline-earnings', async (req, res) => {
     const seconds = Math.min(elapsed, 86400);
 
     // ✅ FIX: Use calcMiningSpeed from cardLevels as fallback when miningSpeed = 0
-    const speed = user.miningSpeed > 0
+    const baseSpeed = user.miningSpeed > 0
       ? user.miningSpeed
       : calcMiningSpeed(user.cardLevels || {});
+    const nftMult = user.nftBoost && user.nftBoost > 1 ? user.nftBoost : 1;
+    const speed = baseSpeed * nftMult;
 
     const recordSpeed = user.recordMiningSpeed > 0
       ? user.recordMiningSpeed
@@ -1469,11 +1473,86 @@ app.get('/api/leaderboard/airdrop', async (req, res) => {
   } catch(e) { res.json([]); }
 });
 
+
+// ====== NFT BOOST SYSTEM ======
+const NFT_ITEMS = {
+  'EQAPhUrnqedcEe7RNJiIxkey21_z-So9xO12jDBffinbCPX-': { type: 'shadow',  boost: 3  },
+  'EQBNpwBS0LTwprDCuMtcfdeFdm_urAtkSZjJoyrmYfV2DqCo': { type: 'neon',    boost: 4  },
+  'EQDLk0aUz0ZocdD1M2KjVOmxTBvl1XibXBTei9PAO4_pGI4g': { type: 'inferno', boost: 5  },
+  'EQBFw_-3113QQFrST0roZMYbjtgER8RchlbmIH7Y0bPTt8PD': { type: 'crystal', boost: 10 }
+};
+
+async function checkNFTOwnership(walletAddress) {
+  if (!walletAddress) return { boost: 1, type: '' };
+  try {
+    const TONCENTER = process.env.TONCENTER_API_KEY || '';
+    const apiUrl = `https://toncenter.com/api/v2/getNftItemsByOwnerAddress?address=${encodeURIComponent(walletAddress)}&limit=50${TONCENTER ? '&api_key=' + TONCENTER : ''}`;
+    const data = await new Promise((resolve) => {
+      https.get(apiUrl, (res) => {
+        let raw = '';
+        res.on('data', c => raw += c);
+        res.on('end', () => { try { resolve(JSON.parse(raw)); } catch(e) { resolve(null); } });
+      }).on('error', () => resolve(null));
+    });
+    if (!data) return { boost: 1, type: '' };
+    if (!data.result || !Array.isArray(data.result)) return { boost: 1, type: '' };
+    
+    let bestBoost = 1;
+    let bestType = '';
+    for (const nft of data.result) {
+      const addr = nft.address;
+      if (NFT_ITEMS[addr]) {
+        if (NFT_ITEMS[addr].boost > bestBoost) {
+          bestBoost = NFT_ITEMS[addr].boost;
+          bestType = NFT_ITEMS[addr].type;
+        }
+      }
+    }
+    return { boost: bestBoost, type: bestType };
+  } catch(e) {
+    console.log('[NFT Check] Error:', e.message);
+    return { boost: 1, type: '' };
+  }
+}
+
+// API: Verify NFT and update user boost
+app.post('/api/nft/verify', async (req, res) => {
+  try {
+    const { telegramId } = req.body;
+    if (!telegramId) return res.json({ ok: false });
+    
+    const user = await User.findOne({ telegramId: parseInt(telegramId) });
+    if (!user || !user.walletAddress) return res.json({ ok: false, error: 'No wallet connected' });
+    
+    const result = await checkNFTOwnership(user.walletAddress);
+    
+    await User.findOneAndUpdate(
+      { telegramId: parseInt(telegramId) },
+      { nftBoost: result.boost, nftType: result.type }
+    );
+    
+    console.log(`[NFT] User ${telegramId}: ${result.type || 'none'} boost=${result.boost}x`);
+    res.json({ ok: true, boost: result.boost, type: result.type });
+  } catch(e) {
+    res.json({ ok: false, error: e.message });
+  }
+});
+
+// API: Get user NFT status
+app.get('/api/nft/status/:telegramId', async (req, res) => {
+  try {
+    const user = await User.findOne({ telegramId: parseInt(req.params.telegramId) });
+    if (!user) return res.json({ boost: 1, type: '' });
+    res.json({ boost: user.nftBoost || 1, type: user.nftType || '', wallet: user.walletAddress || '' });
+  } catch(e) {
+    res.json({ boost: 1, type: '' });
+  }
+});
+
 app.post('/webhook', (req, res) => { bot.processUpdate(req.body); res.sendStatus(200); });
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'index.html')); });
 app.use(express.static(path.join(__dirname, 'public')));
 
-const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   // ====== SET WEBHOOK via Telegram API directly ======
