@@ -17,17 +17,17 @@ var SOUNDS = {
   'nft':         '/Sounds/nft.mp3',
   'shop':        '/Sounds/shop.mp3',
   'airdrop':     '/Sounds/airdrop.mp3',
-  'rank':        '/Sounds/leaderboard.mp3'
+  'rank':        '/Sounds/leaderboard.mp3',
+  'games':       '/Sounds/game1.mp3',
+  'game2':       '/Sounds/game2.mp3'
 };
 
 function playPageSound(pageId) {
   if (!soundEnabled) return;
   var src = SOUNDS[pageId];
-  if (!src) { stopSound(); return; }
+  if (!src) return;
   if (currentSoundPage === pageId && currentAudio && !currentAudio.paused) return;
-
   stopSound();
-
   try {
     var audio = new Audio(src);
     audio.loop = true;
@@ -63,20 +63,45 @@ function toggleSound() {
   else { playPageSound(currentSoundPage || 'home'); }
 }
 
-// Hook into navigation WITHOUT overriding showPage
-document.addEventListener('click', function(e) {
-  var btn = e.target.closest('[onclick]');
-  if (!btn) return;
-  var fn = btn.getAttribute('onclick') || '';
-  var match = fn.match(/showPage\(['"](\w+)['"]/);
-  if (match) {
-    setTimeout(function() { playPageSound(match[1]); }, 50);
-  }
-}, true);
-
-// Init
+// Wrap all navigation functions after page loads
 window.addEventListener('load', function() {
+  // Sound button
   var btn = document.getElementById('soundToggleBtn');
   if (btn) btn.textContent = soundEnabled ? '🔊' : '🔇';
+
+  // Wrap showPage
+  if (typeof showPage === 'function') {
+    var _orig = showPage;
+    window.showPage = function(id, el) {
+      _orig(id, el);
+      playPageSound(id);
+    };
+  }
+
+  // Wrap each navigation function
+  var fnMap = {
+    'openVIP':        'vip',
+    'openNFTPage':    'nft',
+    'openDailyLogin': 'daily',
+    'openUpgrade':    'upgradePage',
+    'openExchange':   'exchange',
+    'openStarsShop':  'shop',
+    'openAirdrop':    'airdrop',
+    'openGames':      'games',
+    'openNFTPage':    'nft'
+  };
+
+  Object.keys(fnMap).forEach(function(fnName) {
+    if (typeof window[fnName] === 'function') {
+      var _orig = window[fnName];
+      var soundId = fnMap[fnName];
+      window[fnName] = function() {
+        _orig.apply(this, arguments);
+        playPageSound(soundId);
+      };
+    }
+  });
+
+  // Start home sound
   setTimeout(function() { playPageSound('home'); }, 800);
 });
