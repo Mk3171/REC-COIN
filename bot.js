@@ -1510,8 +1510,7 @@ const REC_NFT_TYPES = [
 async function uploadNFTMetadata(metadata) {
   const res = await axios_nft.post('https://api.pinata.cloud/pinning/pinJSONToIPFS', metadata, {
     headers: {
-      'pinata_api_key': process.env.PINATA_API_KEY,
-      'pinata_secret_api_key': process.env.PINATA_SECRET,
+      'Authorization': `Bearer ${process.env.PINATA_JWT}`,
       'Content-Type': 'application/json'
     }
   });
@@ -1528,8 +1527,7 @@ app.post('/api/admin/mint-nfts', async (req, res) => {
   try {
     const TON_MNEMONIC = process.env.TON_MNEMONIC || process.env.BOT_WALLET_MNEMONIC || process.env.NEMONIC;
     if (!TON_MNEMONIC) return res.json({ error: 'TON_MNEMONIC not set in Render env vars', logs });
-    if (!process.env.PINATA_API_KEY) return res.json({ error: 'PINATA_API_KEY not set', logs });
-    if (!process.env.PINATA_SECRET) return res.json({ error: 'PINATA_SECRET not set', logs });
+    if (!process.env.PINATA_JWT) return res.json({ error: 'PINATA_JWT not set', logs });
 
     const client = new TonClient({
       endpoint: 'https://toncenter.com/api/v2/jsonRPC',
