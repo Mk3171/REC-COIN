@@ -312,6 +312,10 @@ function openGameFromHub(gameId){
   ov.appendChild(cb);ov.appendChild(iframe);document.body.appendChild(ov);
 }
 
+function openNFTPage(){
+  window.location.href = '/nft.html';
+}
+
 function showPage(id,btn){
   document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active');});
   document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active');});
