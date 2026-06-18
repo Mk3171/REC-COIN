@@ -1530,7 +1530,24 @@ app.post('/api/admin/mint-nfts', async (req, res) => {
 
     const mnemonicArray = TON_MNEMONIC.trim().split(' ');
     const keyPair = await mnemonicToPrivateKey(mnemonicArray);
-    const wallet = client.open(WalletContractV4.create({ publicKey: keyPair.publicKey, workchain: 0 }));
+    
+    // Auto-detect wallet version (same as withdraw.js)
+    const TARGET = 'UQD-FoGlRG5pBxZpkf3H9ZOsNTL5basBbTEZE8zvMgHLB99o';
+    const versions = ['WalletContractV5R1','WalletContractV5Beta','WalletContractV4','WalletContractV3R2'];
+    let walletContract = null;
+    for (const ver of versions) {
+      try {
+        if (tonLib[ver]) {
+          const w = tonLib[ver].create({ publicKey: keyPair.publicKey, workchain: 0 });
+          const addr = w.address.toString({ urlSafe: true, bounceable: false });
+          log(ver + ' → ' + addr);
+          if (addr === TARGET) { walletContract = w; log('✅ Matched: ' + ver); break; }
+        }
+      } catch(e) {}
+    }
+    if (!walletContract) return res.json({ error: 'No wallet version matched ' + TARGET, logs });
+    
+    const wallet = client.open(walletContract);
     const ownerAddress = wallet.address.toString({ bounceable: false });
     log('✅ Wallet: ' + ownerAddress);
 
