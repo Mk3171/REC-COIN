@@ -1549,6 +1549,119 @@ app.get('/api/nft/status/:telegramId', async (req, res) => {
   }
 });
 
+
+// ====== NFT BATCH MINT (test batch) ======
+const { TonClient: TonClientMint, internal: internalMint, toNano: toNanoMint, beginCell: beginCellMint, Address: AddressMint } = require('@ton/ton');
+const tonLibMint = require('@ton/ton');
+
+const MINT_COLLECTION = 'EQC_gZR0JaGya8i_P9Lj4VZyfK3pnU5sYp9sJJpVUALYVhoV';
+const MINT_TARGET_WALLET = 'UQD-FoGlRG5pBxZpkf3H9ZOsNTL5basBbTEZE8zvMgHLB99o';
+
+const MINT_NFT_TYPES = [
+  {
+    name: 'Inferno', count: 3, startNum: 2,
+    imageCID: 'bafybeicf65yugcyej7any6hhpwjh2jkcr4gdfffyne47vgbh6awaxfsxnm',
+    description: 'Born from fire. The Inferno Camera burns through limits and mines at legendary speed. Holders get x5 Mining Speed in REC Mining Bot.',
+    attributes: [{ trait_type:'Boost', value:'x5 Mining Speed' },{ trait_type:'Rarity', value:'Legendary' },{ trait_type:'Type', value:'Inferno Camera' }]
+  }
+];
+
+app.post('/api/admin/mint-nfts-v2', async (req, res) => {
+  const { secret } = req.body;
+  if (secret !== 'REC-MINT-2025') return res.status(403).json({ error: 'Unauthorized' });
+
+  const logs = [];
+  const log = (msg) => { console.log(msg); logs.push(msg); };
+
+  try {
+    const TON_MNEMONIC = process.env.BOT_WALLET_MNEMONIC || process.env.TON_MNEMONIC;
+    if (!TON_MNEMONIC) return res.json({ error: 'BOT_WALLET_MNEMONIC not set', logs });
+
+    const client = new TonClientMint({
+      endpoint: 'https://toncenter.com/api/v2/jsonRPC',
+      apiKey: process.env.TONCENTER_API_KEY || ''
+    });
+
+    const mnemonicArray = TON_MNEMONIC.trim().split(' ');
+    const keyPair = await mnemonicToPrivateKey(mnemonicArray);
+
+    // Auto-detect correct wallet version (same logic as withdraw.js)
+    const versions = ['WalletContractV5R1','WalletContractV5Beta','WalletContractV4','WalletContractV3R2'];
+    let walletContract = null;
+    for (const ver of versions) {
+      try {
+        if (tonLibMint[ver]) {
+          const w = tonLibMint[ver].create({ publicKey: keyPair.publicKey, workchain: 0 });
+          const addr = w.address.toString({ urlSafe: true, bounceable: false });
+          log(ver + ' → ' + addr);
+          if (addr === MINT_TARGET_WALLET) { walletContract = w; log('✅ Matched: ' + ver); break; }
+        }
+      } catch(e) {}
+    }
+    if (!walletContract) return res.json({ error: 'No wallet version matched ' + MINT_TARGET_WALLET, logs });
+
+    const wallet = client.open(walletContract);
+    const ownerAddress = wallet.address.toString({ bounceable: false });
+    log('✅ Wallet ready: ' + ownerAddress);
+
+    let itemIndex = 4; // 0-3 already manually minted
+    let totalMinted = 0;
+
+    for (const nftType of MINT_NFT_TYPES) {
+      log('🎯 Minting ' + nftType.count + 'x ' + nftType.name);
+      for (let i = 0; i < nftType.count; i++) {
+        const num = nftType.startNum + i;
+        try {
+          const metadata = {
+            name: 'REC Camera: ' + nftType.name + ' #' + num,
+            description: nftType.description,
+            image: 'https://ipfs.io/ipfs/' + nftType.imageCID,
+            attributes: nftType.attributes
+          };
+
+          // Use image CID directly (no Pinata metadata upload needed)
+          const nftContent = beginCellMint()
+            .storeUint(0x01, 8)
+            .storeStringTail('https://ipfs.io/ipfs/' + nftType.imageCID)
+            .endCell();
+
+          const nftItemData = beginCellMint()
+            .storeAddress(AddressMint.parse(ownerAddress))
+            .storeRef(nftContent)
+            .endCell();
+
+          const mintBody = beginCellMint()
+            .storeUint(1, 32)
+            .storeUint(Date.now() % 0xFFFFFFFF, 64)
+            .storeUint(itemIndex, 64)
+            .storeCoins(toNanoMint('0.05'))
+            .storeRef(nftItemData)
+            .endCell();
+
+          const seqno = await wallet.getSeqno();
+          await wallet.sendTransfer({
+            secretKey: keyPair.secretKey,
+            seqno,
+            messages: [internalMint({ to: AddressMint.parse(MINT_COLLECTION), value: toNanoMint('0.07'), body: mintBody })]
+          });
+
+          log('[' + (i+1) + '/' + nftType.count + '] ✅ ' + nftType.name + ' #' + num + ' minted (index ' + itemIndex + ')');
+          itemIndex++;
+          totalMinted++;
+          await new Promise(r => setTimeout(r, 15000));
+        } catch(e) {
+          log('[' + (i+1) + '/' + nftType.count + '] ❌ Error: ' + e.message);
+          itemIndex++;
+        }
+      }
+    }
+
+    res.json({ success: true, totalMinted, logs });
+  } catch(e) {
+    res.json({ error: e.message, logs });
+  }
+});
+
 app.post('/webhook', (req, res) => { bot.processUpdate(req.body); res.sendStatus(200); });
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'index.html')); });
 app.use(express.static(path.join(__dirname, 'public')));
