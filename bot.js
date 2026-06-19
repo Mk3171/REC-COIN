@@ -1553,6 +1553,7 @@ app.get('/api/nft/status/:telegramId', async (req, res) => {
 // ====== NFT BATCH MINT (test batch) ======
 const { TonClient: TonClientMint, internal: internalMint, toNano: toNanoMint, beginCell: beginCellMint, Address: AddressMint } = require('@ton/ton');
 const tonLibMint = require('@ton/ton');
+const { mnemonicToPrivateKey: mnemonicToPrivateKeyMint } = require('@ton/crypto');
 
 const MINT_COLLECTION = 'EQC_gZR0JaGya8i_P9Lj4VZyfK3pnU5sYp9sJJpVUALYVhoV';
 const MINT_TARGET_WALLET = 'UQD-FoGlRG5pBxZpkf3H9ZOsNTL5basBbTEZE8zvMgHLB99o';
@@ -1583,7 +1584,7 @@ app.post('/api/admin/mint-nfts-v2', async (req, res) => {
     });
 
     const mnemonicArray = TON_MNEMONIC.trim().split(' ');
-    const keyPair = await mnemonicToPrivateKey(mnemonicArray);
+    const keyPair = await mnemonicToPrivateKeyMint(mnemonicArray);
 
     // Auto-detect correct wallet version (same logic as withdraw.js)
     const versions = ['WalletContractV5R1','WalletContractV5Beta','WalletContractV4','WalletContractV3R2'];
