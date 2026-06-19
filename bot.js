@@ -1567,9 +1567,10 @@ const MINT_NFT_TYPES = [
   }
 ];
 
+app.get('/api/admin/mint-nfts-v2', async (req, res) => { return res.json({ hint: 'Use POST or add ?secret=REC-MINT-2025 to this URL' }); });
 app.post('/api/admin/mint-nfts-v2', async (req, res) => {
-  const { secret } = req.body;
-  if (secret !== 'REC-MINT-2025') return res.status(403).json({ error: 'Unauthorized' });
+  const secret = (req.body && req.body.secret) || req.query.secret;
+  if (secret !== 'REC-MINT-2025') return res.status(403).json({ error: 'Unauthorized', got: secret || null });
 
   const logs = [];
   const log = (msg) => { console.log(msg); logs.push(msg); };
