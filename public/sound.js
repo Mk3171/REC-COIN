@@ -3,6 +3,7 @@
 var soundEnabled = localStorage.getItem('soundEnabled') !== 'false';
 var currentAudio = null;
 var currentSoundPage = '';
+var soundToken = 0; // increments every time we request a new track
 
 var SOUNDS = {
   'home':        '/Sounds/home.mp3',
@@ -17,41 +18,76 @@ var SOUNDS = {
   'nft':         '/Sounds/nft.mp3',
   'shop':        '/Sounds/shop.mp3',
   'airdrop':     '/Sounds/airdrop.mp3',
-  'rank':        '/Sounds/leaderboard.mp3',
-  'games':       '/Sounds/game1.mp3',
-  'game2':       '/Sounds/game2.mp3'
+  'rank':        '/Sounds/leaderboard.mp3'
 };
 
-function playPageSound(pageId) {
-  if (!soundEnabled) return;
-  var src = SOUNDS[pageId];
-  if (!src) return;
-  if (currentSoundPage === pageId && currentAudio && !currentAudio.paused) return;
-  stopSound();
-  try {
-    var audio = new Audio(src);
-    audio.loop = true;
-    audio.volume = 0.35;
-    audio.play().then(function() {
-      currentAudio = audio;
-      currentSoundPage = pageId;
-    }).catch(function() {
-      currentAudio = audio;
-      currentSoundPage = pageId;
-      document.addEventListener('touchstart', function once() {
-        if (currentAudio) currentAudio.play().catch(function(){});
-        document.removeEventListener('touchstart', once);
-      }, { once: true });
-    });
-  } catch(e) {}
-}
+var GAME_SOUNDS = {
+  1: '/Sounds/game1.mp3',
+  2: '/Sounds/game2.mp3'
+};
 
 function stopSound() {
   if (currentAudio) {
     try { currentAudio.pause(); currentAudio.currentTime = 0; } catch(e) {}
-    currentAudio = null;
-    currentSoundPage = '';
   }
+  currentAudio = null;
+  currentSoundPage = '';
+}
+
+function _startTrack(src, pageId) {
+  if (!soundEnabled) return;
+  if (currentSoundPage === pageId && currentAudio && !currentAudio.paused) return;
+
+  stopSound();
+  soundToken++;
+  var myToken = soundToken;
+
+  var audio = new Audio(src);
+  audio.loop = true;
+  audio.volume = 0.35;
+
+  var playPromise = audio.play();
+  if (playPromise !== undefined) {
+    playPromise.then(function() {
+      // Only adopt as "current" if nothing newer has been requested
+      if (myToken === soundToken) {
+        currentAudio = audio;
+        currentSoundPage = pageId;
+      } else {
+        try { audio.pause(); } catch(e) {}
+      }
+    }).catch(function() {
+      // Autoplay blocked - wait for ONE real user gesture, but verify
+      // this request is still the latest before playing.
+      var resume = function() {
+        document.removeEventListener('touchstart', resume);
+        document.removeEventListener('click', resume);
+        if (myToken !== soundToken) return; // superseded by a newer page - ignore
+        audio.play().then(function() {
+          if (myToken === soundToken) {
+            currentAudio = audio;
+            currentSoundPage = pageId;
+          } else {
+            try { audio.pause(); } catch(e) {}
+          }
+        }).catch(function(){});
+      };
+      document.addEventListener('touchstart', resume, { once: true });
+      document.addEventListener('click', resume, { once: true });
+    });
+  }
+}
+
+function playPageSound(pageId) {
+  var src = SOUNDS[pageId];
+  if (!src) return;
+  _startTrack(src, pageId);
+}
+
+function playGameSound(gameNum) {
+  var src = GAME_SOUNDS[gameNum];
+  if (!src) return;
+  _startTrack(src, 'game' + gameNum);
 }
 
 function toggleSound() {
@@ -59,26 +95,27 @@ function toggleSound() {
   localStorage.setItem('soundEnabled', soundEnabled ? 'true' : 'false');
   var btn = document.getElementById('soundToggleBtn');
   if (btn) btn.textContent = soundEnabled ? '🔊' : '🔇';
-  if (!soundEnabled) { stopSound(); }
-  else { playPageSound(currentSoundPage || 'home'); }
+  if (!soundEnabled) {
+    soundToken++; // invalidate any pending track
+    stopSound();
+  } else {
+    playPageSound(currentSoundPage || 'home');
+  }
 }
 
-// Wrap all navigation functions after page loads
+// Wrap navigation functions once page is ready
 window.addEventListener('load', function() {
-  // Sound button
   var btn = document.getElementById('soundToggleBtn');
   if (btn) btn.textContent = soundEnabled ? '🔊' : '🔇';
 
-  // Wrap showPage
   if (typeof showPage === 'function') {
-    var _orig = showPage;
+    var _origShowPage = showPage;
     window.showPage = function(id, el) {
-      _orig(id, el);
+      _origShowPage(id, el);
       playPageSound(id);
     };
   }
 
-  // Wrap each navigation function
   var fnMap = {
     'openVIP':        'vip',
     'openNFTPage':    'nft',
@@ -86,9 +123,10 @@ window.addEventListener('load', function() {
     'openUpgrade':    'upgradePage',
     'openExchange':   'exchange',
     'openStarsShop':  'shop',
-    'openAirdrop':    'airdrop',
-    'openGames':      'games',
-    'openNFTPage':    'nft'
+    'openAirdrop':    'airdrop'
+    // NOTE: openGames intentionally NOT mapped — sound should only
+    // start once a specific game is picked (handled by the game
+    // iframe itself calling parent.playGameSound()).
   };
 
   Object.keys(fnMap).forEach(function(fnName) {
@@ -102,6 +140,5 @@ window.addEventListener('load', function() {
     }
   });
 
-  // Start home sound
   setTimeout(function() { playPageSound('home'); }, 800);
 });
