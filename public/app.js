@@ -325,6 +325,7 @@ function showPage(id,btn){
   if(btn) btn.classList.add('active'); closeLangMenu();
   if(id==='rank') loadLeaderboard('global');
   if(id==='profile') loadProfilePhoto();
+  if(id==='cards') loadComboInCards();
 }
 function openUpgrade(){updateUpgradeUI();document.getElementById('upgradePage').classList.add('open');}
 
@@ -767,7 +768,7 @@ function claimCombo() {
 
 // Called when a card is upgraded — checks against combo
 function checkComboOnUpgrade(cardKey) {
-  if(!tgUser || !comboData || !comboData.exists) return;
+  if(!tgUser) return;
   fetch('/api/combo/check', {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
@@ -781,7 +782,8 @@ function checkComboOnUpgrade(cardKey) {
         saveData(true); updateUI();
         showToast('🎉 أكملت الكومبو! +' + d.reward + ' REC');
       }
-      loadComboData(); // refresh combo display
+      if(comboData) loadComboData(); // refresh popup combo display if it was open
+      loadComboInCards(); // refresh the combo slots shown on the Cards page
     }
   }).catch(function(){});
 }
