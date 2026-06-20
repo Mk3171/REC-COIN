@@ -162,7 +162,7 @@ const WeeklyChallenge = mongoose.model('WeeklyChallenge', WeeklySchema);
 const DailyComboSchema = new mongoose.Schema({
   date:   { type: String, required: true, unique: true },
   cards:  [{ key: String, categoryIndex: Number, cardIndex: Number }],
-  reward: { type: Number, default: 5 }
+  reward: { type: Number, default: 10 }
 });
 const DailyCombo = mongoose.model('DailyCombo', DailyComboSchema);
 
@@ -1035,7 +1035,7 @@ app.get('/api/combo/today/:telegramId', async (req, res) => {
     var today = new Date().toISOString().split('T')[0];
     var combo = await DailyCombo.findOne({ date: today });
     var isAdmin = parseInt(req.params.telegramId) === ADMIN_ID;
-    if(!combo) return res.json({ exists: false, cards: [], reward: 5, setAt: null, expiresAt: null });
+    if(!combo) return res.json({ exists: false, cards: [], reward: 10, setAt: null, expiresAt: null });
 
     var user = await User.findOne({ telegramId: parseInt(req.params.telegramId) })
       .select('cardLevels comboProgress');
@@ -1193,7 +1193,7 @@ app.post('/api/combo/set', async (req, res) => {
     var today = new Date().toISOString().split('T')[0];
     await DailyCombo.findOneAndUpdate(
       { date: today },
-      { $set: { cards: cards, reward: 5, setAt: Date.now() } },
+      { $set: { cards: cards, reward: 10, setAt: Date.now() } },
       { upsert: true, new: true }
     );
     res.json({ success: true, date: today });
@@ -1729,13 +1729,13 @@ async function pickAndSetDailyCombo() {
       var idx = Math.floor(Math.random() * pool.length);
       picked.push(pool.splice(idx,1)[0]);
     }
-    var combo = await DailyCombo.create({ date: today, cards: picked, reward: 5 });
+    var combo = await DailyCombo.create({ date: today, cards: picked, reward: 10 });
     console.log('[Combo] ✅ Set for', today, ':', picked.map(c=>c.key).join(', '));
 
     // Send hint to channel t.me/Momokh1 — first card emoji only
     try {
       var catNames = ['Anime','Cars','Clubs','Palaces'];
-      var hint = '🎯 Daily Combo hint — ' + today + '\nFirst card category: *' + catNames[picked[0].categoryIndex] + '*\nFind all 3 to earn +5 REC!';
+      var hint = '🎯 Daily Combo hint — ' + today + '\nFirst card category: *' + catNames[picked[0].categoryIndex] + '*\nFind all 3 to earn +10 REC!';
       await bot.sendMessage('@Momokh1', hint, { parse_mode: 'Markdown' });
       console.log('[Combo] Channel hint sent');
     } catch(e) { console.log('[Combo] Channel error:', e.message); }
@@ -1753,7 +1753,7 @@ async function pickAndSetDailyCombo() {
           '1️⃣ ' + cn[picked[0].categoryIndex] + ' #' + cardNums[0] + '\n' +
           '2️⃣ ' + cn[picked[1].categoryIndex] + ' #' + cardNums[1] + '\n' +
           '3️⃣ ' + cn[picked[2].categoryIndex] + ' #' + cardNums[2] + '\n\n' +
-          '💰 Reward: +5 REC';
+          '💰 Reward: +10 REC';
         await bot.sendMessage(u.telegramId, msg);
         sent++;
         await new Promise(r=>setTimeout(r,80));
