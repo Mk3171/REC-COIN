@@ -703,7 +703,7 @@ function openRECInfo() {
       '</div>') +
 
     _infoCard('#FF6644','🏆', t('recBlocks'), '', t('recBlocksDesc')) +
-    _infoCard('#FFD700','🎯', t('recDailyCombo'), '+5 REC', t('recDailyComboDesc')) +
+    _infoCard('#FFD700','🎯', t('recDailyCombo'), '+10 REC', t('recDailyComboDesc')) +
 
     _infoCard('#44CCFF','👥', t('recReferrals'), '',
       t('recReferralsDesc') +
