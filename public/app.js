@@ -95,7 +95,7 @@ var defaultData={record:0,rec:0,energy:1000,maxEnergy:1000,
   tapLevelVal:0,energyLevelVal:0,tapPowerVal:1,
   completedTasks:[],cardLevels:{},cardUpgrades:{},refCount:0,claimedMilest:[],
   dailyLogin:{day:0,lastDate:''},mysteryLastDate:'',
-  dailyTasksData:{date:'',done:[],taps:0,upgrades:0,spent:0,sideDaily:'每日',sideRank:'排名',sideGames:'游戏',sideCombo:'组合',sideUpgrade:'升级',sideShop:'商店',navGames:'游戏',navWallet:'钱包',qbTasks:'任务',qbExchange:'兑换',qbSwap:'交换',recordLabel:'记录',recLabel:'REC',energyFull:'满能量',walletTitle:'钱包',walletId:'ID',comboTitle:'每日组合',comboSubtitle:'升级3张每日卡片并获得奖励！',comboReward:'每日奖励',comboClaim:'领取 +5 REC 🎉',comboClaimed:'✅ 今天已领取奖励！'},
+  dailyTasksData:{date:'',done:[],taps:0,upgrades:0,spent:0,sideDaily:'每日',sideRank:'排名',sideGames:'游戏',sideCombo:'组合',sideUpgrade:'升级',sideShop:'商店',navGames:'游戏',navWallet:'钱包',qbTasks:'任务',qbExchange:'兑换',qbSwap:'交换',recordLabel:'记录',recLabel:'REC',energyFull:'满能量',walletTitle:'钱包',walletId:'ID',comboTitle:'每日组合',comboSubtitle:'升级3张每日卡片并获得奖励！',comboReward:'每日奖励',comboClaim:'领取 +10 REC 🎉',comboClaimed:'✅ 今天已领取奖励！'},
   cardTasksClaimed:[],totalTaps:0};
 var G=Object.assign({},defaultData);
 try{var ls=JSON.parse(localStorage.getItem(saveKey));if(ls)G=Object.assign({},defaultData,ls);}catch(e){}
@@ -568,7 +568,7 @@ function openRECInfo() {
       '</div>') +
 
     _infoCard('#FF6644','🏆', t('recBlocks'), '', t('recBlocksDesc')) +
-    _infoCard('#FFD700','🎯', t('recDailyCombo'), '+5 REC', t('recDailyComboDesc')) +
+    _infoCard('#FFD700','🎯', t('recDailyCombo'), '+10 REC', t('recDailyComboDesc')) +
 
     _infoCard('#44CCFF','👥', t('recReferrals'), '',
       t('recReferralsDesc') +
@@ -758,10 +758,11 @@ function getCardInfo(catIdx, cardIdx) {
 function claimCombo() {
   if(!tgUser || !comboData) return;
   // Reward is given server-side automatically when all cards done
+  var rwd = (comboData && comboData.reward) || 10;
   document.getElementById('comboClaimArea').style.display = 'none';
   document.getElementById('comboClaimed').style.display = 'block';
-  showToast('🎉 حصلت على +5 REC!');
-  rec += 5;
+  showToast('🎉 حصلت على +' + rwd + ' REC!');
+  rec += rwd;
   if(typeof addXP==='function') addXP(100);
   saveData(true); updateUI();
 }
