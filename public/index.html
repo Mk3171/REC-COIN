@@ -207,10 +207,11 @@ function closeSideMenu(){
             </div>
           </div>
 
-          <!-- CENTER: circle -->
+          <!-- CENTER: animated inferno camera -->
           <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding:0 4px;">
-            <button class="camera-btn" onclick="tap()" style="width:min(58vw,210px);height:min(58vw,210px);">
-              <img src="logo.jpeg" alt="REC" style="width:100%;height:100%;object-fit:cover;border-radius:50%;pointer-events:none;">
+            <button class="camera-btn" onclick="tap()" style="width:min(58vw,210px);height:min(58vw,210px);background:transparent;border:none;position:relative;">
+              <img id="infernoCameraImg" src="inferno-camera.png" alt="REC" style="width:100%;height:100%;object-fit:contain;pointer-events:none;position:relative;z-index:2;">
+              <canvas id="sparkCanvas" style="position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:3;"></canvas>
             </button>
           </div>
 
@@ -1135,4 +1136,5 @@ function closeSideMenu(){
 
 <script src="nft-page.js"></script>
 <script src="sound.js"></script>
+<script src="inferno-camera.js"></script>
 </body>
