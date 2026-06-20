@@ -798,22 +798,25 @@ function renderComboInCards() {
   var isAdmin = tgUser && String(tgUser.id) === '6995765586';
   var showNames = isVip1 || isAdmin;
   var cards = _comboData.cards || [{},{},{}];
-  var done = _comboData.progress || [];
   var claimed = _comboData.rewardClaimed;
 
   for(var i=0; i<3; i++) {
     var slot = document.getElementById('comboSlot'+i);
     if(!slot) continue;
     var card = cards[i];
-    var isDone = done.indexOf(card.key) !== -1;
+    var isDone = !!card.done; // server already tells us per-card if it's been upgraded today
     slot.className = 'combo-slot' + (isDone ? ' found' : '');
+
+    // Resolve the REAL card name/emoji (same lookup the VIP hint uses) so both
+    // screens always show the same card, instead of the server's generic placeholder.
+    var info = (card.key && card.categoryIndex !== undefined) ? getCardInfo(card.categoryIndex, card.cardIndex) : null;
 
     if(!card.key) {
       slot.innerHTML = '<div style="font-size:24px;">🔒</div><div style="font-size:9px;color:rgba(255,255,255,0.3);">???</div>';
-    } else if(showNames && card.name) {
+    } else if(showNames && info) {
       slot.innerHTML =
-        '<div style="font-size:22px;">' + (isDone ? '✅' : card.emoji||'🃏') + '</div>' +
-        '<div style="font-size:8px;color:' + (isDone?'#00FF88':'#FFD700') + ';margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:80px;">' + card.name + '</div>' +
+        '<div style="font-size:22px;">' + (isDone ? '✅' : info.e) + '</div>' +
+        '<div style="font-size:8px;color:' + (isDone?'#00FF88':'#FFD700') + ';margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:80px;">' + info.name + '</div>' +
         (isDone ? '' : '<div style="font-size:8px;color:rgba(255,255,255,0.3);">Upgrade!</div>');
     } else {
       slot.innerHTML =
@@ -824,7 +827,7 @@ function renderComboInCards() {
 
   // Show claim button if all 3 found and not claimed
   var claimRow = document.getElementById('comboClaimRow');
-  if(claimRow) claimRow.style.display = (done.length >= 3 && !claimed) ? 'block' : 'none';
+  if(claimRow) claimRow.style.display = (_comboData.allDone && !claimed) ? 'block' : 'none';
 }
 
 function claimComboReward() {
@@ -835,8 +838,8 @@ function claimComboReward() {
     body: JSON.stringify({ telegramId: tgUser.id })
   }).then(function(r){ return r.json(); }).then(function(d){
     if(d.success) {
-      rec += d.reward || 5;
-      showToast('🎁 +' + (d.reward||5) + ' REC!');
+      rec += d.reward || 10;
+      showToast('🎁 +' + (d.reward||10) + ' REC!');
       _comboData.rewardClaimed = true;
       renderComboInCards();
       if(typeof saveData === 'function') saveData(true);
