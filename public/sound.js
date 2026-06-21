@@ -21,6 +21,14 @@ var SOUNDS = {
   'rank':        '/Sounds/leaderboard.mp3'
 };
 
+// Pages with more than one track: each time the page is (re)entered, the
+// NEXT track in the list plays (rotates), instead of always the same one.
+// To add more home tracks later, just add more file paths to this array —
+// e.g. add '/Sounds/home3.mp3' and upload that file.
+var SOUNDS_MULTI = {
+  'home': ['/Sounds/home.mp3', '/Sounds/home2.mp3']
+};
+
 var GAME_SOUNDS = {
   1: '/Sounds/game1.mp3',
   2: '/Sounds/game2.mp3'
@@ -78,8 +86,17 @@ function _startTrack(src, pageId) {
   }
 }
 
+function _nextMultiTrack(pageId, list) {
+  var key = 'soundIdx_' + pageId;
+  var last = parseInt(localStorage.getItem(key) || '-1', 10);
+  var next = (last + 1) % list.length;
+  localStorage.setItem(key, String(next));
+  return list[next];
+}
+
 function playPageSound(pageId) {
-  var src = SOUNDS[pageId];
+  var multiList = SOUNDS_MULTI[pageId];
+  var src = (multiList && multiList.length) ? _nextMultiTrack(pageId, multiList) : SOUNDS[pageId];
   if (!src) return;
   _startTrack(src, pageId);
 }
