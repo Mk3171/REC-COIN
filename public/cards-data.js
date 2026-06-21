@@ -240,6 +240,7 @@ function directUpgrade(ci, idx, event) {
   if(dailyTasksData.date!==today) resetDailyTasks(today);
   dailyTasksData.upgrades++; dailyTasksData.spent+=cost;
   checkDailyTaskProgress(); checkCardMissions();
+  checkComboOnUpgrade(key);  // Check if this card is part of daily combo
   saveData(true); updateUI();
   updateCardGridItem(key);
   showToast('⏳ ' + formatWait(wait));
