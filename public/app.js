@@ -817,13 +817,18 @@ function claimCombo() {
 
 // Called when a card is upgraded — checks against combo
 function checkComboOnUpgrade(cardKey) {
-  if(!tgUser) return;
+  if(!tgUser) { showToast('⚠️ DEBUG: no tgUser'); return; }
+  showToast('⚠️ DEBUG: sending check for ' + cardKey);
   fetch('/api/combo/check', {
     method: 'POST',
     headers: {'Content-Type':'application/json'},
     body: JSON.stringify({ telegramId: tgUser.id, cardKey: cardKey })
-  }).then(function(r){ return r.json(); })
+  }).then(function(r){
+    if(!r.ok) showToast('⚠️ DEBUG: HTTP ' + r.status);
+    return r.json();
+  })
   .then(function(d){
+    showToast('⚠️ DEBUG: matched=' + d.matched + ' done=' + d.done + ' err=' + (d.error||'-'));
     if(d.matched) {
       showToast('🎯 بطاقة كومبو! ' + d.done + '/3');
       if(d.allDone && d.reward > 0) {
@@ -834,7 +839,7 @@ function checkComboOnUpgrade(cardKey) {
       if(comboData) loadComboData(); // refresh popup combo display if it was open
       loadComboInCards(); // refresh the combo slots shown on the Cards page
     }
-  }).catch(function(){});
+  }).catch(function(e){ showToast('⚠️ DEBUG ERROR: ' + e.message); });
 }
 
 
