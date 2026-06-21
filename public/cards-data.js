@@ -794,9 +794,6 @@ function loadComboInCards() {
 
 function renderComboInCards() {
   if(!_comboData) return;
-  var isVip1 = vipData && parseInt(vipData.tier||0) >= 1 && parseInt(vipData.expiry||0) > Date.now();
-  var isAdmin = tgUser && String(tgUser.id) === '6995765586';
-  var showNames = isVip1 || isAdmin;
   var cards = _comboData.cards || [{},{},{}];
   var claimed = _comboData.rewardClaimed;
 
@@ -807,20 +804,17 @@ function renderComboInCards() {
     var isDone = !!card.done; // server already tells us per-card if it's been upgraded today
     slot.className = 'combo-slot' + (isDone ? ' found' : '');
 
-    // Resolve the REAL card name/emoji (same lookup the VIP hint uses) so both
-    // screens always show the same card, instead of the server's generic placeholder.
-    var info = (card.key && card.categoryIndex !== undefined) ? getCardInfo(card.categoryIndex, card.cardIndex) : null;
-
     if(!card.key) {
       slot.innerHTML = '<div style="font-size:24px;">🔒</div><div style="font-size:9px;color:rgba(255,255,255,0.3);">???</div>';
-    } else if(showNames && info) {
+    } else if(isDone) {
+      // Only reveal the real card name/emoji once the user has actually found it
+      var info = (card.categoryIndex !== undefined) ? getCardInfo(card.categoryIndex, card.cardIndex) : null;
       slot.innerHTML =
-        '<div style="font-size:22px;">' + (isDone ? '✅' : info.e) + '</div>' +
-        '<div style="font-size:8px;color:' + (isDone?'#00FF88':'#FFD700') + ';margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:80px;">' + info.name + '</div>' +
-        (isDone ? '' : '<div style="font-size:8px;color:rgba(255,255,255,0.3);">Upgrade!</div>');
+        '<div style="font-size:22px;">✅</div>' +
+        '<div style="font-size:8px;color:#00FF88;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:80px;">' + (info ? info.name : '') + '</div>';
     } else {
       slot.innerHTML =
-        '<div style="font-size:24px;">' + (isDone ? '✅' : '🔒') + '</div>' +
+        '<div style="font-size:24px;">🔒</div>' +
         '<div style="font-size:9px;color:rgba(255,255,255,0.3);">???</div>';
     }
   }
