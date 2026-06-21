@@ -340,12 +340,60 @@ function openUpgrade(){updateUpgradeUI();document.getElementById('upgradePage').
 
 // ====== HOME - TAP ======
 
+// ====== TAP BONUS MULTIPLIER SYSTEM ======
+// Every tap has a small random chance to roll a bonus multiplier (x2-x10).
+// Bigger multipliers are rarer (weighted). Each tier has its own color.
+var TAP_BONUS_CHANCE = 0.10; // 10% of taps roll a bonus
+var TAP_MULTIPLIERS = [
+  { m:2,  w:35, c:'#4CAF50' }, // green   - common
+  { m:3,  w:25, c:'#00BCD4' }, // cyan
+  { m:4,  w:15, c:'#2196F3' }, // blue
+  { m:5,  w:10, c:'#9C27B0' }, // purple
+  { m:6,  w:6,  c:'#E91E63' }, // pink
+  { m:7,  w:4,  c:'#FF5722' }, // deep orange
+  { m:8,  w:2.5,c:'#FF9800' }, // orange
+  { m:9,  w:1.5,c:'#F44336' }, // red
+  { m:10, w:1,  c:'mega'    }  // rarest - special gold/red shine style
+];
+
+function _rollTapMultiplier() {
+  var total = 0;
+  for(var i=0;i<TAP_MULTIPLIERS.length;i++) total += TAP_MULTIPLIERS[i].w;
+  var r = Math.random() * total;
+  for(var j=0;j<TAP_MULTIPLIERS.length;j++) {
+    if(r < TAP_MULTIPLIERS[j].w) return TAP_MULTIPLIERS[j];
+    r -= TAP_MULTIPLIERS[j].w;
+  }
+  return TAP_MULTIPLIERS[0];
+}
+
+function spawnTapFloatText(amount, mult) {
+  var btn = document.getElementById('cameraBtn');
+  if(!btn) return;
+  var el = document.createElement('div');
+  var isMega = mult && mult.m === 10;
+  el.className = 'tap-float' + (isMega ? ' tap-float-mega' : '');
+  el.textContent = (mult ? ('x' + mult.m + '  ') : '') + '+' + formatCost(amount);
+  if(!isMega) {
+    var color = mult ? mult.c : '#FFD700'; // normal taps default to gold
+    el.style.color = color;
+    el.style.textShadow = '0 0 8px ' + color + ', 0 0 16px ' + color;
+  }
+  var offsetX = Math.round(Math.random() * 50 - 25);
+  el.style.left = 'calc(50% + ' + offsetX + 'px)';
+  btn.appendChild(el);
+  setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 1100);
+}
+
 function tap(){
   var tapCost = Math.max(1, Math.floor(maxEnergy / 1000));
   if(energy < tapCost) return; // طاقة غير كافية — توقف
-  record += tapPowerVal;
+  var mult = (Math.random() < TAP_BONUS_CHANCE) ? _rollTapMultiplier() : null;
+  var gain = mult ? tapPowerVal * mult.m : tapPowerVal;
+  record += gain;
   energy = Math.max(0, energy - tapCost);
   totalTaps++;
+  spawnTapFloatText(gain, mult);
   var today=getTodayStr();
   if(dailyTasksData.date!==today) resetDailyTasks(today);
   dailyTasksData.taps++;
