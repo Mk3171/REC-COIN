@@ -794,7 +794,7 @@ function loadComboInCards() {
 
 function renderComboInCards() {
   if(!_comboData) return;
-  var cards = _comboData.cards || [{},{},{}];
+  var cards = (_comboData.cards && _comboData.cards.length === 3) ? _comboData.cards : [{},{},{}];
   var claimed = _comboData.rewardClaimed;
 
   for(var i=0; i<3; i++) {
