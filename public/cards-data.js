@@ -811,8 +811,9 @@ function renderComboInCards() {
       // Only reveal the real card name/emoji once the user has actually found it
       var info = (card.categoryIndex !== undefined) ? getCardInfo(card.categoryIndex, card.cardIndex) : null;
       slot.innerHTML =
-        '<div style="font-size:22px;">✅</div>' +
-        '<div style="font-size:8px;color:#00FF88;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:80px;">' + (info ? info.name : '') + '</div>';
+        '<div style="font-size:24px;">' + (info ? info.e : '🃏') + '</div>' +
+        '<div style="font-size:8px;color:#00FF88;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:80px;">' + (info ? info.name : '') + '</div>' +
+        '<div style="font-size:13px;margin-top:2px;">✅</div>';
     } else {
       slot.innerHTML =
         '<div style="font-size:24px;">🔒</div>' +
