@@ -250,6 +250,7 @@ var AIRDROP_LOCKED = false; // غيّرها لـ false عند الإطلاق
 var AIRDROP_DATE = new Date('2027-06-06T10:00:00Z'); // 12:00 ظهراً بتوقيت ألمانيا
 
 function openAirdrop() {
+  tryShowPassiveAd();
   if(AIRDROP_LOCKED) {
     _showAirdropCountdown();
     return;
