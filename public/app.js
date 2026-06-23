@@ -1391,6 +1391,19 @@ function adminGrantBonusSpins() {
   }).catch(function(){ if(el) el.textContent = '❌ Network error'; });
 }
 
+function adminUnbanAll() {
+  if(!tgUser) return;
+  var el = document.getElementById('adminUnbanStatus');
+  if(el) el.textContent = '⏳ Unbanning everyone...';
+  fetch('/api/admin/unban-all', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ adminId: tgUser.id })
+  }).then(function(r){ return r.json(); }).then(function(d){
+    if(el) el.textContent = d.success ? '✅ Unbanned ' + d.unbanned + ' accounts' : '❌ ' + d.error;
+  }).catch(function(){ if(el) el.textContent = '❌ Network error'; });
+}
+
 function adminLookupUser() {
   var uid = (document.getElementById('adminUserId')||{}).value;
   if(!uid || !tgUser) return;
