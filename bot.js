@@ -130,7 +130,8 @@ const UserSchema = new mongoose.Schema({
   vip:             { type: Object, default: { tier: 0, expiry: 0, boxes: {}, txId: '', boostDate: '', boost2Date: '' } },
   nftBoost:        { type: Number, default: 1 },
   nftType:         { type: String, default: '' },
-  wheelState:      { type: Object, default: { date: '', adsWatched: 0, spinsUsed: 0 } }
+  wheelState:      { type: Object, default: { date: '', adsWatched: 0, spinsUsed: 0 } },
+  bonusSpins:      { type: Number, default: 0 }
 });
 
 const User = mongoose.model('User', UserSchema);
@@ -322,7 +323,7 @@ bot.onText(/\/start(.*)/, async (msg, match) => {
           }
         }
       }
-      await new User({ telegramId: from.id, username: from.username || '', firstName: from.first_name || '', lastName: from.last_name || '', language: lang, referredBy: refId || '', referredByL2: l2Id, referredByL3: l3Id }).save();
+      await new User({ telegramId: from.id, username: from.username || '', firstName: from.first_name || '', lastName: from.last_name || '', language: lang, referredBy: refId || '', referredByL2: l2Id, referredByL3: l3Id, bonusSpins: 2 }).save();
       if (refId) {
         await User.findOneAndUpdate({ telegramId: parseInt(refId) }, { $inc: { refCount: 1 } });
         console.log('[Referral] ✅ NEW user', from.id, 'referred by', refId);
@@ -780,6 +781,9 @@ app.post('/api/user/save', async (req, res) => {
     const saveData = { ...data, lastSeen: new Date(), lastSaveTime: Date.now() };
     if(currentUser && currentUser.rec > (parseFloat(data.rec) || 0)) {
       saveData.rec = currentUser.rec; // السيرفر عنده أكثر، احتفظ بقيمته
+    }
+    if(!currentUser) {
+      saveData.bonusSpins = 2; // welcome gift: 2 free wheel spins for every brand-new user
     }
 
     const updated = await User.findOneAndUpdate(
@@ -1250,8 +1254,9 @@ app.post('/api/combo/check', async (req, res) => {
 // would suggest (since they only get evaluated in the remaining probability space).
 // Big prizes (3MRD/10MRD/1 Trillion) pay out in RECORD (which already deals in
 // billions/trillions in normal gameplay). Smaller ones pay out in REC.
+// 'extra_spin' costs nothing — it just refunds the attempt the player just used.
 var WHEEL_SEQUENCE = [
-  { outcome:'no_luck',   chance:0.50    },
+  { outcome:'extra_spin',chance:0.50    },
   { outcome:'3mrd',      chance:0.10    },
   { outcome:'20rec',     chance:0.30    },
   { outcome:'no_luck',   chance:0.50    },
@@ -1266,6 +1271,7 @@ var WHEEL_SEQUENCE = [
 ];
 var WHEEL_REWARDS = {
   no_luck:    { currency: null,     amount: 0 },
+  extra_spin: { currency: null,     amount: 0 },
   '3mrd':     { currency: 'record', amount: 3000000000 },
   '20rec':    { currency: 'rec',    amount: 20 },
   '50rec':    { currency: 'rec',    amount: 50 },
@@ -1276,10 +1282,11 @@ var WHEEL_REWARDS = {
   '5000rec':  { currency: 'rec',    amount: 5000 },
   '50000rec': { currency: 'rec',    amount: 50000 }
 };
-// 15 visual wedges for the wheel graphic (6x no_luck + 9 distinct prizes), used
-// purely for the spin animation — the actual outcome is decided by WHEEL_SEQUENCE.
+// 15 visual wedges for the wheel graphic (5x no_luck + 1x extra_spin + 9 distinct
+// prizes), used purely for the spin animation — the actual outcome is decided by
+// WHEEL_SEQUENCE.
 var WHEEL_VISUAL_WEDGES = [
-  'no_luck','3mrd','20rec','no_luck','50rec','10mrd',
+  'extra_spin','3mrd','20rec','no_luck','50rec','10mrd',
   'no_luck','200rec','500rec','no_luck','5000rec','no_luck',
   '1trillion','50000rec','no_luck'
 ];
@@ -1310,16 +1317,18 @@ function getFreshWheelState(user) {
 // GET current wheel status for a user (resets daily counters if it's a new day)
 app.get('/api/wheel/status/:telegramId', async (req, res) => {
   try {
-    var user = await User.findOne({ telegramId: parseInt(req.params.telegramId) }).select('wheelState');
+    var user = await User.findOne({ telegramId: parseInt(req.params.telegramId) }).select('wheelState bonusSpins');
     var ws = getFreshWheelState(user);
     if (ws._isNew) {
       await User.findOneAndUpdate({ telegramId: parseInt(req.params.telegramId) },
         { $set: { wheelState: { date: ws.date, adsWatched: 0, spinsUsed: 0 } } });
     }
+    var bonusSpins = (user && user.bonusSpins) || 0;
     res.json({
       adsWatched: ws.adsWatched,
       dailyLimit: WHEEL_DAILY_AD_LIMIT,
-      attemptsAvailable: Math.max(0, ws.adsWatched - ws.spinsUsed),
+      bonusSpins: bonusSpins,
+      attemptsAvailable: Math.max(0, ws.adsWatched - ws.spinsUsed) + bonusSpins,
       locked: ws.adsWatched >= WHEEL_DAILY_AD_LIMIT
     });
   } catch(e) { res.status(500).json({ error: e.message }); }
@@ -1329,7 +1338,7 @@ app.get('/api/wheel/status/:telegramId', async (req, res) => {
 app.post('/api/wheel/watch-ad', async (req, res) => {
   try {
     var { telegramId } = req.body;
-    var user = await User.findOne({ telegramId: parseInt(telegramId) }).select('wheelState');
+    var user = await User.findOne({ telegramId: parseInt(telegramId) }).select('wheelState bonusSpins');
     if (!user) return res.status(404).json({ error: 'user_not_found' });
     var ws = getFreshWheelState(user);
 
@@ -1346,36 +1355,54 @@ app.post('/api/wheel/watch-ad', async (req, res) => {
     await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, {
       $set: { wheelState: { date: ws.date, adsWatched: ws.adsWatched, spinsUsed: ws.spinsUsed, _lastAdTime: Date.now() } }
     });
+    var bonusSpins = (user && user.bonusSpins) || 0;
     res.json({
       success:true,
       adsWatched: ws.adsWatched,
       dailyLimit: WHEEL_DAILY_AD_LIMIT,
-      attemptsAvailable: Math.max(0, ws.adsWatched - ws.spinsUsed),
+      bonusSpins: bonusSpins,
+      attemptsAvailable: Math.max(0, ws.adsWatched - ws.spinsUsed) + bonusSpins,
       locked: ws.adsWatched >= WHEEL_DAILY_AD_LIMIT
     });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
-// Spin the wheel — consumes one attempt, resolves the outcome server-side, credits reward directly
+// Spin the wheel — consumes one attempt (free bonus spins first, then ad-earned
+// ones), resolves the outcome server-side, credits reward directly. Landing on
+// 'extra_spin' refunds the attempt that was just used (a free respin).
 app.post('/api/wheel/spin', async (req, res) => {
   try {
     var { telegramId } = req.body;
-    var user = await User.findOne({ telegramId: parseInt(telegramId) }).select('wheelState rec record');
+    var user = await User.findOne({ telegramId: parseInt(telegramId) }).select('wheelState rec record bonusSpins');
     if (!user) return res.status(404).json({ error: 'user_not_found' });
     var ws = getFreshWheelState(user);
-    var attemptsAvailable = ws.adsWatched - ws.spinsUsed;
+    var bonusSpins = user.bonusSpins || 0;
+    var adsAttempts = Math.max(0, ws.adsWatched - ws.spinsUsed);
+    var totalAttempts = adsAttempts + bonusSpins;
 
-    if (attemptsAvailable <= 0) {
+    if (totalAttempts <= 0) {
       return res.json({ success:false, reason:'no_attempts' });
     }
+
+    // Decide which pool this attempt comes from (bonus spins first)
+    var usedBonusSpin = bonusSpins > 0;
+    if (usedBonusSpin) bonusSpins -= 1;
+    else ws.spinsUsed += 1;
 
     var outcome = resolveWheelOutcome();
     var reward = WHEEL_REWARDS[outcome] || WHEEL_REWARDS.no_luck;
     var wedgeIndex = pickWedgeIndex(outcome);
-    ws.spinsUsed += 1;
 
-    var setOp = { wheelState: { date: ws.date, adsWatched: ws.adsWatched, spinsUsed: ws.spinsUsed } };
-    var updateOp = { $set: setOp };
+    // 'extra_spin' = free respin: refund the attempt we just consumed
+    if (outcome === 'extra_spin') {
+      if (usedBonusSpin) bonusSpins += 1;
+      else ws.spinsUsed -= 1;
+    }
+
+    var updateOp = { $set: {
+      wheelState: { date: ws.date, adsWatched: ws.adsWatched, spinsUsed: ws.spinsUsed },
+      bonusSpins: bonusSpins
+    } };
     if (reward.amount > 0 && reward.currency) {
       updateOp.$inc = {};
       updateOp.$inc[reward.currency] = reward.amount;
@@ -1388,8 +1415,22 @@ app.post('/api/wheel/spin', async (req, res) => {
       wedgeIndex: wedgeIndex,
       currency: reward.currency,
       amount: reward.amount,
-      attemptsAvailable: Math.max(0, ws.adsWatched - ws.spinsUsed)
+      bonusSpins: bonusSpins,
+      attemptsAvailable: Math.max(0, ws.adsWatched - ws.spinsUsed) + bonusSpins
     });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// One-time (admin-triggered) bulk grant of free spins to every EXISTING user.
+// Call this once after deploying — new users get their 2 free spins automatically
+// going forward (see the /start handler and /api/user/save above).
+app.post('/api/admin/grant-bonus-spins-all', async (req, res) => {
+  try {
+    var { adminId, amount } = req.body;
+    if (String(adminId) !== String(ADMIN_ID)) return res.status(403).json({ error: 'Not admin' });
+    var grant = parseInt(amount) || 2;
+    var result = await User.updateMany({}, { $inc: { bonusSpins: grant } });
+    res.json({ success: true, grantedTo: result.modifiedCount, amountEach: grant });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
