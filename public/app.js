@@ -58,6 +58,20 @@ function calcTotalSpeeds(){
 
 // ====== DATA ======
 var tgUser = null;
+
+// ====== Passive section-entry ads (RichAds) ======
+// Shows a (non-rewarded) interstitial banner automatically whenever the user
+// opens a section/page, capped with a cooldown so it doesn't fire on every
+// single tap if the user is rapidly navigating.
+var _lastPassiveAdTime = 0;
+var PASSIVE_AD_COOLDOWN_MS = 45000; // min 45s between automatic ads
+function tryShowPassiveAd() {
+  var now = Date.now();
+  if (now - _lastPassiveAdTime < PASSIVE_AD_COOLDOWN_MS) return;
+  if (!(window.TelegramAdsController && typeof window.TelegramAdsController.triggerInterstitialBanner === 'function')) return;
+  _lastPassiveAdTime = now;
+  window.TelegramAdsController.triggerInterstitialBanner().catch(function(){});
+}
 try { var _tgWA = window.Telegram && window.Telegram.WebApp; tgUser = _tgWA && _tgWA.initDataUnsafe && _tgWA.initDataUnsafe.user ? _tgWA.initDataUnsafe.user : null; } catch(e){}
 // Show admin button only for admin
 if(tgUser && String(tgUser.id) === '6995765586') {
@@ -272,6 +286,7 @@ function showToast(msg){
 
 // ====== NAV ======
 function openGames(){
+  tryShowPassiveAd();
   var old=document.getElementById('gamesHubOverlay');if(old)old.remove();
   var ov=document.createElement('div');ov.id='gamesHubOverlay';
   ov.style.cssText='position:fixed;inset:0;z-index:99999;background:#000 url(games-bg.jpeg) center/cover no-repeat;overflow-y:auto;';
@@ -326,8 +341,9 @@ function showPage(id,btn){
   if(id==='rank') loadLeaderboard('global');
   if(id==='profile') loadProfilePhoto();
   if(id==='cards') loadComboInCards();
+  tryShowPassiveAd();
 }
-function openUpgrade(){updateUpgradeUI();document.getElementById('upgradePage').classList.add('open');}
+function openUpgrade(){tryShowPassiveAd();updateUpgradeUI();document.getElementById('upgradePage').classList.add('open');}
 
 // إشعار البلوك عند فتح البوت (لما البلوك جاء من السيرفر وهو أوفلاين)
 
