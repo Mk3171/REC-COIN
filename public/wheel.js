@@ -6,12 +6,13 @@
 
 // Must match WHEEL_VISUAL_WEDGES on the server EXACTLY (order + length).
 var WHEEL_VISUAL_WEDGES = [
-  'no_luck','3mrd','20rec','no_luck','50rec','10mrd',
+  'extra_spin','3mrd','20rec','no_luck','50rec','10mrd',
   'no_luck','200rec','500rec','no_luck','5000rec','no_luck',
   '1trillion','50000rec','no_luck'
 ];
 var WHEEL_WEDGE_INFO = {
   no_luck:    { amount: 0,             currency: null,     color: '#2a2a35' },
+  extra_spin: { amount: 0,             currency: null,     color: '#00ACC1' },
   '3mrd':     { amount: 3000000000,    currency: 'record', color: '#1565C0' },
   '20rec':    { amount: 20,            currency: 'rec',    color: '#2E7D32' },
   '50rec':    { amount: 50,            currency: 'rec',    color: '#388E3C' },
@@ -20,13 +21,13 @@ var WHEEL_WEDGE_INFO = {
   '500rec':   { amount: 500,           currency: 'rec',    color: '#EF6C00' },
   '1trillion':{ amount: 1000000000000, currency: 'record', color: '#B71C1C' },
   '5000rec':  { amount: 5000,          currency: 'rec',    color: '#AD1457' },
-  '50000rec': { amount: 50000,         currency: 'rec',    color: '#F9A825' }
+  '50000rec': { amount: 50000,         currency: 'rec',    color: '#F9A825', jackpot: true }
 };
 var WHEEL_SLICE_DEG = 360 / WHEEL_VISUAL_WEDGES.length;
 
 var _wheelRotation = 0;
 var _wheelSpinning = false;
-var _wheelState = { adsWatched: 0, dailyLimit: 10, attemptsAvailable: 0, locked: false };
+var _wheelState = { adsWatched: 0, dailyLimit: 10, bonusSpins: 0, attemptsAvailable: 0, locked: false };
 
 function formatWheelAmount(n) {
   if(n >= 1e12) return (n % 1e12 === 0 ? (n/1e12) : (n/1e12).toFixed(1)) + 'T';
@@ -36,9 +37,13 @@ function formatWheelAmount(n) {
   return Math.floor(n).toString();
 }
 function wheelWedgeLabel(key) {
+  if(key === 'no_luck') return '✖';
+  if(key === 'extra_spin') return '🔄<br>' + t('wheelExtraSpinLabel','1 Spin');
   var info = WHEEL_WEDGE_INFO[key];
   if(!info || info.amount <= 0) return '✖';
-  return formatWheelAmount(info.amount) + ' ' + (info.currency === 'record' ? 'RECORD' : 'REC');
+  var line1 = formatWheelAmount(info.amount) + ' ' + (info.currency === 'record' ? 'RECORD' : 'REC');
+  if(info.jackpot) return line1 + '<br><span style="color:#FFEB3B;font-size:8px;">' + t('wheelJackpotLabel','Jackpot') + '</span>';
+  return line1;
 }
 
 function openWheel() {
@@ -47,7 +52,7 @@ function openWheel() {
 
   var modal = document.createElement('div');
   modal.id = 'wheelModal';
-  modal.style.cssText = 'position:fixed;inset:0;background:rgba(5,5,10,0.96);z-index:99999;display:flex;flex-direction:column;align-items:center;overflow-y:auto;padding:16px 0 32px;';
+  modal.style.cssText = 'position:fixed;inset:0;background:linear-gradient(rgba(5,5,15,0.55),rgba(5,5,15,0.75)),url(wheel-bg.jpg);background-size:cover;background-position:center;z-index:99999;display:flex;flex-direction:column;align-items:center;overflow-y:auto;padding:16px 0 32px;';
 
   modal.innerHTML =
     '<div style="width:100%;max-width:420px;padding:0 16px;box-sizing:border-box;">' +
@@ -56,7 +61,7 @@ function openWheel() {
         '<button onclick="document.getElementById(\'wheelModal\').remove()" style="background:rgba(255,255,255,0.08);border:none;color:#fff;width:34px;height:34px;border-radius:50%;font-size:18px;">✕</button>' +
       '</div>' +
 
-      '<div style="position:relative;width:300px;height:300px;margin:10px auto 22px;">' +
+      '<div style="position:relative;width:300px;height:300px;margin:10px auto 6px;">' +
         '<div id="wheelPointer" style="position:absolute;top:-10px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-top:22px solid #FFD700;z-index:5;filter:drop-shadow(0 0 6px rgba(255,215,0,0.8));"></div>' +
         '<div id="wheelDisc" style="width:300px;height:300px;border-radius:50%;position:relative;border:6px solid #FFD700;box-shadow:0 0 30px rgba(255,180,0,0.4);transition:transform 4s cubic-bezier(0.12,0.67,0.1,0.99);">' +
           _wheelBuildWedges() +
@@ -64,7 +69,9 @@ function openWheel() {
         '<button id="wheelSpinBtn" onclick="spinWheel()" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:74px;height:74px;border-radius:50%;background:radial-gradient(circle,#FFD700,#FF8C00);border:3px solid #fff;color:#1a1a1a;font-family:Orbitron,sans-serif;font-weight:900;font-size:13px;z-index:4;box-shadow:0 0 18px rgba(255,180,0,0.8);cursor:pointer;" data-i18n="wheelSpinBtn">SPIN</button>' +
       '</div>' +
 
-      '<div id="wheelAdBox" style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,180,0,0.3);border-radius:14px;padding:14px;">' +
+      '<div id="wheelBonusBadge" style="display:none;text-align:center;margin-bottom:14px;font-size:12px;font-weight:700;color:#00ACC1;background:rgba(0,172,193,0.15);border:1px solid rgba(0,172,193,0.4);border-radius:20px;padding:6px 12px;width:fit-content;margin-left:auto;margin-right:auto;"></div>' +
+
+      '<div id="wheelAdBox" style="background:rgba(0,0,0,0.45);border:1px solid rgba(255,180,0,0.3);border-radius:14px;padding:14px;backdrop-filter:blur(4px);">' +
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
           '<span style="font-size:12px;color:rgba(255,255,255,0.7);" data-i18n="wheelAdsLabel">Today\'s Ads</span>' +
           '<span id="wheelAdsCount" style="font-size:12px;font-weight:700;color:#FFD700;">0/10</span>' +
@@ -123,6 +130,7 @@ function _wheelUpdateUI() {
   var countEl = document.getElementById('wheelAdsCount');
   var barEl = document.getElementById('wheelAdsBar');
   var btnEl = document.getElementById('wheelWatchAdBtn');
+  var badgeEl = document.getElementById('wheelBonusBadge');
   if(countEl) countEl.textContent = _wheelState.adsWatched + '/' + _wheelState.dailyLimit;
   if(barEl) barEl.style.width = Math.min(100, (_wheelState.adsWatched/_wheelState.dailyLimit)*100) + '%';
   if(btnEl) {
@@ -134,6 +142,14 @@ function _wheelUpdateUI() {
       btnEl.disabled = false;
       btnEl.style.opacity = '1';
       btnEl.textContent = t('wheelWatchAdBtn','📺 Watch Ad');
+    }
+  }
+  if(badgeEl) {
+    if(_wheelState.bonusSpins > 0) {
+      badgeEl.style.display = 'block';
+      badgeEl.textContent = '🎁 ' + t('wheelFreeSpinsBadge','{n} free spins').replace('{n}', _wheelState.bonusSpins);
+    } else {
+      badgeEl.style.display = 'none';
     }
   }
 }
@@ -153,6 +169,7 @@ function wheelWatchAd() {
         if(d.success) {
           _wheelState.adsWatched = d.adsWatched;
           _wheelState.locked = d.locked;
+          _wheelState.bonusSpins = d.bonusSpins;
           _wheelState.attemptsAvailable = d.attemptsAvailable;
         }
         _wheelUpdateUI();
@@ -193,8 +210,12 @@ function spinWheel() {
       _wheelSpinning = false;
       if(spinBtn) spinBtn.style.opacity = '1';
       _wheelState.attemptsAvailable = d.attemptsAvailable;
+      _wheelState.bonusSpins = d.bonusSpins;
+      _wheelUpdateUI();
 
-      if(d.amount > 0 && d.currency) {
+      if(d.outcome === 'extra_spin') {
+        if(typeof showToast === 'function') showToast(t('wheelResultExtraSpin','🔄 Free spin! Spin again!'));
+      } else if(d.amount > 0 && d.currency) {
         if(d.currency === 'rec') rec += d.amount;
         else if(d.currency === 'record') record += d.amount;
         saveData(true); updateUI();
