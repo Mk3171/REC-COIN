@@ -191,6 +191,20 @@ function watchAd(modal) {
   var btn = document.getElementById('watchAdBtn');
   if(btn) { btn.disabled = true; btn.textContent = t('adsLoading','⏳ Loading...'); }
 
+  // Try RichAds first; if no fill / error, fall back to Monetag.
+  if(window.TelegramAdsController && typeof window.TelegramAdsController.triggerInterstitialVideo === 'function') {
+    window.TelegramAdsController.triggerInterstitialVideo().then(function() {
+      giveAdReward(modal);
+    }).catch(function(e) {
+      console.log('RichAds unavailable, falling back to Monetag:', e);
+      watchAdMonetag(modal, btn);
+    });
+  } else {
+    watchAdMonetag(modal, btn);
+  }
+}
+
+function watchAdMonetag(modal, btn) {
   if(typeof show_11099536 === 'function') {
     show_11099536().then(function() {
       giveAdReward(modal);
