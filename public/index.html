@@ -638,6 +638,13 @@ function closeSideMenu(){
           <button onclick="adminSetCombo()" style="width:100%;background:linear-gradient(135deg,#886600,#FFD700);border:none;color:#000;padding:8px;border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;">🔄 Re-pick Today's Combo</button>
           <div id="adminComboStatus" style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:6px;text-align:center;"></div>
         </div>
+
+        <!-- Grant Bonus Wheel Spins (one-time, to ALL existing users) -->
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px;margin-bottom:12px;">
+          <div style="font-size:13px;font-weight:700;color:#00ACC1;margin-bottom:10px;">🎡 Wheel Bonus Spins</div>
+          <button onclick="adminGrantBonusSpins()" style="width:100%;background:linear-gradient(135deg,#006677,#00ACC1);border:none;color:#fff;padding:8px;border-radius:10px;cursor:pointer;font-size:12px;font-weight:700;">🎁 Give Everyone 2 Free Spins</button>
+          <div id="adminBonusSpinsStatus" style="font-size:11px;color:rgba(255,255,255,0.4);margin-top:6px;text-align:center;"></div>
+        </div>
     
         <!-- User Lookup -->
         <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px;margin-bottom:12px;">
@@ -1131,7 +1138,7 @@ function closeSideMenu(){
   <script src="blocks.js?v=2"></script>
 <script src="airdrop.js?v=2"></script>
 <script src="levels.js?v=1"></script>
-<script src="app.js?v=14"></script>
+<script src="app.js?v=15"></script>
 <script src="referral.js?v=1"></script>
 
 
