@@ -453,7 +453,7 @@ function calcRecordMiningSpeed(cardLevels, tapLevelVal) {
 app.get('/api/leaderboard/global', async (req, res) => {
   try {
     var allUsers = await User.find({ banned: false })
-      .sort({ rec: -1 }).limit(100)
+      .sort({ rec: -1 })
       .select('telegramId username firstName rec miningSpeed cardLevels vip lastSeen')
       .lean();
     res.json({ top100: allUsers.map(function(u, i) {
@@ -829,7 +829,7 @@ app.post('/api/admin/unban-all', async (req, res) => {
     const { adminId } = req.body;
     if (String(adminId) !== String(ADMIN_ID)) return res.status(403).json({ error: 'Not admin' });
     const result = await User.updateMany(
-      { banned: true, banReason: { $ne: 'manual_ban' } },
+      { banned: true },
       { banned: false, banReason: '', suspiciousScore: 0 }
     );
     res.json({ success: true, unbanned: result.modifiedCount });
