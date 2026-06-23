@@ -129,7 +129,8 @@ const UserSchema = new mongoose.Schema({
   weeklyPrize:     { type: Object, default: { rank: 0, amount: 0, week: '', claimed: false } },
   vip:             { type: Object, default: { tier: 0, expiry: 0, boxes: {}, txId: '', boostDate: '', boost2Date: '' } },
   nftBoost:        { type: Number, default: 1 },
-  nftType:         { type: String, default: '' }
+  nftType:         { type: String, default: '' },
+  wheelState:      { type: Object, default: { date: '', adsWatched: 0, spinsUsed: 0 } }
 });
 
 const User = mongoose.model('User', UserSchema);
@@ -1239,6 +1240,156 @@ app.post('/api/combo/check', async (req, res) => {
     }
 
     res.json({ matched: true, done: progress.length, allDone, reward: giveReward ? combo.reward : 0 });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+
+// ====== SPIN THE WHEEL SYSTEM ======
+// Sequential cascade: each entry is checked in order against the PREVIOUS entries
+// failing. This makes later entries naturally much rarer than their nominal % alone
+// would suggest (since they only get evaluated in the remaining probability space).
+// Big prizes (3MRD/10MRD/1 Trillion) pay out in RECORD (which already deals in
+// billions/trillions in normal gameplay). Smaller ones pay out in REC.
+var WHEEL_SEQUENCE = [
+  { outcome:'no_luck',   chance:0.50    },
+  { outcome:'3mrd',      chance:0.10    },
+  { outcome:'20rec',     chance:0.30    },
+  { outcome:'no_luck',   chance:0.50    },
+  { outcome:'50rec',     chance:0.10    },
+  { outcome:'10mrd',     chance:0.20    },
+  { outcome:'200rec',    chance:0.05    },
+  { outcome:'500rec',    chance:0.01    },
+  { outcome:'no_luck',   chance:0.50    },
+  { outcome:'1trillion', chance:0.0010  },
+  { outcome:'5000rec',   chance:0.0005  },
+  { outcome:'50000rec',  chance:0.00001 }
+];
+var WHEEL_REWARDS = {
+  no_luck:    { currency: null,     amount: 0 },
+  '3mrd':     { currency: 'record', amount: 3000000000 },
+  '20rec':    { currency: 'rec',    amount: 20 },
+  '50rec':    { currency: 'rec',    amount: 50 },
+  '10mrd':    { currency: 'record', amount: 10000000000 },
+  '200rec':   { currency: 'rec',    amount: 200 },
+  '500rec':   { currency: 'rec',    amount: 500 },
+  '1trillion':{ currency: 'record', amount: 1000000000000 },
+  '5000rec':  { currency: 'rec',    amount: 5000 },
+  '50000rec': { currency: 'rec',    amount: 50000 }
+};
+// 15 visual wedges for the wheel graphic (6x no_luck + 9 distinct prizes), used
+// purely for the spin animation — the actual outcome is decided by WHEEL_SEQUENCE.
+var WHEEL_VISUAL_WEDGES = [
+  'no_luck','3mrd','20rec','no_luck','50rec','10mrd',
+  'no_luck','200rec','500rec','no_luck','5000rec','no_luck',
+  '1trillion','50000rec','no_luck'
+];
+var WHEEL_DAILY_AD_LIMIT = 10;
+var WHEEL_MIN_AD_GAP_MS = 5000; // can't register watched-ads faster than this (basic abuse guard)
+
+function resolveWheelOutcome() {
+  for (var i=0; i<WHEEL_SEQUENCE.length; i++) {
+    if (Math.random() < WHEEL_SEQUENCE[i].chance) return WHEEL_SEQUENCE[i].outcome;
+  }
+  return 'no_luck';
+}
+function pickWedgeIndex(outcome) {
+  var matches = [];
+  for (var i=0; i<WHEEL_VISUAL_WEDGES.length; i++) {
+    if (WHEEL_VISUAL_WEDGES[i] === outcome) matches.push(i);
+  }
+  if (matches.length === 0) return 0;
+  return matches[Math.floor(Math.random() * matches.length)];
+}
+function getFreshWheelState(user) {
+  var today = new Date().toISOString().split('T')[0];
+  var ws = (user && user.wheelState) || {};
+  if (ws.date !== today) return { date: today, adsWatched: 0, spinsUsed: 0, _isNew: true };
+  return { date: ws.date, adsWatched: ws.adsWatched||0, spinsUsed: ws.spinsUsed||0, _isNew: false };
+}
+
+// GET current wheel status for a user (resets daily counters if it's a new day)
+app.get('/api/wheel/status/:telegramId', async (req, res) => {
+  try {
+    var user = await User.findOne({ telegramId: parseInt(req.params.telegramId) }).select('wheelState');
+    var ws = getFreshWheelState(user);
+    if (ws._isNew) {
+      await User.findOneAndUpdate({ telegramId: parseInt(req.params.telegramId) },
+        { $set: { wheelState: { date: ws.date, adsWatched: 0, spinsUsed: 0 } } });
+    }
+    res.json({
+      adsWatched: ws.adsWatched,
+      dailyLimit: WHEEL_DAILY_AD_LIMIT,
+      attemptsAvailable: Math.max(0, ws.adsWatched - ws.spinsUsed),
+      locked: ws.adsWatched >= WHEEL_DAILY_AD_LIMIT
+    });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// Register one completed ad-watch (only called after the RichAds promise resolves client-side)
+app.post('/api/wheel/watch-ad', async (req, res) => {
+  try {
+    var { telegramId } = req.body;
+    var user = await User.findOne({ telegramId: parseInt(telegramId) }).select('wheelState');
+    if (!user) return res.status(404).json({ error: 'user_not_found' });
+    var ws = getFreshWheelState(user);
+
+    if (ws.adsWatched >= WHEEL_DAILY_AD_LIMIT) {
+      return res.json({ success:false, reason:'daily_limit_reached', adsWatched: ws.adsWatched, dailyLimit: WHEEL_DAILY_AD_LIMIT });
+    }
+    // Basic abuse guard: don't allow registering watched-ads faster than a real ad could finish
+    var lastTime = (user.wheelState && user.wheelState._lastAdTime) || 0;
+    if (!ws._isNew && Date.now() - lastTime < WHEEL_MIN_AD_GAP_MS) {
+      return res.json({ success:false, reason:'too_fast', adsWatched: ws.adsWatched });
+    }
+
+    ws.adsWatched += 1;
+    await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, {
+      $set: { wheelState: { date: ws.date, adsWatched: ws.adsWatched, spinsUsed: ws.spinsUsed, _lastAdTime: Date.now() } }
+    });
+    res.json({
+      success:true,
+      adsWatched: ws.adsWatched,
+      dailyLimit: WHEEL_DAILY_AD_LIMIT,
+      attemptsAvailable: Math.max(0, ws.adsWatched - ws.spinsUsed),
+      locked: ws.adsWatched >= WHEEL_DAILY_AD_LIMIT
+    });
+  } catch(e) { res.status(500).json({ error: e.message }); }
+});
+
+// Spin the wheel — consumes one attempt, resolves the outcome server-side, credits reward directly
+app.post('/api/wheel/spin', async (req, res) => {
+  try {
+    var { telegramId } = req.body;
+    var user = await User.findOne({ telegramId: parseInt(telegramId) }).select('wheelState rec record');
+    if (!user) return res.status(404).json({ error: 'user_not_found' });
+    var ws = getFreshWheelState(user);
+    var attemptsAvailable = ws.adsWatched - ws.spinsUsed;
+
+    if (attemptsAvailable <= 0) {
+      return res.json({ success:false, reason:'no_attempts' });
+    }
+
+    var outcome = resolveWheelOutcome();
+    var reward = WHEEL_REWARDS[outcome] || WHEEL_REWARDS.no_luck;
+    var wedgeIndex = pickWedgeIndex(outcome);
+    ws.spinsUsed += 1;
+
+    var setOp = { wheelState: { date: ws.date, adsWatched: ws.adsWatched, spinsUsed: ws.spinsUsed } };
+    var updateOp = { $set: setOp };
+    if (reward.amount > 0 && reward.currency) {
+      updateOp.$inc = {};
+      updateOp.$inc[reward.currency] = reward.amount;
+    }
+    await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, updateOp);
+
+    res.json({
+      success:true,
+      outcome: outcome,
+      wedgeIndex: wedgeIndex,
+      currency: reward.currency,
+      amount: reward.amount,
+      attemptsAvailable: Math.max(0, ws.adsWatched - ws.spinsUsed)
+    });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
 
