@@ -186,31 +186,11 @@ function openAds() {
   if(wb) wb.onclick = function(){ watchAd(modal); };
 }
 
-// ====== Watch Ad ======
+// ====== Watch Ad (Monetag only — RichAds lives in its own separate section) ======
 function watchAd(modal) {
   var btn = document.getElementById('watchAdBtn');
   if(btn) { btn.disabled = true; btn.textContent = t('adsLoading','⏳ Loading...'); }
 
-  // Try RichAds first; if no fill / error, fall back to Monetag.
-  if(window.TelegramAdsController && typeof window.TelegramAdsController.triggerInterstitialVideo === 'function') {
-    // RichAds' ad overlay renders at a normal z-index, which ends up BEHIND our
-    // fullscreen ads modal (z-index:2147483647). Hide our modal while their ad
-    // plays so it's actually visible, then restore it afterwards.
-    if(modal) modal.style.display = 'none';
-    window.TelegramAdsController.triggerInterstitialVideo().then(function() {
-      if(modal) modal.style.display = 'flex';
-      giveAdReward(modal);
-    }).catch(function(e) {
-      console.log('RichAds unavailable, falling back to Monetag:', e);
-      if(modal) modal.style.display = 'flex';
-      watchAdMonetag(modal, btn);
-    });
-  } else {
-    watchAdMonetag(modal, btn);
-  }
-}
-
-function watchAdMonetag(modal, btn) {
   if(typeof show_11099536 === 'function') {
     show_11099536().then(function() {
       giveAdReward(modal);
