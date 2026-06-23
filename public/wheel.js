@@ -69,9 +69,7 @@ function openWheel() {
         '<button id="wheelSpinBtn" onclick="spinWheel()" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:74px;height:74px;border-radius:50%;background:radial-gradient(circle,#FFD700,#FF8C00);border:3px solid #fff;color:#1a1a1a;font-family:Orbitron,sans-serif;font-weight:900;font-size:13px;z-index:4;box-shadow:0 0 18px rgba(255,180,0,0.8);cursor:pointer;" data-i18n="wheelSpinBtn">SPIN</button>' +
       '</div>' +
 
-      '<div id="wheelBonusBadge" style="display:none;text-align:center;margin-bottom:14px;font-size:12px;font-weight:700;color:#00ACC1;background:rgba(0,172,193,0.15);border:1px solid rgba(0,172,193,0.4);border-radius:20px;padding:6px 12px;width:fit-content;margin-left:auto;margin-right:auto;"></div>' +
-
-      '<div id="wheelAdBox" style="background:rgba(0,0,0,0.45);border:1px solid rgba(255,180,0,0.3);border-radius:14px;padding:14px;backdrop-filter:blur(4px);">' +
+      '<div id="wheelAdBox" style="background:rgba(0,0,0,0.45);border:1px solid rgba(255,180,0,0.3);border-radius:14px;padding:14px;backdrop-filter:blur(4px);margin-top:14px;">' +
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">' +
           '<span style="font-size:12px;color:rgba(255,255,255,0.7);" data-i18n="wheelAdsLabel">Today\'s Ads</span>' +
           '<span id="wheelAdsCount" style="font-size:12px;font-weight:700;color:#FFD700;">0/10</span>' +
@@ -130,9 +128,11 @@ function _wheelUpdateUI() {
   var countEl = document.getElementById('wheelAdsCount');
   var barEl = document.getElementById('wheelAdsBar');
   var btnEl = document.getElementById('wheelWatchAdBtn');
-  var badgeEl = document.getElementById('wheelBonusBadge');
-  if(countEl) countEl.textContent = _wheelState.adsWatched + '/' + _wheelState.dailyLimit;
-  if(barEl) barEl.style.width = Math.min(100, (_wheelState.adsWatched/_wheelState.dailyLimit)*100) + '%';
+  // Show TOTAL attempts available (free bonus spins + ad-earned ones) in the
+  // same 0/10 counter, instead of a separate badge for the bonus spins.
+  var displayCount = Math.min(_wheelState.dailyLimit, _wheelState.attemptsAvailable);
+  if(countEl) countEl.textContent = displayCount + '/' + _wheelState.dailyLimit;
+  if(barEl) barEl.style.width = Math.min(100, (_wheelState.attemptsAvailable/_wheelState.dailyLimit)*100) + '%';
   if(btnEl) {
     if(_wheelState.locked) {
       btnEl.disabled = true;
@@ -142,14 +142,6 @@ function _wheelUpdateUI() {
       btnEl.disabled = false;
       btnEl.style.opacity = '1';
       btnEl.textContent = t('wheelWatchAdBtn','📺 Watch Ad');
-    }
-  }
-  if(badgeEl) {
-    if(_wheelState.bonusSpins > 0) {
-      badgeEl.style.display = 'block';
-      badgeEl.textContent = '🎁 ' + t('wheelFreeSpinsBadge','{n} free spins').replace('{n}', _wheelState.bonusSpins);
-    } else {
-      badgeEl.style.display = 'none';
     }
   }
 }
