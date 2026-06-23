@@ -1378,6 +1378,19 @@ function adminSetCombo() {
   });
 }
 
+function adminGrantBonusSpins() {
+  if(!tgUser) return;
+  var el = document.getElementById('adminBonusSpinsStatus');
+  if(el) el.textContent = '⏳ Sending to everyone...';
+  fetch('/api/admin/grant-bonus-spins-all', {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ adminId: tgUser.id, amount: 2 })
+  }).then(function(r){ return r.json(); }).then(function(d){
+    if(el) el.textContent = d.success ? '✅ Given to ' + d.grantedTo + ' users (+' + d.amountEach + ' each)' : '❌ ' + d.error;
+  }).catch(function(){ if(el) el.textContent = '❌ Network error'; });
+}
+
 function adminLookupUser() {
   var uid = (document.getElementById('adminUserId')||{}).value;
   if(!uid || !tgUser) return;
