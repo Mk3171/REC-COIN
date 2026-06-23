@@ -1819,18 +1819,38 @@ app.post('/webhook', (req, res) => { bot.processUpdate(req.body); res.sendStatus
 app.get('/', (req, res) => { res.sendFile(path.join(__dirname, 'public', 'index.html')); });
 app.use(express.static(path.join(__dirname, 'public')));
 
+function setTelegramWebhook(attempt) {
+  attempt = attempt || 1;
+  const webhookUrl = (process.env.APP_URL || 'https://rec-coin.onrender.com') + '/webhook';
+  const apiUrl = `https://api.telegram.org/bot${process.env.BOT_TOKEN}/setWebhook?url=${encodeURIComponent(webhookUrl)}`;
+  https.get(apiUrl, (res) => {
+    let data = '';
+    res.on('data', chunk => data += chunk);
+    res.on('end', () => {
+      var parsed = null;
+      try { parsed = JSON.parse(data); } catch(e) {}
+      if (parsed && parsed.ok) {
+        console.log('Webhook set ✅:', data);
+      } else {
+        console.log('Webhook rejected by Telegram (attempt ' + attempt + '):', data);
+        if (attempt < 5) setTimeout(() => setTelegramWebhook(attempt+1), 3000);
+        else console.log('Webhook setup gave up after 5 attempts.');
+      }
+    });
+  }).on('error', e => {
+    console.log('Webhook network error (attempt ' + attempt + '):', e.message);
+    if (attempt < 5) setTimeout(() => setTelegramWebhook(attempt+1), 3000);
+    else console.log('Webhook setup gave up after 5 attempts.');
+  });
+}
+
 const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
   // ====== SET WEBHOOK via Telegram API directly ======
   if (process.env.NODE_ENV !== 'development') {
-    const webhookUrl = (process.env.APP_URL || 'https://rec-coin.onrender.com') + '/webhook';
-    const apiUrl = `https://api.telegram.org/bot${process.env.BOT_TOKEN}/setWebhook?url=${encodeURIComponent(webhookUrl)}`;
-    https.get(apiUrl, (res) => {
-      let data = '';
-      res.on('data', chunk => data += chunk);
-      res.on('end', () => console.log('Webhook set ✅:', data));
-    }).on('error', e => console.log('Webhook error:', e.message));
+    // small delay lets the container's outbound networking stabilize right after a cold start
+    setTimeout(() => setTelegramWebhook(1), 1500);
   } else {
     bot.startPolling();
     console.log('Bot polling started (dev mode) ✅');
