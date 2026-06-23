@@ -52,7 +52,7 @@ function openWheel() {
 
   var modal = document.createElement('div');
   modal.id = 'wheelModal';
-  modal.style.cssText = 'position:fixed;inset:0;background:linear-gradient(rgba(5,5,15,0.55),rgba(5,5,15,0.75)),url(wheel-bg.jpg);background-size:cover;background-position:center;z-index:99999;display:flex;flex-direction:column;align-items:center;overflow-y:auto;padding:16px 0 32px;';
+  modal.style.cssText = 'position:fixed;inset:0;background:linear-gradient(rgba(5,5,15,0.55),rgba(5,5,15,0.75)),url(wheel-bg.jpeg);background-size:cover;background-position:center;z-index:99999;display:flex;flex-direction:column;align-items:center;overflow-y:auto;padding:16px 0 32px;';
 
   modal.innerHTML =
     '<div style="width:100%;max-width:420px;padding:0 16px;box-sizing:border-box;">' +
