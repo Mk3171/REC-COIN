@@ -1290,7 +1290,7 @@ var WHEEL_VISUAL_WEDGES = [
   'no_luck','200rec','500rec','no_luck','5000rec','no_luck',
   '1trillion','50000rec','no_luck'
 ];
-var WHEEL_DAILY_AD_LIMIT = 10;
+var WHEEL_DAILY_AD_LIMIT = 20; // RichAds support confirmed: 20 ads/user/day allowed
 var WHEEL_MIN_AD_GAP_MS = 5000; // can't register watched-ads faster than this (basic abuse guard)
 
 function resolveWheelOutcome() {
