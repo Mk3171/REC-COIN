@@ -140,7 +140,6 @@ var RECORD_TO_REC_MIN  = 100000000;         // 100 مليون حد أدنى
 var RECORD_TO_REC_MAX  = 1000000000000;     // 1 تريليون حد أقصى
 
 function openExchange(){
-  tryShowPassiveAd();
   var popup = document.createElement('div');
   popup.id = 'exchangePopup';
   popup.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(180deg,#0d0d14,#111118);border:1px solid rgba(0,255,136,0.3);border-radius:18px;padding:20px;width:86vw;max-width:320px;z-index:10000;backdrop-filter:blur(15px);box-shadow:0 0 50px rgba(0,255,136,0.1);';
@@ -318,7 +317,6 @@ var DAILY_REWARDS=[
 ];
 
 function openDailyLogin(){
-  tryShowPassiveAd();
   var today=getTodayStr();
   var login=dailyLogin;
   var alreadyClaimed=login.lastDate===today;
