@@ -286,7 +286,6 @@ function showToast(msg){
 
 // ====== NAV ======
 function openGames(){
-  tryShowPassiveAd();
   var old=document.getElementById('gamesHubOverlay');if(old)old.remove();
   var ov=document.createElement('div');ov.id='gamesHubOverlay';
   ov.style.cssText='position:fixed;inset:0;z-index:99999;background:#000 url(games-bg.jpeg) center/cover no-repeat;overflow-y:auto;';
@@ -341,9 +340,8 @@ function showPage(id,btn){
   if(id==='rank') loadLeaderboard('global');
   if(id==='profile') loadProfilePhoto();
   if(id==='cards') loadComboInCards();
-  tryShowPassiveAd();
 }
-function openUpgrade(){tryShowPassiveAd();updateUpgradeUI();document.getElementById('upgradePage').classList.add('open');}
+function openUpgrade(){updateUpgradeUI();document.getElementById('upgradePage').classList.add('open');}
 
 // إشعار البلوك عند فتح البوت (لما البلوك جاء من السيرفر وهو أوفلاين)
 
