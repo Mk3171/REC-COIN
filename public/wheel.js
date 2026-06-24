@@ -27,7 +27,7 @@ var WHEEL_SLICE_DEG = 360 / WHEEL_VISUAL_WEDGES.length;
 
 var _wheelRotation = 0;
 var _wheelSpinning = false;
-var _wheelState = { adsWatched: 0, dailyLimit: 10, bonusSpins: 0, attemptsAvailable: 0, locked: false };
+var _wheelState = { adsWatched: 0, dailyLimit: 20, bonusSpins: 0, attemptsAvailable: 0, locked: false };
 
 function formatWheelAmount(n) {
   if(n >= 1e12) return (n % 1e12 === 0 ? (n/1e12) : (n/1e12).toFixed(1)) + 'T';
@@ -151,8 +151,8 @@ function wheelWatchAd() {
   var btn = document.getElementById('wheelWatchAdBtn');
   if(btn) { btn.disabled = true; btn.textContent = t('wheelLoadingAd','⏳ Loading...'); }
 
-  if(window.TelegramAdsController && typeof window.TelegramAdsController.triggerInterstitialVideo === 'function') {
-    window.TelegramAdsController.triggerInterstitialVideo().then(function() {
+  if(window.TelegramAdsController && typeof window.TelegramAdsController.triggerInterstitialBanner === 'function') {
+    window.TelegramAdsController.triggerInterstitialBanner().then(function() {
       fetch('/api/wheel/watch-ad', {
         method:'POST', headers:{'Content-Type':'application/json'},
         body: JSON.stringify({ telegramId: tgUser.id })
