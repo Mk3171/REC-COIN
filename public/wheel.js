@@ -153,21 +153,22 @@ function wheelWatchAd() {
 
   if(window.TelegramAdsController && typeof window.TelegramAdsController.triggerInterstitialBanner === 'function') {
     window.TelegramAdsController.triggerInterstitialBanner().then(function() {
-      fetch('/api/wheel/watch-ad', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ telegramId: tgUser.id })
-      }).then(function(r){ return r.json(); })
-      .then(function(d){
-        if(d.success) {
-          _wheelState.adsWatched = d.adsWatched;
-          _wheelState.locked = d.locked;
-          _wheelState.bonusSpins = d.bonusSpins;
-          _wheelState.attemptsAvailable = d.attemptsAvailable;
-        }
-        _wheelUpdateUI();
-      }).catch(function(){ _wheelUpdateUI(); });
+      _wheelRegisterAdWatch();
     }).catch(function(e) {
-      console.log('Wheel ad error:', e);
+      console.log('triggerInterstitialBanner failed, trying triggerInterstitialVideo:', e);
+      _wheelTryVideoFallback();
+    });
+  } else {
+    _wheelTryVideoFallback();
+  }
+}
+
+function _wheelTryVideoFallback() {
+  if(window.TelegramAdsController && typeof window.TelegramAdsController.triggerInterstitialVideo === 'function') {
+    window.TelegramAdsController.triggerInterstitialVideo().then(function() {
+      _wheelRegisterAdWatch();
+    }).catch(function(e) {
+      console.log('Wheel ad error (both formats failed):', e);
       if(typeof showToast === 'function') showToast(t('wheelAdUnavailable','❌ Ad unavailable — try again'));
       _wheelUpdateUI();
     });
@@ -175,6 +176,22 @@ function wheelWatchAd() {
     if(typeof showToast === 'function') showToast(t('wheelAdUnavailable','❌ Ad unavailable — try again'));
     _wheelUpdateUI();
   }
+}
+
+function _wheelRegisterAdWatch() {
+  fetch('/api/wheel/watch-ad', {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({ telegramId: tgUser.id })
+  }).then(function(r){ return r.json(); })
+  .then(function(d){
+    if(d.success) {
+      _wheelState.adsWatched = d.adsWatched;
+      _wheelState.locked = d.locked;
+      _wheelState.bonusSpins = d.bonusSpins;
+      _wheelState.attemptsAvailable = d.attemptsAvailable;
+    }
+    _wheelUpdateUI();
+  }).catch(function(){ _wheelUpdateUI(); });
 }
 
 function spinWheel() {
