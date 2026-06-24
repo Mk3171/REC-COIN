@@ -528,7 +528,6 @@ function shareInvite(){
 
 // ====== STARS SHOP ======
 function openStarsShop() {
-  tryShowPassiveAd();
   var items = [
     { title:t('shopEnergy'),    desc:t('shopEnergyDesc'),    price:'15',  color:'#FFD700', key:'energy' },
     { title:t('shopRecord500'), desc:t('shopRecord500Desc'), price:'50',  color:'#FFD700', key:'record_500k' },
