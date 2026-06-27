@@ -7,6 +7,8 @@ const WITHDRAW_FEE  = 150;
 const MIN_WITHDRAW  = 10000;
 const MAX_WITHDRAW  = 50000;
 const VIP_MAX_WITHDRAW = 1000000;
+const MIN_WITHDRAW_TON = 0.1;
+const MAX_WITHDRAW_TON_DAILY = 5;
 
 // ── sendJetton ────────────────────────────────────────────
 async function sendJetton(toAddress, amount, comment) {
@@ -112,6 +114,80 @@ async function sendJetton(toAddress, amount, comment) {
   }
 }
 
+// ── sendNativeTon ─────────────────────────────────────────
+// Sends raw/native TON (not a jetton) — used for the Spin the Wheel TON jackpot
+// withdrawals. Reuses the exact same wallet-detection logic as sendJetton.
+async function sendNativeTon(toAddress, amount, comment) {
+  console.log('[sendNativeTon] START → to:', toAddress, '| amount:', amount, '| comment:', comment);
+
+  const mnemonic_raw = process.env.BOT_WALLET_MNEMONIC;
+  if (!mnemonic_raw) {
+    console.log('[sendNativeTon] ❌ BOT_WALLET_MNEMONIC is not set!');
+    return { success: false, error: 'BOT_WALLET_MNEMONIC missing' };
+  }
+
+  const mnemonic = mnemonic_raw.trim().split(/\s+/);
+  if (mnemonic.length !== 24) {
+    console.log('[sendNativeTon] ❌ Expected 24 words, got:', mnemonic.length);
+    return { success: false, error: 'Invalid mnemonic word count: ' + mnemonic.length };
+  }
+
+  try {
+    const tonModule = require('@ton/ton');
+    const { TonClient, internal, toNano, Address } = tonModule;
+    const { mnemonicToPrivateKey } = require('@ton/crypto');
+
+    const keyPair = await mnemonicToPrivateKey(mnemonic);
+
+    const client = new TonClient({
+      endpoint: 'https://toncenter.com/api/v2/jsonRPC',
+      apiKey: process.env.TONCENTER_API_KEY || ''
+    });
+
+    const expectedAddr = (process.env.BOT_WALLET_ADDRESS || '').trim();
+    const versions = ['WalletContractV5R1','WalletContractV5Beta','WalletContractV4','WalletContractV3R2'];
+    let wallet = null;
+    for (const ver of versions) {
+      if (tonModule[ver]) {
+        const w = tonModule[ver].create({ publicKey: keyPair.publicKey, workchain: 0 });
+        const addr = w.address.toString({ urlSafe: true, bounceable: false });
+        if (!expectedAddr || addr === expectedAddr) { wallet = w; break; }
+      }
+    }
+    if (!wallet) {
+      console.log('[sendNativeTon] ❌ No matching wallet version found');
+      return { success: false, error: 'No matching wallet version found' };
+    }
+
+    const contract = client.open(wallet);
+
+    let seqno;
+    try {
+      seqno = await contract.getSeqno();
+    } catch(e) {
+      console.log('[sendNativeTon] ❌ getSeqno failed:', e.message);
+      return { success: false, error: 'getSeqno failed: ' + e.message };
+    }
+
+    try {
+      await contract.sendTransfer({
+        seqno,
+        secretKey: keyPair.secretKey,
+        messages: [internal({ to: Address.parse(toAddress), value: toNano(amount.toString()), body: comment || 'REC Mining Wheel Prize' })]
+      });
+      console.log('[sendNativeTon] ✅ Transfer sent successfully');
+      return { success: true };
+    } catch(e) {
+      console.log('[sendNativeTon] ❌ sendTransfer failed:', e.message);
+      return { success: false, error: 'sendTransfer failed: ' + e.message };
+    }
+
+  } catch(e) {
+    console.log('[sendNativeTon] ❌ Unexpected error:', e.message);
+    return { success: false, error: e.message };
+  }
+}
+
 // ── Withdrawal handler ────────────────────────────────────
 function registerWithdrawRoutes(app, User, Withdrawal) {
 
@@ -186,6 +262,72 @@ function registerWithdrawRoutes(app, User, Withdrawal) {
     }
   });
 
+  // TON withdraw (from Spin the Wheel TON jackpot winnings) — min 0.1, max 5/day
+  app.post('/api/withdraw-ton', async (req, res) => {
+    const { telegramId, amount } = req.body;
+    if (!telegramId || !amount) return res.status(400).json({ error: 'Missing data' });
+
+    try {
+      const user = await User.findOne({ telegramId: parseInt(telegramId) });
+      if (!user) return res.status(404).json({ error: 'User not found' });
+      if (!user.walletAddress) return res.status(400).json({ error: 'no_wallet' });
+      if (amount < MIN_WITHDRAW_TON) return res.status(400).json({ error: 'below_minimum', min: MIN_WITHDRAW_TON });
+      if ((user.tonBalance || 0) < amount) return res.status(400).json({ error: 'insufficient_balance' });
+
+      // Daily limit — only count confirmed sent TON withdrawals
+      const today = new Date().toISOString().split('T')[0];
+      const todayStart = new Date(today + 'T00:00:00.000Z');
+      const todaySent = await Withdrawal.aggregate([
+        { $match: { telegramId: parseInt(telegramId), status: 'sent', currency: 'TON', createdAt: { $gte: todayStart } } },
+        { $group: { _id: null, total: { $sum: '$amount' } } }
+      ]);
+      const dailyWithdrawn = todaySent[0] ? todaySent[0].total : 0;
+      if (dailyWithdrawn + amount > MAX_WITHDRAW_TON_DAILY) {
+        return res.status(400).json({ error: 'daily_limit', remaining: Math.max(0, MAX_WITHDRAW_TON_DAILY - dailyWithdrawn) });
+      }
+
+      // Deduct balance
+      await User.findOneAndUpdate(
+        { telegramId: parseInt(telegramId) },
+        { $inc: { tonBalance: -amount } }
+      );
+
+      // Save record
+      const withdrawal = new Withdrawal({
+        telegramId: parseInt(telegramId), username: user.username,
+        walletAddress: user.walletAddress,
+        amount, fee: 0, netAmount: amount, status: 'pending', currency: 'TON'
+      });
+      await withdrawal.save();
+
+      res.json({ success: true, netAmount: amount, fee: 0, status: 'pending' });
+      console.log('[Withdraw TON] Request saved → ID:', withdrawal._id, '| user:', telegramId, '| amount:', amount);
+
+      // Background send
+      setImmediate(async function() {
+        try {
+          const r = await sendNativeTon(user.walletAddress, amount, 'REC Mining Wheel Jackpot Withdrawal');
+          if (r && r.success) {
+            await Withdrawal.findByIdAndUpdate(withdrawal._id, { status: 'sent' });
+            console.log('[Withdraw TON] ✅ SENT:', amount, 'TON →', user.walletAddress);
+          } else {
+            await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, { $inc: { tonBalance: amount } });
+            await Withdrawal.findByIdAndUpdate(withdrawal._id, { status: 'failed' });
+            console.log('[Withdraw TON] ❌ FAILED & REFUNDED:', amount, 'TON → user', telegramId, '| Reason:', r && r.error);
+          }
+        } catch(e) {
+          await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, { $inc: { tonBalance: amount } }).catch(()=>{});
+          await Withdrawal.findByIdAndUpdate(withdrawal._id, { status: 'failed' }).catch(()=>{});
+          console.log('[Withdraw TON] ❌ EXCEPTION & REFUNDED:', e.message);
+        }
+      });
+
+    } catch(e) {
+      console.log('[Withdraw TON] Server error:', e.message);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
   // Per-user history
   app.get('/api/withdrawals/:telegramId', async (req, res) => {
     try {
@@ -206,7 +348,7 @@ function registerWithdrawRoutes(app, User, Withdrawal) {
   console.log('[Withdraw Module] ✅ Routes registered');
 }
 
-module.exports = { sendJetton, registerWithdrawRoutes };
+module.exports = { sendJetton, sendNativeTon, registerWithdrawRoutes };
 
 
 // ── Diagnostic endpoint ───────────────────────────────────
@@ -279,4 +421,4 @@ function registerDiagnosticRoute(app) {
   console.log('[Diagnostic] ✅ /api/test-wallet registered');
 }
 
-module.exports = { sendJetton, registerWithdrawRoutes, registerDiagnosticRoute };
+module.exports = { sendJetton, sendNativeTon, registerWithdrawRoutes, registerDiagnosticRoute };
