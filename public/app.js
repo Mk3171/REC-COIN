@@ -340,6 +340,16 @@ function showPage(id,btn){
   if(id==='rank') loadLeaderboard('global');
   if(id==='profile') loadProfilePhoto();
   if(id==='cards') loadComboInCards();
+  if(id==='wallet') refreshWalletTonBalance();
+}
+function refreshWalletTonBalance() {
+  if(!tgUser) return;
+  fetch('/api/wheel/status/' + tgUser.id)
+    .then(function(r){ return r.json(); })
+    .then(function(d){
+      var el = document.getElementById('walletTonBalance');
+      if(el) el.textContent = (d.tonBalance||0).toFixed(3) + ' TON';
+    }).catch(function(){});
 }
 function openUpgrade(){updateUpgradeUI();document.getElementById('upgradePage').classList.add('open');}
 
@@ -926,6 +936,8 @@ function updateWalletPage() {
 var WITHDRAW_MIN = 10000;
 var WITHDRAW_MAX = 50000;
 var WITHDRAW_FEE = 150;
+var WITHDRAW_TON_MIN = 0.1;
+var WITHDRAW_TON_MAX_DAILY = 5;
 
 function openWithdrawModal() {
   if(document.getElementById('withdrawModal')) return;
@@ -947,10 +959,16 @@ function openWithdrawModal() {
   var shortAddr = walletAddr ? (walletAddr.substring(0,6)+'...'+walletAddr.substring(walletAddr.length-4)) : '';
   modal.innerHTML =
     '<div style="background:linear-gradient(180deg,#0a160e,#050d08);border-radius:24px 24px 0 0;border-top:2px solid rgba(0,255,136,0.4);padding:20px 18px 36px;width:100%;max-height:90vh;overflow-y:auto;">'
-  + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">'
+  + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">'
   + '<div style="font-size:18px;font-weight:900;color:#00FF88;font-family:Orbitron,sans-serif;">🏦 '+t('withdrawPool','Withdraw')+'</div>'
   + '<div onclick="document.getElementById(\'withdrawModal\').remove()" style="width:32px;height:32px;background:rgba(255,255,255,0.08);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:14px;color:rgba(255,255,255,0.5);">✕</div>'
   + '</div>'
+  + '<div style="display:flex;gap:8px;margin-bottom:16px;">'
+  + '<button id="withdrawTabRecBtn" onclick="switchWithdrawTab(\'rec\')" style="flex:1;background:rgba(0,255,136,0.15);border:1px solid #00FF88;color:#00FF88;padding:10px;border-radius:10px;font-weight:800;font-size:13px;">REC</button>'
+  + '<button id="withdrawTabTonBtn" onclick="switchWithdrawTab(\'ton\')" style="flex:1;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.5);padding:10px;border-radius:10px;font-weight:800;font-size:13px;">TON</button>'
+  + '</div>'
+
+  + '<div id="withdrawRecTab">'
   + '<div style="background:rgba(0,255,136,0.05);border:1px solid rgba(0,255,136,0.15);border-radius:14px;padding:14px;margin-bottom:14px;">'
   + '<div style="font-size:11px;color:rgba(255,255,255,0.4);">'+t('walletAssets','Balance')+'</div>'
   + '<div style="font-size:22px;font-weight:900;color:#00FF88;font-family:Orbitron,sans-serif;">'+balance.toFixed(2)+' REC</div>'
@@ -974,8 +992,36 @@ function openWithdrawModal() {
   + '<div id="withdrawCalc" style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:6px;"></div>'
   + '</div>'
   + '<button id="withdrawSubmitBtn" onclick="submitWithdraw()" style="width:100%;background:linear-gradient(135deg,#006633,#00CC66);border:none;color:white;padding:15px;border-radius:14px;font-size:15px;font-weight:900;cursor:pointer;">💸 '+t('withdrawSubmit','Confirm Withdrawal')+'</button>'
+  + '</div>'
+
+  + '<div id="withdrawTonTab" style="display:none;">'
+  + '<div style="background:rgba(0,198,255,0.05);border:1px solid rgba(0,198,255,0.15);border-radius:14px;padding:14px;margin-bottom:14px;">'
+  + '<div style="font-size:11px;color:rgba(255,255,255,0.4);" data-i18n="tonBalanceTitle">TON Balance</div>'
+  + '<div style="font-size:22px;font-weight:900;color:#00C6FF;font-family:Orbitron,sans-serif;" id="withdrawTonBalanceDisplay">0.000 TON</div>'
+  + '</div>'
+  + '<div style="background:rgba(255,200,0,0.05);border:1px solid rgba(255,200,0,0.15);border-radius:12px;padding:12px;margin-bottom:14px;font-size:12px;color:rgba(255,255,255,0.6);">'
+  + '<div style="display:flex;justify-content:space-between;margin-bottom:4px;"><span>Min</span><span style="color:#FFD700;font-weight:700;">'+WITHDRAW_TON_MIN+' TON</span></div>'
+  + '<div style="display:flex;justify-content:space-between;"><span data-i18n="tonDailyLimitLabel">Daily limit</span><span style="color:#FFD700;font-weight:700;">'+WITHDRAW_TON_MAX_DAILY+' TON</span></div>'
+  + '</div>'
+  + '<div style="background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px;margin-bottom:14px;display:flex;align-items:center;gap:10px;">'
+  + '<span style="font-size:20px;">💳</span>'
+  + '<div style="flex:1;"><div style="font-size:11px;color:rgba(255,255,255,0.4);">'+t('connectWallet','Wallet')+'</div>'
+  + (hasWallet ? '<div style="font-size:12px;color:#00FF88;font-weight:700;">'+shortAddr+'</div>' : '<div style="font-size:12px;color:#FF4444;cursor:pointer;" onclick="connectWallet()">'+t('withdrawErrorWallet','Connect wallet first')+'</div>')
+  + '</div>'+(hasWallet?'<span style="color:#00FF88;">✅</span>':'<span style="color:#FF4444;">❌</span>')+'</div>'
+  + '<div style="margin-bottom:14px;">'
+  + '<div style="font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:6px;" data-i18n="withdrawAmountLabelTon">Amount (TON)</div>'
+  + '<div style="display:flex;gap:8px;">'
+  + '<input id="withdrawTonAmountInput" type="number" min="'+WITHDRAW_TON_MIN+'" max="'+WITHDRAW_TON_MAX_DAILY+'" step="0.01" placeholder="'+WITHDRAW_TON_MIN+' - '+WITHDRAW_TON_MAX_DAILY+'" style="flex:1;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:12px;color:white;font-size:14px;outline:none;" />'
+  + '<button onclick="setWithdrawTonMax()" style="background:rgba(0,198,255,0.1);border:1px solid rgba(0,198,255,0.3);color:#00C6FF;padding:0 14px;border-radius:10px;font-size:12px;font-weight:700;cursor:pointer;">MAX</button>'
+  + '</div>'
+  + '<div id="withdrawTonCalc" style="font-size:11px;color:rgba(255,255,255,0.3);margin-top:6px;"></div>'
+  + '</div>'
+  + '<button id="withdrawTonSubmitBtn" onclick="submitWithdrawTon()" style="width:100%;background:linear-gradient(135deg,#0066AA,#00C6FF);border:none;color:white;padding:15px;border-radius:14px;font-size:15px;font-weight:900;cursor:pointer;">💸 '+t('withdrawSubmit','Confirm Withdrawal')+'</button>'
+  + '</div>'
+
   + '</div>';
   document.body.appendChild(modal);
+  if(typeof applyTranslations === 'function') applyTranslations();
   var inp = document.getElementById('withdrawAmountInput');
   if(inp) inp.addEventListener('input', function(){
     var val=parseFloat(inp.value)||0, calc=document.getElementById('withdrawCalc');
@@ -985,6 +1031,66 @@ function openWithdrawModal() {
     else if(val>0){ calc.style.color='#FF4444'; calc.textContent='❌ Min: '+WITHDRAW_MIN.toLocaleString()+' REC'; }
     else calc.textContent='';
   });
+  var inpTon = document.getElementById('withdrawTonAmountInput');
+  if(inpTon) inpTon.addEventListener('input', function(){
+    var val=parseFloat(inpTon.value)||0, calc=document.getElementById('withdrawTonCalc');
+    if(!calc) return;
+    if(val>=WITHDRAW_TON_MIN&&val<=WITHDRAW_TON_MAX_DAILY){ calc.style.color='#00C6FF'; calc.textContent='✅ '+t('withdrawYouReceive','You receive')+': '+val+' TON'; }
+    else if(val>WITHDRAW_TON_MAX_DAILY){ calc.style.color='#FF4444'; calc.textContent='❌ Max/day: '+WITHDRAW_TON_MAX_DAILY+' TON'; }
+    else if(val>0){ calc.style.color='#FF4444'; calc.textContent='❌ Min: '+WITHDRAW_TON_MIN+' TON'; }
+    else calc.textContent='';
+  });
+  // Fetch real TON balance for the TON tab
+  if(tgUser) {
+    fetch('/api/wheel/status/' + tgUser.id).then(function(r){return r.json();}).then(function(d){
+      _withdrawTonBalance = d.tonBalance || 0;
+      var el = document.getElementById('withdrawTonBalanceDisplay');
+      if(el) el.textContent = _withdrawTonBalance.toFixed(3) + ' TON';
+    }).catch(function(){});
+  }
+}
+var _withdrawTonBalance = 0;
+function switchWithdrawTab(tab) {
+  var recTab = document.getElementById('withdrawRecTab');
+  var tonTab = document.getElementById('withdrawTonTab');
+  var recBtn = document.getElementById('withdrawTabRecBtn');
+  var tonBtn = document.getElementById('withdrawTabTonBtn');
+  if(tab === 'ton') {
+    if(recTab) recTab.style.display = 'none';
+    if(tonTab) tonTab.style.display = 'block';
+    if(recBtn) { recBtn.style.background='rgba(255,255,255,0.05)'; recBtn.style.border='1px solid rgba(255,255,255,0.15)'; recBtn.style.color='rgba(255,255,255,0.5)'; }
+    if(tonBtn) { tonBtn.style.background='rgba(0,198,255,0.15)'; tonBtn.style.border='1px solid #00C6FF'; tonBtn.style.color='#00C6FF'; }
+  } else {
+    if(recTab) recTab.style.display = 'block';
+    if(tonTab) tonTab.style.display = 'none';
+    if(tonBtn) { tonBtn.style.background='rgba(255,255,255,0.05)'; tonBtn.style.border='1px solid rgba(255,255,255,0.15)'; tonBtn.style.color='rgba(255,255,255,0.5)'; }
+    if(recBtn) { recBtn.style.background='rgba(0,255,136,0.15)'; recBtn.style.border='1px solid #00FF88'; recBtn.style.color='#00FF88'; }
+  }
+}
+function setWithdrawTonMax(){ var inp=document.getElementById('withdrawTonAmountInput'); if(inp){inp.value=Math.min(_withdrawTonBalance,WITHDRAW_TON_MAX_DAILY).toFixed(3);inp.dispatchEvent(new Event('input'));} }
+function submitWithdrawTon(){
+  var inp=document.getElementById('withdrawTonAmountInput'); if(!inp) return;
+  var amount=parseFloat(inp.value)||0;
+  if(!tgUser){showToast('❌ '+t('withdrawErrorUser','User error'));return;}
+  if(!(typeof tonConnect!=='undefined'&&tonConnect.connected)){showToast('❌ '+t('withdrawErrorWallet','Connect wallet first'));connectWallet();return;}
+  if(amount<WITHDRAW_TON_MIN){showToast('❌ Min: '+WITHDRAW_TON_MIN+' TON');return;}
+  if(amount>WITHDRAW_TON_MAX_DAILY){showToast('❌ Max/day: '+WITHDRAW_TON_MAX_DAILY+' TON');return;}
+  if(amount>_withdrawTonBalance){showToast('❌ '+t('withdrawErrorBalance','Insufficient balance'));return;}
+  var btn=document.getElementById('withdrawTonSubmitBtn');
+  if(btn){btn.disabled=true;btn.textContent='⏳...';}
+  fetch('/api/withdraw-ton',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({telegramId:tgUser.id,amount:amount})})
+  .then(function(r){return r.json();})
+  .then(function(d){
+    if(d.success){
+      _withdrawTonBalance -= amount;
+      var el = document.getElementById('withdrawTonBalanceDisplay'); if(el) el.textContent = _withdrawTonBalance.toFixed(3) + ' TON';
+      var m=document.getElementById('withdrawModal');if(m)m.remove();
+      showToast('✅ '+amount+' TON '+t('withdrawSuccess','sent!'));
+    } else {
+      showToast('❌ '+(d.error||'Error'));
+      if(btn){btn.disabled=false;btn.textContent='💸 '+t('withdrawSubmit','Confirm Withdrawal');}
+    }
+  }).catch(function(){showToast('❌ Network error');if(btn){btn.disabled=false;btn.textContent='💸 '+t('withdrawSubmit','Confirm Withdrawal');}});
 }
 function setWithdrawMax(){ var inp=document.getElementById('withdrawAmountInput'),b=(typeof rec!=='undefined')?rec:0; if(inp){inp.value=Math.min(Math.floor(b),WITHDRAW_MAX);inp.dispatchEvent(new Event('input'));} }
 function submitWithdraw(){
