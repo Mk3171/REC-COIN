@@ -131,7 +131,9 @@ const UserSchema = new mongoose.Schema({
   nftBoost:        { type: Number, default: 1 },
   nftType:         { type: String, default: '' },
   wheelState:      { type: Object, default: { date: '', adsWatched: 0, spinsUsed: 0 } },
-  bonusSpins:      { type: Number, default: 0 }
+  bonusSpins:      { type: Number, default: 0 },
+  tonBalance:      { type: Number, default: 0 },
+  usedSpinTxIds:   { type: [String], default: [] }
 });
 
 const User = mongoose.model('User', UserSchema);
@@ -145,6 +147,7 @@ const WithdrawSchema = new mongoose.Schema({
   fee:         { type: Number, default: 70 },
   netAmount:   { type: Number, required: true },
   status:      { type: String, default: 'pending' }, // pending, sent, failed
+  currency:    { type: String, default: 'REC' }, // REC or TON
   txHash:      { type: String, default: '' },
   createdAt:   { type: Date, default: Date.now }
 });
@@ -1267,7 +1270,11 @@ var WHEEL_SEQUENCE = [
   { outcome:'no_luck',   chance:0.50    },
   { outcome:'1trillion', chance:0.0010  },
   { outcome:'5000rec',   chance:0.0005  },
-  { outcome:'50000rec',  chance:0.00001 }
+  { outcome:'50000rec',  chance:0.00001 },
+  { outcome:'01ton',     chance:0.0001  },
+  { outcome:'05ton',     chance:0.00007 },
+  { outcome:'1ton',      chance:0.00003 },
+  { outcome:'10ton',     chance:0.000004}
 ];
 var WHEEL_REWARDS = {
   no_luck:    { currency: null,     amount: 0 },
@@ -1280,14 +1287,17 @@ var WHEEL_REWARDS = {
   '500rec':   { currency: 'rec',    amount: 500 },
   '1trillion':{ currency: 'record', amount: 1000000000000 },
   '5000rec':  { currency: 'rec',    amount: 5000 },
-  '50000rec': { currency: 'rec',    amount: 50000 }
+  '50000rec': { currency: 'rec',    amount: 50000 },
+  '01ton':    { currency: 'ton',    amount: 0.1 },
+  '05ton':    { currency: 'ton',    amount: 0.5 },
+  '1ton':     { currency: 'ton',    amount: 1 },
+  '10ton':    { currency: 'ton',    amount: 10 }
 };
-// 15 visual wedges for the wheel graphic (5x no_luck + 1x extra_spin + 9 distinct
-// prizes), used purely for the spin animation — the actual outcome is decided by
-// WHEEL_SEQUENCE.
+// 15 visual wedges for the wheel graphic — kept 1 no_luck wedge, replaced the
+// other 4 with the new TON prizes. Actual outcome is decided by WHEEL_SEQUENCE.
 var WHEEL_VISUAL_WEDGES = [
-  'extra_spin','3mrd','20rec','no_luck','50rec','10mrd',
-  'no_luck','200rec','500rec','no_luck','5000rec','no_luck',
+  'extra_spin','3mrd','20rec','01ton','50rec','10mrd',
+  '05ton','200rec','500rec','1ton','5000rec','10ton',
   '1trillion','50000rec','no_luck'
 ];
 var WHEEL_DAILY_AD_LIMIT = 20; // RichAds support confirmed: 20 ads/user/day allowed
@@ -1317,7 +1327,7 @@ function getFreshWheelState(user) {
 // GET current wheel status for a user (resets daily counters if it's a new day)
 app.get('/api/wheel/status/:telegramId', async (req, res) => {
   try {
-    var user = await User.findOne({ telegramId: parseInt(req.params.telegramId) }).select('wheelState bonusSpins');
+    var user = await User.findOne({ telegramId: parseInt(req.params.telegramId) }).select('wheelState bonusSpins tonBalance');
     var ws = getFreshWheelState(user);
     if (ws._isNew) {
       await User.findOneAndUpdate({ telegramId: parseInt(req.params.telegramId) },
@@ -1328,6 +1338,7 @@ app.get('/api/wheel/status/:telegramId', async (req, res) => {
       adsWatched: ws.adsWatched,
       dailyLimit: WHEEL_DAILY_AD_LIMIT,
       bonusSpins: bonusSpins,
+      tonBalance: (user && user.tonBalance) || 0,
       attemptsAvailable: Math.max(0, ws.adsWatched - ws.spinsUsed) + bonusSpins,
       locked: ws.adsWatched >= WHEEL_DAILY_AD_LIMIT
     });
@@ -1404,8 +1415,9 @@ app.post('/api/wheel/spin', async (req, res) => {
       bonusSpins: bonusSpins
     } };
     if (reward.amount > 0 && reward.currency) {
+      var dbField = (reward.currency === 'ton') ? 'tonBalance' : reward.currency;
       updateOp.$inc = {};
-      updateOp.$inc[reward.currency] = reward.amount;
+      updateOp.$inc[dbField] = reward.amount;
     }
     await User.findOneAndUpdate({ telegramId: parseInt(telegramId) }, updateOp);
 
@@ -1435,7 +1447,64 @@ app.post('/api/admin/grant-bonus-spins-all', async (req, res) => {
 });
 
 
-// ====== ADSGRAM REWARD ENDPOINT ======
+// ====== BUY SPINS WITH TON ======
+var SPIN_PACKAGES = {
+  1: { spins: 20,   nano: 50000000    }, // 0.05 TON
+  2: { spins: 50,   nano: 100000000   }, // 0.1 TON
+  3: { spins: 100,  nano: 500000000   }, // 0.5 TON
+  4: { spins: 200,  nano: 750000000   }, // 0.75 TON
+  5: { spins: 500,  nano: 2000000000  }, // 2 TON
+  6: { spins: 1500, nano: 5000000000  }  // 5 TON
+};
+
+app.post('/api/wheel/buy-spins/verify', async (req, res) => {
+  try {
+    const { telegramId, packageId } = req.body;
+    const pkg = SPIN_PACKAGES[packageId];
+    if (!telegramId || !pkg) return res.status(400).json({ error: 'Missing/invalid params' });
+
+    const user = await User.findOne({ telegramId: parseInt(telegramId) });
+    if (!user) return res.status(404).json({ error: 'User not found' });
+
+    const BOT_WALLET = process.env.BOT_WALLET_ADDRESS || 'UQD-FoGlRG5pBxZpkf3H9ZOsNTL5basBbTEZE8zvMgHLB99o';
+    const apiKey = process.env.TONCENTER_API_KEY || '';
+    const txUrl = `https://toncenter.com/api/v2/getTransactions?address=${BOT_WALLET}&limit=20`;
+    const txRes = await fetch(txUrl, { headers: apiKey ? { 'X-API-Key': apiKey } : {} });
+    const txData = await txRes.json();
+    if (!txData.ok || !txData.result) return res.json({ success: false, error: 'Cannot check transactions' });
+
+    const fifteenMinAgo = Math.floor(Date.now()/1000) - 900;
+    let foundTxId = null;
+    for (const tx of txData.result) {
+      if (tx.utime < fifteenMinAgo) continue;
+      const inMsg = tx.in_msg;
+      if (!inMsg) continue;
+      const amount = parseInt(inMsg.value || 0);
+      if (amount >= pkg.nano * 0.95) {
+        const txId = tx.transaction_id && tx.transaction_id.lt;
+        if (!txId) continue;
+        const alreadyUsed = await User.findOne({ usedSpinTxIds: txId });
+        if (alreadyUsed) continue;
+        foundTxId = txId;
+        break;
+      }
+    }
+
+    if (!foundTxId) return res.json({ success: false, error: 'Payment not found — please wait and try again' });
+
+    await User.findOneAndUpdate(
+      { telegramId: parseInt(telegramId) },
+      { $inc: { bonusSpins: pkg.spins }, $push: { usedSpinTxIds: foundTxId } }
+    );
+
+    res.json({ success: true, spinsAdded: pkg.spins });
+  } catch(e) {
+    console.error('Buy spins verify error:', e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+
 app.post('/api/adsgram/reward', async (req, res) => {
   try {
     var telegramId = req.body.telegramId || req.query.userId;
