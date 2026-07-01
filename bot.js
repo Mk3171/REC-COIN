@@ -1301,7 +1301,7 @@ var WHEEL_VISUAL_WEDGES = [
   '1trillion','50000rec','no_luck'
 ];
 var WHEEL_DAILY_AD_LIMIT = 20; // RichAds support confirmed: 20 ads/user/day allowed
-var WHEEL_MIN_AD_GAP_MS = 5000; // can't register watched-ads faster than this (basic abuse guard)
+var WHEEL_MIN_AD_GAP_MS = 3000; // can't register watched-ads faster than this (basic abuse guard)
 
 function resolveWheelOutcome() {
   for (var i=0; i<WHEEL_SEQUENCE.length; i++) {
@@ -1353,13 +1353,26 @@ app.post('/api/wheel/watch-ad', async (req, res) => {
     if (!user) return res.status(404).json({ error: 'user_not_found' });
     var ws = getFreshWheelState(user);
 
+    var bonusSpins0 = (user && user.bonusSpins) || 0;
     if (ws.adsWatched >= WHEEL_DAILY_AD_LIMIT) {
-      return res.json({ success:false, reason:'daily_limit_reached', adsWatched: ws.adsWatched, dailyLimit: WHEEL_DAILY_AD_LIMIT });
+      return res.json({
+        success:false, reason:'daily_limit_reached',
+        adsWatched: ws.adsWatched, dailyLimit: WHEEL_DAILY_AD_LIMIT,
+        bonusSpins: bonusSpins0,
+        attemptsAvailable: Math.max(0, ws.adsWatched - ws.spinsUsed) + bonusSpins0,
+        locked: true
+      });
     }
     // Basic abuse guard: don't allow registering watched-ads faster than a real ad could finish
     var lastTime = (user.wheelState && user.wheelState._lastAdTime) || 0;
     if (!ws._isNew && Date.now() - lastTime < WHEEL_MIN_AD_GAP_MS) {
-      return res.json({ success:false, reason:'too_fast', adsWatched: ws.adsWatched });
+      return res.json({
+        success:false, reason:'too_fast',
+        adsWatched: ws.adsWatched, dailyLimit: WHEEL_DAILY_AD_LIMIT,
+        bonusSpins: bonusSpins0,
+        attemptsAvailable: Math.max(0, ws.adsWatched - ws.spinsUsed) + bonusSpins0,
+        locked: false
+      });
     }
 
     ws.adsWatched += 1;
