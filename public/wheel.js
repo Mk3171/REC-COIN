@@ -325,20 +325,15 @@ function wheelWatchAd() {
     window.TelegramAdsController.triggerInterstitialBanner().then(function() {
       _wheelRegisterAdWatch();
     }).catch(function(e) {
-      console.log('triggerInterstitialBanner failed, trying triggerInterstitialVideo:', e);
-      _wheelTryVideoFallback();
+      console.log('triggerInterstitialBanner failed:', e);
+      if(typeof showToast === 'function') showToast(t('wheelAdUnavailable','❌ Ad unavailable — try again'));
+      _wheelUpdateUI();
     });
-  } else {
-    _wheelTryVideoFallback();
-  }
-}
-
-function _wheelTryVideoFallback() {
-  if(window.TelegramAdsController && typeof window.TelegramAdsController.triggerInterstitialVideo === 'function') {
+  } else if(window.TelegramAdsController && typeof window.TelegramAdsController.triggerInterstitialVideo === 'function') {
     window.TelegramAdsController.triggerInterstitialVideo().then(function() {
       _wheelRegisterAdWatch();
     }).catch(function(e) {
-      console.log('Wheel ad error (both formats failed):', e);
+      console.log('triggerInterstitialVideo failed:', e);
       if(typeof showToast === 'function') showToast(t('wheelAdUnavailable','❌ Ad unavailable — try again'));
       _wheelUpdateUI();
     });
@@ -354,14 +349,29 @@ function _wheelRegisterAdWatch() {
     body: JSON.stringify({ telegramId: tgUser.id })
   }).then(function(r){ return r.json(); })
   .then(function(d){
-    if(d.success) {
-      _wheelState.adsWatched = d.adsWatched;
-      _wheelState.locked = d.locked;
-      _wheelState.bonusSpins = d.bonusSpins;
-      _wheelState.attemptsAvailable = d.attemptsAvailable;
+    // Always sync state when the server gives us a usable shape, regardless
+    // of success/failure — otherwise the UI silently goes stale (e.g. never
+    // shows the "quota used" message when the daily limit is hit).
+    if(typeof d.adsWatched === 'number') _wheelState.adsWatched = d.adsWatched;
+    if(typeof d.dailyLimit === 'number') _wheelState.dailyLimit = d.dailyLimit;
+    if(typeof d.bonusSpins === 'number') _wheelState.bonusSpins = d.bonusSpins;
+    if(typeof d.attemptsAvailable === 'number') _wheelState.attemptsAvailable = d.attemptsAvailable;
+    if(typeof d.locked === 'boolean') _wheelState.locked = d.locked;
+
+    if(!d.success) {
+      if(d.reason === 'daily_limit_reached') {
+        if(typeof showToast === 'function') showToast(t('wheelQuotaDone','✅ Quota used — come back tomorrow'));
+      } else if(d.reason === 'too_fast') {
+        if(typeof showToast === 'function') showToast(t('wheelTooFast','⏳ Please wait a moment before watching another ad'));
+      } else {
+        if(typeof showToast === 'function') showToast(t('wheelAdUnavailable','❌ Ad unavailable — try again'));
+      }
     }
     _wheelUpdateUI();
-  }).catch(function(){ _wheelUpdateUI(); });
+  }).catch(function(){
+    if(typeof showToast === 'function') showToast(t('wheelAdUnavailable','❌ Ad unavailable — try again'));
+    _wheelUpdateUI();
+  });
 }
 
 function spinWheel(isAuto, doneCallback) {
